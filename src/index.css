@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+/* ========= PALETA & ALIASES ========= */
+@theme {
+  /* Colores base */
+  --color-electric-mint: #39ff14;
+  --color-space-navy: #0b132b;
+  --color-lavender-fog: #8a7f9e;
+  --color-misty-lilac: #e7e5f2;
+  --color-coral-pulse: #ff5e5b;
+
+  /* Alias funcionales */
+  --color-primary:   var(--color-electric-mint);
+  --color-background: var(--color-space-navy);
+  --color-text:      var(--color-misty-lilac);
+  --color-muted:     var(--color-lavender-fog);
+  --color-danger:    var(--color-coral-pulse);
+
+  /* Sombras & animaciones */
+  --shadow-neon:
+    0 0 10px rgba(57, 255, 20, 0.7),
+    0 0 20px rgba(57, 255, 20, 0.5),
+    0 0 30px rgba(57, 255, 20, 0.3);
+  --animate-neon-pulse: neon-pulse 2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+
+:root {
+  --gradient-dark-from: #0b132b;
+  --gradient-dark-via:  #172554;
+  --gradient-dark-to:   #1e293b;
+
+  --gradient-light-from: #f1f5f9;
+  --gradient-light-via:  #e2e8f0;
+  --gradient-light-to:   #cbd5e1;
+}
+
+/* ========= UTILIDADES ========= */
+@layer utilities {
+
+  /* Scrollbar delgado */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  /* Track transparente */
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 999px;
+  }
+
+  /* Thumb base (20%) */
+  .scrollbar-thumb-primary-20::-webkit-scrollbar-thumb {
+    background: rgba(57, 255, 20, 0.2); /* electric-mint al 20% */
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* Hover thumb (40%) */
+  .hover-scrollbar-thumb-primary-40::-webkit-scrollbar-thumb:hover {
+    background: rgba(57, 255, 20, 0.4);
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+  }
+
+  .bg-gradient-dark {
+    background-image: linear-gradient(
+      135deg,
+      var(--gradient-dark-from),
+      var(--gradient-dark-via),
+      var(--gradient-dark-to)
+    );
+  }
+
+  .bg-gradient-light {
+    background-image: linear-gradient(
+      135deg,
+      var(--gradient-light-from),
+      var(--gradient-light-via),
+      var(--gradient-light-to)
+    );
+  }
+
+    .logo-glow {
+    filter: drop-shadow(0 0 6px currentColor)
+            drop-shadow(0 0 12px currentColor);
+  }
+}
+
+/* ========= TOAST UTILITIES ========= */
+.toast-progress {
+    animation: toast-shrink-progress var(--duration, 5000ms) linear forwards;
+  }
+
+/* ========= ANIMACIÓN ========= */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* ========= ANIMACIONES PREMIUM ========= */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(180deg); 
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scaleX(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scaleX(1.1);
+  }
+}
+
+@keyframes shimmer {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+@keyframes tile-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes logo-pulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.8)); 
+  }
+}
+
+@keyframes title-glow {
+  0%, 100% { 
+    text-shadow: 0 0 20px rgba(96, 165, 250, 0.5); 
+  }
+  50% { 
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.8); 
+  }
+}
+
+/* ========= TOAST ANIMATIONS ========= */
+@keyframes toast-shrink-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* ========= CLASES UTILITY ========= */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.tile-entrance {
+  animation: tile-entrance 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.logo-glow {
+  animation: logo-pulse 3s ease-in-out infinite;
+}
+
+.title-shine {
+  animation: title-glow 4s ease-in-out infinite;
+}
+
+/* ========= SOMBRAS PREMIUM ========= */
+.shadow-premium {
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 20px rgba(120, 119, 198, 0.2);
+}
+
+.shadow-premium-hover {
+  box-shadow: 
+    0 35px 60px -12px rgba(0, 0, 0, 0.25),
+    0 0 40px rgba(120, 119, 198, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ========= GRADIENTES RADIALES ========= */
+.bg-gradient-radial-center {
+  background: radial-gradient(circle at 50% 50%, rgba(120, 119, 198, 0.3), rgba(255, 255, 255, 0));
+}
+
+.bg-gradient-radial-top-right {
+  background: radial-gradient(circle at 80% 20%, rgba(120, 119, 198, 0.4), rgba(255, 255, 255, 0));
+}
+
+.bg-gradient-radial-bottom-left {
+  background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4), rgba(255, 255, 255, 0));
+}
+
+/* ========= ESTILOS PARA SELECT PERSONALIZADO ========= */
+.custom-select {
+  /* Estilos base del select */
+  background-image: none;
+}
+
+.custom-select option {
+  background-color: #0b132b; /* space-navy */
+  color: #e7e5f2; /* misty-lilac */
+  padding: 12px 16px;
+  font-weight: 500;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.custom-select option:hover {
+  background-color: rgba(255, 94, 91, 0.15); /* coral-pulse/15 */
+  color: #ff5e5b; /* coral-pulse */
+}
+
+.custom-select option:checked {
+  background-color: rgba(255, 94, 91, 0.2); /* coral-pulse/20 */
+  color: #ff5e5b; /* coral-pulse */
+  font-weight: 600;
+}
+
+.custom-select option:disabled {
+  background-color: rgba(11, 19, 43, 0.8); /* space-navy/80 */
+  color: #8a7f9e; /* lavender-fog */
+  font-style: italic;
+}
+
+/* Mejorar el contraste en el dropdown */
+.custom-select:focus option {
+  background-color: #0b132b; /* space-navy */
+  border-bottom: 1px solid rgba(255, 94, 91, 0.1);
+}
+
+.custom-select:focus option:last-child {
+  border-bottom: none;
+}
+
+/* Estilos para diferentes navegadores */
+@supports (-moz-appearance: none) {
+  .custom-select option {
+    background-color: #0b132b !important;
+    color: #e7e5f2 !important;
+  }
+  
+  .custom-select option:hover {
+    background-color: rgba(255, 94, 91, 0.15) !important;
+  }
+}
+
+/* Para WebKit (Chrome, Safari) */
+.custom-select::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-select::-webkit-scrollbar-track {
+  background: #0b132b;
+  border-radius: 4px;
+}
+
+.custom-select::-webkit-scrollbar-thumb {
+  background: rgba(255, 94, 91, 0.3);
+  border-radius: 4px;
+}
+
+.custom-select::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 94, 91, 0.5);
+}
+
