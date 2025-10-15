@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "../../components/Toast";
 import { getPatientById, updatePatient } from "../../api/patientAPI";
-import { PawPrint, CalendarDays, Scale, Bone, Tag, Upload, Save, X, Heart } from "lucide-react";
+import { PawPrint, CalendarDays, Scale, Bone, Tag, Upload, Save,  Heart } from "lucide-react";
 import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 
