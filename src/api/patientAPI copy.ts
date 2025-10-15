@@ -39,57 +39,7 @@ export async function createPatient(
     throw new Error("Error de red o desconocido");
   }
 }
-// src/api/patientAPI.ts
 
-// Tipo de la respuesta real del backend
-// type CreateResponse = {
-//   msg: string;
-//   patient: Patient;
-// };
-
-// export async function createPatient(formData: FormData): Promise<Patient> {
-//   const ownerId = formData.get("owner") as string;
-
-//   try {
-//     const { data } = await api.post<CreateResponse>(
-//       `/patients/${ownerId}/patients`,
-//       formData,
-//       { headers: { "Content-Type": "multipart/form-data" } }
-//     );
-
-//     console.log("📦 Respuesta cruda:", data);
-
-//     const response = patientSchema.safeParse(data.patient);
-//     if (!response.success) {
-//       console.error("❌ Fallo Zod:", response.error.issues);
-//       throw new Error("Datos de paciente inválidos");
-//     }
-
-//     return response.data;
-//   } catch (error) {
-//     if (error instanceof AxiosError && error.response) {
-//       throw new Error(error.response.data.msg || "Error al crear el paciente");
-//     }
-//     throw new Error("Error de red o desconocido");
-//   }
-// }
-
-// export async function createPatient(formData: PatientFormData) {
-//   try {
-//     const { data } = await api.post<Patient>("/patients", formData);
-//     const response = patientSchema.safeParse(data);
-//     if (response.success) {
-//       return response.data;
-//     } else {
-//       throw new Error("Datos de paciente inválidos");
-//     }
-//   } catch (error) {
-//     if (error instanceof AxiosError && error.response) {
-//       throw new Error(error.response.data.msg || "Error al crear el paciente");
-//     }
-//     throw new Error("Error de red o desconocido");
-//   }
-// }
 
 // ✅ Obtener todas las mascotas
 export async function getPatients() {
@@ -137,10 +87,7 @@ type PatientAPIType = {
   patientId: Patient["_id"];
 };
 
-type UpdatePatientResponse = {
-  msg: string;
-  patient: Patient;
-};
+
 
 type UpdatePatientAPI = {
   formData: FormData;
@@ -166,50 +113,6 @@ export async function updatePatient({ formData, patientId }: UpdatePatientAPI): 
   }
 }
 
-// export async function updatePatient({
-//   formData,
-//   patientId,
-// }: PatientAPIType): Promise<Patient> {
-//   try {
-    
-//     const { data } = await api.put<UpdatePatientResponse>( // ✅ CAMBIO: Usar POST
-//       `/patients/${patientId}`,
-//       formData,
-//       {
-//         headers: {
-//           "Content-Type": "multipart/form-data" 
-//         },
-//       }
-//     ); // Aquí validas y retornas solo el objeto del paciente
-
-//     const patientData = patientSchema.safeParse(data.patient);
-//     if (!patientData.success) {
-//       throw new Error("Datos del paciente recibidos inválidos");
-//     }
-
-//     return patientData.data; // Devuelve solo el objeto Patient
-//   } catch (error) {
-//     if (error instanceof AxiosError && error.response) {
-//       throw new Error(
-//         error.response.data.msg || "Error al actualizar paciente"
-//       );
-//     }
-//     throw new Error("Error de red o desconocido");
-//   }
-// }
-
-// ✅ Actualizar paciente
-// export async function updatePatient({ formData, patientId }: PatientAPIType) {
-//   try {
-//     const { data } = await api.put<UpdatePatientResponse>(`/patients/${patientId}`, formData);
-//     return data;
-//   } catch (error) {
-//     if (error instanceof AxiosError && error.response) {
-//       throw new Error(error.response.data.msg || "Error al actualizar paciente");
-//     }
-//     throw new Error("Error de red o desconocido");
-//   }
-// }
 
 // ✅ Eliminar paciente
 export async function deletePatient(id: Patient["_id"]) {

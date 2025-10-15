@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLabExamById, deleteLabExam } from "../../api/labExamAPI";
 import { getPatientById } from "../../api/patientAPI"; // ✅ Necesitas esta función
 import { toast } from "../../components/Toast";
-import { Edit, Trash, ArrowLeft, Heart, TestTube, Sparkles } from "lucide-react";
+import { Edit, Trash} from "lucide-react";
 import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 

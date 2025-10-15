@@ -29,7 +29,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
   const [useCustomReferringVet, setUseCustomReferringVet] = useState(false);
 
   // Default pet avatar (cute paw print design)
-  const defaultPetAvatar = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjZmY1ZTViIiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8cGF0aCBkPSJNMzUgNDBDMzUgMzUuNTggMzguNTggMzIgNDMgMzJTNTEgMzUuNTggNTEgNDBTNDcuNDIgNDggNDMgNDhTMzUgNDQuNDIgMzUgNDBaIiBmaWxsPSIjZmY1ZTViIi8+CjxwYXRoIGQ9Ik00OSA0MEM0OSAzNS41OCA1Mi41OCAzMiA1NyAzMlM2NSAzNS41OCA2NSA0MFM2MS40MiA0OCA1NyA0OFM0OSA0NC40MiA0OSA0MFoiIGZpbGw9IiNmZjVlNWIiLz4KPHA+Y2lyY2xlIGN4PSIzMyIgY3k9IjMwIiByPSI2IiBmaWxsPSIjZmY1ZTViIiBvcGFjaXR5PSIwLjciLz4KPHA+Y2lyY2xlIGN4PSI2NyIgY3k9IjMwIiByPSI2IiBmaWxsPSIjZmY1ZTViIiBvcGFjaXR5PSIwLjciLz4KPHA+ZWxsaXBzZSBjeD0iNTAiIGN5PSI2NSIgcng9IjE4IiByeT0iMTIiIGZpbGw9IiNmZjVlNWIiLz4KPHA+Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0IiBmaWxsPSIjZmY1ZTViIi8+Cjwvc3ZnPg==";
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -220,6 +220,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
   return (
     <div className="space-y-6">
       {/* Sección de imagen solo para mobile */}
+      <div className="hidden">{birthDate}</div>
       <div className="tile-entrance lg:hidden" style={{ animationDelay: '0s' }}>
         <ImageUploadSection />
       </div>
