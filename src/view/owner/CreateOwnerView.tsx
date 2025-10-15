@@ -1,3 +1,4 @@
+// src/views/owners/CreateOwnerView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import OwnerForm from "../../components/owners/OwnerForm";
@@ -9,9 +10,6 @@ import { toast } from "../../components/Toast";
 import { useMutation } from "@tanstack/react-query";
 import { Save, UserPlus } from "lucide-react";
 import FloatingParticles from "../../components/FloatingParticles";
-
-// Componente: Partículas flotantes
-<FloatingParticles/>
 
 export default function CreateOwnerView() {
   const navigate = useNavigate();
@@ -28,11 +26,12 @@ export default function CreateOwnerView() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm({
     defaultValues: initialValues,
   });
 
-  // crear dueño
   const { mutate, isPending } = useMutation({
     mutationFn: createOwner,
     onError: (error) => {
@@ -70,12 +69,12 @@ export default function CreateOwnerView() {
 
       <FloatingParticles />
       
-      <div className="fixed top-22 left-7  z-150 ">
+      <div className="fixed top-22 left-7 z-150">
         <BackButton />
       </div>
 
       {/* Header */}
-      <div className="relative  pt-16 px-6">
+      <div className="relative pt-16 px-6">
         <div className="max-w-2xl mx-auto">
           <div
             className={`text-center mt-8 transform transition-all duration-1000 delay-200 ${
@@ -126,7 +125,7 @@ export default function CreateOwnerView() {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 hover:opacity-100 transition-opacity duration-300" />
 
               <div className="relative z-10">
-                <OwnerForm register={register} errors={errors} />
+                <OwnerForm register={register} errors={errors} watch={watch} setValue={setValue} />
 
                 <button
                   type="submit"

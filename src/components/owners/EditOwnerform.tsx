@@ -58,6 +58,8 @@ export default function EditOwnerform({ data, ownerId }: EditOwnerformProps) {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm({
     defaultValues: {
       name: data.name,
@@ -70,18 +72,19 @@ export default function EditOwnerform({ data, ownerId }: EditOwnerformProps) {
   const queryClient = useQueryClient();
 
   // update owner
-const { mutate } = useMutation({
-  mutationFn: updateOwners,
-  onError: (error) => {
-    toast.error(error.message);
-  },
-  onSuccess: (data) => {
-    queryClient.invalidateQueries({ queryKey: ["owners"] });
-    queryClient.refetchQueries({ queryKey: ["editOwners", ownerId] });
-    toast.success(data.msg);
-    navigate(-1); // ← vuelve a la página anterior
-  },
-});
+  const { mutate } = useMutation({
+    mutationFn: updateOwners,
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+      queryClient.refetchQueries({ queryKey: ["editOwners", ownerId] });
+      toast.success(data.msg);
+      navigate(-1); // ← vuelve a la página anterior
+    },
+  });
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -116,7 +119,7 @@ const { mutate } = useMutation({
       <FloatingParticles />
 
       {/* Botón fijo de regreso */}
-      <div className="fixed top-20  z-150 ">
+      <div className="fixed top-20 z-150">
         <BackButton/>
       </div>
 
@@ -156,7 +159,12 @@ const { mutate } = useMutation({
                 onSubmit={handleSubmit(handleForm)}
                 noValidate
               >
-                <OwnerForm register={register} errors={errors} />
+                <OwnerForm 
+                  register={register} 
+                  errors={errors}
+                  watch={watch}
+                  setValue={setValue}
+                />
 
                 <div className="pt-6 mt-6 border-t border-muted/20">
                   <button

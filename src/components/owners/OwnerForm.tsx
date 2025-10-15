@@ -1,15 +1,18 @@
+// src/components/owners/OwnerForm.tsx
 import React from "react";
-
-import { User, Phone, Mail, MapPin } from "lucide-react";
+import { User, Mail, MapPin } from "lucide-react";
 import type { OwnerFormData } from "../../types";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { WhatsAppPhoneInput } from "../WhatsAppPhoneInput";
 
 type OwnerFormProps = {
   register: UseFormRegister<OwnerFormData>;
   errors: FieldErrors<OwnerFormData>;
+  watch: (name: keyof OwnerFormData) => string | undefined;
+  setValue: (name: keyof OwnerFormData, value: string) => void;
 };
 
-const OwnerForm: React.FC<OwnerFormProps> = ({ register, errors }) => {
+const OwnerForm: React.FC<OwnerFormProps> = ({ register, errors, watch, setValue }) => {
   const formFields = [
     {
       name: "name" as keyof OwnerFormData,
@@ -17,14 +20,6 @@ const OwnerForm: React.FC<OwnerFormProps> = ({ register, errors }) => {
       placeholder: "Ingresa el nombre del propietario",
       icon: User,
       type: "text",
-      required: true,
-    },
-    {
-      name: "contact" as keyof OwnerFormData,
-      label: "Teléfono",
-      placeholder: "Número de contacto",
-      icon: Phone,
-      type: "tel",
       required: true,
     },
     {
@@ -50,7 +45,7 @@ const OwnerForm: React.FC<OwnerFormProps> = ({ register, errors }) => {
       {formFields.map((field, index) => {
         const Icon = field.icon;
         const error = errors[field.name];
-        
+
         return (
           <div 
             key={field.name}
@@ -119,6 +114,16 @@ const OwnerForm: React.FC<OwnerFormProps> = ({ register, errors }) => {
           </div>
         );
       })}
+
+      {/* ✅ Campo de WhatsApp */}
+      <div className="tile-entrance" style={{ animationDelay: '0.3s' }}>
+        <WhatsAppPhoneInput
+          value={watch("contact") || ""}
+          onChange={(val) => setValue("contact", val)}
+          error={errors.contact?.message}
+          required={true}
+        />
+      </div>
     </div>
   );
 };

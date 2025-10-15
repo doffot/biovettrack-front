@@ -24,7 +24,6 @@
   --animate-neon-pulse: neon-pulse 2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
 }
 
-
 :root {
   --gradient-dark-from: #0b132b;
   --gradient-dark-via:  #172554;
@@ -37,7 +36,6 @@
 
 /* ========= UTILIDADES ========= */
 @layer utilities {
-
   /* Scrollbar delgado */
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
@@ -81,7 +79,7 @@
     );
   }
 
-    .logo-glow {
+  .logo-glow {
     filter: drop-shadow(0 0 6px currentColor)
             drop-shadow(0 0 12px currentColor);
   }
@@ -89,13 +87,24 @@
 
 /* ========= TOAST UTILITIES ========= */
 .toast-progress {
-    animation: toast-shrink-progress var(--duration, 5000ms) linear forwards;
-  }
+  animation: toast-shrink-progress var(--duration, 5000ms) linear forwards;
+}
 
-/* ========= ANIMACIÓN ========= */
+/* ========= ANIMACIONES ========= */
 @keyframes neon-pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.5; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========= ANIMACIONES PREMIUM ========= */
@@ -189,6 +198,10 @@
   animation: title-glow 4s ease-in-out infinite;
 }
 
+.fade-in-down {
+  animation: fadeInDown 0.5s ease-out forwards;
+}
+
 /* ========= SOMBRAS PREMIUM ========= */
 .shadow-premium {
   box-shadow: 
@@ -219,13 +232,12 @@
 
 /* ========= ESTILOS PARA SELECT PERSONALIZADO ========= */
 .custom-select {
-  /* Estilos base del select */
   background-image: none;
 }
 
 .custom-select option {
-  background-color: #0b132b; /* space-navy */
-  color: #e7e5f2; /* misty-lilac */
+  background-color: #0b132b;
+  color: #e7e5f2;
   padding: 12px 16px;
   font-weight: 500;
   border: none;
@@ -233,25 +245,24 @@
 }
 
 .custom-select option:hover {
-  background-color: rgba(255, 94, 91, 0.15); /* coral-pulse/15 */
-  color: #ff5e5b; /* coral-pulse */
+  background-color: rgba(255, 94, 91, 0.15);
+  color: #ff5e5b;
 }
 
 .custom-select option:checked {
-  background-color: rgba(255, 94, 91, 0.2); /* coral-pulse/20 */
-  color: #ff5e5b; /* coral-pulse */
+  background-color: rgba(255, 94, 91, 0.2);
+  color: #ff5e5b;
   font-weight: 600;
 }
 
 .custom-select option:disabled {
-  background-color: rgba(11, 19, 43, 0.8); /* space-navy/80 */
-  color: #8a7f9e; /* lavender-fog */
+  background-color: rgba(11, 19, 43, 0.8);
+  color: #8a7f9e;
   font-style: italic;
 }
 
-/* Mejorar el contraste en el dropdown */
 .custom-select:focus option {
-  background-color: #0b132b; /* space-navy */
+  background-color: #0b132b;
   border-bottom: 1px solid rgba(255, 94, 91, 0.1);
 }
 
@@ -259,7 +270,6 @@
   border-bottom: none;
 }
 
-/* Estilos para diferentes navegadores */
 @supports (-moz-appearance: none) {
   .custom-select option {
     background-color: #0b132b !important;
@@ -271,7 +281,6 @@
   }
 }
 
-/* Para WebKit (Chrome, Safari) */
 .custom-select::-webkit-scrollbar {
   width: 8px;
 }
@@ -289,4 +298,3 @@
 .custom-select::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 94, 91, 0.5);
 }
-

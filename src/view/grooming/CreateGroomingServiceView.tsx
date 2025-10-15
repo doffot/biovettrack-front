@@ -1,20 +1,24 @@
-// src/views/patients/CreatePatientView.tsx
+// src/views/grooming/CreateGroomingServiceView.tsx
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, PawPrint, Sparkles, Heart } from "lucide-react";
-import BackButton from "../../components/BackButton";
-import FloatingParticles from "../../components/FloatingParticles";
-import PatientForm from "../../components/patients/PatientForm";
-import type { PatientFormData } from "../../types";
-import { toast } from "../../components/Toast";
-import { createPatient } from "../../api/patientAPI";
-import { defaultPhotoFile } from "../../utils/defaultPhoto";
-import { VET_ADMIN } from "../../config/vetConfig"; // ✅ Importa el vet admin
+import { Save, Sparkles, Heart, Scissors } from "lucide-react";
 
-export default function CreatePatientView() {
-  const { ownerId } = useParams<{ ownerId: string }>();
+// Importar el componente de formulario separado
+
+// API
+
+// Types
+import type { GroomingServiceFormData } from "../../types";
+import { createGroomingService } from "../../api/groomingAPI";
+import { toast } from "../../components/Toast";
+import FloatingParticles from "../../components/FloatingParticles";
+import BackButton from "../../components/BackButton";
+import GroomingServiceForm from "../../components/grooming/groomingForm";
+
+export default function CreateGroomingServiceView() {
+  const { patientId } = useParams<{ patientId: string }>(); 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
@@ -24,58 +28,51 @@ export default function CreatePatientView() {
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm<PatientFormData>({
+  } = useForm<GroomingServiceFormData>({
     defaultValues: {
-      name: "",
-      birthDate: "",
-      species: "",
-      breed: "",
-      sex: undefined,
-      weight: 0,
-      photo: undefined,
-      // ✅ mainVet se llena automáticamente
-      mainVet: VET_ADMIN.name,
-      // ✅ referringVet empieza con el valor por defecto
-      referringVet: VET_ADMIN.name,
+      patientId: patientId || "",
+      date: "",
+      service: undefined,
+      specifications: "",
+      observations: "",
+      cost: undefined,
+      paymentType: undefined,
+      exchangeRate: undefined,
     },
   });
 
+  // Asegurar que patientId esté configurado
+  useEffect(() => {
+    if (patientId) {
+      setValue("patientId", patientId);
+    }
+  }, [patientId, setValue]);
+
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: PatientFormData) => {
-      if (!ownerId) {
-        throw new Error("ID del dueño no encontrado en la URL");
+    mutationFn: async (data: GroomingServiceFormData) => {
+      if (!patientId) {
+        throw new Error("ID del paciente no encontrado en la URL");
       }
 
-      const form = new FormData();
-      form.append("name", data.name);
-      form.append("birthDate", data.birthDate);
-      form.append("species", data.species);
-      form.append("sex", data.sex);
-      if (data.breed) form.append("breed", data.breed);
-      if (data.weight) form.append("weight", String(data.weight));
-      // ✅ Añade los nuevos campos
-      form.append("mainVet", data.mainVet);
-      // ✅ Solo añadir referringVet si tiene valor
-      if (data.referringVet && data.referringVet.trim()) {
-        form.append("referringVet", data.referringVet);
-      }
+      // Preparar los datos para el envío
+      const serviceData: GroomingServiceFormData = {
+        ...data,
+        patientId,
+        cost: Number(data.cost),
+        exchangeRate: data.exchangeRate ? Number(data.exchangeRate) : undefined,
+      };
 
-      if (data.photo && data.photo.length > 0) {
-        form.append("photo", data.photo[0]);
-      } else {
-        const defaultPng = await defaultPhotoFile();
-        form.append("photo", defaultPng);
-      }
-
-      return await createPatient(form, ownerId);
+      return await createGroomingService(serviceData, patientId);
     },
     onError: (error: any) => {
-      toast.error(error.message || "Error al registrar mascota");
+      toast.error(error.message || "Error al registrar el servicio de estética");
     },
     onSuccess: () => {
-      toast.success("Mascota registrada con éxito");
-      queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
-      navigate(`/owners/${ownerId}`);
+      toast.success("Servicio de Estética registrado con éxito");
+      // Invalida la caché de servicios de estética para ese paciente
+      queryClient.invalidateQueries({ queryKey: ["groomingServices", { patientId }] }); 
+      // Navega de vuelta a la vista del paciente
+      navigate(`/patients/${patientId}`); 
     },
   });
 
@@ -83,19 +80,34 @@ export default function CreatePatientView() {
     setMounted(true);
   }, []);
 
-  const onSubmit = (data: PatientFormData) => {
-    // ✅ Validación adicional: si referringVet está vacío, usar el valor por defecto
-    const processedData = {
-      ...data,
-      referringVet: data.referringVet && data.referringVet.trim() 
-        ? data.referringVet 
-        : VET_ADMIN.name
-    };
-    mutate(processedData);
+  const onSubmit = (data: GroomingServiceFormData) => {
+    // Validación adicional antes de enviar
+    if (!data.date) {
+      toast.error("La fecha del servicio es obligatoria");
+      return;
+    }
+    if (!data.service) {
+      toast.error("El tipo de servicio es obligatorio");
+      return;
+    }
+    if (!data.specifications || data.specifications.trim() === "") {
+      toast.error("Las especificaciones son obligatorias");
+      return;
+    }
+    if (!data.cost || data.cost <= 0) {
+      toast.error("El costo debe ser mayor a 0");
+      return;
+    }
+    if (!data.paymentType) {
+      toast.error("El tipo de pago es obligatorio");
+      return;
+    }
+
+    mutate(data);
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-space-navy via-space-navy/95 to-space-navy/90 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-space-navy via-space-navy/95 to-space-navy/90 overflow-hidden font-inter">
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-10 left-10 w-72 h-72 bg-coral-pulse/20 rounded-full blur-3xl animate-pulse-soft" />
@@ -131,7 +143,7 @@ export default function CreatePatientView() {
         <BackButton />
       </div>
 
-      {/* Header Section */}
+      {/* Minimalist Header Section */}
       <div className="relative pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div
@@ -141,32 +153,24 @@ export default function CreatePatientView() {
                 : "translate-y-16 opacity-0 scale-95"
             }`}
           >
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-coral-pulse/20 via-coral-pulse/30 to-coral-pulse/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-space-navy/80 backdrop-blur-xl border-2 border-coral-pulse/30 rounded-3xl p-8 sm:p-10 shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/5 via-transparent to-lavender-fog/5 rounded-3xl" />
-                <div className="relative z-10">
-                  <div className="relative mb-6">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-coral-pulse/20 to-coral-pulse/10 rounded-2xl border-2 border-coral-pulse/30 shadow-lg">
-                      <PawPrint className="w-10 h-10 text-coral-pulse animate-pulse-soft" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-coral-pulse/20 rounded-full animate-float" />
-                    <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-electric-mint/30 rounded-full animate-pulse-soft" 
-                         style={{ animationDelay: '1s' }} />
-                  </div>
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-coral-pulse via-misty-lilac to-coral-pulse bg-clip-text text-transparent">
-                    Nueva Mascota
-                  </h1>
-                  <p className="text-lg sm:text-xl text-lavender-fog/90 mb-6 max-w-2xl mx-auto leading-relaxed">
-                    Registra a tu compañero peludo con amor y cuidado
-                  </p>
-                  <div className="flex justify-center items-center gap-4 text-coral-pulse/40">
-                    <Heart className="w-4 h-4 animate-pulse-soft" />
-                    <Sparkles className="w-5 h-5 animate-float" />
-                    <Heart className="w-4 h-4 animate-pulse-soft" style={{ animationDelay: '0.5s' }} />
-                  </div>
-                </div>
-                <div className="absolute inset-0 rounded-3xl border border-coral-pulse/20 shadow-[inset_0_1px_0_rgba(255,94,91,0.1)]" />
+            <div className="flex flex-col items-center justify-center gap-4">
+              {/* Icono pequeño y minimalista */}
+              <div className="w-6 h-6 text-coral-pulse">
+                <Scissors className="w-full h-full" />
+              </div>
+              {/* Título */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-misty-lilac">
+                Nuevo Servicio de Peluquería
+              </h1>
+              {/* Subtítulo */}
+              <p className="text-sm sm:text-base text-lavender-fog/80 max-w-md text-center leading-relaxed">
+                Registra un nuevo servicio de estética canina para el paciente.
+              </p>
+              {/* Decoración mínima */}
+              <div className="flex justify-center items-center gap-2 text-coral-pulse/40">
+                <Heart className="w-3 h-3" />
+                <Sparkles className="w-4 h-4" />
+                <Heart className="w-3 h-3" />
               </div>
             </div>
           </div>
@@ -192,7 +196,8 @@ export default function CreatePatientView() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/[0.02] via-transparent to-lavender-fog/[0.02] rounded-3xl" />
                 <div className="relative z-10">
-                  <PatientForm register={register} errors={errors} setValue={setValue} />
+                  {/* Componente de Formulario Separado */}
+                  <GroomingServiceForm register={register} errors={errors} />
 
                   {/* Submit Button */}
                   <div className="mt-12 text-center">
@@ -210,10 +215,10 @@ export default function CreatePatientView() {
                         </div>
                         <div className="text-left">
                           <div className="text-misty-lilac font-bold">
-                            {isPending ? "Guardando..." : "Guardar Mascota"}
+                            {isPending ? "Guardando..." : "Guardar Servicio"}
                           </div>
                           <div className="text-lavender-fog text-sm">
-                            {isPending ? "Procesando datos..." : "Crear nuevo registro"}
+                            {isPending ? "Procesando datos..." : "Crear nuevo registro de estética"}
                           </div>
                         </div>
                       </div>

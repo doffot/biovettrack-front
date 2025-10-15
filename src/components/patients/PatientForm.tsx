@@ -10,17 +10,23 @@ import {
   Upload,
   X,
   ChevronDown,
+  User,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import type { PatientFormData } from "../../types";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { VET_ADMIN } from "../../config/vetConfig";
 
 type PatientFormProps = {
   register: UseFormRegister<PatientFormData>;
   errors: FieldErrors<PatientFormData>;
+  setValue: UseFormSetValue<PatientFormData>;
 };
 
-const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
+const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [useCustomReferringVet, setUseCustomReferringVet] = useState(false);
 
   // Default pet avatar (cute paw print design)
   const defaultPetAvatar = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjZmY1ZTViIiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8cGF0aCBkPSJNMzUgNDBDMzUgMzUuNTggMzguNTggMzIgNDMgMzJTNTEgMzUuNTggNTEgNDBTNDcuNDIgNDggNDMgNDhTMzUgNDQuNDIgMzUgNDBaIiBmaWxsPSIjZmY1ZTViIi8+CjxwYXRoIGQ9Ik00OSA0MEM0OSAzNS41OCA1Mi41OCAzMiA1NyAzMlM2NSAzNS41OCA2NSA0MFM2MS40MiA0OCA1NyA0OFM0OSA0NC40MiA0OSA0MFoiIGZpbGw9IiNmZjVlNWIiLz4KPHA+Y2lyY2xlIGN4PSIzMyIgY3k9IjMwIiByPSI2IiBmaWxsPSIjZmY1ZTViIiBvcGFjaXR5PSIwLjciLz4KPHA+Y2lyY2xlIGN4PSI2NyIgY3k9IjMwIiByPSI2IiBmaWxsPSIjZmY1ZTViIiBvcGFjaXR5PSIwLjciLz4KPHA+ZWxsaXBzZSBjeD0iNTAiIGN5PSI2NSIgcng9IjE4IiByeT0iMTIiIGZpbGw9IiNmZjVlNWIiLz4KPHA+Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0IiBmaWxsPSIjZmY1ZTViIi8+Cjwvc3ZnPg==";
@@ -31,6 +37,18 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
       const reader = new FileReader();
       reader.onload = () => setPreviewImage(reader.result as string);
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Función para manejar el cambio del switcher
+  const handleVetSwitcherChange = (useCustom: boolean) => {
+    setUseCustomReferringVet(useCustom);
+    if (!useCustom) {
+      // Si se desactiva el input personalizado, usar el vet admin por defecto
+      setValue("referringVet", VET_ADMIN.name);
+    } else {
+      // Si se activa, limpiar el campo para que el usuario pueda escribir
+      setValue("referringVet", "");
     }
   };
 
@@ -137,6 +155,17 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
       description: "Para dosificación de medicamentos (opcional)",
       suffix: "kg",
     },
+    // ✅ NUEVO: mainVet (solo lectura)
+    {
+      name: "mainVet" as keyof PatientFormData,
+      label: "Veterinario responsable",
+      placeholder: VET_ADMIN.name,
+      icon: User,
+      type: "text",
+      required: true,
+      description: "Profesional que gestiona el caso",
+      readonly: true,
+    },
   ];
 
   // Componente para la sección de imagen
@@ -175,15 +204,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
         <span className="sm:hidden">Imagen</span>
 
         <input
-  type="file"
-  accept="image/*"
-  {...register("photo", { required: false })}
-  onChange={(e) => {
-    register("photo").onChange(e); // ← le dice a RHF qué archivo eligió
-    handleImageChange(e);          // ← tu preview habitual
-  }}
-  className="absolute inset-0 opacity-0 cursor-pointer"
-/>
+          type="file"
+          accept="image/*"
+          {...register("photo", { required: false })}
+          onChange={(e) => {
+            register("photo").onChange(e);
+            handleImageChange(e);
+          }}
+          className="absolute inset-0 opacity-0 cursor-pointer"
+        />
       </label>
     </div>
   );
@@ -349,14 +378,17 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
                             ) : (
                               <input
                                 type={field.type}
-                                placeholder={field.placeholder}
+                                placeholder={field.readonly ? field.placeholder : field.placeholder}
                                 step={field.type === "number" ? "0.1" : undefined}
                                 min={field.type === "number" ? "0" : undefined}
+                                readOnly={field.readonly}
                                 {...register(field.name, {
                                   required: field.required ? `${field.label} es requerido` : false,
                                   valueAsNumber: field.type === "number",
                                 })}
-                                className="flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
+                                className={`flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm ${
+                                  field.readonly ? 'cursor-not-allowed opacity-75' : ''
+                                }`}
                               />
                             )}
                             {field.suffix && (
@@ -401,10 +433,98 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors }) => {
             </div>
           );
         })}
+
+        {/* ✅ NUEVO: Campo especial para veterinario referido con switcher */}
+        <div className="lg:col-span-2 tile-entrance" style={{ animationDelay: `${formFields.length * 0.1}s` }}>
+          {/* Field Header */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <User className="w-4 h-4 text-coral-pulse" />
+              <label className="text-misty-lilac font-semibold text-sm">
+                Veterinario que ordena la hematología
+              </label>
+            </div>
+            <p className="text-lavender-fog text-xs font-medium">Profesional que solicita los estudios</p>
+          </div>
+
+          {/* Switcher */}
+          <div className="mb-4">
+            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
+              <button
+                type="button"
+                onClick={() => handleVetSwitcherChange(!useCustomReferringVet)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 ${
+                  !useCustomReferringVet
+                    ? 'bg-coral-pulse/20 border border-coral-pulse/40 text-coral-pulse'
+                    : 'bg-transparent border border-coral-pulse/20 text-lavender-fog hover:border-coral-pulse/30'
+                }`}
+              >
+                {!useCustomReferringVet ? (
+                  <ToggleRight className="w-4 h-4" />
+                ) : (
+                  <ToggleLeft className="w-4 h-4" />
+                )}
+                <span className="text-xs font-medium">
+                  {!useCustomReferringVet ? 'Usar veterinario por defecto' : 'Ingresar veterinario personalizado'}
+                </span>
+              </button>
+              
+              {!useCustomReferringVet && (
+                <div className="flex-1 text-sm text-misty-lilac font-medium">
+                  <span className="text-coral-pulse">→</span> {VET_ADMIN.name}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Input field - Solo visible si useCustomReferringVet está activo */}
+          {useCustomReferringVet && (
+            <div className="relative group">
+              {/* Glow Effect */}
+              <div className="absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30" />
+
+              <div className="relative bg-space-navy/60 backdrop-blur-sm border-2 rounded-2xl transition-all duration-300 border-coral-pulse/20 hover:border-coral-pulse/40 focus-within:border-coral-pulse/50">
+                <div className="flex items-center p-4">
+                  {/* Icon */}
+                  <div className="p-2 rounded-xl mr-4 transition-all duration-300 bg-coral-pulse/10 text-coral-pulse group-hover:bg-coral-pulse/15">
+                    <User className="w-5 h-5" />
+                  </div>
+
+                  {/* Input */}
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Ej: Dr. Carlos Ruiz, Dra. María López..."
+                      {...register("referringVet", {
+                        required: false,
+                      })}
+                      className="w-full bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Border Gradient */}
+                <div className="h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300" />
+              </div>
+
+              {/* Floating Indicator */}
+              <div className="absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 bg-coral-pulse/40 group-hover:bg-coral-pulse/60 animate-pulse-soft" />
+            </div>
+          )}
+
+          {/* Hidden input para cuando no se usa custom (garantiza que siempre tenga valor) */}
+          {!useCustomReferringVet && (
+            <input
+              type="hidden"
+              {...register("referringVet")}
+              value={VET_ADMIN.name}
+            />
+          )}
+        </div>
       </div>
 
       {/* Form Footer más compacto */}
-      <div className="tile-entrance pt-4" style={{ animationDelay: `${formFields.length * 0.1}s` }}>
+      <div className="tile-entrance pt-4" style={{ animationDelay: `${(formFields.length + 1) * 0.1}s` }}>
         <div className="text-center p-4 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
           <div className="flex items-center justify-center gap-2 mb-1">
             <Heart className="w-4 h-4 text-coral-pulse animate-pulse-soft" />

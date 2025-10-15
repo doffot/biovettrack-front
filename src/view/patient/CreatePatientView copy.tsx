@@ -1,55 +1,49 @@
-// src/views/EditPatientView.tsx
+// src/views/patients/CreatePatientView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Save, Edit, PawPrint } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Save, PawPrint, Sparkles, Heart } from "lucide-react";
 import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 import PatientForm from "../../components/patients/PatientForm";
-import type { Patient, PatientFormData } from "../../types";
+import type { PatientFormData } from "../../types";
 import { toast } from "../../components/Toast";
-import { getPatientById, updatePatient } from "../../api/patientAPI";
+import { createPatient } from "../../api/patientAPI";
+import { defaultPhotoFile } from "../../utils/defaultPhoto";
+import { VET_ADMIN } from "../../config/vetConfig"; // ✅ Importa el vet admin
 
-export default function EditPatientView() {
-  const { patientId } = useParams<{ patientId: string }>();
+export default function CreatePatientView() {
+  const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-
-  // 1. Cargar los datos del paciente usando React Query
-  const { data: patient, isLoading, isError } = useQuery<Patient, Error>({
-    queryKey: ["patient", patientId],
-    queryFn: () => getPatientById(patientId!),
-    enabled: !!patientId,
-  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<PatientFormData>();
+    setValue,
+  } = useForm<PatientFormData>({
+    defaultValues: {
+      name: "",
+      birthDate: "",
+      species: "",
+      breed: "",
+      sex: undefined,
+      weight: 0,
+      photo: undefined,
+      // ✅ mainVet se llena automáticamente
+      mainVet: VET_ADMIN.name,
+      // ✅ referringVet empieza con el valor por defecto
+      referringVet: VET_ADMIN.name,
+    },
+  });
 
-  // 2. Usar useEffect para pre-llenar el formulario cuando los datos se cargan
-  useEffect(() => {
-    if (patient) {
-      // Formatear la fecha de nacimiento a 'YYYY-MM-DD' para el input de tipo 'date'
-      const formattedBirthDate = new Date(patient.birthDate).toISOString().split('T')[0];
-
-      reset({
-        ...patient,
-        birthDate: formattedBirthDate,
-        photo: undefined,
-      });
-    }
-  }, [patient, reset]);
-
-  // mutación para actualizar al paciente
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: PatientFormData) => {
-      if (!patientId) {
-        throw new Error("ID de paciente no encontrado en la URL");
+      if (!ownerId) {
+        throw new Error("ID del dueño no encontrado en la URL");
       }
 
       const form = new FormData();
@@ -59,24 +53,29 @@ export default function EditPatientView() {
       form.append("sex", data.sex);
       if (data.breed) form.append("breed", data.breed);
       if (data.weight) form.append("weight", String(data.weight));
+      // ✅ Añade los nuevos campos
+      form.append("mainVet", data.mainVet);
+      // ✅ Solo añadir referringVet si tiene valor
+      if (data.referringVet && data.referringVet.trim()) {
+        form.append("referringVet", data.referringVet);
+      }
 
       if (data.photo && data.photo.length > 0) {
         form.append("photo", data.photo[0]);
+      } else {
+        const defaultPng = await defaultPhotoFile();
+        form.append("photo", defaultPng);
       }
-      
-      // La función `updatePatient` ahora devuelve directamente el objeto Patient
-      return await updatePatient({ formData: form, patientId: patientId! });
+
+      return await createPatient(form, ownerId);
     },
     onError: (error: any) => {
-      toast.error(error.message || "Error al actualizar la mascota");
+      toast.error(error.message || "Error al registrar mascota");
     },
-    // `data` es el objeto Patient completo
-    onSuccess: (data) => {
-      toast.success("Mascota actualizada con éxito");
-      // La propiedad `owner` ahora se lee directamente del objeto `data`
-      queryClient.invalidateQueries({ queryKey: ["patients", { ownerId: data.owner }] });
-      queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
-      navigate(`/owners/${data.owner}`);
+    onSuccess: () => {
+      toast.success("Mascota registrada con éxito");
+      queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
+      navigate(`/owners/${ownerId}`);
     },
   });
 
@@ -84,24 +83,16 @@ export default function EditPatientView() {
     setMounted(true);
   }, []);
 
-  const onSubmit = (data: PatientFormData) => mutate(data);
-
-  // Mostrar estado de carga y error
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-space-navy text-misty-lilac">
-        <span>Cargando datos del paciente...</span>
-      </div>
-    );
-  }
-
-  if (isError || !patient) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-space-navy text-red-500">
-        <span>Error al cargar los datos del paciente.</span>
-      </div>
-    );
-  }
+  const onSubmit = (data: PatientFormData) => {
+    // ✅ Validación adicional: si referringVet está vacío, usar el valor por defecto
+    const processedData = {
+      ...data,
+      referringVet: data.referringVet && data.referringVet.trim() 
+        ? data.referringVet 
+        : VET_ADMIN.name
+    };
+    mutate(processedData);
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-space-navy via-space-navy/95 to-space-navy/90 overflow-hidden">
@@ -110,11 +101,12 @@ export default function EditPatientView() {
         <div className="absolute top-10 left-10 w-72 h-72 bg-coral-pulse/20 rounded-full blur-3xl animate-pulse-soft" />
         <div className="absolute top-40 right-20 w-96 h-96 bg-coral-pulse/10 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-coral-pulse/15 rounded-full blur-3xl animate-pulse-soft" 
-          style={{ animationDelay: '1s' }} />
+             style={{ animationDelay: '1s' }} />
+        
         <div className="absolute bottom-10 right-10 w-80 h-80 bg-lavender-fog/10 rounded-full blur-3xl animate-float" 
-          style={{ animationDelay: '2s' }} />
+             style={{ animationDelay: '2s' }} />
         <div className="absolute top-1/2 left-10 w-56 h-56 bg-electric-mint/5 rounded-full blur-3xl animate-pulse-soft" 
-          style={{ animationDelay: '3s' }} />
+             style={{ animationDelay: '3s' }} />
       </div>
 
       {/* Geometric Pattern Overlay */}
@@ -124,14 +116,14 @@ export default function EditPatientView() {
           backgroundImage: `
             radial-gradient(circle at 25% 25%, #ff5e5b 2px, transparent 2px),
             radial-gradient(circle at 75% 75%, #39ff14 1px, transparent 1px),
-            linear-gradient(45deg, rgba(255, 94, 91, 0.1) 1px, transparent 1px),
-            linear-gradient(-45deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
+            linear-gradient(45deg, rgba(255,94,91,0.1) 1px, transparent 1px),
+            linear-gradient(-45deg, rgba(57,255,20,0.1) 1px, transparent 1px)
           `,
           backgroundSize: "100px 100px, 150px 150px, 75px 75px, 75px 75px",
           backgroundPosition: "0 0, 50px 50px, 0 0, 37px 37px"
         }}
       />
-      
+
       <FloatingParticles />
 
       {/* Back Button */}
@@ -149,41 +141,31 @@ export default function EditPatientView() {
                 : "translate-y-16 opacity-0 scale-95"
             }`}
           >
-            {/* Main Header Card */}
             <div className="relative group">
-              {/* Glow Effect */}
               <div className="absolute -inset-4 bg-gradient-to-r from-coral-pulse/20 via-coral-pulse/30 to-coral-pulse/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
-              
               <div className="relative bg-space-navy/80 backdrop-blur-xl border-2 border-coral-pulse/30 rounded-3xl p-8 sm:p-10 shadow-2xl">
-                {/* Animated Background Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/5 via-transparent to-lavender-fog/5 rounded-3xl" />
-                
-                {/* Content */}
                 <div className="relative z-10">
-                  {/* Icon Container */}
                   <div className="relative mb-6">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-coral-pulse/20 to-coral-pulse/10 rounded-2xl border-2 border-coral-pulse/30 shadow-lg">
-                      <Edit className="w-10 h-10 text-coral-pulse animate-pulse-soft" />
+                      <PawPrint className="w-10 h-10 text-coral-pulse animate-pulse-soft" />
                     </div>
-                    
-                    {/* Floating decorative elements */}
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-coral-pulse/20 rounded-full animate-float" />
                     <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-electric-mint/30 rounded-full animate-pulse-soft" 
-                          style={{ animationDelay: '1s' }} />
+                         style={{ animationDelay: '1s' }} />
                   </div>
-
-                  {/* Title */}
                   <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-coral-pulse via-misty-lilac to-coral-pulse bg-clip-text text-transparent">
-                    Actualizar Mascota
+                    Nueva Mascota
                   </h1>
-
-                  {/* Subtitle */}
                   <p className="text-lg sm:text-xl text-lavender-fog/90 mb-6 max-w-2xl mx-auto leading-relaxed">
-                    Modifica los datos de tu fiel compañero
+                    Registra a tu compañero peludo con amor y cuidado
                   </p>
+                  <div className="flex justify-center items-center gap-4 text-coral-pulse/40">
+                    <Heart className="w-4 h-4 animate-pulse-soft" />
+                    <Sparkles className="w-5 h-5 animate-float" />
+                    <Heart className="w-4 h-4 animate-pulse-soft" style={{ animationDelay: '0.5s' }} />
+                  </div>
                 </div>
-
-                {/* Border Glow */}
                 <div className="absolute inset-0 rounded-3xl border border-coral-pulse/20 shadow-[inset_0_1px_0_rgba(255,94,91,0.1)]" />
               </div>
             </div>
@@ -201,22 +183,16 @@ export default function EditPatientView() {
                 : "translate-y-16 opacity-0"
             }`}
           >
-            {/* Form Container */}
             <div className="relative group">
-              {/* Outer Glow */}
               <div className="absolute -inset-2 bg-gradient-to-r from-coral-pulse/10 via-coral-pulse/20 to-coral-pulse/10 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-              
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
                 className="relative bg-space-navy/90 backdrop-blur-xl border-2 border-coral-pulse/20 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl"
               >
-                {/* Form Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/[0.02] via-transparent to-lavender-fog/[0.02] rounded-3xl" />
-                
-                {/* Form Content */}
                 <div className="relative z-10">
-                  <PatientForm register={register} errors={errors} />
+                  <PatientForm register={register} errors={errors} setValue={setValue} />
 
                   {/* Submit Button */}
                   <div className="mt-12 text-center">
@@ -225,33 +201,26 @@ export default function EditPatientView() {
                       disabled={isPending}
                       className="group relative inline-flex items-center justify-center px-8 py-4 sm:px-12 sm:py-6 bg-gradient-to-r from-coral-pulse/20 via-coral-pulse/30 to-coral-pulse/20 border-2 border-coral-pulse/40 rounded-2xl text-misty-lilac font-bold text-lg sm:text-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-coral-pulse/60 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden"
                     >
-                      {/* Button Background Animation */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-coral-pulse/10 to-transparent animate-shimmer" />
-                      
                       <div className="relative z-10 flex items-center gap-3">
                         <div className="p-2 rounded-xl bg-coral-pulse/20">
                           <Save className={`w-6 h-6 text-coral-pulse transition-transform duration-300 ${
                             isPending ? "animate-spin" : "group-hover:scale-110"
                           }`} />
                         </div>
-                        
                         <div className="text-left">
                           <div className="text-misty-lilac font-bold">
-                            {isPending ? "Actualizando..." : "Guardar Cambios"}
+                            {isPending ? "Guardando..." : "Guardar Mascota"}
                           </div>
                           <div className="text-lavender-fog text-sm">
-                            {isPending ? "Procesando datos..." : "Modificar registro"}
+                            {isPending ? "Procesando datos..." : "Crear nuevo registro"}
                           </div>
                         </div>
                       </div>
-
-                      {/* Pulse Indicator */}
                       <div className="absolute top-3 right-3 w-3 h-3 bg-coral-pulse rounded-full animate-pulse opacity-60" />
                     </button>
                   </div>
                 </div>
-
-                {/* Form Border Effects */}
                 <div className="absolute inset-0 rounded-3xl border border-coral-pulse/10 shadow-[inset_0_1px_0_rgba(255,94,91,0.1)]" />
               </form>
             </div>
