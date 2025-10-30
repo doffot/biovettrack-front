@@ -14,6 +14,13 @@ import LabExamDetailView from "./view/labExams/LabExamDetailView";
 import LabExamListView from "./view/labExams/labExamListView";
 import CreateGroomingServiceView from "./view/grooming/CreateGroomingServiceView";
 import GroomingServicesView from "./view/grooming/GroomingServicesView"; // ⭐ IMPORTAR LA NUEVA VISTA
+import AuthLayout from "./layout/AuthLayout";
+import LoginView from "./view/aurth/LoginView";
+import RegisterView from "./view/aurth/RegisterView";
+import ConfirmAccountView from "./view/aurth/ConfirmAccountView";
+import RequestNewToken from "./view/aurth/RequestNewToken";
+import ForgotPasswordView from "./view/aurth/ForgotPasswordView";
+import NewPasswordView from "./view/aurth/NewPasswordView";
 
 export default function Router() {
   return (
@@ -93,6 +100,18 @@ export default function Router() {
           /> */}
           
         </Route>
+
+         <Route element={<AuthLayout />}>
+            <Route path="/auth/login" element={<LoginView />} />
+            <Route path="/auth/register" element={<RegisterView />} />
+            <Route path="/auth/confirm-account" element={<ConfirmAccountView />} />
+            <Route path="/auth/request-new-token" element={<RequestNewToken />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordView />} />
+            <Route path="/auth/new-password" element={<NewPasswordView />} />
+
+         </Route>
+  
+
       </Routes>
     </BrowserRouter>
   );

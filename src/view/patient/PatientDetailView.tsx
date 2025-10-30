@@ -20,6 +20,7 @@ import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { getOwnersById } from "../../api/OwnerAPI";
+import { useAuth } from "../../hooks/useAuth"; // 👈 Importa tu hook
 
 export default function PatientDetailView() {
   const { patientId } = useParams();
@@ -33,7 +34,9 @@ export default function PatientDetailView() {
     queryFn: () => getPatientById(patientId!),
     enabled: !!patientId,
   });
-  console.log('entro al view de paciente');
+
+  // 👇 Usa tu hook para obtener al veterinario autenticado
+  const { data: currentUser, isLoading: isLoadingUser } = useAuth();
 
   // Query for owner data
   const { data: owner, isLoading: isLoadingOwner } = useQuery({
@@ -503,9 +506,15 @@ export default function PatientDetailView() {
                               <p className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wide mb-1">
                                 Veterinario Laboratorio
                               </p>
-                              <p className="text-text font-semibold text-base sm:text-lg break-words">
-                                {patient.mainVet}
-                              </p>
+                              {isLoadingUser ? (
+                                <span className="text-text/70">Cargando...</span>
+                              ) : currentUser ? (
+                                <p className="text-text font-semibold text-base sm:text-lg break-words">
+                                  {currentUser.name}
+                                </p>
+                              ) : (
+                                <span className="text-text/70">No disponible</span>
+                              )}
                               <p className="text-text/70 text-xs sm:text-sm mt-1">
                                 Examenes de Laboratorio
                               </p>

@@ -11,14 +11,16 @@ import type { PatientFormData } from "../../types";
 import { toast } from "../../components/Toast";
 import { createPatient } from "../../api/patientAPI";
 import { defaultPhotoFile } from "../../utils/defaultPhoto";
-import { VET_ADMIN } from "../../config/vetConfig"; // ✅ Importa el vet admin
+// import { VET_ADMIN } from "../../config/vetConfig"; // ✅ Importa el vet admin
+import { useAuth } from "../../hooks/useAuth";
 
 export default function CreatePatientView() {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-
+  const { data:vetmain} = useAuth();
+  
   const {
     register,
     handleSubmit,
@@ -34,9 +36,9 @@ export default function CreatePatientView() {
       weight: 0,
       photo: undefined,
       // ✅ mainVet se llena automáticamente
-      mainVet: VET_ADMIN.name,
+      mainVet: vetmain?.name,
       // ✅ referringVet empieza con el valor por defecto
-      referringVet: VET_ADMIN.name,
+      referringVet: vetmain?.name,
     },
   });
 
@@ -89,7 +91,7 @@ export default function CreatePatientView() {
       ...data,
       referringVet: data.referringVet && data.referringVet.trim() 
         ? data.referringVet 
-        : VET_ADMIN.name
+        : vetmain?.name,
     };
     mutate(processedData);
   };

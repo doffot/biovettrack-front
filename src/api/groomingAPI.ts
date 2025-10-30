@@ -139,7 +139,7 @@ export async function getAllGroomingServices(): Promise<GroomingService[]> {
   try {
     const { data } = await api.get("/grooming"); // No necesitas tipar aquí si usas Zod
 
-    console.log("📦 Todos los servicios:", data);
+    
 
     // ✅ Validar la ESTRUCTURA COMPLETA de la respuesta
     const parsedResponse = groomingServicesListResponseSchema.safeParse(data);

@@ -1,5 +1,5 @@
 // src/components/patients/PatientForm.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   PawPrint,
   Bone,
@@ -16,7 +16,13 @@ import {
 } from "lucide-react";
 import type { PatientFormData } from "../../types";
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
-import { VET_ADMIN } from "../../config/vetConfig";
+import { useAuth } from "../../hooks/useAuth";
+
+// Función auxiliar para capitalizar solo la primera letra
+const capitalizeFirstLetter = (str: string) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 type PatientFormProps = {
   register: UseFormRegister<PatientFormData>;
@@ -28,8 +34,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [useCustomReferringVet, setUseCustomReferringVet] = useState(false);
 
-  // Default pet avatar (cute paw print design)
+  const { data: vetmain } = useAuth();
 
+  // ✅ Formatear y asignar "mainVet" cuando vetmain esté listo
+  useEffect(() => {
+    if (vetmain?.name) {
+      const formattedName = `M.V. ${capitalizeFirstLetter(vetmain.name)}`;
+      setValue("mainVet", formattedName);
+    }
+  }, [vetmain, setValue]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,19 +53,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
     }
   };
 
-  // Función para manejar el cambio del switcher
   const handleVetSwitcherChange = (useCustom: boolean) => {
     setUseCustomReferringVet(useCustom);
     if (!useCustom) {
-      // Si se desactiva el input personalizado, usar el vet admin por defecto
-      setValue("referringVet", VET_ADMIN.name);
+      setValue("referringVet", vetmain?.name || "");
     } else {
-      // Si se activa, limpiar el campo para que el usuario pueda escribir
       setValue("referringVet", "");
     }
   };
 
-  // Calcular edad legible
   const [birthDate, setBirthDate] = useState<string>('');
   const [ageText, setAgeText] = useState<string>('');
 
@@ -155,11 +164,11 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
       description: "Para dosificación de medicamentos (opcional)",
       suffix: "kg",
     },
-    // ✅ NUEVO: mainVet (solo lectura)
+    // ✅ Campo "Veterinario responsable" — ahora con formato correcto
     {
       name: "mainVet" as keyof PatientFormData,
       label: "Veterinario responsable",
-      placeholder: VET_ADMIN.name,
+      placeholder: "Cargando...",
       icon: User,
       type: "text",
       required: true,
@@ -168,11 +177,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
     },
   ];
 
-  // Componente para la sección de imagen
   const ImageUploadSection = ({ isCompact = false }: { isCompact?: boolean }) => (
     <div className={`flex items-center gap-3 p-3 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20 ${isCompact ? 'h-full' : ''}`}>
-      
-      {/* Preview de imagen */}
       <div className="flex-shrink-0">
         {previewImage ? (
           <div className={`relative rounded-lg overflow-hidden border-2 border-coral-pulse/40 shadow-md ${isCompact ? 'w-10 h-10' : 'w-12 h-12'}`}>
@@ -191,7 +197,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
         )}
       </div>
 
-      {/* Botón de subida */}
       <label className={`flex-1 group relative inline-flex items-center justify-center gap-1.5 rounded-lg
                   bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30 text-misty-lilac font-medium
                   border border-coral-pulse/30 hover:border-coral-pulse/50
@@ -219,13 +224,11 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
 
   return (
     <div className="space-y-6">
-      {/* Sección de imagen solo para mobile */}
       <div className="hidden">{birthDate}</div>
       <div className="tile-entrance lg:hidden" style={{ animationDelay: '0s' }}>
         <ImageUploadSection />
       </div>
 
-      {/* Form Fields Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {formFields.map((field, index) => {
           const Icon = field.icon;
@@ -237,7 +240,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
               className={`tile-entrance ${field.name === 'name' ? 'lg:col-span-2' : field.name === 'species' ? 'lg:col-span-2' : ''}`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Field Header */}
               <div className="mb-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Icon className="w-4 h-4 text-coral-pulse" />
@@ -249,13 +251,10 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                 <p className="text-lavender-fog text-xs font-medium">{field.description}</p>
               </div>
 
-              {/* Campo especial para el nombre con imagen al lado en desktop */}
               {field.name === 'name' ? (
                 <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Input de nombre */}
                   <div className="flex-1">
                     <div className="relative group">
-                      {/* Glow Effect */}
                       <div className={`absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 ${
                         error
                           ? "bg-gradient-to-r from-coral-pulse/40 to-coral-pulse/60"
@@ -269,7 +268,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                       }`}>
 
                         <div className="flex items-center p-4">
-                          {/* Icon */}
                           <div className={`p-2 rounded-xl mr-4 transition-all duration-300 ${
                             error
                               ? "bg-coral-pulse/20 text-coral-pulse"
@@ -278,7 +276,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                             <Icon className="w-5 h-5" />
                           </div>
 
-                          {/* Input */}
                           <div className="flex-1">
                             <input
                               type="text"
@@ -291,13 +288,11 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                           </div>
                         </div>
 
-                        {/* Bottom Border Gradient */}
                         <div className={`h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent ${
                           error ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                         } transition-opacity duration-300`} />
                       </div>
 
-                      {/* Floating Indicator */}
                       <div className={`absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 ${
                         error
                           ? "bg-coral-pulse animate-pulse"
@@ -306,15 +301,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                     </div>
                   </div>
 
-                  {/* Sección de imagen al lado del nombre (solo desktop) */}
                   <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
                     <ImageUploadSection isCompact={true} />
                   </div>
                 </div>
               ) : (
-                /* Resto de campos normales */
                 <div className="relative group">
-                  {/* Glow Effect */}
                   <div className={`absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 ${
                     error
                       ? "bg-gradient-to-r from-coral-pulse/40 to-coral-pulse/60"
@@ -328,7 +320,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                   }`}>
 
                     <div className="flex items-center p-4">
-                      {/* Icon */}
                       <div className={`p-2 rounded-xl mr-4 transition-all duration-300 ${
                         error
                           ? "bg-coral-pulse/20 text-coral-pulse"
@@ -337,7 +328,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                         <Icon className="w-5 h-5" />
                       </div>
 
-                      {/* Input */}
                       <div className="flex-1">
                         {field.type === "select" ? (
                           <div className="relative">
@@ -402,13 +392,11 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                       </div>
                     </div>
 
-                    {/* Bottom Border Gradient */}
                     <div className={`h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent ${
                       error ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                     } transition-opacity duration-300`} />
                   </div>
 
-                  {/* Floating Indicator */}
                   <div className={`absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 ${
                     error
                       ? "bg-coral-pulse animate-pulse"
@@ -417,14 +405,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                 </div>
               )}
 
-              {/* Mostrar edad calculada si es birthDate */}
               {field.name === "birthDate" && ageText && (
                 <div className="mt-2 text-sm text-lavender-fog">
                   Edad: <span className="text-coral-pulse font-semibold">{ageText}</span>
                 </div>
               )}
 
-              {/* Error Message */}
               {error && (
                 <div className="mt-3 flex items-center gap-2 p-3 bg-coral-pulse/10 border border-coral-pulse/20 rounded-xl">
                   <div className="w-2 h-2 bg-coral-pulse rounded-full animate-pulse flex-shrink-0" />
@@ -435,9 +421,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
           );
         })}
 
-        {/* ✅ NUEVO: Campo especial para veterinario referido con switcher */}
+        {/* Campo de veterinario referido (sin cambios) */}
         <div className="lg:col-span-2 tile-entrance" style={{ animationDelay: `${formFields.length * 0.1}s` }}>
-          {/* Field Header */}
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1">
               <User className="w-4 h-4 text-coral-pulse" />
@@ -448,7 +433,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
             <p className="text-lavender-fog text-xs font-medium">Profesional que solicita los estudios</p>
           </div>
 
-          {/* Switcher */}
           <div className="mb-4">
             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
               <button
@@ -472,26 +456,22 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
               
               {!useCustomReferringVet && (
                 <div className="flex-1 text-sm text-misty-lilac font-medium">
-                  <span className="text-coral-pulse">→</span> {VET_ADMIN.name}
+                  <span className="text-coral-pulse">→</span>  M.V. <span className=" capitalize">{vetmain?.name}</span> 
                 </div>
               )}
             </div>
           </div>
 
-          {/* Input field - Solo visible si useCustomReferringVet está activo */}
           {useCustomReferringVet && (
             <div className="relative group">
-              {/* Glow Effect */}
               <div className="absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30" />
 
               <div className="relative bg-space-navy/60 backdrop-blur-sm border-2 rounded-2xl transition-all duration-300 border-coral-pulse/20 hover:border-coral-pulse/40 focus-within:border-coral-pulse/50">
                 <div className="flex items-center p-4">
-                  {/* Icon */}
                   <div className="p-2 rounded-xl mr-4 transition-all duration-300 bg-coral-pulse/10 text-coral-pulse group-hover:bg-coral-pulse/15">
                     <User className="w-5 h-5" />
                   </div>
 
-                  {/* Input */}
                   <div className="flex-1">
                     <input
                       type="text"
@@ -504,27 +484,23 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                   </div>
                 </div>
 
-                {/* Bottom Border Gradient */}
                 <div className="h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300" />
               </div>
 
-              {/* Floating Indicator */}
               <div className="absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 bg-coral-pulse/40 group-hover:bg-coral-pulse/60 animate-pulse-soft" />
             </div>
           )}
 
-          {/* Hidden input para cuando no se usa custom (garantiza que siempre tenga valor) */}
           {!useCustomReferringVet && (
             <input
               type="hidden"
               {...register("referringVet")}
-              value={VET_ADMIN.name}
+              value={ `M.V. ${vetmain?.name}` || "" }
             />
           )}
         </div>
       </div>
 
-      {/* Form Footer más compacto */}
       <div className="tile-entrance pt-4" style={{ animationDelay: `${(formFields.length + 1) * 0.1}s` }}>
         <div className="text-center p-4 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
           <div className="flex items-center justify-center gap-2 mb-1">

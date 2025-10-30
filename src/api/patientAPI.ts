@@ -95,9 +95,9 @@ export async function createPatient(
 export async function getPatients() {
   try {
     const { data } = await api.get("/patients");
-    console.log(data);
+    console.log('data:',data);
     const response = patientsListSchema.safeParse(data);
-    console.log(response);
+    console.log('reponse:',response);
 
     if (response.success) {
       console.log("data que envia", response.data);
