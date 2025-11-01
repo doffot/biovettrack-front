@@ -11,7 +11,6 @@ import type { PatientFormData } from "../../types";
 import { toast } from "../../components/Toast";
 import { createPatient } from "../../api/patientAPI";
 import { defaultPhotoFile } from "../../utils/defaultPhoto";
-// import { VET_ADMIN } from "../../config/vetConfig"; // ✅ Importa el vet admin
 import { useAuth } from "../../hooks/useAuth";
 
 export default function CreatePatientView() {
@@ -19,8 +18,8 @@ export default function CreatePatientView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-  const { data:vetmain} = useAuth();
-  
+  const { data: vetmain } = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -35,10 +34,8 @@ export default function CreatePatientView() {
       sex: undefined,
       weight: 0,
       photo: undefined,
-      // ✅ mainVet se llena automáticamente
-      mainVet: vetmain?.name,
-      // ✅ referringVet empieza con el valor por defecto
-      referringVet: vetmain?.name,
+      mainVet: vetmain?.name || "",
+      referringVet: vetmain?.name || "",
     },
   });
 
@@ -55,9 +52,8 @@ export default function CreatePatientView() {
       form.append("sex", data.sex);
       if (data.breed) form.append("breed", data.breed);
       if (data.weight) form.append("weight", String(data.weight));
-      // ✅ Añade los nuevos campos
       form.append("mainVet", data.mainVet);
-      // ✅ Solo añadir referringVet si tiene valor
+
       if (data.referringVet && data.referringVet.trim()) {
         form.append("referringVet", data.referringVet);
       }
@@ -86,145 +82,117 @@ export default function CreatePatientView() {
   }, []);
 
   const onSubmit = (data: PatientFormData) => {
-    // ✅ Validación adicional: si referringVet está vacío, usar el valor por defecto
     const processedData = {
       ...data,
-      referringVet: data.referringVet && data.referringVet.trim() 
-        ? data.referringVet 
+      referringVet: data.referringVet && data.referringVet.trim()
+        ? data.referringVet
         : vetmain?.name,
     };
     mutate(processedData);
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-space-navy via-space-navy/95 to-space-navy/90 overflow-hidden">
-      {/* Animated Background Orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-coral-pulse/20 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute top-40 right-20 w-96 h-96 bg-coral-pulse/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-coral-pulse/15 rounded-full blur-3xl animate-pulse-soft" 
-             style={{ animationDelay: '1s' }} />
-        
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-lavender-fog/10 rounded-full blur-3xl animate-float" 
-             style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-10 w-56 h-56 bg-electric-mint/5 rounded-full blur-3xl animate-pulse-soft" 
-             style={{ animationDelay: '3s' }} />
-      </div>
-
-      {/* Geometric Pattern Overlay */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
+    <div className="relative mt-20 min-h-screen bg-gradient-dark overflow-hidden">
+      {/* Fondo decorativo */}
+      <div
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 25% 25%, #ff5e5b 2px, transparent 2px),
-            radial-gradient(circle at 75% 75%, #39ff14 1px, transparent 1px),
-            linear-gradient(45deg, rgba(255,94,91,0.1) 1px, transparent 1px),
-            linear-gradient(-45deg, rgba(57,255,20,0.1) 1px, transparent 1px)
+            linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
           `,
-          backgroundSize: "100px 100px, 150px 150px, 75px 75px, 75px 75px",
-          backgroundPosition: "0 0, 50px 50px, 0 0, 37px 37px"
+          backgroundSize: "50px 50px",
         }}
       />
 
+      {/* Glow effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/3 rounded-full blur-3xl" />
+
       <FloatingParticles />
 
-      {/* Back Button */}
-      <div className="fixed top-6 left-6 z-50">
+      {/* Botón regresar */}
+      <div className="fixed top-22 left-7 z-150">
         <BackButton />
       </div>
 
-      {/* Header Section */}
-      <div className="relative pt-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+      {/* Header con título simple */}
+      <div className="relative z-10 pt-20 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
           <div
-            className={`text-center transform transition-all duration-1200 ease-out ${
-              mounted 
-                ? "translate-y-0 opacity-100 scale-100" 
-                : "translate-y-16 opacity-0 scale-95"
+            className={`flex flex-col items-center gap-6 transform transition-all duration-1000 delay-200 ${
+              mounted
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
             }`}
           >
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-coral-pulse/20 via-coral-pulse/30 to-coral-pulse/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-space-navy/80 backdrop-blur-xl border-2 border-coral-pulse/30 rounded-3xl p-8 sm:p-10 shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/5 via-transparent to-lavender-fog/5 rounded-3xl" />
-                <div className="relative z-10">
-                  <div className="relative mb-6">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-coral-pulse/20 to-coral-pulse/10 rounded-2xl border-2 border-coral-pulse/30 shadow-lg">
-                      <PawPrint className="w-10 h-10 text-coral-pulse animate-pulse-soft" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-coral-pulse/20 rounded-full animate-float" />
-                    <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-electric-mint/30 rounded-full animate-pulse-soft" 
-                         style={{ animationDelay: '1s' }} />
-                  </div>
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-coral-pulse via-misty-lilac to-coral-pulse bg-clip-text text-transparent">
-                    Nueva Mascota
-                  </h1>
-                  <p className="text-lg sm:text-xl text-lavender-fog/90 mb-6 max-w-2xl mx-auto leading-relaxed">
-                    Registra a tu compañero peludo con amor y cuidado
-                  </p>
-                  <div className="flex justify-center items-center gap-4 text-coral-pulse/40">
-                    <Heart className="w-4 h-4 animate-pulse-soft" />
-                    <Sparkles className="w-5 h-5 animate-float" />
-                    <Heart className="w-4 h-4 animate-pulse-soft" style={{ animationDelay: '0.5s' }} />
-                  </div>
+            <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-primary/10 border-primary/30 px-6 py-4 inline-flex items-center gap-3 xl:min-w-[400px] xl:max-w-[480px]">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+
+              <div className="relative z-10 flex flex-col items-center gap-3 justify-center w-full">
+                <div className="p-3 rounded-xl bg-black/20 text-primary mx-auto mb-3 w-fit">
+                  <PawPrint className="w-8 h-8 xl:w-10 xl:h-10" />
                 </div>
-                <div className="absolute inset-0 rounded-3xl border border-coral-pulse/20 shadow-[inset_0_1px_0_rgba(255,94,91,0.1)]" />
+                <h1 className="text-3xl  xl:text-3xl font-bold text-text mb-1">
+                  Nueva Mascota
+                </h1>
+                <p className="text-muted text-sm">
+                  Registros de Mascotas
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Form Section */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pb-20 mt-12">
-        <div className="max-w-4xl mx-auto">
+      {/* Formulario */}
+      <div className="relative z-10 px-4 sm:px-6 pb-20 mt-12">
+        <div className="max-w-7xl mx-auto">
           <div
-            className={`transform transition-all duration-1200 ease-out delay-300 ${
-              mounted 
-                ? "translate-y-0 opacity-100" 
-                : "translate-y-16 opacity-0"
+            className={`transform transition-all duration-1000 delay-400 ${
+              mounted
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
             }`}
           >
-            <div className="relative group">
-              <div className="absolute -inset-2 bg-gradient-to-r from-coral-pulse/10 via-coral-pulse/20 to-coral-pulse/10 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                noValidate
-                className="relative bg-space-navy/90 backdrop-blur-xl border-2 border-coral-pulse/20 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-coral-pulse/[0.02] via-transparent to-lavender-fog/[0.02] rounded-3xl" />
-                <div className="relative z-10">
-                  <PatientForm register={register} errors={errors} setValue={setValue} />
+            <div className="grid gap-6 sm:gap-8">
+              <div className="tile-entrance">
+                <div className="relative overflow-hidden rounded-2xl xl:rounded-3xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 shadow-premium p-6 xl:p-8">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Submit Button */}
-                  <div className="mt-12 text-center">
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="group relative inline-flex items-center justify-center px-8 py-4 sm:px-12 sm:py-6 bg-gradient-to-r from-coral-pulse/20 via-coral-pulse/30 to-coral-pulse/20 border-2 border-coral-pulse/40 rounded-2xl text-misty-lilac font-bold text-lg sm:text-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-coral-pulse/60 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-coral-pulse/10 to-transparent animate-shimmer" />
-                      <div className="relative z-10 flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-coral-pulse/20">
-                          <Save className={`w-6 h-6 text-coral-pulse transition-transform duration-300 ${
-                            isPending ? "animate-spin" : "group-hover:scale-110"
-                          }`} />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-misty-lilac font-bold">
-                            {isPending ? "Guardando..." : "Guardar Mascota"}
+                  <div className="relative z-10">
+                    <PatientForm register={register} errors={errors} setValue={setValue} />
+
+                    {/* Submit Button */}
+                    <div className="mt-8 flex justify-center">
+                      <button
+                        type="submit"
+                        disabled={isPending}
+                        onClick={handleSubmit(onSubmit)}
+                        className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 p-3 sm:p-4 inline-flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+
+                        <div className="relative z-10 flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-black/20 text-primary">
+                            <Save className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-300" />
                           </div>
-                          <div className="text-lavender-fog text-sm">
-                            {isPending ? "Procesando datos..." : "Crear nuevo registro"}
+                          <div className="text-left">
+                            <div className="text-text font-bold text-sm sm:text-base">
+                              {isPending ? "Guardando..." : "Guardar Mascota"}
+                            </div>
+                            <div className="text-muted text-xs sm:text-sm">
+                              {isPending ? "Procesando..." : "Crear nuevo registro"}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="absolute top-3 right-3 w-3 h-3 bg-coral-pulse rounded-full animate-pulse opacity-60" />
-                    </button>
+                      </button>
+                    </div>
                   </div>
+
+                  <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
                 </div>
-                <div className="absolute inset-0 rounded-3xl border border-coral-pulse/10 shadow-[inset_0_1px_0_rgba(255,94,91,0.1)]" />
-              </form>
+              </div>
             </div>
           </div>
         </div>

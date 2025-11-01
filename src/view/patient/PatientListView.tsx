@@ -7,7 +7,6 @@ import {
   Eye,
   Edit,
   Trash2,
-  Heart,
   User,
   Plus,
   Search,
@@ -125,7 +124,7 @@ export default function PatientListView() {
 
   return (
     <>
-      <div className="relative min-h-screen bg-gradient-dark overflow-hidden pb-20">
+      <div className="relative top-20 min-h-screen bg-gradient-dark overflow-hidden pb-20">
         {/* Fondo decorativo */}
         <div
           className="absolute inset-0 opacity-5"
@@ -183,6 +182,9 @@ export default function PatientListView() {
                     </div>
                   </div>
                 </Link>
+                <div className="mt-2 text-xs text-muted text-center lg:text-left">
+  🐾 Primero selecciona un dueño para agregar su mascota
+</div>
               </div>
             </div>
 
@@ -300,7 +302,6 @@ export default function PatientListView() {
                           <div className="flex items-center gap-4 text-xs text-muted bg-black/10 rounded-lg p-2">
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
-                              {/* <span>{patient.age} años</span> */}
                             </div>
                             <div className="flex items-center gap-1">
                               <Weight className="w-3 h-3" />
@@ -353,7 +354,6 @@ export default function PatientListView() {
                               <div className="flex items-center gap-4 text-xs text-muted mt-1">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
-                                  {/* <span>{patient.age} años</span> */}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Weight className="w-3 h-3" />
@@ -416,55 +416,40 @@ export default function PatientListView() {
                     : "translate-y-10 opacity-0"
                 }`}
               >
-                <div className="text-center py-12">
-                  <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 p-6 sm:p-8 max-w-md mx-auto shadow-premium">
+                <div className="text-center py-8">
+                  <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 p-5 sm:p-6 max-w-md mx-auto shadow-premium">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
 
                     <div className="relative z-10">
-                      <div className="p-4 sm:p-6 rounded-xl bg-black/20 text-muted mx-auto mb-6 w-fit">
-                        <Heart className="w-10 h-10 sm:w-12 sm:h-12 animate-float" />
+                      <div className="p-3 sm:p-4 rounded-xl bg-black/20 text-muted mx-auto mb-4 w-fit">
+                        <PawPrint className="w-8 h-8 sm:w-10 sm:h-10 text-primary animate-float" />
                       </div>
 
-                      <h3 className="text-xl sm:text-2xl font-bold text-text mb-3 title-shine">
-                        {searchTerm ? "Sin resultados" : "No hay pacientes"}
+                      <h3 className="text-xl font-bold text-text mb-2 title-shine">
+                        {searchTerm ? "Sin resultados" : "No hay pacientes registrados"}
                       </h3>
 
-                      <p className="text-muted text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
+                      <p className="text-muted text-sm mb-5 leading-relaxed px-2">
                         {searchTerm
-                          ? `No encontramos coincidencias para "${searchTerm}"`
-                          : "Comienza registrando el primer paciente al sistema"}
+                          ? `No se encontraron coincidencias para "${searchTerm}"`
+                          : "Para registrar una mascota, primero debes crear o seleccionar un dueño."}
                       </p>
 
                       {!searchTerm && (
                         <Link
-                          to="/patients/new"
-                          className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 p-3 sm:p-4 inline-flex items-center gap-3"
+                          to="/owners"
+                          className="group relative overflow-hidden rounded-lg border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-103 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 px-4 py-2.5 inline-flex items-center gap-2.5"
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-                          <div className="relative z-10 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-black/20 text-primary">
-                              <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-300" />
-                            </div>
-                            <div className="text-left">
-                              <div className="text-text font-bold text-sm sm:text-base">
-                                Registrar Mascota
-                              </div>
-                              <div className="text-muted text-xs sm:text-sm">
-                                Agregar nuevo paciente
-                              </div>
-                            </div>
+                          <div className="relative z-10 flex items-center gap-2">
+                            <User className="w-4 h-4 text-primary" />
+                            <span className="text-primary font-bold text-sm">Ir a Dueños</span>
                           </div>
                         </Link>
                       )}
                     </div>
 
-                    {/* Decoración de esquina */}
-                    <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-
-                    {/* Líneas decorativas */}
-                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60" />
-                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                    <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-primary rounded-full animate-neon-pulse opacity-60" />
                   </div>
                 </div>
               </div>

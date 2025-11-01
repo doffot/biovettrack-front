@@ -20,14 +20,14 @@ import ConfirmAccountView from "./view/aurth/ConfirmAccountView";
 import RequestNewToken from "./view/aurth/RequestNewToken";
 import ForgotPasswordView from "./view/aurth/ForgotPasswordView";
 import NewPasswordView from "./view/aurth/NewPasswordView";
-import DesktopHomeView from "./view/home/DesktopHomeView";
+import HomeView from "./view/home/HomeView";
 
 export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<DesktopHomeView />} index />
+          <Route path="/" element={<HomeView />} index />
 
           {/* Rutas de Dueño */}
           <Route path="owners" element={<OwnerListView />} />

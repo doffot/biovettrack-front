@@ -164,7 +164,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
       description: "Para dosificación de medicamentos (opcional)",
       suffix: "kg",
     },
-    // ✅ Campo "Veterinario responsable" — ahora con formato correcto
+    // ✅ Campo "Veterinario responsable" — OCULTO pero funcional
     {
       name: "mainVet" as keyof PatientFormData,
       label: "Veterinario responsable",
@@ -173,7 +173,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
       type: "text",
       required: true,
       description: "Profesional que gestiona el caso",
-      readonly: true,
+      hidden: true, // Campo oculto
     },
   ];
 
@@ -233,6 +233,19 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
         {formFields.map((field, index) => {
           const Icon = field.icon;
           const error = errors[field.name];
+
+          // ✅ Si el campo está marcado como hidden, no lo renderizamos
+          if (field.hidden) {
+            return (
+              <input
+                key={field.name}
+                type="hidden"
+                {...register(field.name, {
+                  required: field.required ? `${field.label} es requerido` : false,
+                })}
+              />
+            );
+          }
 
           return (
             <div
@@ -369,17 +382,14 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                             ) : (
                               <input
                                 type={field.type}
-                                placeholder={field.readonly ? field.placeholder : field.placeholder}
+                                placeholder={field.placeholder}
                                 step={field.type === "number" ? "0.1" : undefined}
                                 min={field.type === "number" ? "0" : undefined}
-                                readOnly={field.readonly}
                                 {...register(field.name, {
                                   required: field.required ? `${field.label} es requerido` : false,
                                   valueAsNumber: field.type === "number",
                                 })}
-                                className={`flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm ${
-                                  field.readonly ? 'cursor-not-allowed opacity-75' : ''
-                                }`}
+                                className="flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
                               />
                             )}
                             {field.suffix && (
@@ -421,16 +431,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
           );
         })}
 
-        {/* Campo de veterinario referido (sin cambios) */}
+        {/* Campo de veterinario referido (actualizado) */}
         <div className="lg:col-span-2 tile-entrance" style={{ animationDelay: `${formFields.length * 0.1}s` }}>
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1">
               <User className="w-4 h-4 text-coral-pulse" />
               <label className="text-misty-lilac font-semibold text-sm">
-                Veterinario que ordena la hematología
+                Médico Veterinario
               </label>
             </div>
-            <p className="text-lavender-fog text-xs font-medium">Profesional que solicita los estudios</p>
           </div>
 
           <div className="mb-4">

@@ -6,9 +6,6 @@ import { toast } from "../../components/Toast";
 import { getPatientById, deletePatient } from "../../api/patientAPI";
 import { 
   PawPrint, 
-  CalendarDays, 
-  Scale, 
-  Tag, 
   Heart, 
   Edit, 
   Trash2, 
@@ -20,7 +17,6 @@ import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { getOwnersById } from "../../api/OwnerAPI";
-import { useAuth } from "../../hooks/useAuth"; // 👈 Importa tu hook
 
 export default function PatientDetailView() {
   const { patientId } = useParams();
@@ -35,17 +31,12 @@ export default function PatientDetailView() {
     enabled: !!patientId,
   });
 
-  // 👇 Usa tu hook para obtener al veterinario autenticado
-  const { data: currentUser, isLoading: isLoadingUser } = useAuth();
-
-  // Query for owner data
   const { data: owner, isLoading: isLoadingOwner } = useQuery({
     queryKey: ["owner", patient?.owner],
     queryFn: () => getOwnersById(patient?.owner!),
     enabled: !!patient?.owner,
   });
 
-  // Mutación para eliminar paciente
   const { mutate: removePatient, isPending: isDeleting } = useMutation({
     mutationFn: () => deletePatient(patientId!),
     onError: (error: Error) => {
@@ -66,7 +57,6 @@ export default function PatientDetailView() {
   if (isLoading) {
     return (
       <div className="relative min-h-screen bg-gradient-dark overflow-hidden flex flex-col">
-        {/* Fondo decorativo */}
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -77,12 +67,9 @@ export default function PatientDetailView() {
             backgroundSize: "50px 50px",
           }}
         />
-
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-danger/5 rounded-full blur-3xl" />
-
         <FloatingParticles />
-
         <div className="relative z-10 flex items-center justify-center flex-1 pt-16">
           <div className="text-center animate-pulse-soft">
             <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
@@ -122,7 +109,6 @@ export default function PatientDetailView() {
     );
   }
 
-  // Calcular edad
   const calculateAge = () => {
     const birthDate = new Date(patient.birthDate);
     const today = new Date();
@@ -155,7 +141,6 @@ export default function PatientDetailView() {
   return (
     <>
       <div className="relative min-h-screen bg-gradient-dark overflow-hidden">
-        {/* Fondo decorativo mejorado */}
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -167,116 +152,102 @@ export default function PatientDetailView() {
           }}
         />
 
-        {/* Efectos de iluminación dinámicos */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 xl:w-[600px] xl:h-[600px] bg-primary/10 rounded-full blur-3xl animate-pulse-soft" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 xl:w-[500px] xl:h-[500px] bg-danger/8 rounded-full blur-3xl animate-float" />
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 xl:w-[400px] xl:h-[400px] bg-muted/5 rounded-full blur-3xl" />
 
         <FloatingParticles />
 
-        {/* Botón regresar */}
         <div className="fixed top-20 left-6 z-50">
           <BackButton />
         </div>
 
-        {/* Header con foto grande */}
-        <div className="relative z-10 pt-16 sm:pt-20 px-4 sm:px-6">
+        {/* Header con foto y título */}
+        <div className="relative mt-20 z-10 pt-8 sm:pt-16 md:pt-20 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             <div
-              className={`text-center transform transition-all duration-1500 ${
+              className={`flex flex-col items-center gap-4 sm:gap-6 transform transition-all duration-1500 ${
                 mounted ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
               }`}
             >
-              <div className="relative z-10">
-                {/* Foto de la mascota - Sin el cuadro con efectos */}
-                <div className="relative mx-auto mb-6 sm:mb-8 xl:mb-10 w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 xl:w-48 xl:h-48">
-                  {patient.photo ? (
-                    <img 
-                      src={patient.photo} 
-                      alt={patient.name} 
-                      className="w-full h-full object-cover rounded-2xl sm:rounded-3xl border-4 border-danger/40 shadow-md"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-slate-800 rounded-2xl sm:rounded-3xl flex items-center justify-center border-4 border-danger/40 shadow-md">
-                      <PawPrint className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 xl:w-24 xl:h-24 text-danger" />
-                    </div>
-                  )}
-                  
-                  {/* Indicador de especie - Ahora usa un ícono fijo */}
-                  <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-10 h-10 sm:w-12 sm:h-12 xl:w-14 xl:h-14 bg-background/95 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl xl:text-3xl border-2 border-primary/30 shadow-lg">
-                    <PawPrint className="w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 text-primary" />
+              {/* Foto */}
+              <div className="relative w-48 h-48 sm:w-52 sm:h-52 md:w-56 md:h-56 xl:w-64 xl:h-64 mb-0">
+                {patient.photo ? (
+                  <img 
+                    src={patient.photo} 
+                    alt={patient.name} 
+                    className="w-full h-full object-cover rounded-t-3xl border-4 border-danger/40 shadow-md"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800 rounded-t-3xl flex items-center justify-center border-4 border-danger/40 shadow-md">
+                    <PawPrint className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 xl:w-32 xl:h-32 text-danger" />
                   </div>
-                </div>
+                )}
+              </div>
 
-                {/* Información principal - Responsive */}
-                <div className="space-y-3 sm:space-y-4 xl:space-y-6">
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-text mb-2">
+              {/* Tarjeta con nombre e info básica - PEGADA a la foto */}
+              <div className="w-48 sm:w-52 md:w-56 xl:w-64 -mt-1">
+                <div className="relative overflow-hidden rounded-b-3xl bg-white px-4 py-6 sm:py-7 shadow-lg">
+                  <div className="relative z-10 text-center">
+                    <h1 className="text-xl sm:text-2xl md:text-2xl font-medium text-gray-900 mb-2">
                       {patient.name}
                     </h1>
-                    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 xl:gap-4 text-text/80 text-sm sm:text-base md:text-lg xl:text-xl">
-                      <span className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-primary rounded-full animate-neon-pulse"></span>
-                        {patient.species}
-                      </span>
-                      <span className="w-1 h-1 bg-text/60 rounded-full"></span>
+                    <div className="flex items-center justify-center gap-2 text-gray-400 text-sm sm:text-base font-light">
+                      <span>{patient.species}</span>
+                      <span>|</span>
                       <span>{calculateAge()}</span>
-                      <span className="w-1 h-1 bg-text/60 rounded-full"></span>
+                      <span>|</span>
                       <span>{patient.sex === 'Macho' ? 'Macho' : 'Hembra'}</span>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Botones de acción principales */}
-                  <div className="flex  gap-3 sm:gap-4 xl:gap-6 justify-center  sm:pt-6 xl:pt-8">
-                    <Link
-                      to={`/patients/edit/${patient._id}`}
-                      className="relative group p-3 xl:p-4 rounded-full bg-slate-600/50 hover:bg-slate-500/50 transition-colors duration-200"
-                    >
-                      <Edit className="w-5 h-5 xl:w-6 xl:h-6 text-white" />
-                      {/* Tooltip para Editar */}
-                      <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 transform px-3 py-1 bg-background/80 text-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-                        Editar
-                      </span>
-                    </Link>
+              {/* Botones de acción */}
+              <div className="flex flex-col gap-3 w-full max-w-xs sm:max-w-md mt-4 sm:mt-6 px-4">
+                {/* Primera fila: Editar y Eliminar */}
+                <div className="flex gap-3 justify-center">
+                  <Link
+                    to={`/patients/edit/${patient._id}`}
+                    className="p-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 transition-colors duration-200"
+                  >
+                    <Edit className="w-5 h-5 text-white" />
+                  </Link>
 
-                    <button
-                      onClick={handleDeleteClick}
-                      disabled={isDeleting}
-                      className="relative group p-3 xl:p-4 rounded-full bg-red-600/50 hover:bg-red-500/50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isDeleting ? (
-                        <div className="w-5 h-5 xl:w-6 xl:h-6 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Trash2 className="w-5 h-5 xl:w-6 xl:h-6 text-white" />
-                      )}
-                      {/* Tooltip para Eliminar */}
-                      <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 transform px-3 py-1 bg-background/80 text-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-                        {isDeleting ? "Eliminando..." : "Eliminar"}
-                      </span>
-                    </button>
+                  <button
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    className="p-3 rounded-full bg-red-700/50 hover:bg-red-600/50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDeleting ? (
+                      <div className="w-5 h-5 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                </div>
 
-                    <Link
-                      to={`/patients/${patientId}/lab-exams`}
-                      className="group relative overflow-hidden rounded-xl sm:rounded-2xl xl:rounded-3xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 sm:hover:scale-110 transition-all duration-300 bg-primary/20 border-primary/30 px-4 py-2.5 sm:px-6 sm:py-3 xl:px-8 xl:py-4"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-shimmer" />
-                      <div className="relative z-10 flex items-center justify-center gap-2 xl:gap-3">
-                        <TestTube className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-primary" />
-                        <span className="text-primary font-bold text-sm sm:text-sm xl:text-base">Hematologia</span>
-                      </div>
-                    </Link>
+                {/* Segunda fila: Laboratorio y Peluquería */}
+                <div className="flex gap-3 justify-center">
+                  <Link
+                    to={`/patients/${patientId}/lab-exams`}
+                    className="flex-1 px-4 py-2.5 rounded-xl border-2 border-green-500 text-green-500 hover:bg-green-500/10 transition-colors duration-300 font-medium"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <TestTube className="w-4 h-4" />
+                      <span className="text-sm">Laboratorio</span>
+                    </div>
+                  </Link>
 
-                    <Link
-                      to={`/patients/${patientId}/grooming-services/create`}
-                      className="group relative overflow-hidden rounded-xl sm:rounded-2xl xl:rounded-3xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 sm:hover:scale-110 transition-all duration-300 bg-danger/20 border-danger/30 px-4 py-2.5 sm:px-6 sm:py-3 xl:px-8 xl:py-4"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-danger/10 to-transparent animate-shimmer" />
-                      <div className="relative z-10 flex items-center justify-center gap-2 xl:gap-3">
-                        <Scissors className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-danger" />
-                        <span className="text-danger font-bold text-sm sm:text-sm xl:text-base">Peluquería</span>
-                      </div>
-                    </Link>
-                  </div>
+                  <Link
+                    to={`/patients/${patientId}/grooming-services/create`}
+                    className="flex-1 px-4 py-2.5 rounded-xl border-2 border-red-500 text-red-500 hover:bg-red-500/10 transition-colors duration-300 font-medium"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <Scissors className="w-4 h-4" />
+                      <span className="text-sm">Peluquería</span>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -284,9 +255,8 @@ export default function PatientDetailView() {
         </div>
 
         {/* Información detallada */}
-        <div className="relative z-10 px-6 pb-20 mt-12 xl:mt-16">
+        <div className="relative z-10 px-4 sm:px-6 pb-20 mt-8 sm:mt-12 xl:mt-16">
           <div className="max-w-6xl mx-auto">
-            {/* Grid de información */}
             <div className="grid lg:grid-cols-2 gap-6 xl:gap-8">
               {/* Información básica */}
               <div
@@ -307,25 +277,20 @@ export default function PatientDetailView() {
                       </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 xl:gap-8">
+                    <div className="space-y-6 xl:space-y-8">
                       {/* Fecha de nacimiento */}
                       <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-danger/10 border-danger/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
-                        <div className="relative z-10 flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-danger/20 text-danger">
-                            <CalendarDays className="w-6 h-6" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-danger text-sm font-bold uppercase tracking-wide mb-1">
-                              Fecha de nacimiento
-                            </p>
-                            <p className="text-background font-semibold text-lg">
-                              {formatDate(patient.birthDate)}
-                            </p>
-                            <p className="text-text/70 text-sm mt-1">
-                              {calculateAge()} de edad
-                            </p>
-                          </div>
+                        <div className="relative z-10">
+                          <p className="text-danger text-sm font-bold uppercase tracking-wide mb-2">
+                            Fecha de nacimiento
+                          </p>
+                          <p className="text-text font-semibold text-lg">
+                            {formatDate(patient.birthDate)}
+                          </p>
+                          <p className="text-text/70 text-sm mt-1">
+                            ({calculateAge()} de edad)
+                          </p>
                         </div>
                         <div className="absolute top-3 right-3 w-2 h-2 bg-danger rounded-full animate-neon-pulse opacity-60" />
                       </div>
@@ -334,18 +299,13 @@ export default function PatientDetailView() {
                       {patient.weight && (
                         <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-muted/10 border-muted/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
-                          <div className="relative z-10 flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-muted/20 text-muted">
-                              <Scale className="w-6 h-6" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-danger text-sm font-bold uppercase tracking-wide mb-1">
-                                Peso actual
-                              </p>
-                              <p className="text-text font-semibold text-lg">
-                                {patient.weight} kg
-                              </p>
-                            </div>
+                          <div className="relative z-10">
+                            <p className="text-danger text-sm font-bold uppercase tracking-wide mb-2">
+                              Peso actual
+                            </p>
+                            <p className="text-text font-semibold text-lg">
+                              {patient.weight} kg
+                            </p>
                           </div>
                           <div className="absolute top-3 right-3 w-2 h-2 bg-muted rounded-full animate-neon-pulse opacity-60" />
                         </div>
@@ -355,18 +315,13 @@ export default function PatientDetailView() {
                       {patient.breed && (
                         <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-background/10 border-background/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
-                          <div className="relative z-10 flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-background/20 text-text">
-                              <Tag className="w-6 h-6" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-danger text-sm font-bold uppercase tracking-wide mb-1">
-                                Raza
-                              </p>
-                              <p className="text-text font-semibold text-lg">
-                                {patient.breed}
-                              </p>
-                            </div>
+                          <div className="relative z-10">
+                            <p className="text-danger text-sm font-bold uppercase tracking-wide mb-2">
+                              Raza
+                            </p>
+                            <p className="text-text font-semibold text-lg">
+                              {patient.breed}
+                            </p>
                           </div>
                           <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
                         </div>
@@ -474,7 +429,7 @@ export default function PatientDetailView() {
                 </div>
               </div>
 
-              {/* NUEVO: Información del equipo médico */}
+              {/* Médico Veterinario */}
               <div
                 className={`transform transition-all duration-1500 delay-700 lg:col-span-2 ${
                   mounted ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
@@ -489,67 +444,35 @@ export default function PatientDetailView() {
                         <User className="w-6 h-6 xl:w-8 xl:h-8" />
                       </div>
                       <h2 className="text-2xl xl:text-3xl font-bold text-text title-shine">
-                        Equipo Médico
+                        Médico Veterinario
                       </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 xl:gap-8">
-                      {/* Veterinario responsable */}
-                      <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-primary/10 border-primary/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
+                    {patient.referringVet ? (
+                      <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-muted/10 border-muted/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
                         <div className="relative z-10">
                           <div className="flex items-start gap-3 sm:gap-4">
-                            <div className="p-2.5 sm:p-3 rounded-xl bg-primary/20 text-primary flex-shrink-0">
+                            <div className="p-2.5 sm:p-3 rounded-xl bg-muted/20 text-muted flex-shrink-0">
                               <User className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wide mb-1">
-                                Veterinario Laboratorio
+                              <p className="text-text font-semibold text-base sm:text-lg break-words">
+                                {patient.referringVet}
                               </p>
-                              {isLoadingUser ? (
-                                <span className="text-text/70">Cargando...</span>
-                              ) : currentUser ? (
-                                <p className="text-text font-semibold text-base sm:text-lg break-words">
-                                  {currentUser.name}
-                                </p>
-                              ) : (
-                                <span className="text-text/70">No disponible</span>
-                              )}
                               <p className="text-text/70 text-xs sm:text-sm mt-1">
-                                Examenes de Laboratorio
+                                Responsable del paciente
                               </p>
                             </div>
                           </div>
                         </div>
-                        <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
+                        <div className="absolute top-3 right-3 w-2 h-2 bg-muted rounded-full animate-neon-pulse opacity-60" />
                       </div>
-
-                      {/* Veterinario referido (opcional) */}
-                      {patient.referringVet && (
-                        <div className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-muted/10 border-muted/20 p-4 xl:p-6 group hover:scale-102 transition-all duration-300">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
-                          <div className="relative z-10">
-                            <div className="flex items-start gap-3 sm:gap-4">
-                              <div className="p-2.5 sm:p-3 rounded-xl bg-muted/20 text-muted flex-shrink-0">
-                                <User className="w-5 h-5 sm:w-6 sm:h-6" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-muted text-xs sm:text-sm font-bold uppercase tracking-wide mb-1">
-                                  Veterinario Tratante
-                                </p>
-                                <p className="text-text font-semibold text-base sm:text-lg break-words">
-                                  {patient.referringVet}
-                                </p>
-                                <p className="text-text/70 text-xs sm:text-sm mt-1">
-                                  Origen del paciente
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="absolute top-3 right-3 w-2 h-2 bg-muted rounded-full animate-neon-pulse opacity-60" />
-                        </div>
-                      )}
-                    </div>
+                    ) : (
+                      <div className="text-center text-text/70">
+                        No se ha asignado un médico veterinario
+                      </div>
+                    )}
                   </div>
 
                   <div className="absolute top-3 right-3 xl:top-6 xl:right-6 w-3 h-3 bg-primary rounded-full animate-neon-pulse opacity-60" />
@@ -560,7 +483,6 @@ export default function PatientDetailView() {
         </div>
       </div>
 
-      {/* Modal de confirmación de eliminación */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
