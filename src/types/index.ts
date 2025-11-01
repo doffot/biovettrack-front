@@ -189,13 +189,10 @@ export const labExamSchema = z.object({
 
 export const labExamsListSchema = z.array(labExamSchema);
 
-// ---
-// ## Servicios de Peluquería (Grooming) ⬅️ CORREGIDO
-// ---
+// ## Servicios de Peluquería (Grooming) 
 export const groomingServiceSchema = z.object({
   _id: z.string().optional(),
   
-  // ✅ CORREGIDO: patientId puede ser string (ID) o objeto (con populate)
   patientId: z.union([
     z.string().min(1, "El ID del paciente es obligatorio"),
     z.object({
@@ -227,12 +224,15 @@ export const groomingServiceSchema = z.object({
   date: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
     message: "La fecha del servicio debe ser válida",
   }),
+
+  // 👇 AÑADE ESTOS CAMPOS (opcionales, porque pueden no venir al crear)
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
-// Esquema para un array de servicios (útil si el backend devolviera un array directo)
 export const groomingServicesListSchema = z.array(groomingServiceSchema);
 
-// ✅ Esquema para la respuesta completa del backend: { services: [...] }
+
 export const groomingServicesListResponseSchema = z.object({
   services: z.array(groomingServiceSchema),
 });

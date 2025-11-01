@@ -4,7 +4,6 @@ import OwnerListView from "./view/owner/OwnerListView";
 import CreateOwnerView from "./view/owner/CreateOwnerView";
 import EditOwnerView from "./view/owner/EditOwnerView";
 import OwnerDatailView from "./view/owner/OwnerDetailView";
-import MainMenu from "./components/MainMenu";
 import PatientListView from "./view/patient/PatientListView";
 import CreatePatientView from "./view/patient/CreatePatientView";
 import PatientDetailView from "./view/patient/PatientDetailView";
@@ -13,7 +12,7 @@ import CreateLabExamView from "./view/labExams/CreateLabExamView";
 import LabExamDetailView from "./view/labExams/LabExamDetailView";
 import LabExamListView from "./view/labExams/labExamListView";
 import CreateGroomingServiceView from "./view/grooming/CreateGroomingServiceView";
-import GroomingServicesView from "./view/grooming/GroomingServicesView"; // ⭐ IMPORTAR LA NUEVA VISTA
+import GroomingServicesView from "./view/grooming/GroomingServicesView"; 
 import AuthLayout from "./layout/AuthLayout";
 import LoginView from "./view/aurth/LoginView";
 import RegisterView from "./view/aurth/RegisterView";
@@ -21,13 +20,14 @@ import ConfirmAccountView from "./view/aurth/ConfirmAccountView";
 import RequestNewToken from "./view/aurth/RequestNewToken";
 import ForgotPasswordView from "./view/aurth/ForgotPasswordView";
 import NewPasswordView from "./view/aurth/NewPasswordView";
+import DesktopHomeView from "./view/home/DesktopHomeView";
 
 export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<MainMenu />} index />
+          <Route path="/" element={<DesktopHomeView />} index />
 
           {/* Rutas de Dueño */}
           <Route path="owners" element={<OwnerListView />} />

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "../../components/Toast";
 import FloatingParticles from "../../components/FloatingParticles";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 
 // Componente: Partículas flotantes 
 <FloatingParticles/>
@@ -21,6 +22,7 @@ import FloatingParticles from "../../components/FloatingParticles";
 export default function OwnerListView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [mounted, setMounted] = useState(false);
+   const [ownerToDelete, setOwnerToDelete] = useState<{id: string, name: string} | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["owners"],
@@ -29,7 +31,8 @@ export default function OwnerListView() {
 
   const queryclient = useQueryClient();
 
-  const { mutate } = useMutation({
+// borrar owner
+  const { mutate:removeOwner, isPending: isDeleting } = useMutation({
     mutationFn: deleteOwners,
     onError: (error) => {
       toast.error(error.message);
@@ -37,12 +40,25 @@ export default function OwnerListView() {
     onSuccess: (data) => {
       toast.success(data.msg);
       queryclient.invalidateQueries({ queryKey: ["owners"] });
+      setOwnerToDelete(null);
     },
   });
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+   // Manejar click de eliminar
+  const handleDeleteClick = (ownerId: string, ownerName: string) => {
+    setOwnerToDelete({ id: ownerId, name: ownerName });
+  };
+
+  // Confirmar eliminación
+  const confirmDelete = () => {
+    if (ownerToDelete) {
+      removeOwner(ownerToDelete.id);
+    }
+  };
 
   const filteredOwners =
     data?.filter(
@@ -238,7 +254,8 @@ export default function OwnerListView() {
 
                             <button
                               type="button"
-                              onClick={() => mutate(owner._id)}
+                              onClick={() => handleDeleteClick(owner._id, owner.name)}
+                                disabled={isDeleting}
                               className="p-2 rounded-lg bg-black/20 text-danger hover:bg-danger/20 hover:scale-110 transition-all duration-300"
                               title="Eliminar"
                             >
@@ -294,7 +311,8 @@ export default function OwnerListView() {
 
                           <button
                             type="button"
-                            onClick={() => mutate(owner._id)}
+                             onClick={() => handleDeleteClick(owner._id, owner.name)}
+                                disabled={isDeleting}
                             className="p-3 rounded-xl bg-black/20 text-danger hover:bg-danger/20 hover:scale-110 transition-all duration-300"
                             title="Eliminar"
                           >
@@ -377,6 +395,13 @@ export default function OwnerListView() {
           )}
         </div>
       </div>
+      <DeleteConfirmationModal
+              isOpen={!!ownerToDelete}
+              onClose={() => setOwnerToDelete(null)}
+              onConfirm={confirmDelete}
+              petName={ownerToDelete?.name || ''}
+              isDeleting={isDeleting}
+            />
     </div>
   );
 }

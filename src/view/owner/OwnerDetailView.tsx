@@ -17,11 +17,12 @@ import { getOwnersById, deleteOwners } from "../../api/OwnerAPI";
 import { toast } from "../../components/Toast";
 import FloatingParticles from "../../components/FloatingParticles";
 import PatientListView from "./PatientListOwnerView";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 
 export default function OwnerDetailView() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
-  
+
   const { ownerId } = useParams();
   const { data: owner, isLoading } = useQuery({
     queryKey: ["owner", ownerId],
@@ -30,15 +31,18 @@ export default function OwnerDetailView() {
   });
 
   const queryClient = useQueryClient();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const { mutate } = useMutation({
-    mutationFn: deleteOwners,
+  const { mutate: removeOwner, isPending: isDeleting } = useMutation({
+    mutationFn: () => deleteOwners(ownerId!), // Asegúrate de pasar el ID correctamente
     onError: (error) => {
       toast.error(error.message);
+      setShowDeleteModal(false);
     },
     onSuccess: (data) => {
       toast.success(data.msg);
       queryClient.invalidateQueries({ queryKey: ["owners"] });
+      setShowDeleteModal(false);
       navigate("/owners");
     },
   });
@@ -224,7 +228,10 @@ export default function OwnerDetailView() {
                             </p>
                           </div>
                           <a
-                            href={`https://wa.me/${owner.contact.replace(/\D/g, "")}`}
+                            href={`https://wa.me/${owner.contact.replace(
+                              /\D/g,
+                              ""
+                            )}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-all duration-200 text-xs font-bold"
@@ -315,7 +322,9 @@ export default function OwnerDetailView() {
                             </p>
                             <p className="text-text text-xs font-medium">
                               {owner.createdAt
-                                ? new Date(owner.createdAt).toLocaleDateString("es-ES")
+                                ? new Date(owner.createdAt).toLocaleDateString(
+                                    "es-ES"
+                                  )
                                 : "N/A"}
                             </p>
                           </div>
@@ -334,7 +343,9 @@ export default function OwnerDetailView() {
                             </p>
                             <p className="text-text text-xs font-medium">
                               {owner.updatedAt
-                                ? new Date(owner.updatedAt).toLocaleDateString("es-ES")
+                                ? new Date(owner.updatedAt).toLocaleDateString(
+                                    "es-ES"
+                                  )
                                 : "N/A"}
                             </p>
                           </div>
@@ -365,15 +376,19 @@ export default function OwnerDetailView() {
 
                     <button
                       type="button"
-                      onClick={() => mutate(owner._id)}
-                      className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-danger/20 border-danger/30 p-3 flex-1 flex items-center justify-center gap-2"
+                      onClick={() => setShowDeleteModal(true)}
+                      disabled={isDeleting}
+                      className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-danger/20 border-danger/30 p-3 flex-1 flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
                       <div className="relative z-10 flex items-center gap-2">
-                        <Trash2 className="w-4 h-4 text-danger" />
+                        {isDeleting ? (
+                          <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4 text-danger" />
+                        )}
                         <span className="text-danger font-bold text-sm">
-                          Eliminar
+                          {isDeleting ? "Eliminando..." : "Eliminar"}
                         </span>
                       </div>
                     </button>
@@ -479,6 +494,13 @@ export default function OwnerDetailView() {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => removeOwner()}
+        petName={owner?.name || "este propietario"}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

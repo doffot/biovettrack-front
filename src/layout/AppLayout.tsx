@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 // Links del menú desktop
 const desktopMenuItems = [
+  { to: '/', label: 'Inicio', icon: '🏠' }, 
   { to: '/owners', label: 'Dueño', icon: '👤' },
   { to: '/patients', label: 'Mascota', icon: '🐾' },
   { to: '/grooming-services', label: 'Peluquería', icon: '🛁' },
