@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, PawPrint, Sparkles, Heart } from "lucide-react";
+import { Save, PawPrint} from "lucide-react";
 import BackButton from "../../components/BackButton";
 import FloatingParticles from "../../components/FloatingParticles";
 import PatientForm from "../../components/patients/PatientForm";

@@ -35,9 +35,7 @@ export default function PatientListView({ ownerId, ownerName }: PatientListViewP
     },
   });
 
-  const handleDeleteClick = (petId: string, petName: string) => {
-    setPetToDelete({ id: petId, name: petName });
-  };
+
 
   const confirmDelete = () => {
     if (petToDelete) {
