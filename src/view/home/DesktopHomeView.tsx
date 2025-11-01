@@ -36,7 +36,6 @@ const DesktopHomeView: React.FC = () => {
   const now = new Date();
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - now.getDay()); // Domingo como inicio
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   // Consultas
   const { data: patients = [], isLoading: loadingPatients } = useQuery({
