@@ -11,8 +11,6 @@ import {
   Plus,
   Search,
   PawPrint,
-  Weight,
-  Calendar,
 } from "lucide-react";
 import type { Patient } from "../../types";
 import type { Owner } from "../../types";
