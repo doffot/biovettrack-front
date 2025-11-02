@@ -30,7 +30,7 @@ const countries: Country[] = [
 ];
 
 interface WhatsAppPhoneInputProps {
-  value: string; // Formato: "+573001234567"
+  value: string;
   onChange: (value: string) => void;
   error?: string;
   required?: boolean;
@@ -46,9 +46,7 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const isUserTyping = useRef(false);
 
-  // Parsear el valor inicial o cuando viene de fuera (ej: modo edición)
   useEffect(() => {
-    // Si el usuario está escribiendo, no sobrescribir
     if (isUserTyping.current) {
       return;
     }
@@ -59,7 +57,6 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
       return;
     }
 
-    // Buscar el país que coincida con el código
     let foundCountry = countries[0];
     let numberPart = value;
 
@@ -86,7 +83,7 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     isUserTyping.current = true;
-    const val = e.target.value.replace(/\D/g, ''); // Solo dígitos
+    const val = e.target.value.replace(/\D/g, '');
     setPhoneNumber(val);
     onChange(selectedCountry.dialCode + val);
     setTimeout(() => { isUserTyping.current = false; }, 100);
@@ -94,82 +91,55 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
 
   return (
     <div>
-      <label className="block text-text font-semibold mb-3 text-sm">
+      <label className="block text-white font-medium mb-2 text-sm">
         Teléfono (WhatsApp)
-        {required && <span className="text-danger ml-1">*</span>}
+        {required && <span className="text-red-400 ml-1">*</span>}
       </label>
 
-      <div className="relative group">
-        <div className={`
-          relative overflow-hidden rounded-2xl border-2 backdrop-blur-sm transition-all duration-300
-          ${error 
-            ? 'bg-danger/10 border-danger/30 shadow-[0_0_20px_rgba(255,94,91,0.2)]' 
-            : 'bg-background/40 border-muted/20 hover:border-primary/30 focus-within:border-primary/50'
-          }
-        `}>
-          {/* Efecto shimmer */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
-          <div className="relative z-10 flex items-center p-4">
-            <div className={`p-2 rounded-xl bg-black/20 mr-3 transition-colors duration-300 ${
-              error ? 'text-danger' : 'text-primary group-hover:text-primary'
-            }`}>
-              <Phone className="w-5 h-5" />
-            </div>
-            
-            {/* Select de país */}
-            <select
-              value={selectedCountry.dialCode}
-              onChange={handleCountryChange}
-              className="bg-transparent text-text focus:outline-none text-sm font-medium pr-2 cursor-pointer"
-              style={{ width: '70px' }}
-            >
-              {countries.map((country) => (
-                <option key={country.code} value={country.dialCode} className="bg-background text-text">
-                  {country.dialCode}
-                </option>
-              ))}
-            </select>
-
-            {/* Separador visual */}
-            <div className="h-6 w-px bg-muted/30 mx-2" />
-
-            {/* Input de número */}
-            <input
-              type="tel"
-              placeholder="Número de teléfono"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              className="flex-1 bg-transparent text-text placeholder-muted focus:outline-none text-sm"
-            />
-          </div>
-
-          {/* Líneas decorativas */}
-          <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent to-transparent opacity-60 transition-colors duration-300 ${
-            error ? 'via-danger/50' : 'via-primary/50'
-          }`} />
-          <div className={`absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent to-transparent transition-colors duration-300 ${
-            error ? 'via-danger/30' : 'via-primary/30'
-          }`} />
+      <div className={`
+        flex items-center gap-3 px-4 py-3 rounded-lg border
+        ${error 
+          ? 'bg-red-500/10 border-red-500/50' 
+          : 'bg-gray-700/50 border-gray-700 hover:border-green-500/50 focus-within:border-green-500'
+        } transition-colors
+      `}>
+        <div className={`p-1 rounded bg-gray-900 ${error ? 'text-red-500' : 'text-green-500'}`}>
+          <Phone className="w-5 h-5" />
         </div>
 
-        {/* Decoración de esquina */}
-        <div className={`absolute top-2 right-2 w-2 h-2 rounded-full animate-neon-pulse opacity-60 transition-colors duration-300 ${
-          error ? 'bg-danger' : 'bg-primary'
-        }`} />
+        <select
+          value={selectedCountry.dialCode}
+          onChange={handleCountryChange}
+          className="bg-transparent text-white focus:outline-none text-sm font-medium pr-2 cursor-pointer"
+          style={{ width: '70px' }}
+        >
+          {countries.map((country) => (
+            <option key={country.code} value={country.dialCode} className="bg-gray-800 text-white">
+              {country.dialCode}
+            </option>
+          ))}
+        </select>
+
+        <div className="h-6 w-px bg-gray-600" />
+
+        <input
+          type="tel"
+          placeholder="Número de teléfono"
+          value={phoneNumber}
+          onChange={handlePhoneChange}
+          className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+        />
       </div>
 
-      {/* Error message */}
       {error && (
-        <div className="mt-2 flex items-center gap-2 text-danger text-xs">
-          <div className="w-1 h-1 bg-danger rounded-full animate-neon-pulse" />
+        <p className="mt-2 text-red-400 text-xs flex items-center gap-1">
+          <span className="w-1 h-1 bg-red-400 rounded-full" />
           {error}
-        </div>
+        </p>
       )}
 
-      {/* Ayuda visual */}
       {!error && (
-        <p className="text-muted/60 text-xs mt-2">
+        <p className="text-gray-400 text-xs mt-2">
           Ej: <span className="font-mono">3001234567</span> → se convierte en <span className="font-mono">{selectedCountry.dialCode}3001234567</span>
         </p>
       )}

@@ -60,6 +60,7 @@ export type confirmToken = Pick<Auth, "token">;
 
 export const userSchema = authSchema.pick({
   name: true,
+  lastName: true,
   email: true,
 }).extend({
   _id: z.string(),

@@ -1,15 +1,14 @@
 // src/views/owners/CreateOwnerView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
-import OwnerForm from "../../components/owners/OwnerForm";
 import BackButton from "../../components/BackButton";
 import type { OwnerFormData } from "../../types";
 import { createOwner } from "../../api/OwnerAPI";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../../components/Toast";
 import { useMutation } from "@tanstack/react-query";
-import { Save, UserPlus } from "lucide-react";
-import FloatingParticles from "../../components/FloatingParticles";
+import { Save, User, Mail, MapPin } from "lucide-react";
+import { WhatsAppPhoneInput } from "../../components/WhatsAppPhoneInput";
 
 export default function CreateOwnerView() {
   const navigate = useNavigate();
@@ -50,126 +49,155 @@ export default function CreateOwnerView() {
   const handleForm = async (formData: OwnerFormData) => mutate(formData);
 
   return (
-    <div className="relative min-h-screen bg-gradient-dark overflow-hidden">
-      {/* Fondo decorativo */}
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: "50px 50px",
-        }}
-      />
-
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/3 rounded-full blur-3xl" />
-
-      <FloatingParticles />
-      
-      <div className="fixed top-22 left-7 z-150">
-        <BackButton />
-      </div>
-
-      {/* Header */}
-      <div className="relative pt-16 px-6">
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={`text-center mt-8 transform transition-all duration-1000 delay-200 ${
-              mounted ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-            }`}
-          >
-            <div className="relative overflow-hidden rounded-2xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-primary/10 border-primary/30 p-6 mb-8 inline-block">
-              {/* Efecto shimmer */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-              <div className="relative z-10">
-                <div className="p-4 rounded-xl bg-black/20 text-primary mx-auto mb-4 w-fit">
-                  <UserPlus className="w-10 h-10" />
-                </div>
-                <h1 className="text-3xl font-bold text-text title-shine mb-2">
-                  Nuevo Propietario
-                </h1>
-                <p className="text-muted text-sm">
-                  Registra la información del nuevo propietario
-                </p>
-              </div>
-
-              {/* Decoración de esquina */}
-              <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-
-              {/* Líneas decorativas */}
-              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60" />
-              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-            </div>
+    <>
+      {/* Header con espaciado superior */}
+      <div className="mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
+        <div className="flex items-center gap-4 px-4 lg:px-0">
+          <BackButton />
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Nuevo Propietario</h1>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Registra la información del nuevo propietario
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Form Container */}
-      <div className="relative z-10 px-6 pb-20">
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={`transform transition-all duration-1000 delay-500 ${
-              mounted ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-            }`}
-          >
-            <form
-              className="relative overflow-hidden rounded-2xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 shadow-premium p-8"
-              onSubmit={handleSubmit(handleForm)}
-              noValidate
-            >
-              {/* Efecto shimmer */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 hover:opacity-100 transition-opacity duration-300" />
+      {/* Card única con formulario */}
+      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 mx-4 lg:mx-0">
+            <form onSubmit={handleSubmit(handleForm)} noValidate>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Nombre */}
+                <div>
+                  <label className="block text-white font-medium mb-2 text-sm">
+                    Nombre completo <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className={`
+                      flex items-center gap-3 px-4 py-3 rounded-lg border
+                      ${errors.name 
+                        ? 'bg-red-500/10 border-red-500/50' 
+                        : 'bg-gray-700/50 border-gray-700 hover:border-green-500/50 focus-within:border-green-500'
+                      } transition-colors
+                    `}>
+                      <div className={`p-1 rounded bg-gray-900 ${errors.name ? 'text-red-500' : 'text-green-500'}`}>
+                        <User className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ingresa el nombre del propietario"
+                        {...register("name", {
+                          required: "El nombre es requerido",
+                          minLength: { value: 2, message: "Mínimo 2 caracteres" },
+                        })}
+                        className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+                      />
+                    </div>
+                    {errors.name && (
+                      <p className="mt-2 text-red-400 text-xs flex items-center gap-1">
+                        <span className="w-1 h-1 bg-red-400 rounded-full" />
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-              <div className="relative z-10">
-                <OwnerForm register={register} errors={errors} watch={watch} setValue={setValue} />
+                {/* WhatsApp */}
+                <div>
+                  <WhatsAppPhoneInput
+                    value={watch("contact") || ""}
+                    onChange={(val) => setValue("contact", val)}
+                    error={errors.contact?.message}
+                    required={true}
+                  />
+                </div>
 
+                {/* Email */}
+                <div>
+                  <label className="block text-white font-medium mb-2 text-sm">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <div className={`
+                      flex items-center gap-3 px-4 py-3 rounded-lg border
+                      ${errors.email 
+                        ? 'bg-red-500/10 border-red-500/50' 
+                        : 'bg-gray-700/50 border-gray-700 hover:border-green-500/50 focus-within:border-green-500'
+                      } transition-colors
+                    `}>
+                      <div className={`p-1 rounded bg-gray-900 ${errors.email ? 'text-red-500' : 'text-green-500'}`}>
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="email"
+                        placeholder="ejemplo@correo.com"
+                        {...register("email", {
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Formato de email inválido",
+                          },
+                        })}
+                        className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="mt-2 text-red-400 text-xs flex items-center gap-1">
+                        <span className="w-1 h-1 bg-red-400 rounded-full" />
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dirección */}
+                <div>
+                  <label className="block text-white font-medium mb-2 text-sm">
+                    Dirección
+                  </label>
+                  <div className={`
+                    flex items-center gap-3 px-4 py-3 rounded-lg border bg-gray-700/50 border-gray-700 hover:border-green-500/50 focus-within:border-green-500 transition-colors
+                  `}>
+                    <div className="p-1 rounded bg-gray-900 text-green-500">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Dirección completa"
+                      {...register("address")}
+                      className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="flex justify-end gap-3 pt-6 mt-6">
+                <button
+                  type="button"
+                  onClick={() => navigate("/owners")}
+                  className="px-4 sm:px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors text-sm font-medium"
+                >
+                  Cancelar
+                </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="group relative overflow-hidden rounded-2xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 p-4 w-full flex items-center justify-center gap-3 mt-8 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="px-4 sm:px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
                 >
-                  {/* Efecto shimmer */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-black/20 text-primary">
-                      <Save
-                        className={`w-5 h-5 transition-transform duration-300 ${
-                          isPending ? "animate-spin" : "group-hover:scale-110"
-                        }`}
-                      />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-text font-bold text-base">
-                        {isPending ? "Guardando..." : "Guardar Propietario"}
-                      </div>
-                      <div className="text-muted text-xs">
-                        {isPending
-                          ? "Procesando datos..."
-                          : "Crear nuevo registro"}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Decoración de esquina */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
+                  {isPending ? (
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  {isPending ? "Guardando..." : "Guardar Propietario"}
                 </button>
               </div>
-
-              {/* Decoración de esquina del form */}
-              <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-
-              {/* Líneas decorativas */}
-              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60" />
-              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

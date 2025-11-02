@@ -9,7 +9,6 @@ import {
   Heart,
   Upload,
   X,
-  ChevronDown,
   User,
   ToggleLeft,
   ToggleRight,
@@ -17,12 +16,6 @@ import {
 import type { PatientFormData } from "../../types";
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth";
-
-// Función auxiliar para capitalizar solo la primera letra
-const capitalizeFirstLetter = (str: string) => {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
 
 type PatientFormProps = {
   register: UseFormRegister<PatientFormData>;
@@ -33,13 +26,14 @@ type PatientFormProps = {
 const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [useCustomReferringVet, setUseCustomReferringVet] = useState(false);
+  const [, setBirthDate] = useState<string>('');
+  const [ageText, setAgeText] = useState<string>('');
 
   const { data: vetmain } = useAuth();
 
-  // ✅ Formatear y asignar "mainVet" cuando vetmain esté listo
   useEffect(() => {
     if (vetmain?.name) {
-      const formattedName = `M.V. ${capitalizeFirstLetter(vetmain.name)}`;
+      const formattedName = `M.V. ${vetmain.name.charAt(0).toUpperCase()}${vetmain.name.slice(1).toLowerCase()}`;
       setValue("mainVet", formattedName);
     }
   }, [vetmain, setValue]);
@@ -53,17 +47,16 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
     }
   };
 
-  const handleVetSwitcherChange = (useCustom: boolean) => {
-    setUseCustomReferringVet(useCustom);
-    if (!useCustom) {
-      setValue("referringVet", vetmain?.name || "");
-    } else {
-      setValue("referringVet", "");
-    }
-  };
+ const handleVetSwitcherChange = (useCustom: boolean) => {
+  setUseCustomReferringVet(useCustom);
+  if (!useCustom) {
+    const fullName = `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim();
+    setValue("referringVet", fullName);
+  } else {
+    setValue("referringVet", "");
+  }
+};
 
-  const [birthDate, setBirthDate] = useState<string>('');
-  const [ageText, setAgeText] = useState<string>('');
 
   const calculateAge = (dateString: string) => {
     if (!dateString) {
@@ -97,431 +90,319 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
     setAgeText(text);
   };
 
-  const formFields = [
-    {
-      name: "name" as keyof PatientFormData,
-      label: "Nombre del paciente",
-      placeholder: "Ej: Luna, Max, Rocky...",
-      icon: PawPrint,
-      type: "text",
-      required: true,
-      description: "Identificación del animal",
-    },
-    {
-      name: "birthDate" as keyof PatientFormData,
-      label: "Fecha de nacimiento",
-      placeholder: "Selecciona una fecha",
-      icon: CalendarDays,
-      type: "date",
-      required: true,
-      description: "Para cálculo de edad y tratamientos",
-    },
-    {
-      name: "species" as keyof PatientFormData,
-      label: "Especie",
-      placeholder: "Selecciona una especie",
-      icon: Bone,
-      type: "select",
-      options: [
-        "Canino",
-        "Felino",
-        "Conejo",
-        "Ave",
-        "Reptil",
-        "Roedor",
-        "Hurón",
-        "Otro"
-      ],
-      required: true,
-      description: "Clasificación taxonómica",
-    },
-    {
-      name: "sex" as keyof PatientFormData,
-      label: "Sexo",
-      placeholder: "Selecciona sexo",
-      icon: Heart,
-      type: "select",
-      options: ["Macho", "Hembra"],
-      required: true,
-      description: "Información biológica para tratamiento",
-    },
-    {
-      name: "breed" as keyof PatientFormData,
-      label: "Raza",
-      placeholder: "Ej: Labrador, Siamés, Mestizo...",
-      icon: Tag,
-      type: "text",
-      required: false,
-      description: "Predisposiciones genéticas (opcional)",
-    },
-    {
-      name: "weight" as keyof PatientFormData,
-      label: "Peso actual",
-      placeholder: "0.0",
-      icon: Scale,
-      type: "number",
-      required: false,
-      description: "Para dosificación de medicamentos (opcional)",
-      suffix: "kg",
-    },
-    // ✅ Campo "Veterinario responsable" — OCULTO pero funcional
-    {
-      name: "mainVet" as keyof PatientFormData,
-      label: "Veterinario responsable",
-      placeholder: "Cargando...",
-      icon: User,
-      type: "text",
-      required: true,
-      description: "Profesional que gestiona el caso",
-      hidden: true, // Campo oculto
-    },
-  ];
-
-  const ImageUploadSection = ({ isCompact = false }: { isCompact?: boolean }) => (
-    <div className={`flex items-center gap-3 p-3 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20 ${isCompact ? 'h-full' : ''}`}>
-      <div className="flex-shrink-0">
-        {previewImage ? (
-          <div className={`relative rounded-lg overflow-hidden border-2 border-coral-pulse/40 shadow-md ${isCompact ? 'w-10 h-10' : 'w-12 h-12'}`}>
-            <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
-            <button
-              type="button"
-              onClick={() => setPreviewImage(null)}
-              className={`absolute -top-1 -right-1 bg-coral-pulse hover:bg-coral-pulse/80 text-white rounded-full flex items-center justify-center transition text-xs ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`}>
-              <X className={isCompact ? 'w-2 h-2' : 'w-2.5 h-2.5'} />
-            </button>
-          </div>
-        ) : (
-          <div className={`rounded-lg border border-dashed border-coral-pulse/30 flex items-center justify-center bg-coral-pulse/5 ${isCompact ? 'w-10 h-10' : 'w-12 h-12'}`}>
-            <Upload className={`text-coral-pulse/60 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-          </div>
-        )}
-      </div>
-
-      <label className={`flex-1 group relative inline-flex items-center justify-center gap-1.5 rounded-lg
-                  bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30 text-misty-lilac font-medium
-                  border border-coral-pulse/30 hover:border-coral-pulse/50
-                  transition-all duration-300 cursor-pointer
-                  hover:bg-gradient-to-r hover:from-coral-pulse/30 hover:to-coral-pulse/40 
-                  ${isCompact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-xs'}`}>
-
-        <Upload className={isCompact ? 'w-3 h-3' : 'w-3 h-3'} />
-        <span className="hidden sm:inline">{previewImage ? 'Cambiar' : 'Subir imagen'}</span>
-        <span className="sm:hidden">Imagen</span>
-
-        <input
-          type="file"
-          accept="image/*"
-          {...register("photo", { required: false })}
-          onChange={(e) => {
-            register("photo").onChange(e);
-            handleImageChange(e);
-          }}
-          className="absolute inset-0 opacity-0 cursor-pointer"
-        />
-      </label>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
-      <div className="hidden">{birthDate}</div>
-      <div className="tile-entrance lg:hidden" style={{ animationDelay: '0s' }}>
-        <ImageUploadSection />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {formFields.map((field, index) => {
-          const Icon = field.icon;
-          const error = errors[field.name];
-
-          // ✅ Si el campo está marcado como hidden, no lo renderizamos
-          if (field.hidden) {
-            return (
-              <input
-                key={field.name}
-                type="hidden"
-                {...register(field.name, {
-                  required: field.required ? `${field.label} es requerido` : false,
-                })}
-              />
-            );
-          }
-
-          return (
-            <div
-              key={field.name}
-              className={`tile-entrance ${field.name === 'name' ? 'lg:col-span-2' : field.name === 'species' ? 'lg:col-span-2' : ''}`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="mb-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <Icon className="w-4 h-4 text-coral-pulse" />
-                  <label className="text-misty-lilac font-semibold text-sm">
-                    {field.label}
-                    {field.required && <span className="text-coral-pulse ml-1">*</span>}
-                  </label>
-                </div>
-                <p className="text-lavender-fog text-xs font-medium">{field.description}</p>
-              </div>
-
-              {field.name === 'name' ? (
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative group">
-                      <div className={`absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 ${
-                        error
-                          ? "bg-gradient-to-r from-coral-pulse/40 to-coral-pulse/60"
-                          : "bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30"
-                      }`} />
-
-                      <div className={`relative bg-space-navy/60 backdrop-blur-sm border-2 rounded-2xl transition-all duration-300 ${
-                        error
-                          ? "border-coral-pulse/50 shadow-[0_0_20px_rgba(255,94,91,0.3)]"
-                          : "border-coral-pulse/20 hover:border-coral-pulse/40 focus-within:border-coral-pulse/50"
-                      }`}>
-
-                        <div className="flex items-center p-4">
-                          <div className={`p-2 rounded-xl mr-4 transition-all duration-300 ${
-                            error
-                              ? "bg-coral-pulse/20 text-coral-pulse"
-                              : "bg-coral-pulse/10 text-coral-pulse group-hover:bg-coral-pulse/15"
-                          }`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-
-                          <div className="flex-1">
-                            <input
-                              type="text"
-                              placeholder={field.placeholder}
-                              {...register(field.name, {
-                                required: field.required ? `${field.label} es requerido` : false,
-                              })}
-                              className="w-full bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
-                            />
-                          </div>
-                        </div>
-
-                        <div className={`h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent ${
-                          error ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-                        } transition-opacity duration-300`} />
-                      </div>
-
-                      <div className={`absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 ${
-                        error
-                          ? "bg-coral-pulse animate-pulse"
-                          : "bg-coral-pulse/40 group-hover:bg-coral-pulse/60 animate-pulse-soft"
-                      }`} />
-                    </div>
-                  </div>
-
-                  <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
-                    <ImageUploadSection isCompact={true} />
-                  </div>
-                </div>
-              ) : (
-                <div className="relative group">
-                  <div className={`absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 ${
-                    error
-                      ? "bg-gradient-to-r from-coral-pulse/40 to-coral-pulse/60"
-                      : "bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30"
-                  }`} />
-
-                  <div className={`relative bg-space-navy/60 backdrop-blur-sm border-2 rounded-2xl transition-all duration-300 ${
-                    error
-                      ? "border-coral-pulse/50 shadow-[0_0_20px_rgba(255,94,91,0.3)]"
-                      : "border-coral-pulse/20 hover:border-coral-pulse/40 focus-within:border-coral-pulse/50"
-                  }`}>
-
-                    <div className="flex items-center p-4">
-                      <div className={`p-2 rounded-xl mr-4 transition-all duration-300 ${
-                        error
-                          ? "bg-coral-pulse/20 text-coral-pulse"
-                          : "bg-coral-pulse/10 text-coral-pulse group-hover:bg-coral-pulse/15"
-                      }`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-
-                      <div className="flex-1">
-                        {field.type === "select" ? (
-                          <div className="relative">
-                            <select
-                              {...register(field.name, {
-                                required: field.required ? `${field.label} es requerido` : false,
-                              })}
-                              className="w-full bg-transparent text-misty-lilac focus:outline-none text-sm appearance-none cursor-pointer pr-8
-                                        custom-select"
-                            >
-                              <option value="" disabled>{field.placeholder}</option>
-                              {field.options?.map((opt) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                              ))}
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-coral-pulse pointer-events-none" />
-                          </div>
-                        ) : (
-                          <div className="flex items-center">
-                            {field.type === "date" ? (
-                              <input
-                                type="date"
-                                {...register(field.name, {
-                                  required: `${field.label} es obligatoria`,
-                                  validate: (value) => {
-                                    if (!value) return "La fecha de nacimiento es obligatoria";
-                                    const date = new Date(value);
-                                    if (isNaN(date.getTime())) return "Fecha inválida";
-                                    if (date > new Date()) return "La fecha no puede ser futura";
-                                    return true;
-                                  },
-                                  onChange: (e) => {
-                                    setBirthDate(e.target.value);
-                                    calculateAge(e.target.value);
-                                  },
-                                })}
-                                className="flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
-                              />
-                            ) : (
-                              <input
-                                type={field.type}
-                                placeholder={field.placeholder}
-                                step={field.type === "number" ? "0.1" : undefined}
-                                min={field.type === "number" ? "0" : undefined}
-                                {...register(field.name, {
-                                  required: field.required ? `${field.label} es requerido` : false,
-                                  valueAsNumber: field.type === "number",
-                                })}
-                                className="flex-1 bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
-                              />
-                            )}
-                            {field.suffix && (
-                              <span className="text-lavender-fog text-sm ml-2 font-medium">
-                                {field.suffix}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className={`h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent ${
-                      error ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-                    } transition-opacity duration-300`} />
-                  </div>
-
-                  <div className={`absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 ${
-                    error
-                      ? "bg-coral-pulse animate-pulse"
-                      : "bg-coral-pulse/40 group-hover:bg-coral-pulse/60 animate-pulse-soft"
-                  }`} />
-                </div>
-              )}
-
-              {field.name === "birthDate" && ageText && (
-                <div className="mt-2 text-sm text-lavender-fog">
-                  Edad: <span className="text-coral-pulse font-semibold">{ageText}</span>
-                </div>
-              )}
-
-              {error && (
-                <div className="mt-3 flex items-center gap-2 p-3 bg-coral-pulse/10 border border-coral-pulse/20 rounded-xl">
-                  <div className="w-2 h-2 bg-coral-pulse rounded-full animate-pulse flex-shrink-0" />
-                  <span className="text-coral-pulse text-sm font-medium">{error.message}</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Campo de veterinario referido (actualizado) */}
-        <div className="lg:col-span-2 tile-entrance" style={{ animationDelay: `${formFields.length * 0.1}s` }}>
-          <div className="mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <User className="w-4 h-4 text-coral-pulse" />
-              <label className="text-misty-lilac font-semibold text-sm">
-                Médico Veterinario
-              </label>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
+      {/* Sección de imagen - visible solo en móvil */}
+      <div className="lg:hidden">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
+          Foto de la mascota
+        </label>
+        <div className="flex items-center gap-3">
+          {previewImage ? (
+            <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-600">
+              <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
               <button
                 type="button"
-                onClick={() => handleVetSwitcherChange(!useCustomReferringVet)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 ${
-                  !useCustomReferringVet
-                    ? 'bg-coral-pulse/20 border border-coral-pulse/40 text-coral-pulse'
-                    : 'bg-transparent border border-coral-pulse/20 text-lavender-fog hover:border-coral-pulse/30'
-                }`}
+                onClick={() => setPreviewImage(null)}
+                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
               >
-                {!useCustomReferringVet ? (
-                  <ToggleRight className="w-4 h-4" />
-                ) : (
-                  <ToggleLeft className="w-4 h-4" />
-                )}
-                <span className="text-xs font-medium">
-                  {!useCustomReferringVet ? 'Usar veterinario por defecto' : 'Ingresar veterinario personalizado'}
-                </span>
+                <X className="w-3 h-3" />
               </button>
-              
-              {!useCustomReferringVet && (
-                <div className="flex-1 text-sm text-misty-lilac font-medium">
-                  <span className="text-coral-pulse">→</span>  M.V. <span className=" capitalize">{vetmain?.name}</span> 
-                </div>
-              )}
             </div>
-          </div>
-
-          {useCustomReferringVet && (
-            <div className="relative group">
-              <div className="absolute -inset-0.5 rounded-2xl blur opacity-25 transition-opacity duration-300 group-hover:opacity-50 group-focus-within:opacity-75 bg-gradient-to-r from-coral-pulse/20 to-coral-pulse/30" />
-
-              <div className="relative bg-space-navy/60 backdrop-blur-sm border-2 rounded-2xl transition-all duration-300 border-coral-pulse/20 hover:border-coral-pulse/40 focus-within:border-coral-pulse/50">
-                <div className="flex items-center p-4">
-                  <div className="p-2 rounded-xl mr-4 transition-all duration-300 bg-coral-pulse/10 text-coral-pulse group-hover:bg-coral-pulse/15">
-                    <User className="w-5 h-5" />
-                  </div>
-
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Ej: Dr. Carlos Ruiz, Dra. María López..."
-                      {...register("referringVet", {
-                        required: false,
-                      })}
-                      className="w-full bg-transparent text-misty-lilac placeholder-lavender-fog focus:outline-none text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="h-px bg-gradient-to-r from-transparent via-coral-pulse/30 to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300" />
-              </div>
-
-              <div className="absolute top-3 right-3 w-2 h-2 rounded-full transition-colors duration-300 bg-coral-pulse/40 group-hover:bg-coral-pulse/60 animate-pulse-soft" />
+          ) : (
+            <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30">
+              <Upload className="w-6 h-6 text-gray-400" />
             </div>
           )}
-
-          {!useCustomReferringVet && (
+          
+          <label className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm text-gray-200">
+            <Upload className="w-4 h-4" />
+            {previewImage ? 'Cambiar imagen' : 'Subir imagen'}
             <input
-              type="hidden"
-              {...register("referringVet")}
-              value={ `M.V. ${vetmain?.name}` || "" }
+              type="file"
+              accept="image/*"
+              {...register("photo", { required: false })}
+              onChange={(e) => {
+                register("photo").onChange(e);
+                handleImageChange(e);
+              }}
+              className="hidden"
             />
-          )}
+          </label>
         </div>
       </div>
 
-      <div className="tile-entrance pt-4" style={{ animationDelay: `${(formFields.length + 1) * 0.1}s` }}>
-        <div className="text-center p-4 bg-gradient-to-r from-coral-pulse/5 via-coral-pulse/10 to-coral-pulse/5 rounded-xl border border-coral-pulse/20">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Heart className="w-4 h-4 text-coral-pulse animate-pulse-soft" />
-            <span className="text-misty-lilac font-semibold text-sm">
-              Información clínica
-            </span>
+      {/* Grid adaptable */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Nombre del paciente - Ocupa 2 columnas en desktop */}
+        <div className="lg:col-span-2">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-200 mb-2">
+            Nombre del paciente <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <PawPrint className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="name"
+              type="text"
+              placeholder="Ej: Luna, Max, Rocky..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("name", {
+                required: "El nombre del paciente es obligatorio",
+              })}
+            />
           </div>
-          <p className="text-lavender-fog text-xs">
-            Los campos marcados con <span className="text-coral-pulse font-bold">*</span> son obligatorios. 
-            La información opcional mejora la precisión del diagnóstico y tratamiento.
-          </p>
+          {errors.name && (
+            <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+          )}
+        </div>
+
+        {/* Imagen en desktop - ocupa 1 columna */}
+        <div className="hidden lg:block">
+          <label className="block text-sm font-medium text-gray-200 mb-2">
+            Foto
+          </label>
+          {previewImage ? (
+            <div className="relative h-[50px] rounded-lg overflow-hidden border-2 border-gray-600">
+              <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setPreviewImage(null)}
+                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <label className="h-[50px] rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30 hover:border-blue-500 transition-colors cursor-pointer">
+              <Upload className="w-5 h-5 text-gray-400 mr-2" />
+              <span className="text-sm text-gray-400">Subir</span>
+              <input
+                type="file"
+                accept="image/*"
+                {...register("photo", { required: false })}
+                onChange={(e) => {
+                  register("photo").onChange(e);
+                  handleImageChange(e);
+                }}
+                className="hidden"
+              />
+            </label>
+          )}
+        </div>
+
+        {/* Fecha de nacimiento */}
+        <div>
+          <label htmlFor="birthDate" className="block text-sm font-medium text-gray-200 mb-2">
+            Fecha de nacimiento <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <CalendarDays className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="birthDate"
+              type="date"
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("birthDate", {
+                required: "La fecha de nacimiento es obligatoria",
+                validate: (value) => {
+                  if (!value) return "La fecha de nacimiento es obligatoria";
+                  const date = new Date(value);
+                  if (isNaN(date.getTime())) return "Fecha inválida";
+                  if (date > new Date()) return "La fecha no puede ser futura";
+                  return true;
+                },
+                onChange: (e) => {
+                  setBirthDate(e.target.value);
+                  calculateAge(e.target.value);
+                },
+              })}
+            />
+          </div>
+          {ageText && (
+            <p className="mt-1 text-xs text-gray-400">
+              Edad: <span className="text-blue-400 font-semibold">{ageText}</span>
+            </p>
+          )}
+          {errors.birthDate && (
+            <p className="mt-1 text-sm text-red-400">{errors.birthDate.message}</p>
+          )}
+        </div>
+
+        {/* Especie */}
+        <div>
+          <label htmlFor="species" className="block text-sm font-medium text-gray-200 mb-2">
+            Especie <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Bone className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              id="species"
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              {...register("species", {
+                required: "La especie es obligatoria",
+              })}
+            >
+              <option value="">Selecciona una especie</option>
+              <option value="Canino">Canino</option>
+              <option value="Felino">Felino</option>
+              <option value="Conejo">Conejo</option>
+              <option value="Ave">Ave</option>
+              <option value="Reptil">Reptil</option>
+              <option value="Roedor">Roedor</option>
+              <option value="Hurón">Hurón</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          {errors.species && (
+            <p className="mt-1 text-sm text-red-400">{errors.species.message}</p>
+          )}
+        </div>
+
+        {/* Sexo */}
+        <div>
+          <label htmlFor="sex" className="block text-sm font-medium text-gray-200 mb-2">
+            Sexo <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Heart className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              id="sex"
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              {...register("sex", {
+                required: "El sexo es obligatorio",
+              })}
+            >
+              <option value="">Selecciona sexo</option>
+              <option value="Macho">Macho</option>
+              <option value="Hembra">Hembra</option>
+            </select>
+          </div>
+          {errors.sex && (
+            <p className="mt-1 text-sm text-red-400">{errors.sex.message}</p>
+          )}
+        </div>
+
+        {/* Raza */}
+        <div>
+          <label htmlFor="breed" className="block text-sm font-medium text-gray-200 mb-2">
+            Raza
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Tag className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="breed"
+              type="text"
+              placeholder="Ej: Labrador, Siamés, Mestizo..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("breed")}
+            />
+          </div>
+        </div>
+
+        {/* Peso */}
+        <div>
+          <label htmlFor="weight" className="block text-sm font-medium text-gray-200 mb-2">
+            Peso actual
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Scale className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="weight"
+              type="number"
+              step="0.1"
+              min="0"
+              placeholder="0.0"
+              className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("weight", {
+                valueAsNumber: true,
+              })}
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-sm">kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Campo oculto mainVet */}
+      <input type="hidden" {...register("mainVet", { required: true })} />
+
+      {/* Veterinario referido */}
+      <div>
+        <label className="block text-sm font-medium text-gray-200 mb-2">
+          Médico Veterinario
+        </label>
+        
+        <div className="mb-3 flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+          <button
+            type="button"
+            onClick={() => handleVetSwitcherChange(!useCustomReferringVet)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-xs font-medium ${
+              !useCustomReferringVet
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            {!useCustomReferringVet ? (
+              <ToggleRight className="w-4 h-4" />
+            ) : (
+              <ToggleLeft className="w-4 h-4" />
+            )}
+            {!useCustomReferringVet ? 'Por defecto' : 'Personalizado'}
+          </button>
+          
+          {!useCustomReferringVet && (
+            <div className="flex-1 text-sm text-gray-300">
+              <span className="text-blue-400">→</span> M.V. <span className="capitalize">{vetmain?.name} {vetmain?.lastName}</span>
+            </div>
+          )}
+        </div>
+
+        {useCustomReferringVet && (
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Ej: Dr. Carlos Ruiz, Dra. María López..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("referringVet")}
+            />
+          </div>
+        )}
+
+        {!useCustomReferringVet && (
+          <input
+            type="hidden"
+            {...register("referringVet")}
+            value={`M.V. ${vetmain?.name}` || ""}
+          />
+        )}
+      </div>
+
+      {/* Nota informativa */}
+      <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+        <div className="flex items-start gap-2">
+          <Heart className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-gray-200 font-medium mb-1">Información clínica</p>
+            <p className="text-xs text-gray-400">
+              Los campos marcados con <span className="text-red-400 font-bold">*</span> son obligatorios. 
+              La información opcional mejora la precisión del diagnóstico y tratamiento.
+            </p>
+          </div>
         </div>
       </div>
     </div>

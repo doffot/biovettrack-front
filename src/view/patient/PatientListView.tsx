@@ -14,7 +14,6 @@ import {
   Weight,
   Calendar,
 } from "lucide-react";
-import FloatingParticles from "../../components/FloatingParticles";
 import type { Patient } from "../../types";
 import type { Owner } from "../../types";
 import { getPatients, deletePatient } from "../../api/patientAPI";
@@ -24,23 +23,21 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 export default function PatientListView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [mounted, setMounted] = useState(false);
-  const [petToDelete, setPetToDelete] = useState<{id: string, name: string} | null>(null);
-  
+  const [petToDelete, setPetToDelete] = useState<{ id: string; name: string } | null>(null);
+
   const queryClient = useQueryClient();
 
-  // Obtener pacientes
+  // ✅ Corrección: usar 'data' en lugar de desestructurar directamente 'patients'
   const { data: patients, isLoading: isLoadingPatients } = useQuery({
     queryKey: ["patients"],
     queryFn: getPatients,
   });
 
-  // Obtener propietarios
   const { data: owners, isLoading: isLoadingOwners } = useQuery({
     queryKey: ["owners"],
     queryFn: getOwners,
   });
 
-  // Mutación para eliminar paciente
   const { mutate: removePatient, isPending: isDeleting } = useMutation({
     mutationFn: (patientId: string) => deletePatient(patientId),
     onError: (error: Error) => {
@@ -58,64 +55,37 @@ export default function PatientListView() {
     setMounted(true);
   }, []);
 
-  // Función para obtener el nombre del propietario
-  const getOwnerName = (ownerId: string) => {
-    const owner = owners?.find((owner: Owner) => owner._id === ownerId);
+  const getOwnerName = (ownerId: string): string => {
+    const owner = owners?.find((o: Owner) => o._id === ownerId);
     return owner?.name || "Propietario no encontrado";
   };
 
-  // Manejar click de eliminar
   const handleDeleteClick = (petId: string, petName: string) => {
     setPetToDelete({ id: petId, name: petName });
   };
 
-  // Confirmar eliminación
   const confirmDelete = () => {
     if (petToDelete) {
       removePatient(petToDelete.id);
     }
   };
 
-  // Filtrar pacientes por búsqueda
   const filteredPatients =
-    patients?.filter(
-      (patient: Patient) =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        getOwnerName(patient.owner)
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+    patients?.filter((patient: Patient) =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getOwnerName(patient.owner).toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
   const isLoading = isLoadingPatients || isLoadingOwners;
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen bg-gradient-dark overflow-hidden flex flex-col">
-        {/* Fondo decorativo */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        />
-
-        {/* Glow effects */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/3 rounded-full blur-3xl" />
-
-        <FloatingParticles />
-
-        <div className="relative z-10 flex items-center justify-center flex-1 pt-16">
-          <div className="text-center animate-pulse-soft">
-            <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-            </div>
-            <p className="text-primary text-lg">Cargando pacientes...</p>
+      <div className="w-full">
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-red-500">Cargando pacientes...</p>
           </div>
         </div>
       </div>
@@ -124,341 +94,209 @@ export default function PatientListView() {
 
   return (
     <>
-      <div className="relative top-20 min-h-screen bg-gradient-dark overflow-hidden pb-20">
-        {/* Fondo decorativo */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        />
-
-        {/* Glow effects */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/3 rounded-full blur-3xl" />
-
-        <FloatingParticles />
-
-        {/* Botón fijo de regreso */}
-        <div className="fixed top-22 left-7 z-150">
-          <BackButton />
-        </div>
-
-        {/* Header */}
-        <div className="relative z-10 pt-20 px-4 sm:px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-              <div className="tile-entrance">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text title-shine mb-2">
-                  Lista de Pacientes
-                </h1>
-                <p className="text-muted text-sm sm:text-base">
-                  Gestiona todos los pacientes y mascotas registradas
-                </p>
-              </div>
-
-              <div className="tile-entrance" style={{ animationDelay: "0.2s" }}>
-                <Link
-                  to="/owners"
-                  className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 p-3 sm:p-4 inline-flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-black/20 text-primary">
-                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-300" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-text font-bold text-sm sm:text-base">
-                        Nueva Mascota
-                      </div>
-                      <div className="text-muted text-xs sm:text-sm">
-                        Registrar paciente
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                <div className="mt-2 text-xs text-muted text-center lg:text-left">
-  🐾 Primero selecciona un dueño para agregar su mascota
-</div>
+      {/* Header */}
+      <div className="mt-10 lg:mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
+        <div className="px-4 lg:px-0 mb-6">
+          {/* Línea principal: BackButton + Título + Botón a la derecha */}
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex items-start gap-4">
+              <BackButton />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Lista de Pacientes</h1>
+                <p className="text-gray-400 text-sm mt-1">Gestiona todos los pacientes y mascotas registradas</p>
               </div>
             </div>
 
-            {/* Search Bar */}
-            <div
-              className={`relative max-w-md mx-auto lg:mx-0 mb-6 transform transition-all duration-1000 delay-300 ${
-                mounted ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-              }`}
-            >
-              <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 hover:border-primary/30 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-                <div className="relative z-10 flex items-center p-3 sm:p-4">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-3 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por nombre, especie, raza o propietario..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-text placeholder-muted focus:outline-none text-sm sm:text-base"
-                  />
-                </div>
-              </div>
+            {/* Botón "Nueva Mascota" en la derecha (solo desktop) */}
+            <div className="hidden sm:block flex-shrink-0">
+              <Link
+                to="/owners"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Nueva Mascota
+              </Link>
             </div>
           </div>
+
+          {/* Mensaje informativo debajo */}
+          <p className="text-xs text-gray-500 hidden sm:block mt-2">
+            🐾 Primero selecciona un dueño para agregar su mascota
+          </p>
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 px-4 sm:px-6">
-          <div className="max-w-7xl mx-auto">
-            {filteredPatients.length ? (
-              <div
-                className={`transform transition-all duration-1000 delay-500 ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-10 opacity-0"
-                }`}
-              >
-                <div className="grid gap-3 sm:gap-4">
-                  {filteredPatients.map((patient: Patient, index: number) => (
-                    <div
-                      key={patient._id}
-                      className="tile-entrance relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 hover:shadow-premium-hover hover:scale-102 transition-all duration-300 cursor-pointer group"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                      <div className="relative z-10 p-3">
-                        {/* Mobile/Tablet Layout */}
-                        <div className="lg:hidden">
-                          <div className="flex items-start justify-between gap-3 mb-3">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="p-2 rounded-lg bg-black/20 text-primary flex-shrink-0">
-                                <img
-                                  src={patient.photo || "/img/default-pet.jpg"}
-                                  alt={patient.name}
-                                  className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <Link
-                                  to={`/patients/${patient._id}`}
-                                  className="block group-hover:text-primary transition-colors duration-300"
-                                >
-                                  <h3 className="text-text font-semibold text-base leading-tight truncate mb-1">
-                                    {patient.name}
-                                  </h3>
-                                </Link>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <PawPrint className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                                  <span className="text-muted text-sm truncate">
-                                    {patient.species} • {patient.breed}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <User className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                                  <span className="text-muted text-sm truncate">
-                                    {getOwnerName(patient.owner)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Actions - Mobile/Tablet */}
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <Link
-                                to={`/patients/${patient._id}`}
-                                className="p-2 rounded-lg bg-black/20 text-primary hover:bg-primary/20 hover:scale-110 transition-all duration-300"
-                                title="Ver"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Link>
-
-                              <Link
-                                to={`/patients/edit/${patient._id}`}
-                                className="p-2 rounded-lg bg-black/20 text-muted hover:bg-muted/20 hover:scale-110 transition-all duration-300"
-                                title="Editar"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Link>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteClick(patient._id, patient.name)}
-                                disabled={isDeleting}
-                                className="p-2 rounded-lg bg-black/20 text-danger hover:bg-danger/20 hover:scale-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Eliminar"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Additional info - Mobile/Tablet */}
-                          <div className="flex items-center gap-4 text-xs text-muted bg-black/10 rounded-lg p-2">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Weight className="w-3 h-3" />
-                              <span>{patient.weight} kg</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span>♂♀</span>
-                              <span>{patient.sex}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Desktop Layout - Solo para pantallas grandes */}
-                        <div className="hidden lg:flex items-center justify-between gap-4">
-                          {/* Info del paciente */}
-                          <div className="flex items-center gap-4 flex-1 min-w-0">
-                            <div className="p-3 rounded-xl bg-black/20 text-primary group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                              <img
-                                src={patient.photo || "/img/default-pet.jpg"}
-                                alt={patient.name}
-                                className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                              />
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <Link
-                                to={`/patients/${patient._id}`}
-                                className="block group-hover:text-primary transition-colors duration-300"
-                              >
-                                <h3 className="text-text font-bold text-lg mb-1 truncate">
-                                  {patient.name}
-                                </h3>
-                              </Link>
-
-                              <div className="flex items-center gap-4 text-muted text-sm">
-                                <div className="flex items-center gap-1">
-                                  <PawPrint className="w-4 h-4 flex-shrink-0" />
-                                  <span className="truncate">
-                                    {patient.species} • {patient.breed}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <User className="w-4 h-4 flex-shrink-0" />
-                                  <span className="truncate">
-                                    {getOwnerName(patient.owner)}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-4 text-xs text-muted mt-1">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-3 h-3" />
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Weight className="w-3 h-3" />
-                                  <span>{patient.weight} kg</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <span>♂♀</span>
-                                  <span>{patient.sex}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Actions - Desktop */}
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Link
-                              to={`/patients/${patient._id}`}
-                              className="p-3 rounded-xl bg-black/20 text-primary hover:bg-primary/20 hover:scale-110 transition-all duration-300"
-                              title="Ver detalles"
-                            >
-                              <Eye className="w-5 h-5" />
-                            </Link>
-
-                            <Link
-                              to={`/patients/edit/${patient._id}`}
-                              className="p-3 rounded-xl bg-black/20 text-muted hover:bg-muted/20 hover:scale-110 transition-all duration-300"
-                              title="Editar"
-                            >
-                              <Edit className="w-5 h-5" />
-                            </Link>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteClick(patient._id, patient.name)}
-                              disabled={isDeleting}
-                              className="p-3 rounded-xl bg-black/20 text-danger hover:bg-danger/20 hover:scale-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Eliminar"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Decoración de esquina */}
-                      <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-
-                      {/* Líneas decorativas */}
-                      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60" />
-                      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`transform transition-all duration-1000 delay-500 ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-10 opacity-0"
-                }`}
-              >
-                <div className="text-center py-8">
-                  <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 p-5 sm:p-6 max-w-md mx-auto shadow-premium">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-                    <div className="relative z-10">
-                      <div className="p-3 sm:p-4 rounded-xl bg-black/20 text-muted mx-auto mb-4 w-fit">
-                        <PawPrint className="w-8 h-8 sm:w-10 sm:h-10 text-primary animate-float" />
-                      </div>
-
-                      <h3 className="text-xl font-bold text-text mb-2 title-shine">
-                        {searchTerm ? "Sin resultados" : "No hay pacientes registrados"}
-                      </h3>
-
-                      <p className="text-muted text-sm mb-5 leading-relaxed px-2">
-                        {searchTerm
-                          ? `No se encontraron coincidencias para "${searchTerm}"`
-                          : "Para registrar una mascota, primero debes crear o seleccionar un dueño."}
-                      </p>
-
-                      {!searchTerm && (
-                        <Link
-                          to="/owners"
-                          className="group relative overflow-hidden rounded-lg border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-103 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 px-4 py-2.5 inline-flex items-center gap-2.5"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-                          <div className="relative z-10 flex items-center gap-2">
-                            <User className="w-4 h-4 text-primary" />
-                            <span className="text-primary font-bold text-sm">Ir a Dueños</span>
-                          </div>
-                        </Link>
-                      )}
-                    </div>
-
-                    <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-primary rounded-full animate-neon-pulse opacity-60" />
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* Search Bar */}
+        <div className="px-4 lg:px-0">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, especie o propietario..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500 transition-colors"
+            />
           </div>
         </div>
       </div>
 
-      {/* Modal de confirmación */}
+      {/* Botón flotante móvil */}
+      <Link
+        to="/owners"
+        className="sm:hidden fixed bottom-24 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg active:scale-95 transition-all"
+      >
+        <Plus className="w-6 h-6" />
+      </Link>
+
+      {/* Content */}
+      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+        {filteredPatients.length ? (
+          <div className="space-y-3 mx-4 lg:mx-0">
+            {filteredPatients.map((patient) => (
+              <div
+                key={patient._id}
+                className="bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-colors overflow-hidden"
+              >
+                {/* Mobile */}
+                <div className="sm:hidden p-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <img
+                        src={patient.photo || "/img/default-pet.jpg"}
+                        alt={patient.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/patients/${patient._id}`} className="block hover:text-green-500">
+                        <h3 className="text-white font-semibold text-base truncate mb-1">{patient.name}</h3>
+                      </Link>
+                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <PawPrint className="w-3.5 h-3.5" />
+                        <span className="truncate">{patient.species} • {patient.breed}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
+                        <User className="w-3.5 h-3.5" />
+                        <span className="truncate">{getOwnerName(patient.owner)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info adicional */}
+                  <div className="flex gap-3 text-xs text-gray-400 mt-2">
+                    <span>🎂 {new Date(patient.birthDate).toLocaleDateString("es-ES")}</span>
+                    <span>⚖️ {patient.weight} kg</span>
+                    <span>{patient.sex === "Macho" ? "♂" : "♀"}</span>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex gap-2 pt-3 border-t border-gray-700 mt-3">
+                    <Link
+                      to={`/patients/${patient._id}`}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="text-sm">Ver</span>
+                    </Link>
+                    <Link
+                      to={`/patients/edit/${patient._id}`}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span className="text-sm">Editar</span>
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteClick(patient._id, patient.name)}
+                      disabled={isDeleting}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span className="text-sm">Eliminar</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Desktop */}
+                <div className="hidden sm:flex items-center gap-4 p-4">
+                  <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                    <img
+                      src={patient.photo || "/img/default-pet.jpg"}
+                      alt={patient.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/patients/${patient._id}`} className="block hover:text-green-500">
+                      <h3 className="text-white font-bold text-lg mb-1 truncate">{patient.name}</h3>
+                    </Link>
+                    <div className="flex flex-wrap items-center gap-3 text-gray-400 text-sm">
+                      <span>{patient.species} • {patient.breed}</span>
+                      <span>•</span>
+                      <span>{getOwnerName(patient.owner)}</span>
+                      <span>•</span>
+                      <span>🎂 {new Date(patient.birthDate).toLocaleDateString("es-ES")}</span>
+                      <span>•</span>
+                      <span>⚖️ {patient.weight} kg</span>
+                      <span>•</span>
+                      <span>{patient.sex === "Macho" ? "♂ Macho" : "♀ Hembra"}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Link
+                      to={`/patients/${patient._id}`}
+                      className="p-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300"
+                      title="Ver"
+                    >
+                      <Eye className="w-5 h-5" />
+                    </Link>
+                    <Link
+                      to={`/patients/edit/${patient._id}`}
+                      className="p-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300"
+                      title="Editar"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteClick(patient._id, patient.name)}
+                      disabled={isDeleting}
+                      className="p-2.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 disabled:opacity-50"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mx-4 lg:mx-0">
+            <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 text-center max-w-md mx-auto">
+              <PawPrint className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">
+                {searchTerm ? "Sin resultados" : "No hay pacientes"}
+              </h3>
+              <p className="text-gray-400 text-sm mb-6">
+                {searchTerm
+                  ? `No se encontraron coincidencias para "${searchTerm}"`
+                  : "Para registrar una mascota, primero debes crear o seleccionar un dueño."}
+              </p>
+              {!searchTerm && (
+                <Link
+                  to="/owners"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ir a Dueños
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       <DeleteConfirmationModal
         isOpen={!!petToDelete}
         onClose={() => setPetToDelete(null)}

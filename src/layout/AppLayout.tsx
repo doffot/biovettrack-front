@@ -44,16 +44,18 @@ const HeaderMobile: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/20 active:scale-95 transition-all"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-primary/5 border border-primary/20 active:scale-95 transition-all"
             >
               <div className="flex flex-col items-start">
                 <span className="text-[10px] text-muted leading-tight">Hola,</span>
-                <span className="text-xs font-semibold text-primary leading-tight truncate max-w-[100px]">
-                  {data?.name 
-                    ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()}`
-                    : 'M.V. Usuario'
-                  }
-                </span>
+              <span className=" text-[10px] font-semibold text-primary leading-tight whitespace-nowrap">
+  {data?.name && data?.lastName
+    ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
+    : data?.name
+      ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()}`
+      : 'M.V. Usuario'
+  }
+</span>
               </div>
               <div className={`w-1.5 h-1.5 border-r-2 border-b-2 border-primary transition-transform duration-300 ${showDropdown ? 'rotate-[-135deg]' : 'rotate-45'}`}></div>
             </button>
@@ -144,12 +146,14 @@ const HeaderDesktop: React.FC = () => {
             >
               <div className="flex flex-col items-start">
                 <span className="text-xs text-muted">Hola,</span>
-                <span className="text-sm font-semibold text-primary">
-                  {data?.name 
-                    ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()}`
-                    : 'M.V. Usuario'
-                  }
-                </span>
+                <span className=" text-xs font-semibold text-primary leading-tight whitespace-nowrap">
+  {data?.name && data?.lastName
+    ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
+    : data?.name
+      ? `M.V. ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()}`
+      : 'M.V. Usuario'
+  }
+</span>
               </div>
               <div className={`w-2 h-2 border-r-2 border-b-2 border-primary transition-transform duration-300 ${showDropdown ? 'rotate-[-135deg]' : 'rotate-45'}`}></div>
             </button>

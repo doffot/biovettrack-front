@@ -3,9 +3,8 @@ import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, PawPrint} from "lucide-react";
+import { Save } from "lucide-react";
 import BackButton from "../../components/BackButton";
-import FloatingParticles from "../../components/FloatingParticles";
 import PatientForm from "../../components/patients/PatientForm";
 import type { PatientFormData } from "../../types";
 import { toast } from "../../components/Toast";
@@ -27,16 +26,16 @@ export default function CreatePatientView() {
     setValue,
   } = useForm<PatientFormData>({
     defaultValues: {
-      name: "",
-      birthDate: "",
-      species: "",
-      breed: "",
-      sex: undefined,
-      weight: 0,
-      photo: undefined,
-      mainVet: vetmain?.name || "",
-      referringVet: vetmain?.name || "",
-    },
+  name: "",
+  birthDate: "",
+  species: "",
+  breed: "",
+  sex: undefined,
+  weight: 0,
+  photo: undefined,
+  mainVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
+  referringVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
+},
   });
 
   const { mutate, isPending } = useMutation({
@@ -92,111 +91,53 @@ export default function CreatePatientView() {
   };
 
   return (
-    <div className="relative mt-20 min-h-screen bg-gradient-dark overflow-hidden">
-      {/* Fondo decorativo */}
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: "50px 50px",
-        }}
-      />
-
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/3 rounded-full blur-3xl" />
-
-      <FloatingParticles />
-
-      {/* Botón regresar */}
-      <div className="fixed top-22 left-7 z-150">
-        <BackButton />
-      </div>
-
-      {/* Header con título simple */}
-      <div className="relative z-10 pt-20 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className={`flex flex-col items-center gap-6 transform transition-all duration-1000 delay-200 ${
-              mounted
-                ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
-            }`}
-          >
-            <div className="relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-primary/10 border-primary/30 px-6 py-4 inline-flex items-center gap-3 xl:min-w-[400px] xl:max-w-[480px]">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-              <div className="relative z-10 flex flex-col items-center gap-3 justify-center w-full">
-                <div className="p-3 rounded-xl bg-black/20 text-primary mx-auto mb-3 w-fit">
-                  <PawPrint className="w-8 h-8 xl:w-10 xl:h-10" />
-                </div>
-                <h1 className="text-3xl  xl:text-3xl font-bold text-text mb-1">
-                  Nueva Mascota
-                </h1>
-                <p className="text-muted text-sm">
-                  Registros de Mascotas
-                </p>
-              </div>
-            </div>
+    <>
+      {/* Header con espaciado superior */}
+      <div className="mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
+        <div className="flex items-center gap-4 px-4 lg:px-0">
+          <BackButton />
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Nueva Mascota</h1>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Registra la información de la nueva mascota
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Formulario */}
-      <div className="relative z-10 px-4 sm:px-6 pb-20 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className={`transform transition-all duration-1000 delay-400 ${
-              mounted
-                ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
-            }`}
-          >
-            <div className="grid gap-6 sm:gap-8">
-              <div className="tile-entrance">
-                <div className="relative overflow-hidden rounded-2xl xl:rounded-3xl border-2 bg-gradient-radial-center backdrop-blur-sm bg-background/40 border-muted/20 shadow-premium p-6 xl:p-8">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 hover:opacity-100 transition-opacity duration-300" />
+      {/* Card única con formulario */}
+      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 mx-4 lg:mx-0">
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <PatientForm register={register} errors={errors} setValue={setValue} />
 
-                  <div className="relative z-10">
-                    <PatientForm register={register} errors={errors} setValue={setValue} />
-
-                    {/* Submit Button */}
-                    <div className="mt-8 flex justify-center">
-                      <button
-                        type="submit"
-                        disabled={isPending}
-                        onClick={handleSubmit(onSubmit)}
-                        className="group relative overflow-hidden rounded-xl border-2 bg-gradient-radial-center backdrop-blur-sm hover:shadow-premium-hover hover:scale-105 transition-all duration-300 cursor-pointer bg-primary/20 border-primary/30 p-3 sm:p-4 inline-flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-
-                        <div className="relative z-10 flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-black/20 text-primary">
-                            <Save className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-300" />
-                          </div>
-                          <div className="text-left">
-                            <div className="text-text font-bold text-sm sm:text-base">
-                              {isPending ? "Guardando..." : "Guardar Mascota"}
-                            </div>
-                            <div className="text-muted text-xs sm:text-sm">
-                              {isPending ? "Procesando..." : "Crear nuevo registro"}
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-                </div>
+              {/* Botones */}
+              <div className="flex justify-end gap-3 pt-6 mt-6">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/owners/${ownerId}`)}
+                  className="px-4 sm:px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-4 sm:px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  {isPending ? (
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  {isPending ? "Guardando..." : "Guardar Mascota"}
+                </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
