@@ -10,6 +10,13 @@ import {
   CalendarDays,
   CalendarCheck,
 } from 'lucide-react';
+import { 
+  startOfWeek, 
+  endOfDay, 
+  isWithinInterval, 
+  isSameDay, 
+  isSameMonth 
+} from 'date-fns';
 import type { GroomingService } from '../../types';
 
 // Card reutilizable con tus estilos
@@ -34,8 +41,11 @@ const StatCard: React.FC<{
 
 const DesktopHomeView: React.FC = () => {
   const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Domingo como inicio
+  
+  // Usando date-fns para cálculos de fecha más precisos
+  const startOfWeekDate = startOfWeek(now, { weekStartsOn: 1 }); // 1 = lunes como inicio de semana
+  // const startOfMonthDate = startOfMonth(now);
+  const endOfToday = endOfDay(now); // Fin del día actual (23:59:59)
 
   // Consultas
   const { data: patients = [], isLoading: loadingPatients } = useQuery({
@@ -50,34 +60,27 @@ const DesktopHomeView: React.FC = () => {
 
   const isLoading = loadingPatients || loadingGrooming;
 
-  // Helper: comparar solo día/mes/año
-  const isSameDay = (d1: Date, d2: Date): boolean => {
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
-    );
-  };
-
-  // Contar servicios de grooming por período
+  // Contar servicios de grooming por período usando date-fns
   const countByPeriod = (period: 'day' | 'week' | 'month'): number => {
     return groomingServices.filter((service: GroomingService) => {
-      // Usamos `service.date` (obligatorio) como fecha del servicio
       const serviceDate = new Date(service.date);
 
-      if (period === 'day') {
-        return isSameDay(serviceDate, now);
+      switch (period) {
+        case 'day':
+          return isSameDay(serviceDate, now);
+        
+        case 'week':
+          return isWithinInterval(serviceDate, {
+            start: startOfWeekDate,
+            end: endOfToday
+          });
+        
+        case 'month':
+          return isSameMonth(serviceDate, now);
+        
+        default:
+          return false;
       }
-      if (period === 'week') {
-        return serviceDate >= startOfWeek && serviceDate <= now;
-      }
-      if (period === 'month') {
-        return (
-          serviceDate.getFullYear() === now.getFullYear() &&
-          serviceDate.getMonth() === now.getMonth()
-        );
-      }
-      return false;
     }).length;
   };
 

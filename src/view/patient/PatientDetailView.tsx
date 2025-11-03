@@ -170,7 +170,7 @@ export default function PatientDetailView() {
   return (
     <>
       {/* Header */}
-      <div className="mt-10 lg:mt-40 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
+      <div className="mt-10 lg:mt-0 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
         <div className="flex items-center gap-4 px-4 lg:px-0">
           <BackButton />
           <h1 className="text-xl sm:text-2xl font-bold text-white">

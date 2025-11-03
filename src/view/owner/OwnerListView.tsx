@@ -76,34 +76,37 @@ export default function OwnerListView() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mt-10 lg:mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
-        <div className="px-4 lg:px-0 mb-6">
-          {/* Línea principal: BackButton + Título + Botón a la derecha */}
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div className="flex items-start gap-4">
+      {/* Header Fijo */}
+      <div className="fixed  lg:mt-0 mt-6 left-0 right-0 lg:top-0 lg:left-64 z-30 bg-gray-900/98 backdrop-blur-xl border-b border-gray-700/50 shadow-lg">
+        <div className="px-4 lg:px-10 py-4">
+          {/* Línea principal: BackButton + Título + Botón */}
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
               <BackButton />
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-white">Lista de Propietarios</h1>
-                <p className="text-gray-400 text-sm mt-1">Gestiona todos los propietarios registrados</p>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
+                  Lista de Propietarios
+                </h1>
+                <p className="text-gray-400 text-xs sm:text-sm mt-0.5 truncate">
+                  Gestiona todos los propietarios registrados
+                </p>
               </div>
             </div>
 
-            {/* Botón "Nuevo Propietario" en la derecha (solo desktop) */}
+            {/* Botón "Nuevo Propietario" - visible desde tablet */}
             <div className="hidden sm:block flex-shrink-0">
               <Link
                 to="/owners/new"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm transition-colors whitespace-nowrap"
               >
                 <Plus className="w-4 h-4" />
-                Nuevo Propietario
+                <span className="hidden lg:inline">Nuevo Propietario</span>
+                <span className="lg:hidden">Nuevo</span>
               </Link>
             </div>
           </div>
-        </div>
 
-        {/* Search Bar */}
-        <div className="px-4 lg:px-0">
+          {/* Search Bar */}
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -117,6 +120,9 @@ export default function OwnerListView() {
         </div>
       </div>
 
+      {/* Espaciador para el header fijo */}
+      <div className="h-32 sm:h-36 lg:h-40"></div>
+
       {/* Botón flotante móvil */}
       <Link
         to="/owners/new"
@@ -126,9 +132,9 @@ export default function OwnerListView() {
       </Link>
 
       {/* Content */}
-      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+      <div className={` mt-15 lg:mt-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
         {filteredOwners.length ? (
-          <div className="space-y-3 mx-4 lg:mx-0">
+          <div className="space-y-3">
             {filteredOwners.map((owner) => (
               <div
                 key={owner._id}
@@ -266,32 +272,30 @@ export default function OwnerListView() {
             ))}
           </div>
         ) : (
-          <div className="mx-4 lg:mx-0">
-            <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 sm:p-12 text-center max-w-md mx-auto">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
-                <User className="w-8 h-8 text-gray-400" />
-              </div>
-
-              <h3 className="text-xl font-bold text-white mb-2">
-                {searchTerm ? "Sin resultados" : "No hay propietarios"}
-              </h3>
-
-              <p className="text-gray-400 text-sm mb-6">
-                {searchTerm
-                  ? `No encontramos coincidencias para "${searchTerm}"`
-                  : "Comienza agregando el primer propietario al sistema"}
-              </p>
-
-              {!searchTerm && (
-                <Link
-                  to="/owners/new"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Crear Propietario
-                </Link>
-              )}
+          <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 sm:p-12 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+              <User className="w-8 h-8 text-gray-400" />
             </div>
+
+            <h3 className="text-xl font-bold text-white mb-2">
+              {searchTerm ? "Sin resultados" : "No hay propietarios"}
+            </h3>
+
+            <p className="text-gray-400 text-sm mb-6">
+              {searchTerm
+                ? `No encontramos coincidencias para "${searchTerm}"`
+                : "Comienza agregando el primer propietario al sistema"}
+            </p>
+
+            {!searchTerm && (
+              <Link
+                to="/owners/new"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Crear Propietario
+              </Link>
+            )}
           </div>
         )}
       </div>

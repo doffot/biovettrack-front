@@ -38,13 +38,13 @@ const Logo: React.FC<LogoProps> = ({
     lg: {
       container: layout === 'horizontal' ? 'gap-6' : 'gap-5',
       icon: 'w-18 h-18', // Aumentado
-      text: 'text-5xl',
+      text: 'text-2xl',
       subtitle: 'text-base'
     },
     xl: {
       container: layout === 'horizontal' ? 'gap-7' : 'gap-6',
       icon: 'w-34 h-34', // Aumentado
-      text: 'text-4xl',
+      text: 'text-2xl',
       subtitle: 'text-lg'
     }
   };
@@ -53,10 +53,10 @@ const Logo: React.FC<LogoProps> = ({
 
   return (
     <div
-      className={`flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col items-center'} ${config.container} ${className}`}
+      className={`flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col items-center  w-full'} ${config.container} ${className}`}
     >
       {/* Logo SVG desde la carpeta public */}
-      <div className={`relative ${config.icon} ${iconClassName}`}>
+      <div className={`relative ${config.icon} ${iconClassName} `}>
         <img
           src="/logobtv.svg"
           alt="BioVetTrack Logo"

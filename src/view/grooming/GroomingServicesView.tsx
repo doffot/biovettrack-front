@@ -1,21 +1,31 @@
 // src/views/GroomingServicesView.tsx
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Filter, DollarSign, Scissors, AlertCircle, Plus } from 'lucide-react';
+import { Calendar,  DollarSign, Scissors, AlertCircle, Plus, User, Search } from 'lucide-react';
 import { getAllGroomingServices } from '../../api/groomingAPI';
+import BackButton from '../../components/BackButton';
 
 type FilterPeriod = 'today' | 'week' | 'month';
 
 export default function GroomingServicesView() {
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('today');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Helper para obtener nombre del paciente
+  // Helper para obtener nombre del paciente CORREGIDO
   const getPatientName = (patientId: any) => {
-    return typeof patientId === 'string' ? 'N/A' : patientId?.name || 'N/A';
+    if (!patientId) return 'Paciente no encontrado';
+    if (typeof patientId === 'string') return 'Cargando...';
+    return patientId?.name || 'Paciente no encontrado';
   };
 
   const getPatientSpecies = (patientId: any) => {
-    return typeof patientId === 'string' ? '' : patientId?.species || '';
+    if (!patientId || typeof patientId === 'string') return '';
+    return patientId?.species || '';
+  };
+
+  const getPatientBreed = (patientId: any) => {
+    if (!patientId || typeof patientId === 'string') return '';
+    return patientId?.breed || '';
   };
 
   // =====================================
@@ -28,7 +38,7 @@ export default function GroomingServicesView() {
   });
 
   // =====================================
-  // 🔍 FILTRAR SERVICIOS POR PERÍODO
+  // 🔍 FILTRAR SERVICIOS POR PERÍODO Y BÚSQUEDA
   // =====================================
   const filteredServices = useMemo(() => {
     if (!services.length) return [];
@@ -36,8 +46,8 @@ export default function GroomingServicesView() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return services.filter(service => {
-      if (!service.date) return false; // Asegurar que hay fecha
+    const filteredByPeriod = services.filter(service => {
+      if (!service.date) return false;
 
       const serviceDate = new Date(service.date);
       serviceDate.setHours(0, 0, 0, 0);
@@ -47,13 +57,13 @@ export default function GroomingServicesView() {
           return serviceDate.getTime() === today.getTime();
 
         case 'week': {
-          const dayOfWeek = today.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+          const dayOfWeek = today.getDay();
           const startOfWeek = new Date(today);
-          startOfWeek.setDate(today.getDate() - dayOfWeek); // Domingo de esta semana
+          startOfWeek.setDate(today.getDate() - dayOfWeek);
           startOfWeek.setHours(0, 0, 0, 0);
 
           const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6); // Sábado de esta semana
+          endOfWeek.setDate(startOfWeek.getDate() + 6);
           endOfWeek.setHours(23, 59, 59, 999);
 
           return serviceDate >= startOfWeek && serviceDate <= endOfWeek;
@@ -69,7 +79,20 @@ export default function GroomingServicesView() {
           return true;
       }
     });
-  }, [services, filterPeriod]);
+
+    // Aplicar búsqueda
+    if (!searchTerm) return filteredByPeriod;
+
+    return filteredByPeriod.filter(service => {
+      const patientName = getPatientName(service.patientId).toLowerCase();
+      const serviceType = service.service?.toLowerCase() || '';
+      const specifications = service.specifications?.toLowerCase() || '';
+      
+      return patientName.includes(searchTerm.toLowerCase()) ||
+             serviceType.includes(searchTerm.toLowerCase()) ||
+             specifications.includes(searchTerm.toLowerCase());
+    });
+  }, [services, filterPeriod, searchTerm]);
 
   // =====================================
   // 💰 CALCULAR TOTALES
@@ -96,12 +119,13 @@ export default function GroomingServicesView() {
 
   const getPaymentBadgeColor = (paymentType: string) => {
     const colors: Record<string, string> = {
-      'Efectivo': 'bg-[#39ff14] bg-opacity-20 text-[#39ff14]',
-      'Pago Movil': 'bg-[#8a7f9e] bg-opacity-20 text-[#8a7f9e]',
-      'Zelle': 'bg-[#e7e5f2] bg-opacity-20 text-[#e7e5f2]',
-      'Otro': 'bg-[#8a7f9e] bg-opacity-10 text-[#8a7f9e]'
+      'Efectivo': 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+      'Pago Movil': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+      'Zelle': 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+      'Transferencia': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+      'Otro': 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
     };
-    return colors[paymentType] || 'bg-[#8a7f9e] bg-opacity-10 text-[#8a7f9e]';
+    return colors[paymentType] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
   };
 
   const formatDate = (dateString: string) => {
@@ -118,10 +142,10 @@ export default function GroomingServicesView() {
   // =====================================
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0b132b]">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#39ff14] mx-auto"></div>
-          <p className="mt-4 text-[#e7e5f2]">Cargando servicios...</p>
+          <div className="w-12 h-12 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-300 font-medium">Cargando servicios...</p>
         </div>
       </div>
     );
@@ -129,13 +153,13 @@ export default function GroomingServicesView() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0b132b] p-4">
-        <div className="bg-[#ff5e5b] bg-opacity-10 border border-[#ff5e5b] rounded-lg p-6 max-w-md">
-          <div className="flex items-center gap-3 text-[#ff5e5b]">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center p-4">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 max-w-md backdrop-blur-sm">
+          <div className="flex items-center gap-3 text-red-400">
             <AlertCircle className="w-6 h-6" />
             <div>
               <h3 className="font-semibold">Error al cargar servicios</h3>
-              <p className="text-sm mt-1">{error?.message || 'Error desconocido'}</p>
+              <p className="text-sm mt-1 text-gray-300">{error?.message || 'Error desconocido'}</p>
             </div>
           </div>
         </div>
@@ -147,100 +171,128 @@ export default function GroomingServicesView() {
   // 📄 RENDERIZADO PRINCIPAL
   // =====================================
   return (
-    <div className="min-h-screen bg-[#0b132b] p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-[#e7e5f2] flex items-center gap-2">
-              <Scissors className="w-8 h-8 text-[#39ff14]" />
-              Servicios de Grooming
-            </h1>
-            <p className="text-[#8a7f9e] mt-1">Gestión de servicios de peluquería</p>
-          </div>
-          <a 
-            href="/patients"
-            className="flex items-center gap-2 px-4 py-2 bg-[#39ff14] text-[#0b132b] rounded-lg font-semibold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Servicio
-          </a>
-        </div>
+    <>
+      {/* Header Fijo */}
+      <div className="fixed mt-10 lg:mt-0 top-16 left-0 right-0 lg:top-0 lg:left-64 z-40 bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/50 shadow-lg">
+        <div className="px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <BackButton />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Servicios de Grooming</h1>
+                <p className="text-gray-400 text-sm">Gestión de servicios de peluquería</p>
+              </div>
+            </div>
 
-        {/* Filtros */}
-        <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg p-4 mb-6 border border-[#8a7f9e] border-opacity-20">
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="w-5 h-5 text-[#8a7f9e]" />
-            <h2 className="font-semibold text-[#e7e5f2]">Filtrar por período</h2>
+            {/* Botón "Nuevo Servicio" */}
+            <div className="hidden sm:block flex-shrink-0">
+              <a 
+                href="/patients"
+                className="inline-flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500 font-medium text-sm transition-colors whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden lg:inline">Nuevo Servicio</span>
+                <span className="lg:hidden">Nuevo</span>
+              </a>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterPeriod('today')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filterPeriod === 'today'
-                  ? 'bg-[#39ff14] text-[#0b132b] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                  : 'bg-[#8a7f9e] bg-opacity-20 text-[#e7e5f2] hover:bg-opacity-30'
-              }`}
-            >
-              Hoy
-            </button>
-            <button
-              onClick={() => setFilterPeriod('week')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filterPeriod === 'week'
-                  ? 'bg-[#39ff14] text-[#0b132b] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                  : 'bg-[#8a7f9e] bg-opacity-20 text-[#e7e5f2] hover:bg-opacity-30'
-              }`}
-            >
-              Esta Semana
-            </button>
-            <button
-              onClick={() => setFilterPeriod('month')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filterPeriod === 'month'
-                  ? 'bg-[#39ff14] text-[#0b132b] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                  : 'bg-[#8a7f9e] bg-opacity-20 text-[#e7e5f2] hover:bg-opacity-30'
-              }`}
-            >
-              Este Mes
-            </button>
+
+          {/* Search Bar y Filtros */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por paciente, servicio o especificaciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterPeriod('today')}
+                className={`px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  filterPeriod === 'today'
+                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                }`}
+              >
+                Hoy
+              </button>
+              <button
+                onClick={() => setFilterPeriod('week')}
+                className={`px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  filterPeriod === 'week'
+                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setFilterPeriod('month')}
+                className={`px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  filterPeriod === 'month'
+                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                }`}
+              >
+                Mes
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
+      {/* Espacio para el header fijo */}
+      <div className="h-40 sm:h-44"></div>
+
+      {/* Botón flotante móvil */}
+      <a 
+        href="/patients"
+        className="sm:hidden fixed bottom-24 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg active:scale-95 transition-all"
+      >
+        <Plus className="w-6 h-6" />
+      </a>
+
+      {/* Contenido Principal */}
+      <div className="px-4 lg:px-8 max-w-7xl mx-auto pb-12">
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg p-6 border border-[#8a7f9e] border-opacity-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#8a7f9e]">Total Servicios</p>
-                <p className="text-2xl font-bold text-[#e7e5f2]">{totals.count}</p>
+                <p className="text-sm text-gray-400 font-medium">Total Servicios</p>
+                <p className="text-2xl font-bold text-white mt-1">{totals.count}</p>
               </div>
-              <div className="bg-[#39ff14] bg-opacity-20 p-3 rounded-full">
-                <Scissors className="w-6 h-6 text-[#39ff14]" />
+              <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
+                <Scissors className="w-6 h-6 text-emerald-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg p-6 border border-[#8a7f9e] border-opacity-20">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#8a7f9e]">Ingresos Totales</p>
-                <p className="text-2xl font-bold text-[#39ff14]">${totals.total.toFixed(2)}</p>
+                <p className="text-sm text-gray-400 font-medium">Ingresos Totales</p>
+                <p className="text-2xl font-bold text-emerald-400 mt-1">${totals.total.toFixed(2)}</p>
               </div>
-              <div className="bg-[#39ff14] bg-opacity-20 p-3 rounded-full">
-                <DollarSign className="w-6 h-6 text-[#39ff14]" />
+              <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
+                <DollarSign className="w-6 h-6 text-emerald-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg p-6 border border-[#8a7f9e] border-opacity-20">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#8a7f9e]">Promedio por Servicio</p>
-                <p className="text-2xl font-bold text-[#e7e5f2]">${totals.average.toFixed(2)}</p>
+                <p className="text-sm text-gray-400 font-medium">Promedio por Servicio</p>
+                <p className="text-2xl font-bold text-white mt-1">${totals.average.toFixed(2)}</p>
               </div>
-              <div className="bg-[#8a7f9e] bg-opacity-20 p-3 rounded-full">
-                <Calendar className="w-6 h-6 text-[#8a7f9e]" />
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
+                <Calendar className="w-6 h-6 text-blue-400" />
               </div>
             </div>
           </div>
@@ -248,88 +300,100 @@ export default function GroomingServicesView() {
 
         {/* Lista de Servicios */}
         {filteredServices.length === 0 ? (
-          <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg p-12 text-center border border-[#8a7f9e] border-opacity-20">
-            <Scissors className="w-16 h-16 text-[#8a7f9e] opacity-50 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[#e7e5f2] mb-2">
-              No hay servicios en este período
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-700/50">
+            <Scissors className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">
+              {searchTerm ? "No hay resultados" : "No hay servicios en este período"}
             </h3>
-            <p className="text-[#8a7f9e]">
-              Intenta cambiar el filtro para ver más resultados
+            <p className="text-gray-400">
+              {searchTerm 
+                ? "Intenta con otros términos de búsqueda" 
+                : "Intenta cambiar el filtro para ver más resultados"
+              }
             </p>
           </div>
         ) : (
-          <div className="bg-[#172554] bg-opacity-50 rounded-lg shadow-lg overflow-hidden border border-[#8a7f9e] border-opacity-20">
+          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#0b132b] bg-opacity-50 border-b border-[#8a7f9e] border-opacity-20">
+                <thead className="bg-gray-900/50 border-b border-gray-700/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Fecha
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Paciente
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Servicio
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Especificaciones
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Pago
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-[#8a7f9e] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Costo
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#8a7f9e] divide-opacity-20">
+                <tbody className="divide-y divide-gray-700/50">
                   {filteredServices.map((service) => (
-                    <tr key={service._id} className="hover:bg-[#8a7f9e] hover:bg-opacity-10 transition-colors">
+                    <tr key={service._id} className="hover:bg-gray-700/20 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2 text-sm text-[#e7e5f2]">
-                          <Calendar className="w-4 h-4 text-[#8a7f9e]" />
+                        <div className="flex items-center gap-2 text-sm text-white">
+                          <Calendar className="w-4 h-4 text-gray-400" />
                           {formatDate(service.date)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <p className="text-sm font-medium text-[#e7e5f2]">
-                            {getPatientName(service.patientId)}
-                          </p>
-                          <p className="text-xs text-[#8a7f9e]">
-                            {getPatientSpecies(service.patientId)}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-500/30">
+                            <User className="w-4 h-4 text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              {getPatientName(service.patientId)}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {getPatientSpecies(service.patientId)} • {getPatientBreed(service.patientId)}
+                            </p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-[#e7e5f2]">
-                          <span>{getServiceIcon(service.service)}</span>
+                        <span className="inline-flex items-center gap-2 text-sm font-medium text-white bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
+                          <span className="text-base">{getServiceIcon(service.service)}</span>
                           {service.service}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-sm text-[#e7e5f2] max-w-xs truncate">
-                          {service.specifications}
-                        </p>
-                        {service.observations && (
-                          <p className="text-xs text-[#8a7f9e] mt-1 max-w-xs truncate">
-                            {service.observations}
+                        <div className="max-w-xs">
+                          <p className="text-sm text-white line-clamp-2">
+                            {service.specifications || 'Sin especificaciones'}
                           </p>
-                        )}
+                          {service.observations && (
+                            <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                              {service.observations}
+                            </p>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
-                          {service.paymentType}
-                        </span>
-                        {service.exchangeRate && (
-                          <p className="text-xs text-[#8a7f9e] mt-1">
-                            Tasa: {service.exchangeRate}
-                          </p>
-                        )}
+                        <div className="space-y-1">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
+                            {service.paymentType}
+                          </span>
+                          {service.exchangeRate && (
+                            <p className="text-xs text-gray-400">
+                              Tasa: {service.exchangeRate}
+                            </p>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-sm font-semibold text-[#39ff14]">
+                        <span className="text-sm font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
                           ${service.cost.toFixed(2)}
                         </span>
                       </td>
@@ -341,6 +405,6 @@ export default function GroomingServicesView() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
