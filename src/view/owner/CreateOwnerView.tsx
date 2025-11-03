@@ -51,7 +51,7 @@ export default function CreateOwnerView() {
   return (
     <>
       {/* Header con espaciado superior */}
-      <div className="mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
+      <div className="mt-10 lg:mt-0 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
         <div className="flex items-center gap-4 px-4 lg:px-0">
           <BackButton />
           <div>

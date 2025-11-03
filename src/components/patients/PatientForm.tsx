@@ -47,16 +47,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
     }
   };
 
- const handleVetSwitcherChange = (useCustom: boolean) => {
-  setUseCustomReferringVet(useCustom);
-  if (!useCustom) {
-    const fullName = `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim();
-    setValue("referringVet", fullName);
-  } else {
-    setValue("referringVet", "");
-  }
-};
-
+  const handleVetSwitcherChange = (useCustom: boolean) => {
+    setUseCustomReferringVet(useCustom);
+    if (!useCustom) {
+      const fullName = `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim();
+      setValue("referringVet", fullName);
+    } else {
+      setValue("referringVet", "");
+    }
+  };
 
   const calculateAge = (dateString: string) => {
     if (!dateString) {
@@ -92,46 +91,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
 
   return (
     <div className="space-y-6">
-      {/* Sección de imagen - visible solo en móvil */}
-      <div className="lg:hidden">
-        <label className="block text-sm font-medium text-gray-200 mb-2">
-          Foto de la mascota
-        </label>
-        <div className="flex items-center gap-3">
-          {previewImage ? (
-            <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-600">
-              <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => setPreviewImage(null)}
-                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30">
-              <Upload className="w-6 h-6 text-gray-400" />
-            </div>
-          )}
-          
-          <label className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm text-gray-200">
-            <Upload className="w-4 h-4" />
-            {previewImage ? 'Cambiar imagen' : 'Subir imagen'}
-            <input
-              type="file"
-              accept="image/*"
-              {...register("photo", { required: false })}
-              onChange={(e) => {
-                register("photo").onChange(e);
-                handleImageChange(e);
-              }}
-              className="hidden"
-            />
-          </label>
-        </div>
-      </div>
-
       {/* Grid adaptable */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Nombre del paciente - Ocupa 2 columnas en desktop */}
@@ -158,26 +117,32 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
           )}
         </div>
 
-        {/* Imagen en desktop - ocupa 1 columna */}
-        <div className="hidden lg:block">
+        {/* Foto - visible en todos los dispositivos, estilo mobile */}
+        <div className="lg:col-span-1">
           <label className="block text-sm font-medium text-gray-200 mb-2">
             Foto
           </label>
-          {previewImage ? (
-            <div className="relative h-[50px] rounded-lg overflow-hidden border-2 border-gray-600">
-              <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => setPreviewImage(null)}
-                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <label className="h-[50px] rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30 hover:border-blue-500 transition-colors cursor-pointer">
-              <Upload className="w-5 h-5 text-gray-400 mr-2" />
-              <span className="text-sm text-gray-400">Subir</span>
+          <div className="flex items-center gap-3">
+            {previewImage ? (
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-600">
+                <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setPreviewImage(null)}
+                  className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30">
+                <Upload className="w-6 h-6 text-gray-400" />
+              </div>
+            )}
+            
+            <label className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm text-gray-200">
+              <Upload className="w-4 h-4" />
+              {previewImage ? 'Cambiar imagen' : 'Subir imagen'}
               <input
                 type="file"
                 accept="image/*"
@@ -189,7 +154,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
                 className="hidden"
               />
             </label>
-          )}
+          </div>
         </div>
 
         {/* Fecha de nacimiento */}
@@ -387,7 +352,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
           <input
             type="hidden"
             {...register("referringVet")}
-            value={`M.V. ${vetmain?.name}` || ""}
+            value={`M.V. ${vetmain?.name} ${vetmain?.lastName}`.trim() || ""}
           />
         )}
       </div>

@@ -1,19 +1,28 @@
 // src/layout/AppLayout.tsx
 import React, { useState } from 'react';
-import { Bell, Home, LogOut } from 'lucide-react';
+import { 
+  Bell, 
+  Home as HomeIcon,
+  LogOut,
+  User,
+  PawPrint,
+  Scissors,
+  FileText,
+  BarChart3
+} from 'lucide-react';
 import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useAuth } from '../hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 
-// Menú común
+// Menú común - Iconos profesionales de Lucide
 const menuItems = [
-  { to: '/', label: 'Inicio', icon: '🏠' },
-  { to: '/owners', label: 'Dueño', icon: '👤' },
-  { to: '/patients', label: 'Mascota', icon: '🐾' },
-  { to: '/grooming-services', label: 'Peluquería', icon: '🛁' },
-  { to: '/medical-history', label: 'Consulta', icon: '📋' },
-  { to: '/reports', label: 'Reportes', icon: '📊' },
+  { to: '/', label: 'Inicio', icon: HomeIcon },
+  { to: '/owners', label: 'Dueño', icon: User },
+  { to: '/patients', label: 'Mascota', icon: PawPrint },
+  { to: '/grooming-services', label: 'Peluquería', icon: Scissors },
+  { to: '/medical-history', label: 'Consulta', icon: FileText },
+  { to: '/reports', label: 'Reportes', icon: BarChart3 },
 ];
 
 // Sidebar para desktop (logo + menú + usuario)
@@ -45,20 +54,30 @@ const SidebarDesktop: React.FC<{ activeItem: string; setActiveItem: (to: string)
       <nav className="flex-1 px-4 py-5 overflow-y-auto">
         <div className="space-y-1">
           {menuItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setActiveItem(item.to)}
-              className={`
-                group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300
-                ${activeItem === item.to
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-muted hover:text-primary hover:bg-primary/5'}
-              `}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-sm whitespace-nowrap">{item.label}</span>
-            </Link>
+           <Link
+  key={item.to}
+  to={item.to}
+  onClick={() => setActiveItem(item.to)}
+  className={`
+    group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300
+    ${activeItem === item.to
+      ? 'bg-primary/10'
+      : 'hover:bg-primary/5'}
+  `}
+>
+  <item.icon 
+    className={`w-5 h-5 flex-shrink-0 ${
+      activeItem === item.to ? 'text-primary' : 'text-blue-300 group-hover:text-primary'
+    }`} 
+  />
+  <span 
+    className={`text-sm whitespace-nowrap ${
+      activeItem === item.to ? 'text-primary font-medium' : 'text-muted group-hover:text-primary'
+    }`}
+  >
+    {item.label}
+  </span>
+</Link>
           ))}
         </div>
       </nav>
@@ -144,7 +163,7 @@ const SidebarDesktop: React.FC<{ activeItem: string; setActiveItem: (to: string)
   );
 };
 
-// Header Mobile/Tablet (sin cambios)
+// Header Mobile/Tablet
 const HeaderMobile: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const queryClient = useQueryClient();
@@ -233,7 +252,7 @@ const HeaderMobile: React.FC = () => {
   );
 };
 
-// Footer (sin cambios)
+// Footer
 const Footer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const navigate = useNavigate();
@@ -246,7 +265,7 @@ const Footer: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'home', icon: Home, label: 'Inicio', action: () => { setActiveTab('home'); navigate('/'); } },
+    { id: 'home', icon: HomeIcon, label: 'Inicio', action: () => { setActiveTab('home'); navigate('/'); } },
     { id: 'notif', icon: Bell, label: 'Notificaciones', action: () => { setActiveTab('notif'); navigate('/notifications'); } },
     { id: 'logout', icon: LogOut, label: 'Salir', action: handleLogout },
   ];
@@ -307,7 +326,7 @@ const AppLayout: React.FC = () => {
 
         {/* Contenido principal */}
         <main className="pt-20 pb-24 lg:pt-0 lg:pb-0 lg:pl-64 px-4 relative z-10 min-h-screen">
-          <div className="max-w-md lg:max-w-7xl lg:p-10 mx-auto w-full">
+          <div className="w-full sm:max-w-lg md:max-w-3xl lg:max-w-7xl lg:p-10 mx-auto">
             <Outlet />
           </div>
         </main>
