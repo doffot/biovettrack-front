@@ -19,12 +19,12 @@ import HomeView from "./view/home/HomeView";
 // ✅ Solo la vista que ya tienes
 import CreateAppointmentView from "./view/appointment/CreateAppointmentView";
 import LabExamListView from "./view/labExams/labExamListView";
-import LoginView from "./view/aurth/LoginView";
-import RegisterView from "./view/aurth/RegisterView";
-import ConfirmAccountView from "./view/aurth/ConfirmAccountView";
-import RequestNewToken from "./view/aurth/RequestNewToken";
-import ForgotPasswordView from "./view/aurth/ForgotPasswordView";
-import NewPasswordView from "./view/aurth/NewPasswordView";
+import LoginView from "./view/auth/LoginView";
+import RegisterView from "./view/auth/RegisterView";
+import ConfirmAccountView from "./view/auth/ConfirmAccountView";
+import RequestNewToken from "./view/auth/RequestNewToken";
+import ForgotPasswordView from "./view/auth/ForgotPasswordView";
+import NewPasswordView from "./view/auth/NewPasswordView";
 
 export default function Router() {
   return (

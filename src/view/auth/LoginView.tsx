@@ -15,7 +15,7 @@ export default function LoginView() {
   };
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   const {
     register,

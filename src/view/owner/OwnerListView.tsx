@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { deleteOwners, getOwners } from "../../api/OwnerAPI";
-import BackButton from "../../components/BackButton";
 import {
   Eye,
   Edit,

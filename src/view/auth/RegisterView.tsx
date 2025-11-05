@@ -6,7 +6,7 @@ import { createAccount } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import type { UserRegistrationForm } from "../../types";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Phone, FileText, MapPin, ArrowLeft } from "lucide-react";
+import { Mail, Lock, User, Phone, FileText, MapPin } from "lucide-react";
 import { useState } from "react";
 
 // Códigos internacionales

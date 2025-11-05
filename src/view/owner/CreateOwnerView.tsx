@@ -1,7 +1,6 @@
 // src/views/owners/CreateOwnerView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
-import BackButton from "../../components/BackButton";
 import type { OwnerFormData } from "../../types";
 import { createOwner } from "../../api/OwnerAPI";
 import { useNavigate } from "react-router-dom";

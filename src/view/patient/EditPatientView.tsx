@@ -14,7 +14,6 @@ import {
   Bone,
   ArrowLeft
 } from "lucide-react";
-import BackButton from "../../components/BackButton";
 
 export default function EditPatientView() {
   const { patientId } = useParams<{ patientId: string }>();
