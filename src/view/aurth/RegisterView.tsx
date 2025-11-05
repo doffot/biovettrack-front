@@ -5,7 +5,9 @@ import { useMutation } from "@tanstack/react-query";
 import { createAccount } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import type { UserRegistrationForm } from "../../types";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, User, Phone, FileText, MapPin, ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
 // Códigos internacionales
 const countryCodes = [
@@ -19,9 +21,9 @@ const countryCodes = [
 ];
 
 export default function RegisterView() {
-
   const navigate = useNavigate();
-
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
 
   const initialValues = {
     name: '',
@@ -39,11 +41,11 @@ export default function RegisterView() {
     somevepa: '',
   };
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: initialValues,
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: createAccount,
     onError: (error) => {
       toast.error(error.message);
@@ -56,332 +58,518 @@ export default function RegisterView() {
   });
 
   const handleRegister = (formData: any) => {
-    // Combinar el código de país con el número de WhatsApp
     const dataToSend: UserRegistrationForm = {
       ...formData,
       whatsapp: `${formData.countryCode}${formData.whatsapp}`,
     };
-    
-    // Eliminar countryCode del objeto final
     delete (dataToSend as any).countryCode;
-    
     mutate(dataToSend);
   };
 
-  return (
-    <div className="min-h-screen bg-[#0b132b] flex">
-      {/* Left Panel - Logo centrado */}
-      <div className="hidden lg:flex lg:w-[35%] bg-gradient-to-br from-[#0b132b] via-[#172554] to-[#1e293b] items-center justify-center p-8 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-[#39ff14]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8a7f9e]/5 rounded-full blur-3xl"></div>
-        
-        <div className="text-center max-w-md z-10">
-          <div className="mb-8 flex justify-center">
-            <Logo size="xl" showText={true} showSubtitle={false} layout="vertical" />
-          </div>
-          <p className="text-[#8a7f9e] text-lg leading-relaxed">
-            Sistema profesional de gestión veterinaria diseñado para optimizar tus procesos de trabajo.
-          </p>
-          <div className="mt-12 flex justify-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-[#39ff14]/30"></div>
-            <div className="w-3 h-3 rounded-full bg-[#39ff14]/50"></div>
-            <div className="w-3 h-3 rounded-full bg-[#39ff14]"></div>
-          </div>
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  // Mobile & Tablet Layout
+  const MobileTabletLayout = () => (
+    <div className="w-full max-w-2xl lg:hidden">
+      
+      {/* Header */}
+      <div className="text-center mb-6">
+        <Logo size="lg" showText={true} showSubtitle={true} layout="vertical" />
+        <div className="mt-4">
+          <h1 className="text-xl font-bold text-gray-900 mb-1">Crear Cuenta</h1>
+          <p className="text-gray-600 text-sm">Completa tus datos para registrarte</p>
         </div>
       </div>
 
-      {/* Right Panel - Formulario con scroll */}
-      <div className="flex-1 flex flex-col h-screen lg:w-[65%]">
-        {/* Mobile Logo - Fixed header */}
-        <div className="lg:hidden bg-[#0b132b] border-b border-[#8a7f9e]/20 py-4 px-4 flex justify-center sticky top-0 z-10">
-          <Logo size="lg" showText={true} showSubtitle={false} layout="vertical" />
+      {/* Progress Bar */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs font-medium text-gray-500">Paso {currentStep} de {totalSteps}</span>
+          <span className="text-xs font-medium text-vet-primary">{Math.round((currentStep / totalSteps) * 100)}%</span>
         </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-vet-primary h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          ></div>
+        </div>
+      </div>
 
-        {/* Scrollable form area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
-            <div className="w-full max-w-3xl">
-              <div className="bg-[#0b132b]/50 backdrop-blur-sm border border-[#8a7f9e]/20 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
-                <div className="mb-6">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-[#e7e5f2] mb-2 tracking-tight">Crear Cuenta</h2>
-                  <p className="text-[#8a7f9e] text-sm sm:text-base">
-                    Regístrate como veterinario para acceder al sistema
-                  </p>
+      {/* Form Card */}
+      <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+        <form onSubmit={handleSubmit(handleRegister)}>
+          
+          {/* Step 1: Información Personal */}
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Tu nombre"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.name ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("name", { required: "El nombre es obligatorio" })}
+                    />
+                  </div>
+                  {errors.name && <p className="text-red-600 text-xs">{errors.name.message as string}</p>}
                 </div>
 
-                <form onSubmit={handleSubmit(handleRegister)} className="space-y-4">
-                  {/* Nombre y Apellido */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="name" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        Nombre
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        placeholder="Tu nombre"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.name ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("name", { required: "El nombre es obligatorio" })}
-                      />
-                      {errors.name && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.name.message as string}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="lastName" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        Apellido
-                      </label>
-                      <input
-                        id="lastName"
-                        type="text"
-                        placeholder="Tu apellido"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.lastName ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("lastName", { required: "El apellido es obligatorio" })}
-                      />
-                      {errors.lastName && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.lastName.message as string}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label htmlFor="email" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                      Email
-                    </label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
-                      id="email"
-                      type="email"
-                      placeholder="correo@ejemplo.com"
-                      className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                        errors.email ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
+                      type="text"
+                      placeholder="Tu apellido"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.lastName ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
                       }`}
-                      {...register("email", {
-                        required: "El email es obligatorio",
-                        pattern: {
-                          value: /\S+@\S+\.\S+/,
-                          message: "Email no válido",
-                        },
-                      })}
+                      {...register("lastName", { required: "El apellido es obligatorio" })}
                     />
-                    {errors.email && (
-                      <p className="text-[#ff5e5b] text-xs mt-1">{errors.email.message as string}</p>
-                    )}
                   </div>
-
-                  {/* WhatsApp con código internacional */}
-                  <div>
-                    <label className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                      WhatsApp
-                    </label>
-                    <div className="flex gap-2">
-                      <select
-                        {...register("countryCode")}
-                        className="w-1/3 sm:w-1/4 px-3 py-2.5 bg-[#0b132b] border-2 border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] focus:border-[#39ff14] focus:outline-none"
-                      >
-                        {countryCodes.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.code} ({country.name})
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="tel"
-                        placeholder="4121234567"
-                        className={`flex-1 px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.whatsapp ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("whatsapp", {
-                          required: "El WhatsApp es obligatorio",
-                          pattern: {
-                            value: /^[0-9]+$/,
-                            message: "Solo números sin espacios",
-                          },
-                        })}
-                      />
-                    </div>
-                    {errors.whatsapp && (
-                      <p className="text-[#ff5e5b] text-xs mt-1">{errors.whatsapp.message as string}</p>
-                    )}
-                  </div>
-
-                  {/* CI y CMV */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="ci" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        Cédula (CI)
-                      </label>
-                      <input
-                        id="ci"
-                        type="text"
-                        placeholder="V-12345678"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.ci ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("ci", { required: "La cédula es obligatoria" })}
-                      />
-                      {errors.ci && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.ci.message as string}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="cmv" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        CMV
-                      </label>
-                      <input
-                        id="cmv"
-                        type="text"
-                        placeholder="Número de CMV"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.cmv ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("cmv", { required: "El CMV es obligatorio" })}
-                      />
-                      {errors.cmv && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.cmv.message as string}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Estado */}
-                  <div>
-                    <label htmlFor="estado" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                      Estado
-                    </label>
-                    <select
-                      id="estado"
-                      className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] focus:outline-none transition-colors duration-200 appearance-none ${
-                        errors.estado ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                      }`}
-                      {...register("estado", { required: "El estado es obligatorio" })}
-                    >
-                      <option value="">Selecciona un estado</option>
-                      {estadosVenezuela.map((estado) => (
-                        <option key={estado} value={estado}>
-                          {estado}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.estado && (
-                      <p className="text-[#ff5e5b] text-xs mt-1">{errors.estado.message as string}</p>
-                    )}
-                  </div>
-
-                  {/* Contraseñas */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="password" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        Contraseña
-                      </label>
-                      <input
-                        id="password"
-                        type="password"
-                        placeholder="Mínimo 6 caracteres"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.password ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("password", {
-                          required: "La contraseña es obligatoria",
-                          minLength: { value: 6, message: "Mínimo 6 caracteres" },
-                        })}
-                      />
-                      {errors.password && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.password.message as string}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="confirmPassword" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-1.5">
-                        Confirmar Contraseña
-                      </label>
-                      <input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="Repite tu contraseña"
-                        className={`w-full px-4 py-2.5 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                          errors.confirmPassword ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                        }`}
-                        {...register("confirmPassword", {
-                          required: "Debes confirmar la contraseña",
-                          validate: (value, formValues) =>
-                            value === formValues.password || "Las contraseñas no coinciden",
-                        })}
-                      />
-                      {errors.confirmPassword && (
-                        <p className="text-[#ff5e5b] text-xs mt-1">{errors.confirmPassword.message as string}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Campos opcionales */}
-                  <div className="pt-3 border-t border-[#8a7f9e]/20">
-                    <h3 className="text-xs font-semibold text-[#8a7f9e] uppercase tracking-wide mb-3">
-                      Información Adicional (Opcional)
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <label htmlFor="runsai" className="block text-xs text-[#e7e5f2] mb-1.5">RUNSAI</label>
-                        <input
-                          id="runsai"
-                          type="text"
-                          placeholder="Número RUNSAI"
-                          className="w-full px-4 py-2 bg-[#0b132b] border border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:border-[#39ff14] focus:outline-none text-sm"
-                          {...register("runsai")}
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="msds" className="block text-xs text-[#e7e5f2] mb-1.5">MSDS</label>
-                        <input
-                          id="msds"
-                          type="text"
-                          placeholder="Código MSDS"
-                          className="w-full px-4 py-2 bg-[#0b132b] border border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:border-[#39ff14] focus:outline-none text-sm"
-                          {...register("msds")}
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="somevepa" className="block text-xs text-[#e7e5f2] mb-1.5">SOMEVEPA</label>
-                        <input
-                          id="somevepa"
-                          type="text"
-                          placeholder="Número SOMEVEPA"
-                          className="w-full px-4 py-2 bg-[#0b132b] border border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:border-[#39ff14] focus:outline-none text-sm"
-                          {...register("somevepa")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-[#39ff14] hover:bg-[#39ff14]/90 text-[#0b132b] font-bold py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#39ff14]/20 hover:scale-[1.02] active:scale-[0.98] mt-4"
-                  >
-                    Registrarse
-                  </button>
-                </form>
-
-                <div className="mt-6 pt-5 border-t border-[#8a7f9e]/20 text-center">
-                  <p className="text-[#8a7f9e] text-sm">
-                    ¿Ya tienes cuenta?{' '}
-                    <a href="#" className="text-[#39ff14] hover:text-[#39ff14]/80 font-semibold transition-colors">
-                      Inicia sesión aquí
-                    </a>
-                  </p>
+                  {errors.lastName && <p className="text-red-600 text-xs">{errors.lastName.message as string}</p>}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                      errors.email ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                    }`}
+                    {...register("email", {
+                      required: "El email es obligatorio",
+                      pattern: { value: /\S+@\S+\.\S+/, message: "Email no válido" },
+                    })}
+                  />
+                </div>
+                {errors.email && <p className="text-red-600 text-xs">{errors.email.message as string}</p>}
+              </div>
+
+              <button
+                type="button"
+                onClick={nextStep}
+                className="w-full bg-vet-primary text-white font-medium py-3 rounded-lg hover:bg-vet-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2"
+              >
+                Continuar
+              </button>
             </div>
+          )}
+
+          {/* Step 2: Información Profesional */}
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">WhatsApp</label>
+                <div className="flex gap-2">
+                  <div className="relative w-1/3">
+                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <select
+                      {...register("countryCode")}
+                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-vet-primary focus:border-vet-primary appearance-none"
+                    >
+                      {countryCodes.map((country) => (
+                        <option key={country.code} value={country.code}>{country.code}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="relative flex-1">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="tel"
+                      placeholder="4121234567"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.whatsapp ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("whatsapp", {
+                        required: "El WhatsApp es obligatorio",
+                        pattern: { value: /^[0-9]+$/, message: "Solo números" },
+                      })}
+                    />
+                  </div>
+                </div>
+                {errors.whatsapp && <p className="text-red-600 text-xs">{errors.whatsapp.message as string}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Cédula (CI)</label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="V-12345678"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.ci ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("ci", { required: "La cédula es obligatoria" })}
+                    />
+                  </div>
+                  {errors.ci && <p className="text-red-600 text-xs">{errors.ci.message as string}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">CMV</label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Número CMV"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.cmv ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("cmv", { required: "El CMV es obligatorio" })}
+                    />
+                  </div>
+                  {errors.cmv && <p className="text-red-600 text-xs">{errors.cmv.message as string}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Estado</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <select
+                    {...register("estado", { required: "El estado es obligatorio" })}
+                    className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 focus:outline-none transition-all appearance-none ${
+                      errors.estado ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                    }`}
+                  >
+                    <option value="">Selecciona un estado</option>
+                    {estadosVenezuela.map((estado) => (
+                      <option key={estado} value={estado}>{estado}</option>
+                    ))}
+                  </select>
+                </div>
+                {errors.estado && <p className="text-red-600 text-xs">{errors.estado.message as string}</p>}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="flex-1 bg-gray-100 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  Atrás
+                </button>
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="flex-1 bg-vet-primary text-white font-medium py-3 rounded-lg hover:bg-vet-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2"
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Contraseña y Registro */}
+          {currentStep === 3 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="password"
+                      placeholder="Mínimo 6 caracteres"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.password ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("password", {
+                        required: "La contraseña es obligatoria",
+                        minLength: { value: 6, message: "Mínimo 6 caracteres" },
+                      })}
+                    />
+                  </div>
+                  {errors.password && <p className="text-red-600 text-xs">{errors.password.message as string}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="password"
+                      placeholder="Repite tu contraseña"
+                      className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                        errors.confirmPassword ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                      }`}
+                      {...register("confirmPassword", {
+                        required: "Confirma tu contraseña",
+                        validate: value => value === watch('password') || "Las contraseñas no coinciden",
+                      })}
+                    />
+                  </div>
+                  {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message as string}</p>}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="flex-1 bg-gray-100 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  Atrás
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex-1 bg-vet-primary text-white font-medium py-3 rounded-lg hover:bg-vet-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPending ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Creando cuenta...</span>
+                    </div>
+                  ) : (
+                    "Registrarse"
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </form>
+
+        <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+          <p className="text-gray-600 text-sm">
+            ¿Ya tienes cuenta?{' '}
+            <Link to="/auth/login" className="text-vet-primary hover:text-vet-secondary font-medium transition-colors">
+              Inicia sesión aquí
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Desktop Layout
+  const DesktopLayout = () => (
+    <div className="hidden lg:flex w-full max-w-6xl bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      
+      {/* Left Panel */}
+      <div className="w-2/5 bg-gradient-to-br from-vet-primary to-vet-secondary p-8 flex flex-col justify-center">
+        <div className="text-white">
+          <div className="mb-6">
+            <Logo size="xl" showText={true} showSubtitle={true} layout="vertical" textClassName="text-white" subtitleClassName="text-white/80" />
+          </div>
+          
+          <h1 className="text-2xl font-bold mb-4">Únete a nuestra comunidad</h1>
+          <p className="text-white/80 mb-6">Registra tu consultorio y optimiza tu gestión veterinaria</p>
+          
+          <div className="space-y-3">
+            {['Gestión de pacientes', 'Control de citas', 'Reportes automáticos', 'Soporte especializado'].map((feature, index) => (
+              <div key={index} className="flex items-center gap-2 text-white/90">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <span className="text-sm">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* Right Panel */}
+      <div className="w-3/5 p-8">
+        <div className="max-w-md mx-auto">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Crear Cuenta</h2>
+            <p className="text-gray-600">Completa tus datos profesionales</p>
+          </div>
+
+          <form onSubmit={handleSubmit(handleRegister)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.name ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("name", { required: "El nombre es obligatorio" })}
+                />
+                {errors.name && <p className="text-red-600 text-xs">{errors.name.message as string}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                <input
+                  type="text"
+                  placeholder="Tu apellido"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.lastName ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("lastName", { required: "El apellido es obligatorio" })}
+                />
+                {errors.lastName && <p className="text-red-600 text-xs">{errors.lastName.message as string}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                  errors.email ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                }`}
+                {...register("email", {
+                  required: "El email es obligatorio",
+                  pattern: { value: /\S+@\S+\.\S+/, message: "Email no válido" },
+                })}
+              />
+              {errors.email && <p className="text-red-600 text-xs">{errors.email.message as string}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">WhatsApp</label>
+              <div className="flex gap-3">
+                <select
+                  {...register("countryCode")}
+                  className="w-1/3 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-vet-primary focus:border-vet-primary"
+                >
+                  {countryCodes.map((country) => (
+                    <option key={country.code} value={country.code}>{country.code}</option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  placeholder="4121234567"
+                  className={`flex-1 px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.whatsapp ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("whatsapp", {
+                    required: "El WhatsApp es obligatorio",
+                    pattern: { value: /^[0-9]+$/, message: "Solo números" },
+                  })}
+                />
+              </div>
+              {errors.whatsapp && <p className="text-red-600 text-xs">{errors.whatsapp.message as string}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Cédula (CI)</label>
+                <input
+                  type="text"
+                  placeholder="V-12345678"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.ci ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("ci", { required: "La cédula es obligatoria" })}
+                />
+                {errors.ci && <p className="text-red-600 text-xs">{errors.ci.message as string}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">CMV</label>
+                <input
+                  type="text"
+                  placeholder="Número CMV"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.cmv ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("cmv", { required: "El CMV es obligatorio" })}
+                />
+                {errors.cmv && <p className="text-red-600 text-xs">{errors.cmv.message as string}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Estado</label>
+              <select
+                {...register("estado", { required: "El estado es obligatorio" })}
+                className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 focus:outline-none transition-all ${
+                  errors.estado ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                }`}
+              >
+                <option value="">Selecciona un estado</option>
+                {estadosVenezuela.map((estado) => (
+                  <option key={estado} value={estado}>{estado}</option>
+                ))}
+              </select>
+              {errors.estado && <p className="text-red-600 text-xs">{errors.estado.message as string}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                <input
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.password ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("password", {
+                    required: "La contraseña es obligatoria",
+                    minLength: { value: 6, message: "Mínimo 6 caracteres" },
+                  })}
+                />
+                {errors.password && <p className="text-red-600 text-xs">{errors.password.message as string}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Confirmar</label>
+                <input
+                  type="password"
+                  placeholder="Repite tu contraseña"
+                  className={`w-full px-3 py-2.5 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.confirmPassword ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("confirmPassword", {
+                    required: "Confirma tu contraseña",
+                    validate: value => value === watch('password') || "Las contraseñas no coinciden",
+                  })}
+                />
+                {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message as string}</p>}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-vet-primary text-white font-medium py-3 rounded-lg hover:bg-vet-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Creando cuenta...</span>
+                </div>
+              ) : (
+                "Registrarse"
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+            <p className="text-gray-600 text-sm">
+              ¿Ya tienes cuenta?{' '}
+              <Link to="/auth/login" className="text-vet-primary hover:text-vet-secondary font-medium transition-colors">
+                Inicia sesión aquí
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 lg:p-8">
+      <MobileTabletLayout />
+      <DesktopLayout />
     </div>
   );
 }

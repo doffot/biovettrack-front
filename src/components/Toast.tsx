@@ -151,20 +151,36 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
     }
   };
 
-  const getBackgroundGradient = () => {
-    switch (toast.type) {
-      case 'success':
-        return { background: 'linear-gradient(90deg, rgba(34, 197, 94, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)' };
-      case 'error':
-        return { background: 'linear-gradient(90deg, rgba(239, 68, 68, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)' };
-      case 'warning':
-        return { background: 'linear-gradient(90deg, rgba(245, 158, 11, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)' };
-      case 'info':
-        return { background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)' };
-      default:
-        return { background: 'linear-gradient(90deg, rgba(107, 114, 128, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)' };
-    }
-  };
+const getBackgroundGradient = () => {
+  switch (toast.type) {
+    case 'success':
+      return {
+        background:
+          'linear-gradient(90deg, rgba(34, 197, 94, 0.45) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
+      };
+    case 'error':
+      return {
+        background:
+          'linear-gradient(90deg, rgba(239, 68, 68, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
+      };
+    case 'warning':
+      return {
+        background:
+          'linear-gradient(90deg, rgba(245, 158, 11, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
+      };
+    case 'info':
+      return {
+        background:
+          'linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
+      };
+    default:
+      return {
+        background:
+          'linear-gradient(90deg, rgba(107, 114, 128, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
+      };
+  }
+};
+
 
   const styles = getToastStyles();
   const IconComponent = styles.icon;

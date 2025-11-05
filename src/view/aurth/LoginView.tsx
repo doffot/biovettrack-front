@@ -5,12 +5,17 @@ import { login } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, Eye, EyeOff, Shield, User } from "lucide-react";
+import { useState } from "react";
 
 export default function LoginView() {
   const initialValues = {
     email: "",
     password: "",
   };
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -22,129 +27,313 @@ export default function LoginView() {
 
   const navigate = useNavigate();
 
-
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: login,
     onError: (error) => {
       toast.error(error.message);
+      setIsLoading(false);
     },
     onSuccess: () => {
-      toast.success("Iniciando sesión...");
+      toast.success("Bienvenido a BioVetTrack, tu panel clínico está listo.");
       navigate("/");
     },
   });
 
-  const handleLogin = (formData: UserLoginForm) => mutate(formData);
+  const handleLogin = (formData: UserLoginForm) => {
+    setIsLoading(true);
+    mutate(formData);
+  };
 
   return (
-    <div className="min-h-screen bg-[#0b132b] flex">
-      {/* Left Panel - Logo */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#0b132b] via-[#172554] to-[#1e293b] items-center justify-center p-12">
-        <div className="max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 lg:p-8">
+      {/* Mobile & Tablet Layout */}
+      <div className="w-full max-w-md lg:hidden">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
           <Logo
             size="xl"
             showText={true}
-            showSubtitle={false}
+            showSubtitle={true}
             layout="vertical"
           />
-          <p className="mt-8 text-[#8a7f9e] text-lg leading-relaxed">
-            Sistema profesional de gestión diseñado para optimizar tus procesos
-            de trabajo.
-          </p>
-        </div>
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8 flex justify-center">
-            <Logo
-              size="lg"
-              showText={true}
-              showSubtitle={false}
-              layout="vertical"
-            />
+          <div className="mt-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Bienvenido de vuelta
+            </h1>
+            <p className="text-gray-600 text-sm">
+              Accede a tu panel de control veterinario
+            </p>
           </div>
+        </div>
 
-          <div className="bg-[#0b132b] border border-[#8a7f9e]/20 rounded-2xl p-8 shadow-xl">
-            {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[#e7e5f2] mb-2">
-                Iniciar Sesión
-              </h2>
-              <p className="text-[#8a7f9e]">
-                Ingresa tus credenciales para continuar
-              </p>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-6">
-              {/* Email Field */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-semibold text-[#e7e5f2] uppercase tracking-wide"
-                >
-                  Email
-                </label>
-
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <form onSubmit={handleSubmit(handleLogin)} className="space-y-5">
+            
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="email"
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  className="w-full px-4 py-3 bg-[#0b132b] border-2 border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:border-[#39ff14] focus:outline-none transition-colors duration-200"
+                  className={`w-full pl-10 pr-4 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.email 
+                      ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
                   {...register("email", {
-                    required: "El Email es obligatorio",
+                    required: "El correo electrónico es obligatorio",
                     pattern: {
                       value: /\S+@\S+\.\S+/,
-                      message: "E-mail no válido",
+                      message: "Correo electrónico no válido",
                     },
                   })}
                 />
+              </div>
+              {errors.email && (
+                <p className="text-red-600 text-sm font-medium">{errors.email.message}</p>
+              )}
+            </div>
 
-                <div className="h-5">
-                  {errors.email && (
-                    <p className="text-[#ff5e5b] text-sm font-medium">
-                      {errors.email.message}
-                    </p>
-                  )}
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Contraseña
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Tu contraseña"
+                  className={`w-full pl-10 pr-12 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                    errors.password 
+                      ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  }`}
+                  {...register("password", {
+                    required: "La contraseña es obligatoria",
+                    minLength: {
+                      value: 6,
+                      message: "La contraseña debe tener al menos 6 caracteres",
+                    },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-600 text-sm font-medium">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* Forgot Password */}
+            <div className="text-right">
+              <Link
+                to="/auth/forgot-password"
+                className="text-sm text-vet-primary hover:text-vet-secondary font-medium transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isPending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Iniciando sesión...</span>
+                </div>
+              ) : (
+                "Iniciar Sesión"
+              )}
+            </button>
+          </form>
+
+          {/* Register Link */}
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-gray-600 text-sm">
+              ¿No tienes cuenta?{" "}
+              <Link
+                to="/auth/register"
+                className="text-vet-primary hover:text-vet-secondary font-medium transition-colors"
+              >
+                Regístrate aquí
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Security Notice - Mobile */}
+        <div className="mt-6 p-4 bg-vet-light rounded-lg border border-vet-primary/20">
+          <div className="flex items-center justify-center gap-2 text-vet-primary text-sm">
+            <Shield className="h-4 w-4" />
+            <span>Tus datos están protegidos con encriptación</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden lg:flex w-full max-w-6xl bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        
+        {/* Left Panel - Branding */}
+        <div className="w-1/2 bg-gradient-to-br from-vet-primary to-vet-secondary p-12 flex flex-col justify-center relative">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white rounded-full"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white rounded-full"></div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="mb-8">
+              <Logo
+                size="xl"
+                showText={true}
+                showSubtitle={true}
+                layout="vertical"
+                textClassName="text-white"
+                subtitleClassName="text-white/80"
+              />
+            </div>
+            
+            <div className="space-y-6">
+              <h1 className="text-3xl font-bold text-white leading-tight">
+                Bienvenido de vuelta
+              </h1>
+              <p className="text-white/80 text-lg leading-relaxed">
+                Accede a tu panel de control veterinario para gestionar pacientes, citas y servicios.
+              </p>
+              
+              {/* Features List */}
+              <div className="space-y-4 mt-8">
+                <div className="flex items-center gap-3 text-white/90">
+                  <User className="h-5 w-5" />
+                  <span className="text-sm">Gestión integral de pacientes</span>
+                </div>
+                <div className="flex items-center gap-3 text-white/90">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm">Control de citas y servicios</span>
+                </div>
+                <div className="flex items-center gap-3 text-white/90">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span className="text-sm">Reportes y estadísticas</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Login Form */}
+        <div className="w-1/2 p-12 flex items-center justify-center">
+          <div className="w-full max-w-sm">
+            {/* Form Header */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Iniciar Sesión
+              </h2>
+              <p className="text-gray-600">
+                Ingresa tus credenciales para acceder al sistema
+              </p>
+            </div>
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
+              
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Correo Electrónico
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    className={`w-full pl-10 pr-4 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                      errors.email 
+                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                        : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                    }`}
+                    {...register("email", {
+                      required: "El correo electrónico es obligatorio",
+                      pattern: {
+                        value: /\S+@\S+\.\S+/,
+                        message: "Correo electrónico no válido",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-red-600 text-sm font-medium">{errors.email.message}</p>
+                )}
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-semibold text-[#e7e5f2] uppercase tracking-wide"
-                >
-                  Password
+                <label className="block text-sm font-medium text-gray-700">
+                  Contraseña
                 </label>
-
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Tu contraseña"
-                  className="w-full px-4 py-3 bg-[#0b132b] border-2 border-[#8a7f9e]/30 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:border-[#39ff14] focus:outline-none transition-colors duration-200"
-                  {...register("password", {
-                    required: "El Password es obligatorio",
-                  })}
-                />
-
-                <div className="h-5">
-                  {errors.password && (
-                    <p className="text-[#ff5e5b] text-sm font-medium">
-                      {errors.password.message}
-                    </p>
-                  )}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Tu contraseña"
+                    className={`w-full pl-10 pr-12 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                      errors.password 
+                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                        : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                    }`}
+                    {...register("password", {
+                      required: "La contraseña es obligatoria",
+                      minLength: {
+                        value: 6,
+                        message: "La contraseña debe tener al menos 6 caracteres",
+                      },
+                    })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-600 text-sm font-medium">{errors.password.message}</p>
+                )}
               </div>
 
-              {/* Forgot Password Link */}
+              {/* Forgot Password */}
               <div className="text-right">
                 <Link
                   to="/auth/forgot-password"
-                  className="text-sm text-[#39ff14] hover:text-[#39ff14]/80 font-medium transition-colors"
+                  className="text-sm text-vet-primary hover:text-vet-secondary font-medium transition-colors"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -152,21 +341,28 @@ export default function LoginView() {
 
               {/* Submit Button */}
               <button
-                onClick={handleSubmit(handleLogin)}
-                type="button"
-                className="w-full bg-[#39ff14] hover:bg-[#39ff14]/90 text-[#0b132b] font-bold py-3.5 rounded-lg transition-colors duration-200"
+                type="submit"
+                disabled={isPending}
+                className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                Iniciar Sesión
+                {isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Iniciando sesión...</span>
+                  </div>
+                ) : (
+                  "Iniciar Sesión"
+                )}
               </button>
-            </div>
+            </form>
 
             {/* Register Link */}
-            <div className="mt-6 pt-6 border-t border-[#8a7f9e]/20 text-center">
-              <p className="text-[#8a7f9e] text-sm">
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+              <p className="text-gray-600 text-sm">
                 ¿No tienes cuenta?{" "}
                 <Link
                   to="/auth/register"
-                  className="text-[#39ff14] hover:text-[#39ff14]/80 font-semibold transition-colors"
+                  className="text-vet-primary hover:text-vet-secondary font-medium transition-colors"
                 >
                   Regístrate aquí
                 </Link>

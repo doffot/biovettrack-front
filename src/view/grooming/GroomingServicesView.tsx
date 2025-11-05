@@ -1,9 +1,9 @@
 // src/views/GroomingServicesView.tsx
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, DollarSign, Scissors, AlertCircle, Plus, User, Search } from 'lucide-react';
+import { Calendar, DollarSign, Scissors, AlertCircle, Plus, User, Search, ArrowLeft } from 'lucide-react';
 import { getAllGroomingServices } from '../../api/groomingAPI';
-import BackButton from '../../components/BackButton';
+import { Link } from 'react-router-dom';
 
 type FilterPeriod = 'today' | 'week' | 'month';
 
@@ -119,13 +119,13 @@ export default function GroomingServicesView() {
 
   const getPaymentBadgeColor = (paymentType: string) => {
     const colors: Record<string, string> = {
-      'Efectivo': 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-      'Pago Movil': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-      'Zelle': 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-      'Transferencia': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-      'Otro': 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+      'Efectivo': 'bg-green-100 text-green-700 border border-green-200',
+      'Pago Movil': 'bg-blue-100 text-blue-700 border border-blue-200',
+      'Zelle': 'bg-purple-100 text-purple-700 border border-purple-200',
+      'Transferencia': 'bg-orange-100 text-orange-700 border border-orange-200',
+      'Otro': 'bg-gray-100 text-gray-700 border border-gray-200'
     };
-    return colors[paymentType] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+    return colors[paymentType] || 'bg-gray-100 text-gray-700 border border-gray-200';
   };
 
   const formatDate = (dateString: string) => {
@@ -142,10 +142,12 @@ export default function GroomingServicesView() {
   // =====================================
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300 font-medium">Cargando servicios...</p>
+      <div className="w-full">
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-vet-text font-medium">Cargando servicios...</p>
+          </div>
         </div>
       </div>
     );
@@ -153,14 +155,18 @@ export default function GroomingServicesView() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center p-4">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 max-w-md backdrop-blur-sm">
-          <div className="flex items-center gap-3 text-red-400">
-            <AlertCircle className="w-6 h-6" />
-            <div>
-              <h3 className="font-semibold">Error al cargar servicios</h3>
-              <p className="text-sm mt-1 text-gray-300">{error?.message || 'Error desconocido'}</p>
-            </div>
+      <div className="w-full">
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
+            <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Error al cargar servicios</h2>
+            <p className="text-gray-600 mb-6">{error?.message || 'Error desconocido'}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+            >
+              Reintentar
+            </button>
           </div>
         </div>
       </div>
@@ -172,40 +178,67 @@ export default function GroomingServicesView() {
   // =====================================
   return (
     <>
-      {/* Header Fijo */}
-      <div className="fixed mt-10 lg:mt-0 top-16 left-0 right-0 lg:top-0 lg:left-64 z-40 bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/50 shadow-lg">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between gap-4 mb-4">
+      {/* Header Fijo Mejorado */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+        <div className="px-6 lg:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between gap-6 mb-6">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <BackButton />
+              {/* BackButton siempre visible */}
+              <Link
+                to="/"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                title="Volver al dashboard"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Servicios de Grooming</h1>
-                <p className="text-gray-400 text-sm">Gestión de servicios de peluquería</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-vet-primary/10 rounded-lg">
+                    <Scissors className="w-6 h-6 text-vet-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-vet-text">
+                    Servicios de Peluquería
+                  </h1>
+                </div>
+                <p className="text-vet-muted text-sm">
+                  Gestión de servicios de peluquería
+                </p>
+              </div>
+            </div>
+
+            {/* Estadísticas */}
+            <div className="hidden lg:flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-vet-text">{totals.count}</p>
+                <p className="text-vet-muted text-sm">Total servicios</p>
               </div>
             </div>
 
             {/* Botón "Nuevo Servicio" */}
             <div className="hidden sm:block flex-shrink-0">
-              <a 
-                href="/patients"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500 font-medium text-sm transition-colors whitespace-nowrap border border-emerald-500/30"
+              <Link
+                to="/patients"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 <span>Nuevo Servicio</span>
-              </a>
+              </Link>
             </div>
           </div>
 
           {/* Search Bar y Filtros */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative flex-1 max-w-2xl w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="relative flex-1 max-w-2xl">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="w-5 h-5 text-vet-muted" />
+              </div>
               <input
                 type="text"
                 placeholder="Buscar por paciente, servicio o especificaciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-vet-light border border-vet-muted/30 rounded-xl text-vet-text placeholder-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors"
               />
             </div>
 
@@ -214,8 +247,8 @@ export default function GroomingServicesView() {
                 onClick={() => setFilterPeriod('today')}
                 className={`flex-1 sm:flex-none px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
                   filterPeriod === 'today'
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                    ? 'bg-vet-primary text-white shadow-sm'
+                    : 'bg-vet-light text-vet-text hover:bg-vet-primary/10 border border-vet-muted/20'
                 }`}
               >
                 Hoy
@@ -224,8 +257,8 @@ export default function GroomingServicesView() {
                 onClick={() => setFilterPeriod('week')}
                 className={`flex-1 sm:flex-none px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
                   filterPeriod === 'week'
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                    ? 'bg-vet-primary text-white shadow-sm'
+                    : 'bg-vet-light text-vet-text hover:bg-vet-primary/10 border border-vet-muted/20'
                 }`}
               >
                 Semana
@@ -234,8 +267,8 @@ export default function GroomingServicesView() {
                 onClick={() => setFilterPeriod('month')}
                 className={`flex-1 sm:flex-none px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
                   filterPeriod === 'month'
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                    ? 'bg-vet-primary text-white shadow-sm'
+                    : 'bg-vet-light text-vet-text hover:bg-vet-primary/10 border border-vet-muted/20'
                 }`}
               >
                 Mes
@@ -245,53 +278,53 @@ export default function GroomingServicesView() {
         </div>
       </div>
 
-      {/* Espacio para el header fijo - Ajustado para tablets */}
-      <div className="h-48 sm:h-44 lg:h-40"></div>
+      {/* Espacio para el header fijo */}
+      <div className="h-55 md:h-45 lg:h-38"></div>
 
       {/* Botón flotante móvil */}
-      <a 
-        href="/patients"
-        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg active:scale-95 transition-all"
+      <Link
+        to="/patients"
+        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
       >
         <Plus className="w-6 h-6" />
-      </a>
+      </Link>
 
       {/* Contenido Principal */}
-      <div className="px-4 mt-15 md:mt-8 lg:mt-0 sm:px-6 md:px-8 max-w-7xl mx-auto pb-12">
-        {/* Estadísticas - Mejorado para tablets */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50">
-            <div className="flex items-center justify-between w-full">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
+        {/* Estadísticas - Mejorado */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 font-medium">Total Servicios</p>
-                <p className="text-xl sm:text-2xl font-bold text-white mt-1">{totals.count}</p>
+                <p className="text-sm text-gray-600 font-medium">Total Servicios</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{totals.count}</p>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
-                <Scissors className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+              <div className="w-12 h-12 bg-vet-primary/10 rounded-xl flex items-center justify-center border border-vet-primary/20">
+                <Scissors className="w-6 h-6 text-vet-primary" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 font-medium">Ingresos Totales</p>
-                <p className="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">${totals.total.toFixed(2)}</p>
+                <p className="text-sm text-gray-600 font-medium">Ingresos Totales</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">${totals.total.toFixed(2)}</p>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
-                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center border border-green-200">
+                <DollarSign className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50 sm:col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 font-medium">Promedio por Servicio</p>
-                <p className="text-xl sm:text-2xl font-bold text-white mt-1">${totals.average.toFixed(2)}</p>
+                <p className="text-sm text-gray-600 font-medium">Promedio por Servicio</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">${totals.average.toFixed(2)}</p>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200">
+                <Calendar className="w-6 h-6 text-blue-600" />
               </div>
             </div>
           </div>
@@ -299,151 +332,165 @@ export default function GroomingServicesView() {
 
         {/* Lista de Servicios - Versión Responsive */}
         {filteredServices.length === 0 ? (
-          <div className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 sm:p-12 text-center border border-gray-700/50">
-            <Scissors className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">
+          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200 shadow-sm">
+            <Scissors className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
               {searchTerm ? "No hay resultados" : "No hay servicios en este período"}
             </h3>
-            <p className="text-gray-400 text-sm sm:text-base">
+            <p className="text-gray-600 mb-6">
               {searchTerm 
                 ? "Intenta con otros términos de búsqueda" 
                 : "Intenta cambiar el filtro para ver más resultados"
               }
             </p>
+            {!searchTerm && (
+              <Link
+                to="/patients"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+              >
+                <Plus className="w-5 h-5" />
+                Crear Primer Servicio
+              </Link>
+            )}
           </div>
         ) : (
           <>
             {/* 👇 Versión para Móvil (pantallas pequeñas) 👇 */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden grid gap-4">
               {filteredServices.map((service) => (
-                <div key={service._id} className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 border border-gray-700/50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-2 text-sm text-white mb-2">
-                        <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div key={service._id} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
                         <span>{formatDate(service.date)}</span>
                       </div>
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-lg font-semibold text-gray-900">
                         {getPatientName(service.patientId)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm text-gray-500">
                         {getPatientSpecies(service.patientId)} • {getPatientBreed(service.patientId)}
                       </p>
                     </div>
-                    <span className="inline-flex text-sm font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
+                    <span className="text-lg font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg border border-green-200">
                       ${service.cost.toFixed(2)}
                     </span>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-gray-700/30">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm">{getServiceIcon(service.service)}</span>
-                      <span className="text-sm font-medium text-white">{service.service}</span>
+                  
+                  <div className="space-y-3 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{getServiceIcon(service.service)}</span>
+                      <span className="font-medium text-gray-900">{service.service}</span>
                     </div>
-                    <p className="text-sm text-gray-300 line-clamp-2">
-                      {service.specifications || 'Sin especificaciones'}
-                    </p>
-                    {service.observations && (
-                      <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                        {service.observations}
+                    
+                    <div>
+                      <p className="text-sm text-gray-700">
+                        {service.specifications || 'Sin especificaciones'}
                       </p>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
-                      {service.paymentType}
-                    </span>
-                    {service.exchangeRate && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Tasa: {service.exchangeRate}
-                      </p>
-                    )}
+                      {service.observations && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {service.observations}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
+                        {service.paymentType}
+                      </span>
+                      {service.exchangeRate && (
+                        <span className="text-sm text-gray-500">
+                          Tasa: {service.exchangeRate}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* 👇 Versión para Tablet/Desktop (pantallas medianas y grandes) 👇 */}
-            <div className="hidden lg:block bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden">
+            {/* 👇 Versión para Desktop (pantallas grandes) 👇 */}
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-900/50 border-b border-gray-700/50">
+                  <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Fecha
                       </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Paciente
                       </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Servicio
                       </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Especificaciones
                       </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Pago
                       </th>
-                      <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 uppercase tracking-wider">
                         Costo
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700/50">
+                  <tbody className="divide-y divide-gray-200">
                     {filteredServices.map((service) => (
-                      <tr key={service._id} className="hover:bg-gray-700/20 transition-colors group">
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2 text-sm text-white">
-                            <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm">{formatDate(service.date)}</span>
+                      <tr key={service._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2 text-sm text-gray-900">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span>{formatDate(service.date)}</span>
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-500/30 flex-shrink-0">
-                              <User className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-vet-primary/10 rounded-lg flex items-center justify-center border border-vet-primary/20">
+                              <User className="w-5 h-5 text-vet-primary" />
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-white truncate">
+                            <div>
+                              <p className="font-medium text-gray-900">
                                 {getPatientName(service.patientId)}
                               </p>
-                              <p className="text-xs text-gray-400 truncate">
+                              <p className="text-sm text-gray-500">
                                 {getPatientSpecies(service.patientId)} • {getPatientBreed(service.patientId)}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-white bg-gray-700/50 px-2 sm:px-3 py-1.5 rounded-lg border border-gray-600/50">
-                            <span className="text-sm">{getServiceIcon(service.service)}</span>
-                            <span className="truncate max-w-20 sm:max-w-none">{service.service}</span>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 bg-gray-100 px-3 py-2 rounded-lg border border-gray-200">
+                            <span className="text-base">{getServiceIcon(service.service)}</span>
+                            {service.service}
                           </span>
                         </td>
-                        <td className="px-4 sm:px-6 py-4">
-                          <div className="max-w-[150px] sm:max-w-xs">
-                            <p className="text-xs sm:text-sm text-white line-clamp-2">
+                        <td className="px-6 py-4">
+                          <div className="max-w-xs">
+                            <p className="text-sm text-gray-900">
                               {service.specifications || 'Sin especificaciones'}
                             </p>
                             {service.observations && (
-                              <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                              <p className="text-sm text-gray-500 mt-1">
                                 {service.observations}
                               </p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="space-y-1">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentBadgeColor(service.paymentType)}`}>
                               {service.paymentType}
                             </span>
                             {service.exchangeRate && (
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-gray-500">
                                 Tasa: {service.exchangeRate}
                               </p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
-                          <span className="inline-flex text-xs sm:text-sm font-semibold text-emerald-400 bg-emerald-500/10 px-2 sm:px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <span className="text-lg font-bold text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                             ${service.cost.toFixed(2)}
                           </span>
                         </td>

@@ -1,4 +1,4 @@
-// src/views/patients/PatientDetailView.tsx
+// src/views/patient/PatientDetailView.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,8 +17,8 @@ import {
   Upload,
   X,
   Camera,
+  ArrowLeft
 } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { getOwnersById } from "../../api/OwnerAPI";
 
@@ -141,8 +141,8 @@ export default function PatientDetailView() {
       <div className="w-full">
         <div className="flex items-center justify-center h-[70vh]">
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-red-500">Cargando mascota...</p>
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-vet-text font-medium">Cargando mascota...</p>
           </div>
         </div>
       </div>
@@ -153,14 +153,21 @@ export default function PatientDetailView() {
     return (
       <div className="w-full">
         <div className="flex items-center justify-center h-[70vh]">
-          <div className="bg-gray-800 p-6 rounded-xl border border-red-500/30 text-center max-w-md mx-auto">
-            <PawPrint className="w-12 h-12 mx-auto text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-white mb-2">
+          <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
+            <PawPrint className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
               Mascota no encontrada
             </h2>
-            <p className="text-gray-400">
+            <p className="text-gray-600 mb-6">
               La mascota que buscas no existe o ha sido eliminada
             </p>
+            <Link
+              to="/patients"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Volver a la lista
+            </Link>
           </div>
         </div>
       </div>
@@ -169,30 +176,59 @@ export default function PatientDetailView() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mt-10 lg:mt-0 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
-        <div className="flex items-center gap-4 px-4 lg:px-0">
-          <BackButton />
-          <h1 className="text-xl sm:text-2xl font-bold text-white">
-            {patient.name}
-          </h1>
-          <span className="hidden sm:inline text-gray-400 text-sm">
-            Información completa de la mascota
-          </span>
+      {/* Header Mejorado */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+        <div className="px-6 lg:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between gap-6 mb-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {/* BackButton siempre visible */}
+              <Link
+                to="/patients"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                title="Volver a la lista"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-vet-primary/10 rounded-lg">
+                    <PawPrint className="w-6 h-6 text-vet-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-vet-text">
+                    {patient.name}
+                  </h1>
+                </div>
+                <p className="text-vet-muted text-sm">
+                  Información completa de la mascota
+                </p>
+              </div>
+            </div>
+
+            {/* Botón Editar */}
+            <div className="hidden sm:block flex-shrink-0">
+              <Link
+                to={`/patients/edit/${patient._id}`}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
+              >
+                <Edit className="w-5 h-5" />
+                <span>Editar información</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Espaciador para el header fijo */}
+      <div className="h-40"></div>
+
       {/* Contenedor principal */}
-      <div
-        className={`-mx-4 lg:-mx-0 ${
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        } transition-all duration-500`}
-      >
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
+        <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
           {/* Columna izquierda: Foto y acciones */}
-          <div className="lg:w-80 xl:w-96 lg:flex-shrink-0 space-y-4 lg:space-y-6 mx-4 lg:mx-0">
+          <div className="lg:w-80 xl:w-96 lg:flex-shrink-0 space-y-6">
             {/* Tarjeta de foto */}
-            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               {patient.photo ? (
                 <div className="relative group">
                   <img
@@ -204,7 +240,7 @@ export default function PatientDetailView() {
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                       onClick={() => setShowPhotoModal(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-vet-primary hover:bg-vet-secondary text-white rounded-lg transition-colors"
                     >
                       <Camera className="w-4 h-4" />
                       Cambiar foto
@@ -212,17 +248,17 @@ export default function PatientDetailView() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full aspect-square bg-gray-700 flex items-center justify-center">
-                  <PawPrint className="w-24 h-24 text-red-500/30" />
+                <div className="w-full aspect-square bg-vet-light flex items-center justify-center">
+                  <PawPrint className="w-24 h-24 text-vet-primary/30" />
                 </div>
               )}
 
-              <div className="p-4 sm:p-6">
-                <h2 className="text-2xl font-bold text-white mb-2">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
                   {patient.name}
                 </h2>
-                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
-                  <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded-md font-medium">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                  <span className="px-3 py-1 bg-vet-primary/10 text-vet-primary rounded-full font-medium">
                     {patient.species}
                   </span>
                   <span>•</span>
@@ -237,7 +273,7 @@ export default function PatientDetailView() {
                 {!patient.photo && (
                   <button
                     onClick={() => setShowPhotoModal(true)}
-                    className="w-full mt-4 flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors"
+                    className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-colors"
                   >
                     <Camera className="w-4 h-4" />
                     Agregar foto
@@ -247,15 +283,16 @@ export default function PatientDetailView() {
             </div>
 
             {/* Botones de acción */}
-            <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
-                Acciones
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                Acciones Rápidas
               </h3>
 
               <div className="space-y-3">
+                {/* Botón Editar para móvil */}
                 <Link
                   to={`/patients/edit/${patient._id}`}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium text-sm transition-colors"
+                  className="sm:hidden flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-text font-medium transition-all duration-200"
                 >
                   <Edit className="w-4 h-4" />
                   Editar información
@@ -263,121 +300,133 @@ export default function PatientDetailView() {
 
                 <button
                   onClick={() => setShowPhotoModal(true)}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium text-sm transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium transition-all duration-200"
                 >
                   <Camera className="w-4 h-4" />
                   Cambiar foto
                 </button>
 
-                <button
-                  onClick={handleDeleteClick}
-                  disabled={isDeleting}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium text-sm disabled:opacity-50 transition-colors"
+                <Link
+                  to={`/patients/${patientId}/lab-exams`}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-green-50 hover:bg-green-500 hover:text-white text-green-600 font-medium transition-all duration-200"
                 >
-                  {isDeleting ? (
-                    <span className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4" />
-                  )}
-                  {isDeleting ? "Eliminando..." : "Eliminar mascota"}
-                </button>
-
-                <div className="pt-3 border-t border-gray-700">
-                  <Link
-                    to={`/patients/${patientId}/lab-exams`}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 font-medium text-sm transition-colors"
-                  >
-                    <TestTube className="w-4 h-4" />
-                    Exámenes de laboratorio
-                  </Link>
-                </div>
+                  <TestTube className="w-4 h-4" />
+                  Exámenes de laboratorio
+                </Link>
 
                 <Link
                   to={`/patients/${patientId}/grooming-services/create`}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium text-sm transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium transition-all duration-200"
                 >
                   <Scissors className="w-4 h-4" />
                   Servicio de peluquería
                 </Link>
+
+                <Link
+                  to={`/patients/${patientId}/appointments/create`}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-purple-50 hover:bg-purple-500 hover:text-white text-purple-600 font-medium transition-all duration-200"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Crear cita
+                </Link>
+
+                <div className="pt-3 border-t border-gray-100">
+                  <button
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 font-medium transition-all duration-200 disabled:opacity-50"
+                  >
+                    {isDeleting ? (
+                      <span className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    {isDeleting ? "Eliminando..." : "Eliminar mascota"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Columna derecha: Información detallada */}
-          <div className="flex-1 space-y-4 lg:space-y-6 mx-4 lg:mx-0">
+          <div className="flex-1 space-y-6">
             {/* Información general */}
-            <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <Heart className="w-6 h-6 text-red-500" />
-                <h2 className="text-xl font-bold text-white">
+                <div className="p-2 bg-red-50 rounded-lg">
+                  <Heart className="w-6 h-6 text-red-500" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">
                   Información General
                 </h2>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-gray-700/30">
+                <div className="p-4 rounded-xl bg-vet-light border border-gray-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-red-500" />
-                    <p className="text-xs text-gray-400 font-medium">
+                    <Calendar className="w-4 h-4 text-vet-primary" />
+                    <p className="text-xs text-gray-600 font-medium">
                       Fecha de nacimiento
                     </p>
                   </div>
-                  <p className="text-white font-semibold">
+                  <p className="text-gray-900 font-semibold">
                     {formatDate(patient.birthDate)}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-gray-500 mt-1">
                     {calculateAge()} de edad
                   </p>
                 </div>
 
                 {patient.weight && (
-                  <div className="p-4 rounded-lg bg-gray-700/30">
+                  <div className="p-4 rounded-xl bg-vet-light border border-gray-100">
                     <div className="flex items-center gap-2 mb-2">
-                      <Weight className="w-4 h-4 text-red-500" />
-                      <p className="text-xs text-gray-400 font-medium">
+                      <Weight className="w-4 h-4 text-vet-primary" />
+                      <p className="text-xs text-gray-600 font-medium">
                         Peso actual
                       </p>
                     </div>
-                    <p className="text-white font-semibold text-2xl">
+                    <p className="text-gray-900 font-semibold text-2xl">
                       {patient.weight}{" "}
-                      <span className="text-base text-gray-400">kg</span>
+                      <span className="text-base text-gray-500">kg</span>
                     </p>
                   </div>
                 )}
 
                 {patient.breed && (
-                  <div className="p-4 rounded-lg bg-gray-700/30 sm:col-span-2">
+                  <div className="p-4 rounded-xl bg-vet-light border border-gray-100 sm:col-span-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <PawPrint className="w-4 h-4 text-red-500" />
-                      <p className="text-xs text-gray-400 font-medium">Raza</p>
+                      <PawPrint className="w-4 h-4 text-vet-primary" />
+                      <p className="text-xs text-gray-600 font-medium">Raza</p>
                     </div>
-                    <p className="text-white font-semibold">{patient.breed}</p>
+                    <p className="text-gray-900 font-semibold">{patient.breed}</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Información del propietario */}
-            <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <User className="w-6 h-6 text-green-500" />
-                <h2 className="text-xl font-bold text-white">Propietario</h2>
+                <div className="p-2 bg-green-50 rounded-lg">
+                  <User className="w-6 h-6 text-green-500" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Propietario</h2>
               </div>
 
               {isLoadingOwner ? (
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-700/30 animate-pulse">
-                  <div className="w-12 h-12 bg-gray-600 rounded-full" />
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-vet-light animate-pulse">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-600 rounded w-3/4" />
-                    <div className="h-3 bg-gray-600 rounded w-1/2" />
+                    <div className="h-4 bg-gray-300 rounded w-3/4" />
+                    <div className="h-3 bg-gray-300 rounded w-1/2" />
                   </div>
                 </div>
               ) : owner ? (
                 <>
-                  <div className="p-4 rounded-lg bg-gray-700/30 mb-4">
+                  <div className="p-4 rounded-xl bg-vet-light border border-gray-100 mb-4">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/30">
-                        <span className="text-green-500 font-bold">
+                      <div className="w-12 h-12 rounded-full bg-vet-primary/10 flex items-center justify-center border border-vet-primary/20">
+                        <span className="text-vet-primary font-bold text-sm">
                           {owner.name
                             ? owner.name
                                 .split(" ")
@@ -388,22 +437,22 @@ export default function PatientDetailView() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-white font-bold text-lg">
+                        <p className="text-gray-900 font-bold text-lg">
                           {owner.name}
                         </p>
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-gray-500 text-sm">
                           Propietario responsable
                         </p>
                       </div>
                     </div>
 
                     <div className="space-y-2 pl-16">
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-gray-600">
                         <span className="text-gray-500">Teléfono:</span>{" "}
                         {owner.contact}
                       </p>
                       {owner.email && (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-600">
                           <span className="text-gray-500">Email:</span>{" "}
                           {owner.email}
                         </p>
@@ -413,14 +462,14 @@ export default function PatientDetailView() {
 
                   <Link
                     to={`/owners/${owner._id}`}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 font-medium text-sm transition-colors"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-green-50 hover:bg-green-500 hover:text-white text-green-600 font-medium transition-all duration-200"
                   >
                     <User className="w-4 h-4" />
                     Ver perfil completo
                   </Link>
                 </>
               ) : (
-                <div className="text-center text-gray-400 py-6">
+                <div className="text-center text-gray-500 py-6 bg-vet-light rounded-xl">
                   No se encontró información del propietario
                 </div>
               )}
@@ -428,24 +477,26 @@ export default function PatientDetailView() {
 
             {/* Médico Veterinario */}
             {patient.referringVet && (
-              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <User className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-bold text-white">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <User className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
                     Médico Veterinario
                   </h2>
                 </div>
 
-                <div className="p-4 rounded-lg bg-gray-700/30">
+                <div className="p-4 rounded-xl bg-vet-light border border-gray-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/30">
-                      <User className="w-5 h-5 text-blue-500" />
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200">
+                      <User className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-white font-semibold">
+                      <p className="text-gray-900 font-semibold">
                         {patient.referringVet}
                       </p>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-gray-500">
                         Responsable del paciente
                       </p>
                     </div>
@@ -460,12 +511,12 @@ export default function PatientDetailView() {
       {/* Modal para cambiar foto */}
       {showPhotoModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Cambiar foto</h3>
+          <div className="bg-white rounded-2xl border border-gray-200 max-w-md w-full p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Cambiar foto</h3>
             
             <div className="space-y-4">
               {/* Preview de la foto */}
-              <div className="relative rounded-lg overflow-hidden border-2 border-gray-600 bg-gray-700/30 group aspect-square">
+              <div className="relative rounded-xl overflow-hidden border-2 border-gray-300 bg-vet-light group aspect-square">
                 {previewImage ? (
                   <>
                     <img 
@@ -474,7 +525,7 @@ export default function PatientDetailView() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <label className="cursor-pointer p-2 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors">
+                      <label className="cursor-pointer p-2 bg-vet-primary hover:bg-vet-secondary rounded-full transition-colors">
                         <Upload className="w-4 h-4 text-white" />
                         <input
                           type="file"
@@ -493,9 +544,9 @@ export default function PatientDetailView() {
                     </div>
                   </>
                 ) : (
-                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors p-4">
+                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors p-4">
                     <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-400 text-center">Seleccionar foto</span>
+                    <span className="text-sm text-gray-500 text-center">Seleccionar foto</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -507,8 +558,8 @@ export default function PatientDetailView() {
               </div>
 
               {photo && (
-                <p className="text-xs text-blue-400 flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                <p className="text-xs text-blue-600 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
                   Nueva foto seleccionada
                 </p>
               )}
@@ -521,14 +572,14 @@ export default function PatientDetailView() {
                     setPhoto(null);
                     setPreviewImage(patient.photo || null);
                   }}
-                  className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors text-sm font-medium"
+                  className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors text-sm font-medium"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSavePhoto}
                   disabled={isUpdatingPhoto || !photo}
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
+                  className="px-4 py-2 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
                 >
                   {isUpdatingPhoto ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

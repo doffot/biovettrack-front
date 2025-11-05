@@ -24,27 +24,27 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   const sizeConfig = {
     sm: {
-      container: layout === 'horizontal' ? 'gap-4' : 'gap-3',
-      icon: 'w-20 h-20', // Aumentado para horizontal
-      text: 'text-md',
+      container: layout === 'horizontal' ? 'gap-3' : 'gap-2',
+      icon: 'w-10 h-10',
+      text: 'text-lg font-bold',
       subtitle: 'text-xs'
     },
     md: {
-      container: layout === 'horizontal' ? 'gap-5' : 'gap-4',
-      icon: 'w-14 h-14', // Aumentado
-      text: 'text-4xl',
+      container: layout === 'horizontal' ? 'gap-4' : 'gap-3',
+      icon: 'w-12 h-12',
+      text: 'text-xl font-bold',
       subtitle: 'text-sm'
     },
     lg: {
-      container: layout === 'horizontal' ? 'gap-6' : 'gap-5',
-      icon: 'w-18 h-18', // Aumentado
-      text: 'text-2xl',
+      container: layout === 'horizontal' ? 'gap-5' : 'gap-4',
+      icon: 'w-16 h-16',
+      text: 'text-2xl font-bold',
       subtitle: 'text-base'
     },
     xl: {
-      container: layout === 'horizontal' ? 'gap-7' : 'gap-6',
-      icon: 'w-34 h-34', // Aumentado
-      text: 'text-2xl',
+      container: layout === 'horizontal' ? 'gap-6' : 'gap-5',
+      icon: 'w-20 h-20',
+      text: 'text-3xl font-bold',
       subtitle: 'text-lg'
     }
   };
@@ -53,34 +53,30 @@ const Logo: React.FC<LogoProps> = ({
 
   return (
     <div
-      className={`flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col items-center  w-full'} ${config.container} ${className}`}
+      className={` flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col items-center'} ${config.container} ${className}`}
     >
-      {/* Logo SVG desde la carpeta public */}
-      <div className={`relative ${config.icon} ${iconClassName} `}>
+      {/* Logo SVG */}
+      <div className={`relative ${config.icon} ${iconClassName}`}>
         <img
           src="/logobtv.svg"
           alt="BioVetTrack Logo"
-          className="w-full h-full text-primary logo-glow"
+          className="w-full h-full object-contain"
         />
       </div>
 
       {showText && (
         <div
           className={`${
-            layout === 'horizontal' ? 'ml-4' : 'mt-3'
-          } flex flex-col items-start text-left`}
+            layout === 'horizontal' ? '' : 'text-center'
+          } flex flex-col ${layout === 'horizontal' ? 'items-start' : 'items-center'}`}
         >
-          <div className="relative">
-            <h1 className={`font-black text-primary tracking-tight animate-neon-pulse ${config.text} ${textClassName}`}>
-              BioVetTrack
-            </h1>
-            <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 text-primary/60 text-2xl font-thin">{'['}</div>
-            <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 text-primary/60 text-2xl font-thin">{']'}</div>
-          </div>
-          <div className="w-24 h-1 bg-primary rounded-full shadow-neon animate-pulse-soft mt-2"></div>
+          <h1 className={`text-vet-light font-bold tracking-tight ${config.text} ${textClassName}`}>
+            BioVetTrack
+          </h1>
+          
           {showSubtitle && (
-            <p className={`text-muted font-medium mt-2 tracking-wide ${config.subtitle} ${subtitleClassName}`}>
-              <span className="text-primary">///</span> Sistema integral veterinario <span className="text-primary">///</span>
+            <p className={`text-gray-600 font-medium mt-1 ${config.subtitle} ${subtitleClassName}`}>
+              Sistema integral veterinario
             </p>
           )}
         </div>

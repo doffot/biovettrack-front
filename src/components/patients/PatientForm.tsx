@@ -95,52 +95,61 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Nombre del paciente - Ocupa 2 columnas en desktop */}
         <div className="lg:col-span-2">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-3">
             Nombre del paciente <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <PawPrint className="h-5 w-5 text-gray-400" />
+          <div className={`
+            flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200
+            ${errors.name 
+              ? 'bg-red-50 border-red-300' 
+              : 'bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary'
+            }
+          `}>
+            <div className={`p-2 rounded-lg ${errors.name ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
+              <PawPrint className="w-4 h-4" />
             </div>
             <input
               id="name"
               type="text"
               placeholder="Ej: Luna, Max, Rocky..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
               {...register("name", {
                 required: "El nombre del paciente es obligatorio",
               })}
             />
           </div>
           {errors.name && (
-            <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+            <p className="mt-2 text-red-600 text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
+              {errors.name.message}
+            </p>
           )}
         </div>
 
-        {/* Foto - visible en todos los dispositivos, estilo mobile */}
+        {/* Foto */}
         <div className="lg:col-span-1">
-          <label className="block text-sm font-medium text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-gray-900 mb-3">
             Foto
           </label>
           <div className="flex items-center gap-3">
             {previewImage ? (
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-600">
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-300">
                 <img src={previewImage} alt="preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setPreviewImage(null)}
-                  className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition"
+                  className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center transition-all"
                 >
                   <X className="w-3 h-3" />
                 </button>
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center bg-gray-700/30">
+              <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-vet-light">
                 <Upload className="w-6 h-6 text-gray-400" />
               </div>
             )}
             
-            <label className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm text-gray-200">
+            <label className="flex-1 px-4 py-3 rounded-xl bg-vet-light border-2 border-gray-200 hover:border-vet-primary transition-all cursor-pointer flex items-center justify-center gap-2 text-sm text-gray-700 font-medium">
               <Upload className="w-4 h-4" />
               {previewImage ? 'Cambiar imagen' : 'Subir imagen'}
               <input
@@ -159,17 +168,23 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
 
         {/* Fecha de nacimiento */}
         <div>
-          <label htmlFor="birthDate" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="birthDate" className="block text-sm font-semibold text-gray-900 mb-3">
             Fecha de nacimiento <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CalendarDays className="h-5 w-5 text-gray-400" />
+          <div className={`
+            flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200
+            ${errors.birthDate 
+              ? 'bg-red-50 border-red-300' 
+              : 'bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary'
+            }
+          `}>
+            <div className={`p-2 rounded-lg ${errors.birthDate ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
+              <CalendarDays className="w-4 h-4" />
             </div>
             <input
               id="birthDate"
               type="date"
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium"
               {...register("birthDate", {
                 required: "La fecha de nacimiento es obligatoria",
                 validate: (value) => {
@@ -187,27 +202,36 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
             />
           </div>
           {ageText && (
-            <p className="mt-1 text-xs text-gray-400">
-              Edad: <span className="text-blue-400 font-semibold">{ageText}</span>
+            <p className="mt-2 text-xs text-gray-600">
+              Edad: <span className="text-vet-primary font-semibold">{ageText}</span>
             </p>
           )}
           {errors.birthDate && (
-            <p className="mt-1 text-sm text-red-400">{errors.birthDate.message}</p>
+            <p className="mt-2 text-red-600 text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
+              {errors.birthDate.message}
+            </p>
           )}
         </div>
 
         {/* Especie */}
         <div>
-          <label htmlFor="species" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="species" className="block text-sm font-semibold text-gray-900 mb-3">
             Especie <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Bone className="h-5 w-5 text-gray-400" />
+          <div className={`
+            flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200
+            ${errors.species 
+              ? 'bg-red-50 border-red-300' 
+              : 'bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary'
+            }
+          `}>
+            <div className={`p-2 rounded-lg ${errors.species ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
+              <Bone className="w-4 h-4" />
             </div>
             <select
               id="species"
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
               {...register("species", {
                 required: "La especie es obligatoria",
               })}
@@ -224,22 +248,31 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
             </select>
           </div>
           {errors.species && (
-            <p className="mt-1 text-sm text-red-400">{errors.species.message}</p>
+            <p className="mt-2 text-red-600 text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
+              {errors.species.message}
+            </p>
           )}
         </div>
 
         {/* Sexo */}
         <div>
-          <label htmlFor="sex" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="sex" className="block text-sm font-semibold text-gray-900 mb-3">
             Sexo <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Heart className="h-5 w-5 text-gray-400" />
+          <div className={`
+            flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200
+            ${errors.sex 
+              ? 'bg-red-50 border-red-300' 
+              : 'bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary'
+            }
+          `}>
+            <div className={`p-2 rounded-lg ${errors.sex ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
+              <Heart className="w-4 h-4" />
             </div>
             <select
               id="sex"
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
               {...register("sex", {
                 required: "El sexo es obligatorio",
               })}
@@ -250,24 +283,27 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
             </select>
           </div>
           {errors.sex && (
-            <p className="mt-1 text-sm text-red-400">{errors.sex.message}</p>
+            <p className="mt-2 text-red-600 text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
+              {errors.sex.message}
+            </p>
           )}
         </div>
 
         {/* Raza */}
         <div>
-          <label htmlFor="breed" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="breed" className="block text-sm font-semibold text-gray-900 mb-3">
             Raza
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Tag className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+            <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+              <Tag className="w-4 h-4" />
             </div>
             <input
               id="breed"
               type="text"
               placeholder="Ej: Labrador, Siamés, Mestizo..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
               {...register("breed")}
             />
           </div>
@@ -275,12 +311,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
 
         {/* Peso */}
         <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="weight" className="block text-sm font-semibold text-gray-900 mb-3">
             Peso actual
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Scale className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+            <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+              <Scale className="w-4 h-4" />
             </div>
             <input
               id="weight"
@@ -288,14 +324,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
               step="0.1"
               min="0"
               placeholder="0.0"
-              className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
               {...register("weight", {
                 valueAsNumber: true,
               })}
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span className="text-gray-400 text-sm">kg</span>
-            </div>
+            <span className="text-gray-500 text-sm font-medium">kg</span>
           </div>
         </div>
       </div>
@@ -305,44 +339,46 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
 
       {/* Veterinario referido */}
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-2">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">
           Médico Veterinario
         </label>
         
-        <div className="mb-3 flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
-          <button
-            type="button"
-            onClick={() => handleVetSwitcherChange(!useCustomReferringVet)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-xs font-medium ${
-              !useCustomReferringVet
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            {!useCustomReferringVet ? (
-              <ToggleRight className="w-4 h-4" />
-            ) : (
-              <ToggleLeft className="w-4 h-4" />
+        <div className="mb-4 p-4 bg-vet-light rounded-xl border border-gray-200">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleVetSwitcherChange(!useCustomReferringVet)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                !useCustomReferringVet
+                  ? 'bg-vet-primary text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {!useCustomReferringVet ? (
+                <ToggleRight className="w-4 h-4" />
+              ) : (
+                <ToggleLeft className="w-4 h-4" />
+              )}
+              {!useCustomReferringVet ? 'Por defecto' : 'Personalizado'}
+            </button>
+            
+            {!useCustomReferringVet && (
+              <div className="flex-1 text-sm text-gray-700">
+                <span className="text-vet-primary font-medium">→</span> M.V. <span className="capitalize font-medium">{vetmain?.name} {vetmain?.lastName}</span>
+              </div>
             )}
-            {!useCustomReferringVet ? 'Por defecto' : 'Personalizado'}
-          </button>
-          
-          {!useCustomReferringVet && (
-            <div className="flex-1 text-sm text-gray-300">
-              <span className="text-blue-400">→</span> M.V. <span className="capitalize">{vetmain?.name} {vetmain?.lastName}</span>
-            </div>
-          )}
+          </div>
         </div>
 
         {useCustomReferringVet && (
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <User className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <User className="w-4 h-4" />
             </div>
             <input
               type="text"
               placeholder="Ej: Dr. Carlos Ruiz, Dra. María López..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
               {...register("referringVet")}
             />
           </div>
@@ -358,13 +394,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ register, errors, setValue })
       </div>
 
       {/* Nota informativa */}
-      <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-        <div className="flex items-start gap-2">
-          <Heart className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Heart className="w-4 h-4 text-blue-600" />
+          </div>
           <div>
-            <p className="text-sm text-gray-200 font-medium mb-1">Información clínica</p>
-            <p className="text-xs text-gray-400">
-              Los campos marcados con <span className="text-red-400 font-bold">*</span> son obligatorios. 
+            <p className="text-sm text-gray-900 font-semibold mb-1">Información clínica</p>
+            <p className="text-xs text-gray-600">
+              Los campos marcados con <span className="text-red-500 font-bold">*</span> son obligatorios. 
               La información opcional mejora la precisión del diagnóstico y tratamiento.
             </p>
           </div>

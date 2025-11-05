@@ -12,6 +12,7 @@ type CreateResponse = {
 export async function createPatient(
   formData: FormData,
   ownerId: string
+  
 ): Promise<Patient> {
   try {
     // La URL es más clara: estamos creando un paciente DENTRO de un dueño
@@ -22,6 +23,7 @@ export async function createPatient(
     );
 
     console.log("📦 Respuesta cruda:", data);
+    console.log('crear paciente');
 
     // Validamos que el objeto 'patient' de la respuesta cumpla con el esquema
     const response = patientSchema.safeParse(data.patient);
@@ -33,6 +35,7 @@ export async function createPatient(
     // Retornamos solo los datos del paciente validados
     return response.data;
   } catch (error) {
+    console.log(error);
     if (error instanceof AxiosError && error.response) {
       throw new Error(error.response.data.msg || "Error al crear el paciente");
     }

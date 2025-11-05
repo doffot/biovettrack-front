@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { requestConfirmationCode } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import Logo from "../../components/Logo";
+import { Mail, RefreshCw, ArrowLeft, Shield } from "lucide-react";
 
 export default function NewCodeView() {
     const initialValues: RequestConfirmationCodeForm = {
@@ -38,115 +39,252 @@ export default function NewCodeView() {
     const handleRequestCode = (formData: RequestConfirmationCodeForm) => mutate(formData);
 
     return (
-        <div className="min-h-screen bg-[#0b132b] flex">
-            {/* Left Panel - Logo centrado */}
-            <div className="hidden lg:flex lg:w-[35%] bg-gradient-to-br from-[#0b132b] via-[#172554] to-[#1e293b] items-center justify-center p-8 relative overflow-hidden">
-                {/* Decorative elements */}
-                <div className="absolute top-0 left-0 w-64 h-64 bg-[#39ff14]/5 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8a7f9e]/5 rounded-full blur-3xl"></div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 lg:p-8">
+            
+            {/* Mobile & Tablet Layout */}
+            <div className="w-full max-w-md lg:hidden">
                 
-                <div className="text-center max-w-md z-10">
-                    <div className="mb-8 flex justify-center">
-                        <Logo size="xl" showText={true} showSubtitle={false} layout="vertical" />
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <Logo size="lg" showText={true} showSubtitle={true} layout="vertical" />
+                    <div className="mt-6">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-vet-light rounded-full mb-4">
+                            <RefreshCw className="w-8 h-8 text-vet-primary" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                            Nuevo Código
+                        </h1>
+                        <p className="text-gray-600 text-sm">
+                            Solicita un nuevo código de verificación
+                        </p>
                     </div>
-                    <p className="text-[#8a7f9e] text-lg leading-relaxed">
-                        Solicita un nuevo código de verificación para confirmar tu cuenta.
+                </div>
+
+                {/* Form Card */}
+                <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    
+                    {/* Security Badge */}
+                    <div className="flex items-center gap-2 mb-6 p-3 bg-vet-light rounded-lg">
+                        <Shield className="w-4 h-4 text-vet-primary" />
+                        <span className="text-sm text-vet-primary font-medium">Verificación segura</span>
+                    </div>
+
+                    <form onSubmit={handleSubmit(handleRequestCode)} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Correo Electrónico
+                            </label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="email"
+                                    placeholder="correo@ejemplo.com"
+                                    className={`w-full pl-10 pr-4 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                                        errors.email 
+                                            ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                                            : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                                    }`}
+                                    {...register("email", {
+                                        required: "El correo electrónico es obligatorio",
+                                        pattern: {
+                                            value: /\S+@\S+\.\S+/,
+                                            message: "Correo electrónico no válido",
+                                        },
+                                    })}
+                                />
+                            </div>
+                            {errors.email && (
+                                <p className="text-red-600 text-sm font-medium">{errors.email.message as string}</p>
+                            )}
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isPending}
+                            className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                        >
+                            {isPending ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Enviando código...</span>
+                                </div>
+                            ) : (
+                                "Enviar Código"
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Footer Links */}
+                    <div className="mt-6 pt-5 border-t border-gray-200 space-y-3">
+                        <Link
+                            to="/auth/login"
+                            className="block text-center text-gray-600 hover:text-vet-primary text-sm transition-colors font-medium"
+                        >
+                            ¿Ya tienes cuenta? Iniciar Sesión
+                        </Link>
+                        <Link
+                            to="/auth/forgot-password"
+                            className="block text-center text-gray-600 hover:text-vet-primary text-sm transition-colors font-medium"
+                        >
+                            ¿Olvidaste tu contraseña? Restablecer
+                        </Link>
+                    </div>
+
+                    {/* Back Link */}
+                    <div className="mt-4 text-center">
+                        <Link
+                            to="/auth/confirm-account"
+                            className="inline-flex items-center text-sm text-gray-600 hover:text-vet-primary font-medium transition-colors"
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Volver a confirmar cuenta
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Help Text */}
+                <div className="mt-6 p-4 bg-vet-light rounded-lg border border-vet-primary/20">
+                    <p className="text-vet-muted text-xs text-center">
+                        💡 El código se enviará al email con el que te registraste. Revisa tu bandeja de spam.
                     </p>
-                    <div className="mt-12 flex justify-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-[#39ff14]"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#39ff14]/50"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#39ff14]/30"></div>
-                    </div>
                 </div>
             </div>
 
-            {/* Right Panel - Formulario */}
-            <div className="flex-1 flex flex-col h-screen lg:w-[65%]">
-                {/* Mobile Logo - Fixed header */}
-                <div className="lg:hidden bg-[#0b132b] border-b border-[#8a7f9e]/20 py-4 px-4 flex justify-center sticky top-0 z-10">
-                    <Logo size="lg" showText={true} showSubtitle={false} layout="vertical" />
+            {/* Desktop Layout */}
+            <div className="hidden lg:flex w-full max-w-4xl bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                
+                {/* Left Panel */}
+                <div className="w-2/5 bg-gradient-to-br from-vet-primary to-vet-secondary p-8 flex flex-col justify-center">
+                    <div className="text-white">
+                        <div className="mb-6">
+                            <Logo 
+                                size="xl" 
+                                showText={true} 
+                                showSubtitle={true} 
+                                layout="vertical" 
+                                textClassName="text-white" 
+                                subtitleClassName="text-white/80" 
+                            />
+                        </div>
+                        
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
+                            <RefreshCw className="w-10 h-10 text-white" />
+                        </div>
+
+                        <h1 className="text-2xl font-bold mb-4">
+                            Nuevo Código de Verificación
+                        </h1>
+                        <p className="text-white/80 mb-6 leading-relaxed">
+                            ¿No recibiste el código? Solicita uno nuevo para completar la verificación de tu cuenta.
+                        </p>
+                        
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 text-white/90">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <span className="text-sm">Entrega inmediata</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-white/90">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <span className="text-sm">Válido por 10 minutos</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-white/90">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <span className="text-sm">Soporte técnico incluido</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Content area */}
-                <div className="flex-1 overflow-y-auto">
-                    <div className="min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                        <div className="w-full max-w-xl">
-                            <div className="bg-[#0b132b]/50 backdrop-blur-sm border border-[#8a7f9e]/20 rounded-2xl p-8 sm:p-10 lg:p-12 shadow-2xl">
-                                
-                                {/* Header */}
-                                <div className="text-center mb-8">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#39ff14]/10 rounded-full mb-4">
-                                        <svg className="w-8 h-8 text-[#39ff14]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                    </div>
-                                    <h2 className="text-3xl sm:text-4xl font-bold text-[#e7e5f2] mb-3 tracking-tight">
-                                        Solicitar Nuevo Código
-                                    </h2>
-                                    <p className="text-[#8a7f9e] text-sm sm:text-base leading-relaxed">
-                                        Coloca tu email para recibir{' '}
-                                        <span className="text-[#39ff14] font-semibold">un nuevo código de verificación</span>
-                                    </p>
+                {/* Right Panel */}
+                <div className="w-3/5 p-8 flex items-center justify-center">
+                    <div className="w-full max-w-sm">
+                        
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                                Solicitar Nuevo Código
+                            </h2>
+                            <p className="text-gray-600">
+                                Ingresa tu email para recibir un nuevo código
+                            </p>
+                        </div>
+
+                        {/* Security Badge */}
+                        <div className="flex items-center gap-2 mb-6 p-4 bg-vet-light rounded-lg">
+                            <Shield className="w-5 h-5 text-vet-primary" />
+                            <span className="text-sm text-vet-primary font-medium">Verificación de cuenta segura</span>
+                        </div>
+
+                        <form onSubmit={handleSubmit(handleRequestCode)} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Correo Electrónico
+                                </label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        placeholder="correo@ejemplo.com"
+                                        className={`w-full pl-10 pr-4 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
+                                            errors.email 
+                                                ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
+                                                : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                                        }`}
+                                        {...register("email", {
+                                            required: "El correo electrónico es obligatorio",
+                                            pattern: {
+                                                value: /\S+@\S+\.\S+/,
+                                                message: "Correo electrónico no válido",
+                                            },
+                                        })}
+                                    />
                                 </div>
-
-                                {/* Form */}
-                                <form onSubmit={handleSubmit(handleRequestCode)} className="space-y-6" noValidate>
-                                    <div>
-                                        <label htmlFor="email" className="block text-xs font-semibold text-[#e7e5f2] uppercase tracking-wide mb-2">
-                                            Email de Registro
-                                        </label>
-                                        <input
-                                            id="email"
-                                            type="email"
-                                            placeholder="correo@ejemplo.com"
-                                            className={`w-full px-4 py-3 bg-[#0b132b] border-2 rounded-lg text-[#e7e5f2] placeholder-[#8a7f9e]/50 focus:outline-none transition-colors duration-200 ${
-                                                errors.email ? 'border-[#ff5e5b]' : 'border-[#8a7f9e]/30 focus:border-[#39ff14]'
-                                            }`}
-                                            {...register("email", {
-                                                required: "El email es obligatorio",
-                                                pattern: {
-                                                    value: /\S+@\S+\.\S+/,
-                                                    message: "Email no válido",
-                                                },
-                                            })}
-                                        />
-                                        {errors.email && (
-                                            <p className="text-[#ff5e5b] text-xs mt-2">{errors.email.message as string}</p>
-                                        )}
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={isPending}
-                                        className="w-full bg-[#39ff14] hover:bg-[#39ff14]/90 text-[#0b132b] font-bold py-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-[#39ff14]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                                    >
-                                        {isPending ? 'Enviando código...' : 'Enviar Código'}
-                                    </button>
-                                </form>
-
-                                {/* Footer Links */}
-                                <div className="mt-8 pt-6 border-t border-[#8a7f9e]/20 space-y-3">
-                                    <Link
-                                        to='/auth/login'
-                                        className="block text-center text-[#8a7f9e] hover:text-[#39ff14] text-sm transition-colors"
-                                    >
-                                        ¿Ya tienes cuenta? <span className="font-semibold">Iniciar Sesión</span>
-                                    </Link>
-                                    <Link
-                                        to='/auth/forgot-password'
-                                        className="block text-center text-[#8a7f9e] hover:text-[#39ff14] text-sm transition-colors"
-                                    >
-                                        ¿Olvidaste tu contraseña? <span className="font-semibold">Restablecer</span>
-                                    </Link>
-                                </div>
-
-                                {/* Help text */}
-                                <div className="mt-6 p-4 bg-[#8a7f9e]/5 rounded-lg border border-[#8a7f9e]/10">
-                                    <p className="text-[#8a7f9e] text-xs text-center leading-relaxed">
-                                        💡 El código se enviará al email con el que te registraste. Revisa tu bandeja de spam.
-                                    </p>
-                                </div>
+                                {errors.email && (
+                                    <p className="text-red-600 text-sm font-medium">{errors.email.message as string}</p>
+                                )}
                             </div>
+
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                                {isPending ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        <span>Enviando código...</span>
+                                    </div>
+                                ) : (
+                                    "Enviar Código"
+                                )}
+                            </button>
+                        </form>
+
+                        {/* Footer Links */}
+                        <div className="mt-6 pt-5 border-t border-gray-200 space-y-3">
+                            <Link
+                                to="/auth/login"
+                                className="block text-center text-gray-600 hover:text-vet-primary text-sm transition-colors font-medium"
+                            >
+                                ¿Ya tienes cuenta? Iniciar Sesión
+                            </Link>
+                            <Link
+                                to="/auth/forgot-password"
+                                className="block text-center text-gray-600 hover:text-vet-primary text-sm transition-colors font-medium"
+                            >
+                                ¿Olvidaste tu contraseña? Restablecer
+                            </Link>
+                        </div>
+
+                        {/* Back Link */}
+                        <div className="mt-4 text-center">
+                            <Link
+                                to="/auth/confirm-account"
+                                className="inline-flex items-center text-sm text-gray-600 hover:text-vet-primary font-medium transition-colors"
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                                Volver a confirmar cuenta
+                            </Link>
                         </div>
                     </div>
                 </div>

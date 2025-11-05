@@ -1,6 +1,6 @@
 // src/views/patients/EditPatientView.tsx
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "../../components/Toast";
 import { getPatientById, updatePatient } from "../../api/patientAPI";
@@ -12,6 +12,7 @@ import {
   Save,
   Heart,
   Bone,
+  ArrowLeft
 } from "lucide-react";
 import BackButton from "../../components/BackButton";
 
@@ -127,10 +128,12 @@ export default function EditPatientView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-400">Cargando mascota...</p>
+      <div className="w-full">
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-vet-text font-medium">Cargando mascota...</p>
+          </div>
         </div>
       </div>
     );
@@ -138,42 +141,93 @@ export default function EditPatientView() {
 
   if (!patient) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">Mascota no encontrada</p>
+      <div className="w-full">
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
+            <PawPrint className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Mascota no encontrada</h2>
+            <p className="text-gray-600 mb-6">La mascota que buscas no existe o ha sido eliminada.</p>
+            <Link
+              to="/patients"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Volver a la lista
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      {/* Header */}
-      <div className="mt-30 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
-        <div className="flex items-center gap-4 px-4 lg:px-0">
-          <BackButton />
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">Editar Mascota</h1>
-            <p className="text-gray-400 text-xs sm:text-sm">
-              Actualiza la información de {patient.name}
-            </p>
+      {/* Header Mejorado */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+        <div className="px-6 lg:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between gap-6 mb-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {/* BackButton siempre visible */}
+              <Link
+                to={`/patients/${patientId}`}
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                title="Volver al detalle"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-vet-primary/10 rounded-lg">
+                    <PawPrint className="w-6 h-6 text-vet-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-vet-text">
+                    Editar {patient.name}
+                  </h1>
+                </div>
+                <p className="text-vet-muted text-sm">
+                  Actualiza la información de la mascota
+                </p>
+              </div>
+            </div>
+
+            {/* Botón Guardar para desktop */}
+            <div className="hidden sm:block flex-shrink-0">
+              <button
+                onClick={handleSaveData}
+                disabled={isPending}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+              >
+                {isPending ? (
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-5 h-5" />
+                )}
+                {isPending ? "Guardando..." : "Guardar Cambios"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Card con formulario */}
-      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+      {/* Espaciador para el header fijo */}
+      <div className="h-40"></div>
+
+      {/* Formulario */}
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 mx-4 lg:mx-0">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
             
             {/* Grid de formulario */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Nombre - ocupa toda la fila */}
               <div className="lg:col-span-2">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-3">
                   Nombre del paciente <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <PawPrint className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                    <PawPrint className="w-4 h-4" />
                   </div>
                   <input
                     id="name"
@@ -181,19 +235,19 @@ export default function EditPatientView() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ej: Luna, Max, Rocky..."
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
                 </div>
               </div>
 
               {/* Fecha de nacimiento */}
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="birthDate" className="block text-sm font-semibold text-gray-900 mb-3">
                   Fecha de nacimiento <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <CalendarDays className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                    <CalendarDays className="w-4 h-4" />
                   </div>
                   <input
                     id="birthDate"
@@ -203,30 +257,30 @@ export default function EditPatientView() {
                       setFormData({ ...formData, birthDate: e.target.value });
                       calculateAge(e.target.value);
                     }}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium"
                   />
                 </div>
                 {ageText && (
-                  <p className="mt-1 text-xs text-gray-400">
-                    Edad: <span className="text-blue-400 font-semibold">{ageText}</span>
+                  <p className="mt-2 text-xs text-gray-600">
+                    Edad: <span className="text-vet-primary font-semibold">{ageText}</span>
                   </p>
                 )}
               </div>
 
               {/* Especie */}
               <div>
-                <label htmlFor="species" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="species" className="block text-sm font-semibold text-gray-900 mb-3">
                   Especie <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Bone className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                    <Bone className="w-4 h-4" />
                   </div>
                   <select
                     id="species"
                     value={formData.species}
                     onChange={(e) => setFormData({ ...formData, species: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
                   >
                     <option value="">Selecciona una especie</option>
                     <option value="Canino">Canino</option>
@@ -243,18 +297,18 @@ export default function EditPatientView() {
 
               {/* Sexo */}
               <div>
-                <label htmlFor="sex" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="sex" className="block text-sm font-semibold text-gray-900 mb-3">
                   Sexo <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Heart className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                    <Heart className="w-4 h-4" />
                   </div>
                   <select
                     id="sex"
                     value={formData.sex}
                     onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
                   >
                     <option value="">Selecciona sexo</option>
                     <option value="Macho">Macho</option>
@@ -265,12 +319,12 @@ export default function EditPatientView() {
 
               {/* Raza */}
               <div>
-                <label htmlFor="breed" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="breed" className="block text-sm font-semibold text-gray-900 mb-3">
                   Raza
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Tag className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                    <Tag className="w-4 h-4" />
                   </div>
                   <input
                     id="breed"
@@ -278,19 +332,19 @@ export default function EditPatientView() {
                     value={formData.breed}
                     onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
                     placeholder="Ej: Labrador, Siamés, Mestizo..."
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
                 </div>
               </div>
 
               {/* Peso */}
               <div>
-                <label htmlFor="weight" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="weight" className="block text-sm font-semibold text-gray-900 mb-3">
                   Peso actual
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Scale className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
+                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                    <Scale className="w-4 h-4" />
                   </div>
                   <input
                     id="weight"
@@ -300,35 +354,45 @@ export default function EditPatientView() {
                     value={formData.weight || ""}
                     onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || 0 })}
                     placeholder="0.0"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-sm">kg</span>
-                  </div>
+                  <span className="text-gray-500 text-sm font-medium">kg</span>
                 </div>
               </div>
             </div>
 
-            {/* Botones */}
-            <div className="flex justify-end gap-3 pt-6 mt-6">
-              <button
-                type="button"
-                onClick={() => navigate(`/patients/${patientId}`)}
-                className="px-4 sm:px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors text-sm font-medium"
-              >
-                Cancelar
-              </button>
+            {/* Botones para móvil */}
+            <div className="sm:hidden flex flex-col gap-3 pt-6 mt-6 border-t border-gray-100">
               <button
                 onClick={handleSaveData}
                 disabled={isPending}
-                className="px-4 sm:px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
               >
                 {isPending ? (
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Save className="w-4 h-4" />
+                  <Save className="w-5 h-5" />
                 )}
                 {isPending ? "Guardando..." : "Guardar Cambios"}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => navigate(`/patients/${patientId}`)}
+                className="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+
+            {/* Botón Cancelar para desktop */}
+            <div className="hidden sm:flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => navigate(`/patients/${patientId}`)}
+                className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+              >
+                Cancelar
               </button>
             </div>
           </div>

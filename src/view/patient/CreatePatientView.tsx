@@ -1,9 +1,9 @@
 // src/views/patients/CreatePatientView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save } from "lucide-react";
+import { Save, ArrowLeft, PawPrint } from "lucide-react";
 import BackButton from "../../components/BackButton";
 import PatientForm from "../../components/patients/PatientForm";
 import type { PatientFormData } from "../../types";
@@ -26,16 +26,16 @@ export default function CreatePatientView() {
     setValue,
   } = useForm<PatientFormData>({
     defaultValues: {
-  name: "",
-  birthDate: "",
-  species: "",
-  breed: "",
-  sex: undefined,
-  weight: 0,
-  photo: undefined,
-  mainVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
-  referringVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
-},
+      name: "",
+      birthDate: "",
+      species: "",
+      breed: "",
+      sex: undefined,
+      weight: 0,
+      photo: undefined,
+      mainVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
+      referringVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
+    },
   });
 
   const { mutate, isPending } = useMutation({
@@ -92,46 +92,97 @@ export default function CreatePatientView() {
 
   return (
     <>
-      {/* Header con espaciado superior */}
-      <div className="mt-10 lg:m-0 mb-6 -mx-4 lg:-mx-0 pt-4 lg:pt-0">
-        <div className="flex items-center gap-4 px-4 lg:px-0">
-          <BackButton />
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">Nueva Mascota</h1>
-            <p className="text-gray-400 text-xs sm:text-sm">
-              Registra la información de la nueva mascota
-            </p>
+      {/* Header Mejorado */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+        <div className="px-6 lg:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between gap-6 mb-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {/* BackButton siempre visible */}
+              <Link
+                to={`/owners/${ownerId}`}
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                title="Volver al propietario"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-vet-primary/10 rounded-lg">
+                    <PawPrint className="w-6 h-6 text-vet-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-vet-text">
+                    Nueva Mascota
+                  </h1>
+                </div>
+                <p className="text-vet-muted text-sm">
+                  Registra la información de la nueva mascota
+                </p>
+              </div>
+            </div>
+
+            {/* Botón Guardar para desktop */}
+            <div className="hidden sm:block flex-shrink-0">
+              <button
+                type="submit"
+                form="patient-form"
+                disabled={isPending}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+              >
+                {isPending ? (
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-5 h-5" />
+                )}
+                {isPending ? "Guardando..." : "Guardar Mascota"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Card única con formulario */}
-      <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+      {/* Espaciador para el header fijo */}
+      <div className="h-40"></div>
+
+      {/* Formulario */}
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 mx-4 lg:mx-0">
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <form id="patient-form" onSubmit={handleSubmit(onSubmit)} noValidate>
               <PatientForm register={register} errors={errors} setValue={setValue} />
 
-              {/* Botones */}
-              <div className="flex justify-end gap-3 pt-6 mt-6">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/owners/${ownerId}`)}
-                  className="px-4 sm:px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors text-sm font-medium"
-                >
-                  Cancelar
-                </button>
+              {/* Botones para móvil */}
+              <div className="sm:hidden flex flex-col gap-3 pt-6 mt-6 border-t border-gray-100">
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 sm:px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
                 >
                   {isPending ? (
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4" />
+                    <Save className="w-5 h-5" />
                   )}
                   {isPending ? "Guardando..." : "Guardar Mascota"}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => navigate(`/owners/${ownerId}`)}
+                  className="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+
+              {/* Botón Cancelar para desktop */}
+              <div className="hidden sm:flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/owners/${ownerId}`)}
+                  className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                >
+                  Cancelar
                 </button>
               </div>
             </form>

@@ -12,6 +12,8 @@ import {
   Plus,
   Search,
   Mail,
+  Users,
+  ArrowLeft
 } from "lucide-react";
 import { toast } from "../../components/Toast";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -66,8 +68,8 @@ export default function OwnerListView() {
       <div className="w-full">
         <div className="flex items-center justify-center h-[70vh]">
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-green-500">Cargando propietarios...</p>
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-vet-text font-medium">Cargando propietarios...</p>
           </div>
         </div>
       </div>
@@ -76,195 +78,184 @@ export default function OwnerListView() {
 
   return (
     <>
-      {/* Header Fijo */}
-      <div className="fixed  lg:mt-0 mt-6 left-0 right-0 lg:top-0 lg:left-64 z-30 bg-gray-900/98 backdrop-blur-xl border-b border-gray-700/50 shadow-lg">
-        <div className="px-4 lg:px-10 py-4">
-          {/* Línea principal: BackButton + Título + Botón */}
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <BackButton />
+      {/* Header Fijo Mejorado */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+        <div className="px-6 lg:px-8 pt-6 pb-4">
+          {/* Línea principal: Título + Estadísticas + Botón */}
+          <div className="flex items-center justify-between gap-6 mb-6">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {/* BackButton siempre visible */}
+              <Link
+                to="/"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                title="Volver al dashboard"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
-                  Lista de Propietarios
-                </h1>
-                <p className="text-gray-400 text-xs sm:text-sm mt-0.5 truncate">
-                  Gestiona todos los propietarios registrados
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-vet-primary/10 rounded-lg">
+                    <Users className="w-6 h-6 text-vet-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-vet-text">
+                    Lista de Propietarios
+                  </h1>
+                </div>
+                <p className="text-vet-muted text-sm">
+                  Gestiona todos los propietarios registrados en el sistema
                 </p>
               </div>
             </div>
 
-            {/* Botón "Nuevo Propietario" - visible desde tablet */}
+            {/* Estadísticas */}
+            <div className="hidden lg:flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-vet-text">{data?.length || 0}</p>
+                <p className="text-vet-muted text-sm">Total registrados</p>
+              </div>
+            </div>
+
+            {/* Botón "Nuevo Propietario" */}
             <div className="hidden sm:block flex-shrink-0">
               <Link
                 to="/owners/new"
-                className="inline-flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
               >
-                <Plus className="w-4 h-4" />
-                <span className="hidden lg:inline">Nuevo Propietario</span>
-                <span className="lg:hidden">Nuevo</span>
+                <Plus className="w-5 h-5" />
+                <span>Nuevo Propietario</span>
               </Link>
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* Search Bar Mejorada */}
+          <div className="relative max-w-2xl">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-vet-muted" />
+            </div>
             <input
               type="text"
-              placeholder="Buscar por nombre o contacto..."
+              placeholder="Buscar por nombre o teléfono..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500 transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-vet-light border border-vet-muted/30 rounded-xl text-vet-text placeholder-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors"
             />
           </div>
         </div>
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-32 sm:h-36 lg:h-40"></div>
+      <div className="h-55 md:h-45 lg:h-38"></div>
 
-      {/* Botón flotante móvil */}
+      {/* Botón flotante móvil mejorado */}
       <Link
         to="/owners/new"
-        className="sm:hidden fixed bottom-24 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg active:scale-95 transition-all"
+        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
       >
         <Plus className="w-6 h-6" />
       </Link>
 
-      {/* Content */}
-      <div className={` mt-15 lg:mt-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
+      {/* Content Mejorado con Cards Pro */}
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
         {filteredOwners.length ? (
-          <div className="space-y-3">
-            {filteredOwners.map((owner) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {filteredOwners.map((owner, index) => (
               <div
                 key={owner._id}
-                className="bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-colors overflow-hidden"
+                className="bg-white rounded-2xl border border-gray-100 hover:border-vet-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                style={{ 
+                  animationDelay: `${index * 50}ms`,
+                }}
               >
-                {/* Mobile Layout */}
-                <div className="sm:hidden p-4">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/30 flex-shrink-0">
-                      <span className="text-green-500 font-bold text-sm">
-                        {owner.name
-                          .split(" ")
-                          .map((n: string) => n.charAt(0))
-                          .join("")
-                          .toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/owners/${owner._id}`}
-                        className="block hover:text-green-500 transition-colors"
-                      >
-                        <h3 className="text-white font-semibold text-base truncate mb-1">
-                          {owner.name}
-                        </h3>
-                      </Link>
-                      <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <Phone className="w-3.5 h-3.5" />
-                        <span className="truncate">{owner.contact}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions - Mobile */}
-                  <div className="flex gap-2 pt-3 border-t border-gray-700 mt-3">
-                    <Link
-                      to={`/owners/${owner._id}`}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span className="text-sm font-medium">Ver</span>
-                    </Link>
-
-                    <Link
-                      to={`/owners/${owner._id}/edit`}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    >
-                      <Edit className="w-4 h-4" />
-                      <span className="text-sm font-medium">Editar</span>
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteClick(owner._id, owner.name)}
-                      disabled={isDeleting}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 disabled:opacity-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="text-sm font-medium">Eliminar</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Desktop/Tablet Layout */}
-                <div className="hidden sm:flex items-center gap-4 p-4">
-                  {/* Avatar y info */}
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/30 flex-shrink-0">
-                      <span className="text-green-500 font-bold text-lg">
-                        {owner.name
-                          .split(" ")
-                          .map((n: string) => n.charAt(0))
-                          .join("")
-                          .toUpperCase()}
-                      </span>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/owners/${owner._id}`}
-                        className="block hover:text-green-500 transition-colors group"
-                      >
-                        <h3 className="text-white font-bold text-lg mb-1 truncate">
-                          {owner.name}
-                        </h3>
-                      </Link>
-                      <div className="flex flex-wrap items-center gap-3 text-gray-400 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-green-500" />
-                          <span className="truncate">{owner.contact}</span>
+                {/* Card Content */}
+                <div className="p-6">
+                  {/* Header de la card */}
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-md">
+                          <span className="text-white font-bold text-sm">
+                            {owner.name
+                              .split(" ")
+                              .map((n: string) => n.charAt(0))
+                              .join("")
+                              .toUpperCase()}
+                          </span>
                         </div>
-                        {owner.email && (
-                          <>
-                            <span className="text-gray-600">•</span>
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-gray-500" />
-                              <span className="truncate">{owner.email}</span>
-                            </div>
-                          </>
-                        )}
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-white flex items-center justify-center">
+                          <User className="w-2.5 h-2.5 text-vet-primary" />
+                        </div>
                       </div>
+                      <div className="min-w-0">
+                        <Link
+                          to={`/owners/${owner._id}`}
+                          className="block hover:text-vet-primary transition-colors"
+                        >
+                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-vet-primary transition-colors truncate">
+                            {owner.name}
+                          </h3>
+                        </Link>
+                        <p className="text-xs text-gray-500 mt-1">Propietario</p>
+                      </div>
+                    </div>
+                    
+                    {/* Badge de estado */}
+                    <div className="px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                      <span className="text-xs font-medium text-green-700">Activo</span>
                     </div>
                   </div>
 
-                  {/* Actions - Desktop */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Información de contacto */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-vet-light/50 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-4 h-4 text-vet-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">{owner.contact}</p>
+                        <p className="text-xs text-gray-500">Teléfono</p>
+                      </div>
+                    </div>
+
+                    {owner.email && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-vet-light/50 transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <Mail className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">{owner.email}</p>
+                          <p className="text-xs text-gray-500">Email</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex gap-2 pt-4 border-t border-gray-100">
                     <Link
                       to={`/owners/${owner._id}`}
-                      className="p-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      title="Ver detalles"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-text font-medium text-sm transition-all duration-200 group/action"
                     >
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-4 h-4 group-hover/action:text-white" />
+                      <span>Ver</span>
                     </Link>
 
                     <Link
                       to={`/owners/${owner._id}/edit`}
-                      className="p-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      title="Editar"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium text-sm transition-all duration-200 group/action"
                     >
-                      <Edit className="w-5 h-5" />
+                      <Edit className="w-4 h-4 group-hover/action:text-white" />
+                      <span>Editar</span>
                     </Link>
 
                     <button
                       type="button"
                       onClick={() => handleDeleteClick(owner._id, owner.name)}
                       disabled={isDeleting}
-                      className="p-2.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 disabled:opacity-50"
-                      title="Eliminar"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 font-medium text-sm transition-all duration-200 disabled:opacity-50 group/action"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4 group-hover/action:text-white" />
+                      <span>Eliminar</span>
                     </button>
                   </div>
                 </div>
@@ -272,28 +263,28 @@ export default function OwnerListView() {
             ))}
           </div>
         ) : (
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 sm:p-12 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
-              <User className="w-8 h-8 text-gray-400" />
+          <div className="bg-white rounded-2xl border border-vet-muted/20 p-12 text-center max-w-2xl mx-auto">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-vet-light flex items-center justify-center">
+              <User className="w-10 h-10 text-vet-muted" />
             </div>
 
-            <h3 className="text-xl font-bold text-white mb-2">
-              {searchTerm ? "Sin resultados" : "No hay propietarios"}
+            <h3 className="text-2xl font-bold text-vet-text mb-3">
+              {searchTerm ? "No se encontraron resultados" : "No hay propietarios registrados"}
             </h3>
 
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-vet-muted mb-8 max-w-md mx-auto">
               {searchTerm
-                ? `No encontramos coincidencias para "${searchTerm}"`
-                : "Comienza agregando el primer propietario al sistema"}
+                ? `No encontramos coincidencias para "${searchTerm}". Intenta con otros términos.`
+                : "Comienza agregando el primer propietario al sistema para gestionar sus mascotas."}
             </p>
 
             {!searchTerm && (
               <Link
                 to="/owners/new"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-500 font-medium text-sm"
+                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
               >
-                <Plus className="w-4 h-4" />
-                Crear Propietario
+                <Plus className="w-5 h-5" />
+                Crear Primer Propietario
               </Link>
             )}
           </div>
