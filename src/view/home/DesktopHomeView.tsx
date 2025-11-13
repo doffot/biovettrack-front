@@ -4,9 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../hooks/useAuth';
 import { getAllAppointments } from '../../api/appointmentAPI';
 import { getAllGroomingServices } from '../../api/groomingAPI';
-import { extractId } from '../../utils/extractId';
 import { formatCurrency, getPaymentMethodInfo } from '../../utils/currencyUtils';
-import type { Appointment } from '../../types';
 import { Calendar, CheckCircle, Scissors } from 'lucide-react';
 
 // Tarjeta de métrica reutilizable

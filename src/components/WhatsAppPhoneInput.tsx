@@ -40,7 +40,6 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
   value,
   onChange,
   error,
-  required = false,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
   const [phoneNumber, setPhoneNumber] = useState<string>("");

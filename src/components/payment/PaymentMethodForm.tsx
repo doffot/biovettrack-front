@@ -97,7 +97,7 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
         >
           <option value="">Selecciona una modalidad</option>
           {paymentModes.map((mode) => {
-            const Icon = mode.icon;
+            // const Icon = mode.icon;
             return (
               <option key={mode.value} value={mode.value}>
                 {mode.label}

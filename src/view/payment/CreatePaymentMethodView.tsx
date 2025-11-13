@@ -22,7 +22,6 @@ export default function CreatePaymentMethodView() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<PaymentMethodFormData>({
     defaultValues: {
       name: "",

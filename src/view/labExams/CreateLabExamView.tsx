@@ -23,6 +23,7 @@ import errorSound from '/sounds/error.mp3';
 import ShareResultsModal from "../../components/ShareResultsModal";
 import { getPatientById } from "../../api/patientAPI";
 import { getOwnersById } from "../../api/OwnerAPI";
+import { extractId } from "../../utils/extractId";
 
 // Valores normales
 const normalValues = {
@@ -139,10 +140,13 @@ export default function CreateLabExamView() {
   });
 
   const { data: owner } = useQuery({
-    queryKey: ["owner", pet?.owner],
-    queryFn: () => getOwnersById(pet?.owner!),
-    enabled: !!pet?.owner,
-  });
+  queryKey: ["owner", pet?.owner],
+  queryFn: () => {
+    const ownerId = extractId(pet?.owner);
+    return ownerId ? getOwnersById(ownerId) : null;
+  },
+  enabled: !!pet?.owner,
+});
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: LabExamFormData) => {

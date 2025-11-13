@@ -23,6 +23,7 @@ import type { Owner } from "../../types";
 import { getPatients, deletePatient } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { extractId } from "../../utils/extractId";
 
 export default function PatientListView() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,10 +60,19 @@ export default function PatientListView() {
     setMounted(true);
   }, []);
 
-  const getOwnerName = (ownerId: string): string => {
-    const owner = owners?.find((o: Owner) => o._id === ownerId);
-    return owner?.name || "Propietario no encontrado";
-  };
+const getOwnerName = (ownerField: string | { _id: string; name: string } | null | undefined): string => {
+  if (!ownerField) return "Propietario no encontrado";
+  
+  // Si es un objeto con name, devuélvelo directamente
+  if (typeof ownerField !== 'string' && 'name' in ownerField) {
+    return ownerField.name;
+  }
+  
+  // Si es un string (ID), busca en la lista de owners
+  const ownerId = extractId(ownerField);
+  const owner = owners?.find((o: Owner) => o._id === ownerId);
+  return owner?.name || "Propietario no encontrado";
+};
 
   const handleDeleteClick = (petId: string, petName: string) => {
     setPetToDelete({ id: petId, name: petName });
@@ -314,6 +324,7 @@ export default function PatientListView() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-gray-900 truncate">
+                          
                           {getOwnerName(patient.owner)}
                         </p>
                         <p className="text-xs text-gray-500">Propietario</p>
