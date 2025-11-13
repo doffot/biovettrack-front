@@ -23,9 +23,9 @@ const menuItems = [
   { to: '/owners', label: 'Dueño', icon: User },
   { to: '/patients', label: 'Mascota', icon: PawPrint },
   { to: '/grooming-services', label: 'Peluquería', icon: Scissors },
-  { to: '/medical-history', label: 'Consulta', icon: FileText, disabled: true }, // 👈 DESACTIVADO
+  { to: '/medical-history', label: 'Consulta', icon: FileText },
   { to: '/grooming/report', label: 'Reportes', icon: BarChart3 },
-  { to: '/payment-methods', label: 'Métodos de Pago', icon: CreditCard },
+  { to: 'payment-methods', label: 'Métodos de Pago', icon: CreditCard },
 ];
 
 const HeaderDesktop: React.FC<{ 
@@ -166,36 +166,26 @@ const SidebarDesktop: React.FC<{
       <nav className="flex-1 px-4 py-5 overflow-y-auto">
         <div className="space-y-1">
           {menuItems.map((item) => (
-            <div key={item.to}>
-              {item.disabled ? (
-                <div
-                  className="group flex items-center gap-3 px-4 py-3 rounded-lg text-white/50 cursor-not-allowed"
-                >
-                  <item.icon className="w-5 h-5 flex-shrink-0 text-white/50" />
-                  <span className="text-sm whitespace-nowrap">Próximamente</span>
-                </div>
-              ) : (
-                <Link
-                  to={item.to}
-                  onClick={() => setActiveItem(item.to)}
-                  className={`
-                    group flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                    ${activeItem === item.to
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/80 hover:bg-white/10 hover:text-white'}
-                  `}
-                >
-                  <item.icon 
-                    className={`w-5 h-5 flex-shrink-0 ${
-                      activeItem === item.to ? 'text-white' : 'text-white/80 group-hover:text-white'
-                    }`} 
-                  />
-                  <span className="text-sm whitespace-nowrap">
-                    {item.label}
-                  </span>
-                </Link>
-              )}
-            </div>
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={() => setActiveItem(item.to)}
+              className={`
+                group flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                ${activeItem === item.to
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/80 hover:bg-white/10 hover:text-white'}
+              `}
+            >
+              <item.icon 
+                className={`w-5 h-5 flex-shrink-0 ${
+                  activeItem === item.to ? 'text-white' : 'text-white/80 group-hover:text-white'
+                }`} 
+              />
+              <span className="text-sm whitespace-nowrap">
+                {item.label}
+              </span>
+            </Link>
           ))}
         </div>
       </nav>
@@ -374,6 +364,8 @@ const AppLayout: React.FC = () => {
     const saved = localStorage.getItem('user_title');
     return saved === 'Dr.' || saved === 'Dra.' ? saved : 'Dr.';
   });
+
+
 
   // Cargar tema al iniciar
   useEffect(() => {
