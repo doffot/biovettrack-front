@@ -10,7 +10,8 @@ import {
   FileText,
   BarChart3,
   Moon,
-  Sun
+  Sun,
+  CreditCard
 } from 'lucide-react';
 import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
@@ -22,8 +23,9 @@ const menuItems = [
   { to: '/owners', label: 'Dueño', icon: User },
   { to: '/patients', label: 'Mascota', icon: PawPrint },
   { to: '/grooming-services', label: 'Peluquería', icon: Scissors },
-  { to: '/medical-history', label: 'Consulta', icon: FileText },
-  { to: '/reports', label: 'Reportes', icon: BarChart3 },
+  { to: '/medical-history', label: 'Consulta', icon: FileText, disabled: true }, // 👈 DESACTIVADO
+  { to: '/grooming/report', label: 'Reportes', icon: BarChart3 },
+  { to: '/payment-methods', label: 'Métodos de Pago', icon: CreditCard },
 ];
 
 const HeaderDesktop: React.FC<{ 
@@ -164,26 +166,36 @@ const SidebarDesktop: React.FC<{
       <nav className="flex-1 px-4 py-5 overflow-y-auto">
         <div className="space-y-1">
           {menuItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setActiveItem(item.to)}
-              className={`
-                group flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                ${activeItem === item.to
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/80 hover:bg-white/10 hover:text-white'}
-              `}
-            >
-              <item.icon 
-                className={`w-5 h-5 flex-shrink-0 ${
-                  activeItem === item.to ? 'text-white' : 'text-white/80 group-hover:text-white'
-                }`} 
-              />
-              <span className="text-sm whitespace-nowrap">
-                {item.label}
-              </span>
-            </Link>
+            <div key={item.to}>
+              {item.disabled ? (
+                <div
+                  className="group flex items-center gap-3 px-4 py-3 rounded-lg text-white/50 cursor-not-allowed"
+                >
+                  <item.icon className="w-5 h-5 flex-shrink-0 text-white/50" />
+                  <span className="text-sm whitespace-nowrap">Próximamente</span>
+                </div>
+              ) : (
+                <Link
+                  to={item.to}
+                  onClick={() => setActiveItem(item.to)}
+                  className={`
+                    group flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                    ${activeItem === item.to
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'}
+                  `}
+                >
+                  <item.icon 
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      activeItem === item.to ? 'text-white' : 'text-white/80 group-hover:text-white'
+                    }`} 
+                  />
+                  <span className="text-sm whitespace-nowrap">
+                    {item.label}
+                  </span>
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </nav>
@@ -402,10 +414,8 @@ const AppLayout: React.FC = () => {
           setActiveItem={setActiveItem} 
         />
 
-        <main className="pt-20 pb-24 lg:pt-16 lg:pb-0 lg:pl-64 px-4 relative z-10 min-h-screen bg-vet-gradient">
-          <div className="w-full sm:max-w-lg md:max-w-3xl lg:max-w-7xl lg:p-10 mx-auto">
-            <Outlet />
-          </div>
+        <main className="pt-14 pb-20 lg:pt-16 lg:pb-0 lg:pl-64 relative z-10 min-h-screen bg-vet-gradient">
+          <Outlet />
         </main>
       </div>
     );

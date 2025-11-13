@@ -31,7 +31,7 @@ export default function OwnerListView() {
 
   const { mutate: removeOwner, isPending: isDeleting } = useMutation({
     mutationFn: deleteOwners,
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(error.message);
     },
     onSuccess: (data) => {
@@ -144,7 +144,7 @@ export default function OwnerListView() {
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-55 md:h-45 lg:h-38"></div>
+      <div className="h-55 md:h-45 lg:h-55"></div>
 
       {/* Botón flotante móvil mejorado */}
       <Link

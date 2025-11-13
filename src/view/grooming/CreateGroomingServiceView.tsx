@@ -1,19 +1,19 @@
 // src/views/grooming/CreateGroomingServiceView.tsx
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Scissors, ArrowLeft } from "lucide-react";
-
-// Importar el componente de formulario separado
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Save, Scissors, ArrowLeft, PawPrint } from "lucide-react";
 
 // API
+import { createGroomingService } from "../../api/groomingAPI";
+import { getPatientById } from "../../api/patientAPI";
 
 // Types
 import type { GroomingServiceFormData } from "../../types";
-import { createGroomingService } from "../../api/groomingAPI";
 import { toast } from "../../components/Toast";
 import GroomingServiceForm from "../../components/grooming/groomingForm";
+import { getPaymentMethods } from "../../api/paymentAPI";
 
 export default function CreateGroomingServiceView() {
   const { patientId } = useParams<{ patientId: string }>(); 
@@ -21,23 +21,46 @@ export default function CreateGroomingServiceView() {
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
 
+  // Obtener información del paciente
+  const { data: patient, isLoading: isLoadingPatient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: () => getPatientById(patientId!),
+    enabled: !!patientId,
+  });
+
+  // Obtener métodos de pago del veterinario
+  const { data: paymentMethods = []} = useQuery({
+    queryKey: ["paymentMethods"],
+    queryFn: getPaymentMethods,
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<GroomingServiceFormData>({
     defaultValues: {
       patientId: patientId || "",
-      date: "",
+      date: new Date().toISOString().split('T')[0], // Fecha actual por defecto
       service: undefined,
       specifications: "",
       observations: "",
       cost: undefined,
-      paymentType: undefined,
-      exchangeRate: undefined,
+      paymentMethod: "",
+      paymentReference: "",
+      status: "Programado",
+      paymentStatus: "Pendiente",
+      amountPaid: 0,
     },
   });
+
+  // Observar el método de pago seleccionado
+  const selectedPaymentMethod = watch("paymentMethod");
+  const selectedPaymentMethodData = paymentMethods.find(
+    (method: any) => method._id === selectedPaymentMethod
+  );
 
   // Asegurar que patientId esté configurado
   useEffect(() => {
@@ -57,7 +80,7 @@ export default function CreateGroomingServiceView() {
         ...data,
         patientId,
         cost: Number(data.cost),
-        exchangeRate: data.exchangeRate ? Number(data.exchangeRate) : undefined,
+        amountPaid: Number(data.amountPaid) || 0,
       };
 
       return await createGroomingService(serviceData, patientId);
@@ -96,8 +119,14 @@ export default function CreateGroomingServiceView() {
       toast.error("El costo debe ser mayor a 0");
       return;
     }
-    if (!data.paymentType) {
-      toast.error("El tipo de pago es obligatorio");
+    if (!data.paymentMethod) {
+      toast.error("El método de pago es obligatorio");
+      return;
+    }
+
+    // Validar referencia si el método de pago lo requiere
+    if (selectedPaymentMethodData?.requiresReference && !data.paymentReference) {
+      toast.error("Este método de pago requiere número de referencia");
       return;
     }
 
@@ -125,9 +154,23 @@ export default function CreateGroomingServiceView() {
                   <div className="p-2 bg-vet-primary/10 rounded-lg">
                     <Scissors className="w-6 h-6 text-vet-primary" />
                   </div>
-                  <h1 className="text-2xl font-bold text-vet-text">
-                    Nuevo Servicio de Peluquería
-                  </h1>
+                  <div className="min-w-0">
+                    <h1 className="text-2xl font-bold text-vet-text truncate">
+                      Nuevo Servicio de Peluquería
+                    </h1>
+                    <div className="flex items-center gap-2 mt-1">
+                      <PawPrint className="w-4 h-4 text-vet-muted flex-shrink-0" />
+                      <span className="text-vet-primary font-semibold text-sm truncate">
+                        {isLoadingPatient ? (
+                          "Cargando mascota..."
+                        ) : patient ? (
+                          `Para: ${patient.name}`
+                        ) : (
+                          "Mascota no encontrada"
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <p className="text-vet-muted text-sm">
                   Registra un nuevo servicio de estética para el paciente
@@ -135,43 +178,56 @@ export default function CreateGroomingServiceView() {
               </div>
             </div>
 
-            {/* Botón Guardar para desktop */}
+            {/* Foto de la mascota en lugar del botón Guardar */}
             <div className="hidden sm:block flex-shrink-0">
-              <button
-                type="submit"
-                form="grooming-form"
-                disabled={isPending}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50"
-              >
-                {isPending ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Save className="w-5 h-5" />
-                )}
-                {isPending ? "Guardando..." : "Guardar Servicio"}
-              </button>
+              {isLoadingPatient ? (
+                <div className="w-16 h-16 rounded-xl bg-gray-200 animate-pulse"></div>
+              ) : patient?.photo ? (
+                <img
+                  src={patient.photo}
+                  alt={patient.name}
+                  className="w-16 h-16 rounded-xl object-cover border-2 border-vet-primary/20 shadow-sm"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-vet-primary/10 flex items-center justify-center border-2 border-vet-primary/20">
+                  <PawPrint className="w-8 h-8 text-vet-primary" />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-40"></div>
+      <div className="h-40 lg:h-40"></div>
 
       {/* Formulario */}
       <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
             <form id="grooming-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-              {/* Componente de Formulario Separado */}
-              <GroomingServiceForm register={register} errors={errors} />
+              {/* Componente de Formulario Actualizado */}
+              <GroomingServiceForm 
+                register={register} 
+                errors={errors} 
+                paymentMethods={paymentMethods}
+                selectedPaymentMethod={selectedPaymentMethodData}
+              />
 
-              {/* Botones para móvil */}
-              <div className="sm:hidden flex flex-col gap-3 pt-6 mt-6 border-t border-gray-100">
+              {/* Botones - Ahora ambos en el formulario */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/patients/${patientId}`)}
+                  className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
                 >
                   {isPending ? (
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -179,25 +235,6 @@ export default function CreateGroomingServiceView() {
                     <Save className="w-5 h-5" />
                   )}
                   {isPending ? "Guardando..." : "Guardar Servicio"}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => navigate(`/patients/${patientId}`)}
-                  className="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-
-              {/* Botón Cancelar para desktop */}
-              <div className="hidden sm:flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/patients/${patientId}`)}
-                  className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-                >
-                  Cancelar
                 </button>
               </div>
             </form>

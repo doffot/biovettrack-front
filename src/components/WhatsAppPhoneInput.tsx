@@ -91,56 +91,55 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
 
   return (
     <div>
-      <label className="block text-white font-medium mb-2 text-sm">
-        Teléfono (WhatsApp)
-        {required && <span className="text-red-400 ml-1">*</span>}
+      <label className="block text-vet-text font-semibold mb-2 text-sm">
+        WhatsApp <span className="text-red-500">*</span>
       </label>
 
       <div className={`
-        flex items-center gap-3 px-4 py-3 rounded-lg border
+        flex items-center gap-3 px-3 py-2 rounded-lg border transition-all duration-200
         ${error 
-          ? 'bg-red-500/10 border-red-500/50' 
-          : 'bg-gray-700/50 border-gray-700 hover:border-green-500/50 focus-within:border-green-500'
-        } transition-colors
+          ? 'bg-red-50 border-red-300' 
+          : 'bg-vet-light border-gray-300 hover:border-gray-400 focus-within:border-vet-primary'
+        }
       `}>
-        <div className={`p-1 rounded bg-gray-900 ${error ? 'text-red-500' : 'text-green-500'}`}>
-          <Phone className="w-5 h-5" />
+        <div className={`p-1.5 rounded ${error ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
+          <Phone className="w-4 h-4" />
         </div>
 
         <select
           value={selectedCountry.dialCode}
           onChange={handleCountryChange}
-          className="bg-transparent text-white focus:outline-none text-sm font-medium pr-2 cursor-pointer"
+          className="bg-transparent text-vet-text focus:outline-none text-sm font-medium pr-2 cursor-pointer appearance-none"
           style={{ width: '70px' }}
         >
           {countries.map((country) => (
-            <option key={country.code} value={country.dialCode} className="bg-gray-800 text-white">
+            <option key={country.code} value={country.dialCode} className="bg-white text-vet-text">
               {country.dialCode}
             </option>
           ))}
         </select>
 
-        <div className="h-6 w-px bg-gray-600" />
+        <div className="h-6 w-px bg-gray-300" />
 
         <input
           type="tel"
           placeholder="Número de teléfono"
           value={phoneNumber}
           onChange={handlePhoneChange}
-          className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+          className="flex-1 bg-transparent text-vet-text placeholder-vet-muted focus:outline-none text-sm"
         />
       </div>
 
       {error && (
-        <p className="mt-2 text-red-400 text-xs flex items-center gap-1">
-          <span className="w-1 h-1 bg-red-400 rounded-full" />
+        <p className="mt-1 text-red-600 text-xs flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
           {error}
         </p>
       )}
 
       {!error && (
-        <p className="text-gray-400 text-xs mt-2">
-          Ej: <span className="font-mono">3001234567</span> → se convierte en <span className="font-mono">{selectedCountry.dialCode}3001234567</span>
+        <p className="text-vet-muted text-xs mt-1">
+          Ej: <span className="font-mono text-vet-text">3001234567</span> → se convierte en <span className="font-mono text-vet-primary">{selectedCountry.dialCode}3001234567</span>
         </p>
       )}
     </div>

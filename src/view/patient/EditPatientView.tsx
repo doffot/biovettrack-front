@@ -12,7 +12,9 @@ import {
   Save,
   Heart,
   Bone,
-  ArrowLeft
+  ArrowLeft,
+  Palette,
+  MapPin
 } from "lucide-react";
 
 export default function EditPatientView() {
@@ -28,6 +30,8 @@ export default function EditPatientView() {
     sex: "",
     breed: "",
     weight: 0,
+    color: "", // ✅ Nuevo campo
+    identification: "", // ✅ Nuevo campo
   });
 
   const [ageText, setAgeText] = useState<string>('');
@@ -48,6 +52,8 @@ export default function EditPatientView() {
         sex: patient.sex,
         breed: patient.breed || "",
         weight: patient.weight || 0,
+        color: patient.color || "", // ✅ Nuevo campo
+        identification: patient.identification || "", // ✅ Nuevo campo
       });
       calculateAge(birthDate);
     }
@@ -116,6 +122,10 @@ export default function EditPatientView() {
       dataToUpdate.append("breed", formData.breed);
     if (formData.weight !== (patient?.weight || 0))
       dataToUpdate.append("weight", String(formData.weight));
+    if (formData.color !== (patient?.color || "")) // ✅ Nuevo campo
+      dataToUpdate.append("color", formData.color);
+    if (formData.identification !== (patient?.identification || "")) // ✅ Nuevo campo
+      dataToUpdate.append("identification", formData.identification);
 
     if (Array.from(dataToUpdate.entries()).length === 0) {
       toast.info("No hay cambios para guardar");
@@ -125,14 +135,16 @@ export default function EditPatientView() {
     updatePatientData(dataToUpdate);
   };
 
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   if (isLoading) {
     return (
-      <div className="w-full">
-        <div className="flex items-center justify-center h-[70vh]">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-vet-text font-medium">Cargando mascota...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 mx-auto mb-3 border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-vet-text font-medium">Cargando mascota...</p>
         </div>
       </div>
     );
@@ -140,20 +152,18 @@ export default function EditPatientView() {
 
   if (!patient) {
     return (
-      <div className="w-full">
-        <div className="flex items-center justify-center h-[70vh]">
-          <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
-            <PawPrint className="w-16 h-16 mx-auto text-red-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Mascota no encontrada</h2>
-            <p className="text-gray-600 mb-6">La mascota que buscas no existe o ha sido eliminada.</p>
-            <Link
-              to="/patients"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Volver a la lista
-            </Link>
-          </div>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="bg-white p-6 rounded-xl border border-gray-200 text-center max-w-sm w-full">
+          <PawPrint className="w-12 h-12 mx-auto text-red-400 mb-3" />
+          <h2 className="text-xl font-semibold text-vet-text mb-2">Mascota no encontrada</h2>
+          <p className="text-vet-muted text-sm mb-4">La mascota que buscas no existe o ha sido eliminada.</p>
+          <Link
+            to="/patients"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver a la lista
+          </Link>
         </div>
       </div>
     );
@@ -161,127 +171,114 @@ export default function EditPatientView() {
 
   return (
     <>
-      {/* Header Mejorado */}
-      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
-        <div className="px-6 lg:px-8 pt-6 pb-4">
-          <div className="flex items-center justify-between gap-6 mb-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              {/* BackButton siempre visible */}
+      {/* Header Minimalista */}
+      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-200">
+        <div className="px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <Link
                 to={`/patients/${patientId}`}
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Volver al detalle"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
               </Link>
               
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-vet-primary/10 rounded-lg">
-                    <PawPrint className="w-6 h-6 text-vet-primary" />
-                  </div>
-                  <h1 className="text-2xl font-bold text-vet-text">
-                    Editar {patient.name}
-                  </h1>
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-vet-primary/10 rounded">
+                  <PawPrint className="w-4 h-4 text-vet-primary" />
                 </div>
-                <p className="text-vet-muted text-sm">
-                  Actualiza la información de la mascota
-                </p>
+                <h1 className="text-lg font-semibold text-vet-text">
+                  Editar {patient.name}
+                </h1>
               </div>
             </div>
 
-            {/* Botón Guardar para desktop */}
-            <div className="hidden sm:block flex-shrink-0">
-              <button
-                onClick={handleSaveData}
-                disabled={isPending}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50"
-              >
-                {isPending ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Save className="w-5 h-5" />
-                )}
-                {isPending ? "Guardando..." : "Guardar Cambios"}
-              </button>
-            </div>
+            <button
+              onClick={handleSaveData}
+              disabled={isPending}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-colors text-sm disabled:opacity-50"
+            >
+              {isPending ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {isPending ? "Guardando..." : "Guardar"}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Espaciador para el header fijo */}
-      <div className="h-40"></div>
+      {/* Espaciador para el header */}
+      <div className="h-16"></div>
 
-      {/* Formulario */}
-      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            
+      {/* Formulario Minimalista */}
+      <div className={`${mounted ? "opacity-100" : "opacity-0"} transition-opacity duration-300 px-4 sm:px-6 lg:px-8 pb-4`}>
+        <div className="max-w-2xl mx-auto">
+          <div className="space-y-4">
             {/* Grid de formulario */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nombre - ocupa toda la fila */}
-              <div className="lg:col-span-2">
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-3">
-                  Nombre del paciente <span className="text-red-500">*</span>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-vet-text mb-2">
+                  Nombre <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <PawPrint className="w-4 h-4" />
                   </div>
                   <input
-                    id="name"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ej: Luna, Max, Rocky..."
-                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="Nombre de la mascota"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted text-sm"
                   />
                 </div>
               </div>
 
               {/* Fecha de nacimiento */}
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-semibold text-gray-900 mb-3">
+                <label className="block text-sm font-medium text-vet-text mb-2">
                   Fecha de nacimiento <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <CalendarDays className="w-4 h-4" />
                   </div>
                   <input
-                    id="birthDate"
                     type="date"
                     value={formData.birthDate}
                     onChange={(e) => {
-                      setFormData({ ...formData, birthDate: e.target.value });
+                      handleInputChange("birthDate", e.target.value);
                       calculateAge(e.target.value);
                     }}
-                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text text-sm"
                   />
                 </div>
                 {ageText && (
-                  <p className="mt-2 text-xs text-gray-600">
-                    Edad: <span className="text-vet-primary font-semibold">{ageText}</span>
+                  <p className="mt-1 text-xs text-vet-muted">
+                    Edad: <span className="text-vet-primary font-medium">{ageText}</span>
                   </p>
                 )}
               </div>
 
               {/* Especie */}
               <div>
-                <label htmlFor="species" className="block text-sm font-semibold text-gray-900 mb-3">
+                <label className="block text-sm font-medium text-vet-text mb-2">
                   Especie <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <Bone className="w-4 h-4" />
                   </div>
                   <select
-                    id="species"
                     value={formData.species}
-                    onChange={(e) => setFormData({ ...formData, species: e.target.value })}
-                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
+                    onChange={(e) => handleInputChange("species", e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text appearance-none cursor-pointer text-sm"
                   >
-                    <option value="">Selecciona una especie</option>
+                    <option value="">Seleccionar especie</option>
                     <option value="Canino">Canino</option>
                     <option value="Felino">Felino</option>
                     <option value="Conejo">Conejo</option>
@@ -296,20 +293,19 @@ export default function EditPatientView() {
 
               {/* Sexo */}
               <div>
-                <label htmlFor="sex" className="block text-sm font-semibold text-gray-900 mb-3">
+                <label className="block text-sm font-medium text-vet-text mb-2">
                   Sexo <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <Heart className="w-4 h-4" />
                   </div>
                   <select
-                    id="sex"
                     value={formData.sex}
-                    onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
-                    className="flex-1 bg-transparent text-gray-900 focus:outline-none text-sm font-medium appearance-none cursor-pointer"
+                    onChange={(e) => handleInputChange("sex", e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text appearance-none cursor-pointer text-sm"
                   >
-                    <option value="">Selecciona sexo</option>
+                    <option value="">Seleccionar sexo</option>
                     <option value="Macho">Macho</option>
                     <option value="Hembra">Hembra</option>
                   </select>
@@ -318,80 +314,105 @@ export default function EditPatientView() {
 
               {/* Raza */}
               <div>
-                <label htmlFor="breed" className="block text-sm font-semibold text-gray-900 mb-3">
+                <label className="block text-sm font-medium text-vet-text mb-2">
                   Raza
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <Tag className="w-4 h-4" />
                   </div>
                   <input
-                    id="breed"
                     type="text"
                     value={formData.breed}
-                    onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
-                    placeholder="Ej: Labrador, Siamés, Mestizo..."
-                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                    onChange={(e) => handleInputChange("breed", e.target.value)}
+                    placeholder="Raza o mestizo"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Color - ✅ Nuevo campo */}
+              <div>
+                <label className="block text-sm font-medium text-vet-text mb-2">
+                  Color
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
+                    <Palette className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.color}
+                    onChange={(e) => handleInputChange("color", e.target.value)}
+                    placeholder="Ej: Negro, Blanco y marrón..."
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Identificación (Señas/Marcas) - ✅ Nuevo campo */}
+              <div>
+                <label className="block text-sm font-medium text-vet-text mb-2">
+                  Señas o Marcas
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.identification}
+                    onChange={(e) => handleInputChange("identification", e.target.value)}
+                    placeholder="Ej: Mancha en el ojo, Cicatriz..."
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted text-sm"
                   />
                 </div>
               </div>
 
               {/* Peso */}
               <div>
-                <label htmlFor="weight" className="block text-sm font-semibold text-gray-900 mb-3">
+                <label className="block text-sm font-medium text-vet-text mb-2">
                   Peso actual
                 </label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 bg-vet-light border-gray-200 hover:border-vet-primary focus-within:border-vet-primary transition-all duration-200">
-                  <div className="p-2 rounded-lg bg-vet-primary/10 text-vet-primary">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted">
                     <Scale className="w-4 h-4" />
                   </div>
                   <input
-                    id="weight"
                     type="number"
                     step="0.1"
                     min="0"
                     value={formData.weight || ""}
-                    onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => handleInputChange("weight", parseFloat(e.target.value) || 0)}
                     placeholder="0.0"
-                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                    className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted text-sm"
                   />
-                  <span className="text-gray-500 text-sm font-medium">kg</span>
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vet-muted text-sm font-medium">
+                    kg
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Botones para móvil */}
-            <div className="sm:hidden flex flex-col gap-3 pt-6 mt-6 border-t border-gray-100">
+            {/* Botones inferiores */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => navigate(`/patients/${patientId}`)}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-vet-text font-medium transition-colors text-sm"
+              >
+                Cancelar
+              </button>
               <button
                 onClick={handleSaveData}
                 disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-all disabled:opacity-50 text-sm"
               >
                 {isPending ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Save className="w-5 h-5" />
+                  <Save className="w-4 h-4" />
                 )}
-                {isPending ? "Guardando..." : "Guardar Cambios"}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => navigate(`/patients/${patientId}`)}
-                className="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-
-            {/* Botón Cancelar para desktop */}
-            <div className="hidden sm:flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => navigate(`/patients/${patientId}`)}
-                className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-              >
-                Cancelar
+                {isPending ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </div>

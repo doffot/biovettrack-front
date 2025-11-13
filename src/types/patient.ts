@@ -1,6 +1,18 @@
 // src/types/patient.ts
 import { z } from "zod";
 
+// Esquema para el owner (objeto poblado)
+const OwnerPopulatedSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+});
+
+// Definición flexible para owner: puede ser ID (string) o objeto
+export const OwnerFieldSchema = z.union([
+  z.string().min(1, "El dueño es obligatorio"),
+  OwnerPopulatedSchema,
+]);
+
 export const patientSchema = z.object({
   _id: z.string(),
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -14,33 +26,37 @@ export const patientSchema = z.object({
     }
   ),
   species: z.string().min(1, "La especie es obligatoria"),
-  breed: z.string().optional(),
+  breed: z.string().optional().nullable(),
   sex: z.enum(["Macho", "Hembra"]),
-  weight: z.number().optional(),
-  owner: z.string().min(1, "El dueño es obligatorio"),
-  photo: z.string().optional(),
-  mainVet: z
-    .string()
-    .min(1, "El nombre del veterinario principal es obligatorio"),
-  referringVet: z.string().optional(),
+  weight: z.number().optional().nullable(),
+  color: z.string().optional().nullable(),
+  identification: z.string().optional().nullable(),
+  owner: OwnerFieldSchema, // ✅ Ahora admite string o { _id, name }
+  photo: z.string().optional().nullable(),
+  mainVet: z.string().min(1, "El nombre del veterinario principal es obligatorio"),
+  referringVet: z.string().optional().nullable(),
 });
 
+// Schema para listas (mismo tipo flexible)
 export const patientsListSchema = z.array(
-  patientSchema.pick({
-    _id: true,
-    name: true,
-    birthDate: true,
-    species: true,
-    breed: true,
-    sex: true,
-    weight: true,
-    owner: true,
-    photo: true,
-    mainVet: true,
-    referringVet: true,
+  z.object({
+    _id: z.string(),
+    name: z.string(),
+    birthDate: z.string(),
+    species: z.string(),
+    breed: z.string().optional().nullable(),
+    sex: z.enum(["Macho", "Hembra"]),
+    weight: z.number().optional().nullable(),
+    color: z.string().optional().nullable(),
+    identification: z.string().optional().nullable(),
+    owner: OwnerFieldSchema, // ✅ También flexible en listas
+    photo: z.string().optional().nullable(),
+    mainVet: z.string(),
+    referringVet: z.string().optional().nullable(),
   })
 );
 
+// Tipos derivados
 export type Patient = z.infer<typeof patientSchema>;
 export type PatientFormData = Pick<
   Patient,
@@ -50,6 +66,8 @@ export type PatientFormData = Pick<
   | "breed"
   | "sex"
   | "weight"
+  | "color"
+  | "identification"
   | "owner"
   | "photo"
   | "mainVet"

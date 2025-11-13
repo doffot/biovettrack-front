@@ -101,7 +101,9 @@ export async function getGroomingServicesByPatient(
 // =====================================
 export async function getGroomingServiceById(
   id: GroomingService["_id"]
+ 
 ): Promise<GroomingService> {
+   console.log('service by id');
   try {
     const { data } = await api.get<GetGroomingResponse>(`/grooming/${id}`);
 

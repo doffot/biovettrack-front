@@ -35,6 +35,7 @@ export default function CreateAppointmentView() {
       return createAppointment(formData, patientId);
     },
     onError: (error) => {
+       console.log('❌ Error en mutación:', error);
       toast.error(error.message);
     },
     onSuccess: () => {

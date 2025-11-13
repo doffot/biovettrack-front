@@ -14,7 +14,9 @@ import {
   Calendar,
   Weight,
   Venus,
-  ArrowLeft
+  ArrowLeft,
+  Palette,
+  MapPin
 } from "lucide-react";
 import type { Patient } from "../../types";
 import type { Owner } from "../../types";
@@ -86,10 +88,25 @@ export default function PatientListView() {
     });
   };
 
+  // const calculateAge = (birthDate: string) => {
+  //   if (!birthDate) return "N/A";
+  //   const birth = new Date(birthDate);
+  //   const today = new Date();
+  //   const years = today.getFullYear() - birth.getFullYear();
+  //   const months = today.getMonth() - birth.getMonth();
+    
+  //   if (years > 0) return `${years}a`;
+  //   if (months > 0) return `${months}m`;
+  //   return "Recién nacido";
+  // };
+
   const filteredPatients =
     patients?.filter((patient: Patient) =>
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.breed?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.color?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.identification?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       getOwnerName(patient.owner).toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
@@ -141,7 +158,7 @@ export default function PatientListView() {
             </div>
 
             {/* Estadísticas */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-6">
               <div className="text-right">
                 <p className="text-2xl font-bold text-vet-text">{patients?.length || 0}</p>
                 <p className="text-vet-muted text-sm">Total registrados</p>
@@ -167,7 +184,7 @@ export default function PatientListView() {
             </div>
             <input
               type="text"
-              placeholder="Buscar por nombre, especie o propietario..."
+              placeholder="Buscar por nombre, especie, color, señas o propietario..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-vet-light border border-vet-muted/30 rounded-xl text-vet-text placeholder-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors"
@@ -182,7 +199,7 @@ export default function PatientListView() {
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-55 md:h-50 lg:h-45"></div>
+      <div className="h-55 md:h-50 lg:h-55"></div>
 
       {/* Botón flotante móvil */}
       <Link
@@ -199,7 +216,7 @@ export default function PatientListView() {
             {filteredPatients.map((patient, index) => (
               <div
                 key={patient._id}
-                className="bg-white rounded-2xl border border-gray-100 hover:border-vet-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                className="bg-white rounded-2xl border-2 border-gray-100 hover:border-vet-primary/30 hover:shadow-2xl transition-all duration-500 overflow-hidden group relative"
                 style={{ 
                   animationDelay: `${index * 50}ms`,
                 }}
@@ -208,9 +225,9 @@ export default function PatientListView() {
                 <div className="p-6">
                   {/* Header de la card */}
                   <div className="flex items-start justify-between mb-5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-md">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
                           {patient.photo ? (
                             <img
                               src={patient.photo}
@@ -218,25 +235,32 @@ export default function PatientListView() {
                               className="w-full h-full object-cover rounded-xl"
                             />
                           ) : (
-                            <PawPrint className="w-6 h-6 text-white" />
+                            <PawPrint className="w-7 h-7 text-white" />
                           )}
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-white flex items-center justify-center">
-                          <PawPrint className="w-2.5 h-2.5 text-vet-primary" />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full border-2 border-white flex items-center justify-center shadow-sm">
+                          <PawPrint className="w-3 h-3 text-vet-primary" />
                         </div>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <Link
                           to={`/patients/${patient._id}`}
                           className="block hover:text-vet-primary transition-colors"
                         >
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-vet-primary transition-colors truncate">
+                          <h3 className="text-xl font-bold text-gray-900 group-hover:text-vet-primary transition-colors truncate">
                             {patient.name}
                           </h3>
                         </Link>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {patient.species} • {patient.breed}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-vet-primary font-semibold bg-vet-primary/10 px-2 py-0.5 rounded-full">
+                            {patient.species}
+                          </span>
+                          {patient.breed && (
+                            <span className="text-xs text-gray-500 truncate">
+                              • {patient.breed}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     
@@ -244,37 +268,37 @@ export default function PatientListView() {
                     <div className="relative hidden sm:block">
                       <button
                         onClick={() => toggleDropdown(patient._id)}
-                        className="p-2 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-muted transition-colors"
+                        className="p-2 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-muted transition-colors group/dropdown"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
 
                       {activeDropdown === patient._id && (
-                        <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-10">
+                        <div className="absolute right-0 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-2xl z-20 animate-in fade-in zoom-in-95">
                           <Link
                             to={`/patients/${patient._id}`}
-                            className="flex items-center gap-2 px-3 py-2.5 hover:bg-vet-light text-gray-700 transition-colors first:rounded-t-xl text-sm"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-vet-light text-gray-700 transition-colors first:rounded-t-xl text-sm"
                             onClick={() => setActiveDropdown(null)}
                           >
                             <Eye className="w-4 h-4" />
-                            Ver
+                            <span>Ver detalles completos</span>
                           </Link>
                           
                           <Link
                             to={`/patients/edit/${patient._id}`}
-                            className="flex items-center gap-2 px-3 py-2.5 hover:bg-blue-50 text-blue-600 transition-colors text-sm"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-blue-600 transition-colors text-sm"
                             onClick={() => setActiveDropdown(null)}
                           >
                             <Edit className="w-4 h-4" />
-                            Editar
+                            <span>Editar información</span>
                           </Link>
                           
                           <button
                             onClick={() => handleDeleteClick(patient._id, patient.name)}
-                            className="flex items-center gap-2 px-3 py-2.5 hover:bg-red-50 text-red-600 transition-colors w-full text-left last:rounded-b-xl text-sm"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 transition-colors w-full text-left last:rounded-b-xl text-sm"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Eliminar
+                            <span>Eliminar mascota</span>
                           </button>
                         </div>
                       )}
@@ -282,40 +306,69 @@ export default function PatientListView() {
                   </div>
 
                   {/* Información del paciente */}
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-4 mb-6">
                     {/* Propietario */}
-                    <div className="flex items-center gap-3 p-3 bg-vet-light rounded-lg hover:bg-vet-primary/5 transition-colors">
-                      <div className="w-8 h-8 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-vet-primary" />
+                    <div className="flex items-center gap-3 p-3 bg-vet-light rounded-xl hover:bg-vet-primary/5 transition-colors duration-300 group/item">
+                      <div className="w-10 h-10 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
+                        <User className="w-5 h-5 text-vet-primary" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
                           {getOwnerName(patient.owner)}
                         </p>
                         <p className="text-xs text-gray-500">Propietario</p>
                       </div>
                     </div>
 
-                    {/* Información adicional */}
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-                        <Calendar className="w-4 h-4 text-gray-500 mb-1" />
-                        <p className="text-xs font-medium text-gray-900">{formatDate(patient.birthDate)}</p>
-                        <p className="text-xs text-gray-500">Nacimiento</p>
+                    {/* Información en grid mejorada */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Color */}
+                      {patient.color && (
+                        <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-md transition-all">
+                          <Palette className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {patient.color}
+                            </p>
+                            <p className="text-xs text-blue-600">Color</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Señas/Marcas */}
+                      {patient.identification && (
+                        <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-md transition-all">
+                          <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {patient.identification}
+                            </p>
+                            <p className="text-xs text-purple-600">Señas/Marcas</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Información adicional en cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:shadow-md transition-all group/metric">
+                        <Calendar className="w-4 h-4 text-gray-600 mx-auto mb-2 group-hover/metric:scale-110 transition-transform" />
+                        <p className="text-sm font-bold text-gray-900">{formatDate(patient.birthDate)}</p>
+                        <p className="text-xs text-gray-600">Nacimiento</p>
                       </div>
                       
-                      <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-                        <Weight className="w-4 h-4 text-gray-500 mb-1" />
-                        <p className="text-xs font-medium text-gray-900">{patient.weight} kg</p>
-                        <p className="text-xs text-gray-500">Peso</p>
+                      <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-md transition-all group/metric">
+                        <Weight className="w-4 h-4 text-green-600 mx-auto mb-2 group-hover/metric:scale-110 transition-transform" />
+                        <p className="text-sm font-bold text-gray-900">{patient.weight || 'N/A'} kg</p>
+                        <p className="text-xs text-green-600">Peso</p>
                       </div>
                       
-                      <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-                        <Venus className="w-4 h-4 text-gray-500 mb-1" />
-                        <p className="text-xs font-medium text-gray-900">
-                          {patient.sex === "Macho" ? "Macho" : "Hembra"}
+                      <div className="text-center p-3 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:shadow-md transition-all group/metric">
+                        <Venus className="w-4 h-4 text-pink-600 mx-auto mb-2 group-hover/metric:scale-110 transition-transform" />
+                        <p className="text-sm font-bold text-gray-900">
+                          {patient.sex === "Macho" ? "M" : "H"}
                         </p>
-                        <p className="text-xs text-gray-500">Sexo</p>
+                        <p className="text-xs text-pink-600">Sexo</p>
                       </div>
                     </div>
                   </div>
@@ -324,7 +377,7 @@ export default function PatientListView() {
                   <div className="sm:hidden flex gap-2 pt-4 border-t border-gray-100">
                     <Link
                       to={`/patients/${patient._id}`}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-text font-medium text-sm transition-all duration-200"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-text font-medium text-sm transition-all duration-200 hover:scale-105"
                     >
                       <Eye className="w-4 h-4" />
                       <span>Ver</span>
@@ -332,7 +385,7 @@ export default function PatientListView() {
 
                     <Link
                       to={`/patients/edit/${patient._id}`}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium text-sm transition-all duration-200"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium text-sm transition-all duration-200 hover:scale-105"
                     >
                       <Edit className="w-4 h-4" />
                       <span>Editar</span>
@@ -342,7 +395,7 @@ export default function PatientListView() {
                       type="button"
                       onClick={() => handleDeleteClick(patient._id, patient.name)}
                       disabled={isDeleting}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 font-medium text-sm transition-all duration-200 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 font-medium text-sm transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Eliminar</span>
@@ -371,7 +424,7 @@ export default function PatientListView() {
             {!searchTerm && (
               <Link
                 to="/owners"
-                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
+                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all hover:scale-105"
               >
                 <Plus className="w-5 h-5" />
                 Ir a Dueños
