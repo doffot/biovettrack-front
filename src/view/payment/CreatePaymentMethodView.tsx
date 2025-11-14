@@ -70,14 +70,13 @@ export default function CreatePaymentMethodView() {
 
   return (
     <>
-      {/* Header - Similar al grooming view */}
       <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
         <div className="px-6 lg:px-8 pt-6 pb-4">
           <div className="flex items-center justify-between gap-6 mb-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               {/* BackButton */}
               <Link
-                to="/settings/payment-methods" // Ajusta esta ruta
+                to="/" 
                 className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
                 title="Volver a métodos de pago"
               >
@@ -107,7 +106,6 @@ export default function CreatePaymentMethodView() {
               </div>
             </div>
 
-            {/* Icono decorativo */}
             <div className="hidden sm:block flex-shrink-0">
               <div className="w-16 h-16 rounded-xl bg-vet-primary/10 flex items-center justify-center border-2 border-vet-primary/20">
                 <CreditCard className="w-8 h-8 text-vet-primary" />
