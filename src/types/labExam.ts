@@ -51,3 +51,13 @@ export type LabExamFormData = Pick<
   | "hemotropico"
   | "observacion"
 >;
+
+export type DifferentialCount = LabExamFormData["differentialCount"];
+
+// Agregar este tipo
+export interface DifferentialField {
+  key: keyof DifferentialCount;
+  sound: HTMLAudioElement;
+  label: string;
+  image: string;
+}

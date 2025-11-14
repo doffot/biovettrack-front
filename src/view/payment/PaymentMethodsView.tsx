@@ -155,7 +155,7 @@ export default function PaymentMethodsView() {
             {/* Botón "Nuevo Método" */}
             <div className="hidden sm:block flex-shrink-0">
               <Link
-                to="/payment-methods/create"
+                to="/payment-methods/new"
                 className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
               >
                 <Plus className="w-5 h-5" />
@@ -185,7 +185,7 @@ export default function PaymentMethodsView() {
 
       {/* Botón flotante móvil */}
       <Link
-        to="/payment-methods/create"
+        to="/payment-methods/new"
         className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
       >
         <Plus className="w-6 h-6" />
