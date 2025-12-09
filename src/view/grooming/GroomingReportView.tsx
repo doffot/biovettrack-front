@@ -116,7 +116,7 @@ export default function GroomingReportView() {
         totalsByCurrency[currency] = { total: 0, paid: 0, count: 0 };
       }
       totalsByCurrency[currency].total += service.cost;
-      totalsByCurrency[currency].paid += service.amountPaid;
+      totalsByCurrency[currency].paid += service.amountPaid!;
       totalsByCurrency[currency].count += 1;
     });
 

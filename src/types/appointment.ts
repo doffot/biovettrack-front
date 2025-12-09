@@ -2,6 +2,10 @@
 
 import { z } from "zod";
 
+// ============================================
+// CONSTANTES
+// ============================================
+
 export const appointmentTypes = [
   "Consulta",
   "Peluquería",
@@ -18,7 +22,9 @@ export const appointmentStatuses = [
   "No asistió"
 ] as const;
 
-export type AppointmentStatus = typeof appointmentStatuses[number];
+// ============================================
+// SCHEMAS DE ENTIDADES RELACIONADAS
+// ============================================
 
 const ownerSchema = z.object({
   _id: z.string(),
@@ -49,23 +55,48 @@ const populatedPatientSchema = z.object({
   identification: z.string().optional(),
 });
 
+// ============================================
+// SCHEMA PRINCIPAL DE CITA
+// ============================================
+
 export const appointmentSchema = z.object({
   _id: z.string(),
-  patient: z.any(), 
+  patient: z.any(),
   type: z.enum(appointmentTypes),
   date: z.string(),
-  status: z.enum(appointmentStatuses), 
+  status: z.enum(appointmentStatuses),
   reason: z.string(),
   observations: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-export type Appointment = z.infer<typeof appointmentSchema>;
+// ============================================
+// TIPOS INFERIDOS
+// ============================================
 
-export type AppointmentWithPatient = Omit<Appointment, 'patient'> & {
-  patient: z.infer<typeof populatedPatientSchema>;
+export type AppointmentStatus = typeof appointmentStatuses[number];
+export type AppointmentType = typeof appointmentTypes[number];
+
+export type Appointment = z.infer<typeof appointmentSchema>;
+export type Owner = z.infer<typeof ownerSchema>;
+export type Vet = z.infer<typeof vetSchema>;
+export type PopulatedPatient = z.infer<typeof populatedPatientSchema>;
+
+// ============================================
+// TIPOS DE CITAS CON RELACIONES POBLADAS
+// ============================================
+
+export type PopulatedAppointment = Omit<Appointment, 'patient'> & {
+  patient: PopulatedPatient | string;
 };
+
+// Alias para mantener compatibilidad con código existente
+export type AppointmentWithPatient = PopulatedAppointment;
+
+// ============================================
+// TIPOS PARA FORMULARIOS
+// ============================================
 
 export type CreateAppointmentForm = Pick<
   Appointment,
@@ -74,4 +105,9 @@ export type CreateAppointmentForm = Pick<
 
 export type UpdateAppointmentStatusForm = Pick<Appointment, "status">;
 
+// ============================================
+// UTILIDADES
+// ============================================
+
 export const appointmentTypesValues = [...appointmentTypes];
+export const appointmentStatusesValues = [...appointmentStatuses];

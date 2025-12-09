@@ -7,6 +7,7 @@ import {
   type StaffFormData,
 } from "../types/staff";
 import api from "../lib/axios";
+import type { GroomerOption } from "../types";
 
 type CreateStaffResponse = {
   msg: string;
@@ -124,6 +125,32 @@ export async function deleteStaff(id: Staff["_id"]): Promise<{ msg: string }> {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
         error.response.data.msg || "Error al eliminar el miembro del staff"
+      );
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
+//  Obtener solo los peluqueros (groomers)
+export async function getGroomers(): Promise<GroomerOption[]> {
+  try {
+    const { data } = await api.get<GetStaffListResponse>("/staff");
+    
+    // Filtrar solo los que tienen rol de groomer
+    const groomers = data.staff
+      .filter((member: any) => member.role === "groomer")
+      .map((member: any) => ({
+        _id: member._id || member.id,
+        name: member.name,
+        lastName: member.lastName,
+        role: member.role,
+      }));
+    
+    return groomers;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(
+        error.response.data.msg || "Error al obtener los peluqueros"
       );
     }
     throw new Error("Error de red o desconocido");

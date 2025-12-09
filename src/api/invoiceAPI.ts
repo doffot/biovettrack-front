@@ -96,6 +96,57 @@ export async function getInvoiceById(id: Invoice["_id"]): Promise<Invoice> {
   }
 }
 
+export async function getInvoiceByResourceId(
+  resourceId: string,
+  type: "grooming" | "labExam" | "consulta" | "vacuna" | "producto" = "grooming"
+): Promise<Invoice | null> {
+  try {
+    console.log('entro a getinvoiceby id');
+     console.log("API: getInvoiceByResourceId", { resourceId, type });
+    const { data } = await api.get<GetInvoiceResponse>(
+      `/invoices/resource/${resourceId}`,
+      { params: { type } }
+    );
+    const parsed = invoiceSchema.safeParse(data.invoice);
+    if (!parsed.success) {
+      console.error("Error parsing invoice:", parsed.error);
+      return null;
+    }
+    return parsed.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      return null; 
+    }
+    console.error("Error buscando factura por resourceId:", error);
+    return null;
+  }
+}
+
+export async function updateInvoiceItem(
+  invoiceId: string,
+  resourceId: string,
+  updates: {
+    cost?: number;
+    description?: string;
+    quantity?: number;
+  }
+): Promise<Invoice> {
+  try {
+    const { data } = await api.put<CreateInvoiceResponse>(
+      `/invoices/${invoiceId}/item/${resourceId}`,
+      updates
+    );
+    return data.invoice;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(
+        error.response.data?.msg || "Error al actualizar el item de la factura"
+      );
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
 // Actualizar factura (pagos)
 export async function updateInvoice(
   id: Invoice["_id"],
@@ -123,6 +174,21 @@ export async function updateInvoice(
     if (error instanceof AxiosError && error.response) {
       throw new Error(
         error.response.data?.msg || "Error al actualizar la factura"
+      );
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
+// Eliminar factura
+export async function deleteInvoice(id: Invoice["_id"]): Promise<{ msg: string }> {
+  try {
+    const { data } = await api.delete<{ msg: string }>(`/invoices/${id}`);
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(
+        error.response.data?.msg || "Error al eliminar la factura"
       );
     }
     throw new Error("Error de red o desconocido");

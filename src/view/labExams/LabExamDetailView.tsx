@@ -7,7 +7,6 @@ import ShareResultsModal from "../../components/ShareResultsModal";
 import {
   ArrowLeft,
   Printer,
-  Calendar,
   AlertCircle,
   Check,
   FlaskConical,

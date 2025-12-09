@@ -7,16 +7,17 @@ import {
   updateGroomingService,
   getGroomingServiceById,
 } from "../../api/groomingAPI";
-import { getInvoices, updateInvoice } from "../../api/invoiceAPI";
+import { getInvoices, updateInvoice, updateInvoiceItem } from "../../api/invoiceAPI";
 import { PaymentModal } from "../../components/payment/PaymentModal";
-import { extractId } from "../../utils/extractId";
 
 import {
-  Scissors,
   ArrowLeft,
   Check,
   AlertCircle,
   Clock,
+  AlertTriangle,
+  Save,
+  CreditCard,
 } from "lucide-react";
 import type { ServiceStatus, ServiceType } from "../../types";
 import type { Invoice } from "../../types/invoice";
@@ -38,7 +39,7 @@ export default function EditGroomingServiceView() {
 
   const { data: service, isLoading: isLoadingService } = useQuery({
     queryKey: ["groomingService", serviceId],
-    queryFn: () => getGroomingServiceById(serviceId),
+    queryFn: () => getGroomingServiceById(serviceId!),
     enabled: !!serviceId,
   });
 
@@ -93,16 +94,33 @@ export default function EditGroomingServiceView() {
     }
   }, [service]);
 
-  const { mutate: updateService, isPending } = useMutation({
-    mutationFn: (updates: Partial<typeof formData>) =>
-      updateGroomingService({ formData: updates, groomingId: serviceId }),
+  const { mutate: updateServiceAndInvoice, isPending } = useMutation({
+    mutationFn: async (updates: Partial<typeof formData>) => {
+      await updateGroomingService({ formData: updates, groomingId: serviceId! });
+
+      if (invoice && invoice._id && updates.cost !== undefined && updates.cost !== service?.cost) {
+        const newDescription = updates.service 
+          ? `${updates.service} - ${updates.specifications || formData.specifications || "Servicio de grooming"}`
+          : undefined;
+
+        await updateInvoiceItem(invoice._id, serviceId!, {
+          cost: updates.cost,
+          ...(newDescription && { description: newDescription }),
+        });
+      }
+    },
     onError: (error: Error) => {
       toast.error(error.message || "Error al actualizar");
     },
     onSuccess: () => {
-      toast.success("Servicio actualizado");
+      toast.success(
+        invoice && formData.cost !== service?.cost 
+          ? "Servicio y factura actualizados" 
+          : "Servicio actualizado"
+      );
       queryClient.invalidateQueries({ queryKey: ["groomingService", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["groomingServices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       navigate(`/patients/${patientId}/grooming-services/${serviceId}`);
     },
   });
@@ -150,13 +168,19 @@ export default function EditGroomingServiceView() {
       toast.info("Sin cambios");
       return;
     }
-    updateService(updates);
+    
+    updateServiceAndInvoice(updates);
   };
+
+  const costChanged = service && formData.cost !== service.cost;
+  const newInvoiceTotal = invoice && costChanged 
+    ? invoice.total - service.cost + formData.cost 
+    : null;
 
   if (isLoadingService) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -179,37 +203,23 @@ export default function EditGroomingServiceView() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header fijo */}
+      {/* Header compacto */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to={`/patients/${patientId}/grooming-services/${serviceId}`}
-              className="p-1.5 -ml-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </Link>
-            <div>
-              <h1 className="text-sm font-semibold text-gray-900">Editar Servicio</h1>
-              <p className="text-xs text-gray-500">{patientName}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleSave}
-            disabled={isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+        <div className="max-w-2xl mx-auto px-4 h-12 flex items-center gap-3">
+          <Link
+            to={`/patients/${patientId}/grooming-services/${serviceId}`}
+            className="p-1.5 -ml-1.5 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            {isPending ? (
-              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Check className="w-3.5 h-3.5" />
-            )}
-            Guardar
-          </button>
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
+          <div>
+            <h1 className="text-sm font-semibold text-gray-900">Editar Servicio</h1>
+            <p className="text-xs text-gray-500">{patientName}</p>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Formulario */}
         <section className="space-y-4">
           {/* Fecha y Servicio */}
@@ -220,7 +230,7 @@ export default function EditGroomingServiceView() {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
               />
             </div>
             <div>
@@ -228,7 +238,7 @@ export default function EditGroomingServiceView() {
               <select
                 value={formData.service}
                 onChange={(e) => setFormData({ ...formData, service: e.target.value as ServiceType })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all appearance-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all appearance-none bg-white"
               >
                 <option value="Corte">Corte</option>
                 <option value="Baño">Baño</option>
@@ -244,7 +254,7 @@ export default function EditGroomingServiceView() {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as ServiceStatus })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all appearance-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all appearance-none bg-white"
               >
                 <option value="Programado">Programado</option>
                 <option value="En progreso">En progreso</option>
@@ -262,12 +272,30 @@ export default function EditGroomingServiceView() {
                   min="0"
                   value={formData.cost || ""}
                   onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all"
+                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   placeholder="0.00"
                 />
               </div>
             </div>
           </div>
+
+          {/* Aviso cuando el costo cambia */}
+          {costChanged && invoice && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-amber-800">
+                  <p className="font-medium">La factura se actualizará automáticamente</p>
+                  <p className="mt-0.5">
+                    Costo: ${service.cost.toFixed(2)} → ${formData.cost.toFixed(2)}
+                    {newInvoiceTotal !== null && (
+                      <span className="ml-2">• Nuevo total: ${newInvoiceTotal.toFixed(2)}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Especificaciones */}
           <div>
@@ -280,7 +308,7 @@ export default function EditGroomingServiceView() {
               rows={2}
               maxLength={300}
               placeholder="Detalles del corte, estilo..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all resize-none"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all resize-none"
             />
           </div>
 
@@ -294,90 +322,102 @@ export default function EditGroomingServiceView() {
               onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
               rows={2}
               placeholder="Notas adicionales..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all resize-none"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all resize-none"
             />
           </div>
+
+          {/* Botón Guardar */}
+          <button
+            onClick={handleSave}
+            disabled={isPending}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isPending ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                {costChanged && invoice ? "Guardar y Actualizar Factura" : "Guardar Cambios"}
+              </>
+            )}
+          </button>
         </section>
 
-        {/* Divider */}
-        <div className="border-t border-gray-100" />
+        {/* Sección de Pago - Fondo diferente, sin card, ancho completo */}
+        <section className="mt-6 -mx-4 px-4 py-5 bg-vet-light">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Pago</h2>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                  paymentInfo.status === "Pagado"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : paymentInfo.status === "Parcial"
+                    ? "bg-amber-100 text-amber-700"
+                    : paymentInfo.status === "Pendiente"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {paymentInfo.status === "Pagado" && <Check className="w-3 h-3" />}
+                {paymentInfo.status === "Parcial" && <Clock className="w-3 h-3" />}
+                {paymentInfo.status === "Pendiente" && <AlertCircle className="w-3 h-3" />}
+                {paymentInfo.status}
+              </span>
+            </div>
 
-        {/* Sección de Pago */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-900">Pago</h2>
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                paymentInfo.status === "Pagado"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : paymentInfo.status === "Parcial"
-                  ? "bg-amber-50 text-amber-700"
-                  : paymentInfo.status === "Pendiente"
-                  ? "bg-red-50 text-red-700"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {paymentInfo.status === "Pagado" && <Check className="w-3 h-3" />}
-              {paymentInfo.status === "Parcial" && <Clock className="w-3 h-3" />}
-              {paymentInfo.status === "Pendiente" && <AlertCircle className="w-3 h-3" />}
-              {paymentInfo.status}
-            </span>
-          </div>
-
-          {paymentInfo.status !== "Sin facturar" ? (
-            <div className="space-y-4">
-              {/* Progress bar minimalista */}
-              <div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            {paymentInfo.status !== "Sin facturar" ? (
+              <div className="space-y-3">
+                {/* Progress bar */}
+                <div className="h-1.5 bg-white rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 ${
-                      progress === 100 ? "bg-emerald-500" : "bg-gray-900"
+                      progress === 100 ? "bg-emerald-500" : "bg-vet-primary"
                     }`}
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-              </div>
 
-              {/* Montos en línea */}
-              <div className="flex items-center justify-between text-sm">
-                <div className="space-y-0.5">
-                  <p className="text-gray-500 text-xs">Pagado</p>
-                  <p className="font-semibold text-gray-900">${paymentInfo.amountPaid.toFixed(2)}</p>
-                  {/* Desglose */}
-                  {(paymentInfo.amountPaidUSD > 0 || paymentInfo.amountPaidBs > 0) && (
-                    <div className="flex gap-2 text-xs text-gray-400">
-                      {paymentInfo.amountPaidUSD > 0 && (
-                        <span>${paymentInfo.amountPaidUSD.toFixed(2)} USD</span>
-                      )}
-                      {paymentInfo.amountPaidBs > 0 && (
-                        <span>Bs {paymentInfo.amountPaidBs.toLocaleString("es-VE", { minimumFractionDigits: 2 })}</span>
-                      )}
-                    </div>
-                  )}
+                {/* Montos */}
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="text-gray-500 text-xs">Pagado</p>
+                    <p className="font-semibold text-gray-900">${paymentInfo.amountPaid.toFixed(2)}</p>
+                    {(paymentInfo.amountPaidUSD > 0 || paymentInfo.amountPaidBs > 0) && (
+                      <div className="flex gap-2 text-xs text-gray-400 mt-0.5">
+                        {paymentInfo.amountPaidUSD > 0 && <span>${paymentInfo.amountPaidUSD.toFixed(2)} USD</span>}
+                        {paymentInfo.amountPaidBs > 0 && <span>Bs {paymentInfo.amountPaidBs.toLocaleString("es-VE", { minimumFractionDigits: 2 })}</span>}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-500 text-xs">Pendiente</p>
+                    <p className={`font-semibold ${paymentInfo.pending > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                      ${paymentInfo.pending.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right space-y-0.5">
-                  <p className="text-gray-500 text-xs">Pendiente</p>
-                  <p className={`font-semibold ${paymentInfo.pending > 0 ? "text-red-600" : "text-emerald-600"}`}>
-                    ${paymentInfo.pending.toFixed(2)}
-                  </p>
-                </div>
-              </div>
 
-              {/* Botón de pago */}
-              {paymentInfo.pending > 0 && (
-                <button
-                  onClick={() => setShowPaymentModal(true)}
-                  className="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  Registrar Pago
-                </button>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 text-center py-4">
-              Sin factura asociada
-            </p>
-          )}
+                {/* Botón de pago pequeño */}
+                {paymentInfo.pending > 0 && (
+                  <button
+                    onClick={() => setShowPaymentModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-vet-primary border border-vet-primary/30 rounded-lg hover:bg-white transition-colors"
+                  >
+                    <CreditCard className="w-3.5 h-3.5" />
+                    Registrar Pago
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-2">
+                Sin factura asociada
+              </p>
+            )}
+          </div>
         </section>
       </main>
 

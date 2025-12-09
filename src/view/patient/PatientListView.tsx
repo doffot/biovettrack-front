@@ -16,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  Activity,
   Dog,
   Cat,
 } from "lucide-react";

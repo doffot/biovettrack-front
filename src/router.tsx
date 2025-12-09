@@ -83,18 +83,14 @@ export default function Router() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomeView />} index />
 
-          {/* ==================== */}
           {/* EXÁMENES DE LABORATORIO (RUTA INDEPENDIENTE) */}
-          {/* ==================== */}
           <Route path="/lab-exams">
             <Route index element={<LabExamListView />} />
             <Route path="create" element={<CreateLabExamView />} />
             <Route path=":id" element={<LabExamDetailView />} />
           </Route>
 
-          {/* ==================== */}
           {/* RUTAS DE OWNERS */}
-          {/* ==================== */}
           <Route path="/owners">
             <Route index element={<OwnerListView />} />
             <Route path="new" element={<CreateOwnerView />} />
@@ -105,9 +101,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          {/* ==================== */}
           {/* RUTAS DE PATIENTS */}
-          {/* ==================== */}
           <Route path="/patients">
             <Route index element={<PatientListView />} />
             <Route path=":patientId" element={<PatientLayout />}>
