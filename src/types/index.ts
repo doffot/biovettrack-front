@@ -16,5 +16,3 @@ export * from './labExam';
 // Grooming
 export * from './grooming';
 
-// Appointments
-export * from './appointment';
