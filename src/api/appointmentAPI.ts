@@ -1,13 +1,8 @@
 import { AxiosError } from "axios";
-import {
-  appointmentSchema,
-  type Appointment,
-  type AppointmentWithPatient,
-  type CreateAppointmentForm,
-  type UpdateAppointmentStatusForm,
-} from "../types";
+
 import api from "../lib/axios";
 import { z } from "zod";
+import { appointmentSchema, type Appointment, type AppointmentWithPatient, type CreateAppointmentForm, type UpdateAppointmentStatusForm } from "../types/appointment";
 
 type CreateAppointmentResponse = {
   msg: string;

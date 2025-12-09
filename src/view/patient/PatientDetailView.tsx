@@ -8,8 +8,8 @@ import { getActiveAppointmentsByPatient, updateAppointmentStatus } from "../../a
 import { getOwnersById } from "../../api/OwnerAPI";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import PhotoModal from "../../components/patients/PhotoModal";
-import type { Appointment } from "../../types";
 import { extractId } from "../../utils/extractId";
+import type { Appointment } from "../../types/appointment";
 
 export default function PatientDetailView() {
   const { patientId } = useParams<{ patientId?: string }>();

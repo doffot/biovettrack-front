@@ -1,9 +1,10 @@
 // src/views/dashboard/components/AgendaSection.tsx
 import { Calendar } from "lucide-react";
 import { AgendaItem } from "./AgendaItem";
-import type { Appointment, GroomingService } from "../../types";
+import type { GroomingService } from "../../types";
 import type { Consultation } from "../../types/consultation";
 import { formatTime } from "../../utils/dashboardUtils";
+import type { Appointment } from "../../types/appointment";
 
 interface AgendaSectionProps {
   appointments: Appointment[];

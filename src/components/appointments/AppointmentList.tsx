@@ -2,7 +2,7 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
 import { AppointmentCard } from './AppointmentCard';
-import type { PopulatedAppointment, Appointment } from '../../types';
+import type { Appointment, PopulatedAppointment } from '../../types/appointment';
 
 interface AppointmentListProps {
   appointments: (PopulatedAppointment | Appointment)[];

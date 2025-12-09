@@ -1,7 +1,7 @@
 // src/views/patient/components/ActiveAppointmentsSection.tsx
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin } from "lucide-react";
-import type { Appointment } from "../../types";
+import type { Appointment } from "../../types/appointment";
 
 interface ActiveAppointmentsSectionProps {
   appointments: Appointment[] | undefined;

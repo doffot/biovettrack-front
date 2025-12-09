@@ -14,7 +14,7 @@ import {
 } from "../utils/dashboardUtils";
 import type { Vaccination } from "../types/vaccination";
 import type { Deworming } from "../types/deworming";
-import type { Appointment, GroomingService, Owner, Patient } from "../types";
+import type {  GroomingService, Owner, Patient } from "../types";
 import { getAllAppointments } from "../api/appointmentAPI";
 import { getAllGroomingServices } from "../api/groomingAPI";
 import type { Consultation } from "../types/consultation";
@@ -24,6 +24,7 @@ import { getAllDewormings } from "../api/dewormingAPI";
 import { getInvoices } from "../api/invoiceAPI";
 import { getPatients } from "../api/patientAPI";
 import { getOwners } from "../api/OwnerAPI";
+import type { Appointment } from "../types/appointment";
 
 
 export interface VaccinationWithDaysLeft extends Vaccination {

@@ -1,7 +1,7 @@
 // src/components/appointments/AppointmentCard.tsx
 import React from 'react';
 import { PawPrint } from 'lucide-react';
-import type { PopulatedAppointment } from '../../types';
+import type { PopulatedAppointment } from '../../types/appointment';
 
 
 interface AppointmentCardProps {
