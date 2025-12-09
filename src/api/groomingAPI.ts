@@ -3,37 +3,32 @@ import { AxiosError } from "axios";
 import {
   groomingServiceSchema,
   groomingServicesListResponseSchema,
-  groomingServicesListSchema,
   type GroomingService,
   type GroomingServiceFormData,
 } from "../types";
-import api from "../lib/axioa";
+import api from "../lib/axios";
 
-// =====================================
-// 📦 TIPOS DE RESPUESTA DEL BACKEND
-// =====================================
+//  TIPOS DE RESPUESTA DEL BACKEND
 
 type CreateGroomingResponse = {
   msg: string;
-  service: GroomingService; // ✅ CAMBIO: Era 'groomingService'
+  service: GroomingService;
 };
 
 type UpdateGroomingResponse = {
   msg: string;
-  service: GroomingService; // ✅ CAMBIO: Era 'groomingService'
+  service: GroomingService;
 };
 
 type GetGroomingResponse = {
-  service: GroomingService; // ✅ CAMBIO: Era 'groomingService'
+  service: GroomingService;
 };
 
 type GetGroomingListResponse = {
   services: GroomingService[];
 };
 
-// =====================================
-// ✅ CREAR SERVICIO DE GROOMING
-// =====================================
+//  CREAR SERVICIO DE GROOMING
 export async function createGroomingService(
   formData: GroomingServiceFormData,
   patientId: string
@@ -41,18 +36,15 @@ export async function createGroomingService(
   try {
     const { data } = await api.post<CreateGroomingResponse>(
       `/patients/${patientId}/grooming`,
-      formData
+      formData //
     );
 
-    console.log("📦 Respuesta cruda (crear grooming):", data);
-
-    const response = groomingServiceSchema.safeParse(data.service); // ✅ CAMBIO
-    if (!response.success) {
-      console.error("❌ Fallo Zod al crear servicio:", response.error.issues);
+    const parsed = groomingServiceSchema.safeParse(data.service);
+    if (!parsed.success) {
       throw new Error("Datos del servicio inválidos");
     }
 
-    return response.data;
+    return parsed.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
@@ -63,9 +55,7 @@ export async function createGroomingService(
   }
 }
 
-// =====================================
-// ✅ OBTENER SERVICIOS POR PACIENTE
-// =====================================
+//  OBTENER SERVICIOS POR PACIENTE
 export async function getGroomingServicesByPatient(
   patientId: string
 ): Promise<GroomingService[]> {
@@ -74,18 +64,14 @@ export async function getGroomingServicesByPatient(
       `/patients/${patientId}/grooming`
     );
 
-    console.log("📦 Servicios del paciente:", data);
-
-    const response = groomingServicesListSchema.safeParse(data.services);
-    if (!response.success) {
-      console.error(
-        "❌ Fallo Zod al obtener servicios:",
-        response.error.issues
-      );
+    const parsed = groomingServicesListResponseSchema.safeParse({
+      services: data.services,
+    });
+    if (!parsed.success) {
       throw new Error("Datos de servicios inválidos");
     }
 
-    return response.data;
+    return parsed.data.services;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
@@ -96,28 +82,19 @@ export async function getGroomingServicesByPatient(
   }
 }
 
-// =====================================
-// ✅ OBTENER SERVICIO POR ID
-// =====================================
+//  OBTENER SERVICIO POR ID
 export async function getGroomingServiceById(
   id: GroomingService["_id"]
- 
 ): Promise<GroomingService> {
-   console.log('service by id');
   try {
     const { data } = await api.get<GetGroomingResponse>(`/grooming/${id}`);
 
-    console.log("📦 Servicio individual:", data);
-
-    const response = groomingServiceSchema.safeParse(
-      data.service || data // ✅ CAMBIO: Intentar data.service primero
-    );
-    if (!response.success) {
-      console.error("❌ Fallo Zod al obtener servicio:", response.error.issues);
+    const parsed = groomingServiceSchema.safeParse(data.service);
+    if (!parsed.success) {
       throw new Error("Datos del servicio inválidos");
     }
 
-    return response.data;
+    return parsed.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
@@ -128,45 +105,28 @@ export async function getGroomingServiceById(
   }
 }
 
-// =====================================
-// ✅ OBTENER TODOS LOS SERVICIOS
-// =====================================
-// =====================================
-// ✅ OBTENER TODOS LOS SERVICIOS
-// =====================================
-// =====================================
-// ✅ OBTENER TODOS LOS SERVICIOS
-// =====================================
+//  OBTENER TODOS LOS SERVICIOS
 export async function getAllGroomingServices(): Promise<GroomingService[]> {
   try {
-    const { data } = await api.get("/grooming"); // No necesitas tipar aquí si usas Zod
+    const { data } = await api.get<GetGroomingListResponse>("/grooming");
 
-    
-
-    // ✅ Validar la ESTRUCTURA COMPLETA de la respuesta
-    const parsedResponse = groomingServicesListResponseSchema.safeParse(data);
-    if (!parsedResponse.success) {
-      console.error(
-        "❌ Fallo Zod al parsear la respuesta completa:",
-        parsedResponse.error.issues
-      );
-      throw new Error("Estructura de respuesta inválida del servidor");
+    const parsed = groomingServicesListResponseSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new Error("Estructura de respuesta inválida");
     }
 
-    return parsedResponse.data.services;
+    return parsed.data.services;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
-        error.response.data.msg || "Error al obtener todos los servicios de grooming"
+        error.response.data.msg || "Error al obtener todos los servicios"
       );
     }
     throw new Error("Error de red o desconocido");
   }
 }
 
-// =====================================
-// ✅ ACTUALIZAR SERVICIO DE GROOMING
-// =====================================
+//  ACTUALIZAR SERVICIO
 type UpdateGroomingAPI = {
   formData: Partial<GroomingServiceFormData>;
   groomingId: GroomingService["_id"];
@@ -182,42 +142,32 @@ export async function updateGroomingService({
       formData
     );
 
-    console.log("📦 Servicio actualizado:", data);
-
-    const response = groomingServiceSchema.safeParse(data.service); // ✅ CAMBIO
-    if (!response.success) {
-      console.error(
-        "❌ Fallo Zod al actualizar servicio:",
-        response.error.issues
-      );
-      throw new Error("Datos del servicio actualizados inválidos");
+    const parsed = groomingServiceSchema.safeParse(data.service);
+    if (!parsed.success) {
+      throw new Error("Datos actualizados inválidos");
     }
 
-    return response.data;
+    return parsed.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(
-        error.response.data.msg || "Error al actualizar servicio de grooming"
+        error.response.data.msg || "Error al actualizar servicio"
       );
     }
     throw new Error("Error de red o desconocido");
   }
 }
 
-// =====================================
-// ✅ ELIMINAR SERVICIO DE GROOMING
-// =====================================
+//  ELIMINAR SERVICIO
 export async function deleteGroomingService(
   id: GroomingService["_id"]
 ): Promise<{ msg: string }> {
   try {
-    const { data } = await api.delete(`/grooming/${id}`);
+    const { data } = await api.delete<{ msg: string }>(`/grooming/${id}`);
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      throw new Error(
-        error.response.data.msg || "Error al eliminar servicio de grooming"
-      );
+      throw new Error(error.response.data.msg || "Error al eliminar servicio");
     }
     throw new Error("Error de red o desconocido");
   }

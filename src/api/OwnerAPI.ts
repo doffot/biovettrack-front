@@ -1,6 +1,7 @@
+// src/api/OwnerAPI.ts
 import { AxiosError } from "axios";
 import { ownersListSchema, type Owner, type OwnerFormData } from "../types";
-import api from "../lib/axioa";
+import api from "../lib/axios";
 
 export async function createOwner(formData: OwnerFormData) {
   try {
@@ -8,7 +9,6 @@ export async function createOwner(formData: OwnerFormData) {
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      // 👇 Accede a error.response.data
       throw new Error(error.response.data.msg || "Error al crear el dueño");
     }
     throw new Error("Error de red o desconocido");
@@ -22,10 +22,10 @@ export async function getOwners() {
     if (response.success) {
       return response.data;
     }
+    return data; 
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      // 👇 Accede a error.response.data
-      throw new Error(error.response.data.msg || "Error al crear el dueño");
+      throw new Error(error.response.data.msg || "Error al obtener los dueños");
     }
     throw new Error("Error de red o desconocido");
   }
@@ -37,33 +37,32 @@ export async function getOwnersById(id: Owner["_id"]) {
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      // 👇 Accede a error.response.data
-      throw new Error(error.response.data.msg || "Error al crear el dueño");
+      throw new Error(error.response.data.msg || "Error al obtener el dueño");
     }
     throw new Error("Error de red o desconocido");
   }
 }
 
-
-type OwnerAPIType ={
+type OwnerAPIType = {
   formData: OwnerFormData;
   ownerId: Owner["_id"];
-
-}
+};
 
 type UpdateOwnerResponse = {
   msg: string;
   owner: Owner;
-}
+};
 
-export async function updateOwners({formData, ownerId}: OwnerAPIType) {
+export async function updateOwners({ formData, ownerId }: OwnerAPIType) {
   try {
-    const { data } = await api.put<UpdateOwnerResponse>(`/owners/${ownerId}`, formData);
+    const { data } = await api.put<UpdateOwnerResponse>(
+      `/owners/${ownerId}`,
+      formData
+    );
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      // 👇 Accede a error.response.data
-      throw new Error(error.response.data.msg || "Error al crear el dueño");
+      throw new Error(error.response.data.msg || "Error al actualizar el dueño");
     }
     throw new Error("Error de red o desconocido");
   }
@@ -75,9 +74,8 @@ export async function deleteOwners(id: Owner["_id"]) {
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      throw new Error(error.response.data.msg || "Error al crear el dueño");
+      throw new Error(error.response.data.msg || "Error al eliminar el dueño");
     }
     throw new Error("Error de red o desconocido");
   }
 }
-

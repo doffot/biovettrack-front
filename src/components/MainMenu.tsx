@@ -2,12 +2,14 @@
 import React from "react";
 import {
   User,
-  Heart,
+  PawPrint,
   BarChart3,
-  FileText,
   Scissors,
   CreditCard,
   ChevronRight,
+  Activity,
+  Home,
+  Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMedia } from "../hooks/useMedia";
@@ -17,36 +19,64 @@ interface MenuItem {
   title: string;
   subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
-  to?: string;
+  to: string;
   color: string;
   bgColor: string;
-  comingSoon?: boolean;
+  gradientFrom: string;
+  gradientTo: string;
 }
 
 const MainMenu: React.FC = () => {
   const isDesktop = useMedia("(min-width: 1024px)");
+
   if (isDesktop) {
     return null;
   }
 
   const menuItems: MenuItem[] = [
     {
+      id: "home",
+      title: "Inicio",
+      subtitle: "Panel principal",
+      icon: Home,
+      to: "/",
+      color: "text-vet-primary",
+      bgColor: "bg-vet-light",
+      gradientFrom: "from-vet-primary",
+      gradientTo: "to-vet-secondary",
+    },
+    {
       id: "owners",
-      title: "Propietarios",
-      subtitle: "Gestionar clientes",
+      title: "Dueño",
+      subtitle: "Gestionar propietarios",
       icon: User,
       to: "/owners",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-sky-600",
+      bgColor: "bg-sky-50",
+      gradientFrom: "from-sky-500",
+      gradientTo: "to-sky-600",
     },
     {
       id: "patients",
-      title: "Mascotas",
+      title: "Mascota",
       subtitle: "Expedientes médicos",
-      icon: Heart,
+      icon: PawPrint,
       to: "/patients",
       color: "text-pink-600",
       bgColor: "bg-pink-50",
+      gradientFrom: "from-pink-500",
+      gradientTo: "to-pink-600",
+    },
+    {
+      id: "lab-exams",
+      title: "Crear Hemograma",
+      subtitle: "Laboratorio clínico",
+      icon: Activity,
+      to: "/lab-exams",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      gradientFrom: "from-purple-500",
+      gradientTo: "to-purple-600",
     },
     {
       id: "grooming",
@@ -54,17 +84,10 @@ const MainMenu: React.FC = () => {
       subtitle: "Servicios de estética",
       icon: Scissors,
       to: "/grooming-services",
-      color: "text-vet-primary",
-      bgColor: "bg-vet-light",
-    },
-    {
-      id: "payment-methods",
-      title: "Métodos de Pago",
-      subtitle: "Configurar pagos",
-      icon: CreditCard,
-      to: "/payment-methods",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
+      gradientFrom: "from-emerald-500",
+      gradientTo: "to-emerald-600",
     },
     {
       id: "reports",
@@ -72,116 +95,140 @@ const MainMenu: React.FC = () => {
       subtitle: "Análisis y estadísticas",
       icon: BarChart3,
       to: "/grooming/report",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+      gradientFrom: "from-indigo-500",
+      gradientTo: "to-indigo-600",
     },
     {
-      id: "appointments",
-      title: "Consultas",
-      subtitle: "Próximamente",
-      icon: FileText,
-      color: "text-gray-400",
-      bgColor: "bg-gray-50",
-      comingSoon: true,
+      id: "payment-methods",
+      title: "Métodos de Pago",
+      subtitle: "Configurar pagos",
+      icon: CreditCard,
+      to: "/payment-methods",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      gradientFrom: "from-amber-500",
+      gradientTo: "to-amber-600",
+    },
+    {
+      id: "staff",
+      title: "Staff",
+      subtitle: "Gestionar personal",
+      icon: Users,
+      to: "/staff",
+      color: "text-teal-600",
+      bgColor: "bg-teal-50",
+      gradientFrom: "from-teal-500",
+      gradientTo: "to-teal-600",
     },
   ];
 
+  const renderCard = (item: MenuItem) => {
+    const Icon = item.icon;
+
+    return (
+      <div
+        className="
+          relative bg-white rounded-2xl p-4 border border-gray-100/50
+          transition-all duration-300 shadow-sm hover:shadow-lg active:scale-[0.97]
+          overflow-hidden group
+        "
+      >
+        <div
+          className={`
+            absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
+            opacity-0 group-hover:opacity-5 transition-opacity duration-300
+          `}
+        />
+
+        <div
+          className={`
+            absolute -top-8 -right-8 w-24 h-24 ${item.bgColor}
+            rounded-full opacity-30 blur-2xl
+            group-hover:scale-150 transition-transform duration-500
+          `}
+        />
+
+        {/* Contenido */}
+        <div className="relative flex items-center gap-4">
+          {/* Icono con gradiente */}
+          <div className="relative">
+            <div
+              className={`
+                absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
+                rounded-2xl blur-md opacity-20 group-hover:opacity-30 transition-opacity
+              `}
+            />
+            <div
+              className={`
+                relative flex-shrink-0 w-14 h-14 ${item.bgColor}
+                rounded-2xl flex items-center justify-center
+                shadow-sm group-hover:shadow-md transition-all duration-300
+                group-hover:scale-110
+              `}
+            >
+              <Icon className={`w-7 h-7 ${item.color}`} />
+            </div>
+          </div>
+
+          {/* Texto */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-vet-text text-base mb-0.5 font-montserrat">
+              {item.title}
+            </h3>
+            <p className="text-xs text-vet-muted truncate font-inter">
+              {item.subtitle}
+            </p>
+          </div>
+
+          {/* Flecha */}
+          <div className="flex-shrink-0">
+            <ChevronRight
+              className="
+                w-6 h-6 text-gray-400
+                group-hover:text-vet-primary group-hover:translate-x-1
+                transition-all duration-300
+              "
+            />
+          </div>
+        </div>
+
+        {/* Indicador de activación en hover */}
+        <div
+          className={`
+            absolute bottom-0 left-0 right-0 h-1 
+            bg-gradient-to-r ${item.gradientFrom} ${item.gradientTo} 
+            opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl
+          `}
+        />
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-vet-light via-white to-vet-light/30">
+    <div className="flex flex-col h-full bg-gradient-to-b from-vet-light/30 via-white to-vet-light/20">
+      {/* Header decorativo */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-vet-primary/5 to-vet-accent/5" />
+        <div className="relative px-6 pt-6 pb-4">
+          <h2 className="text-2xl font-bold text-vet-text font-montserrat mb-1">
+            Panel Principal
+          </h2>
+          <p className="text-sm text-vet-muted font-inter">
+            Accede rápidamente a todas las funciones
+          </p>
+        </div>
+      </div>
+
       {/* Contenido principal */}
-      <div className="flex-1 overflow-y-auto px-4 pt-6 pb-28">
-        <div className="max-w-md mx-auto space-y-3">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isDisabled = item.comingSoon;
-
-            return (
-              <div key={item.id}>
-                {item.to ? (
-                  <Link
-                    to={item.to}
-                    className="block"
-                  >
-                    <div className={`
-                      relative bg-white rounded-2xl p-4 border border-gray-100
-                      shadow-sm hover:shadow-md active:scale-[0.98]
-                      transition-all duration-200 overflow-hidden
-                      ${isDisabled ? 'opacity-60' : ''}
-                    `}>
-                      {/* Fondo decorativo */}
-                      <div className={`absolute top-0 right-0 w-32 h-32 ${item.bgColor} rounded-full blur-3xl opacity-20 -mr-16 -mt-16`} />
-                      
-                      {/* Contenido */}
-                      <div className="relative flex items-center gap-4">
-                        {/* Icono */}
-                        <div className={`flex-shrink-0 w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center shadow-sm`}>
-                          <Icon className={`w-7 h-7 ${item.color}`} />
-                        </div>
-
-                        {/* Texto */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-vet-text text-base mb-0.5">
-                            {item.title}
-                          </h3>
-                          <p className="text-xs text-vet-muted truncate">
-                            {item.subtitle}
-                          </p>
-                        </div>
-
-                        {/* Flecha */}
-                        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                      </div>
-
-                      {item.comingSoon && (
-                        <div className="absolute top-3 right-3">
-                          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
-                            Próximamente
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ) : (
-                  <div className={`
-                    relative bg-white rounded-2xl p-4 border border-gray-100
-                    shadow-sm opacity-60 overflow-hidden
-                  `}>
-                    {/* Fondo decorativo */}
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${item.bgColor} rounded-full blur-3xl opacity-20 -mr-16 -mt-16`} />
-                    
-                    {/* Contenido */}
-                    <div className="relative flex items-center gap-4">
-                      {/* Icono */}
-                      <div className={`flex-shrink-0 w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center shadow-sm`}>
-                        <Icon className={`w-7 h-7 ${item.color}`} />
-                      </div>
-
-                      {/* Texto */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-vet-text text-base mb-0.5">
-                          {item.title}
-                        </h3>
-                        <p className="text-xs text-vet-muted truncate">
-                          {item.subtitle}
-                        </p>
-                      </div>
-
-                      {/* Flecha */}
-                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    </div>
-
-                    {item.comingSoon && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
-                          Próximamente
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-28 scrollbar-thin">
+        <div className="max-w-md mx-auto space-y-3 pb-4">
+          {menuItems.map((item) => (
+            <Link key={item.id} to={item.to} className="block">
+              {renderCard(item)}
+            </Link>
+          ))}
         </div>
       </div>
     </div>

@@ -6,13 +6,9 @@ import {
   type LabExam,
   type LabExamFormData,
 } from "../types";
-import api from "../lib/axioa";
+import api from "../lib/axios";
 
-/**
- * Helper para manejar errores de Axios de forma consistente.
- * Lanza un error con un mensaje del backend si está disponible,
- * o un mensaje genérico si es un error de red.
- */
+//  Helper para manejar errores de Axios de forma consistente.
 const handleErrors = (error: unknown) => {
   if (error instanceof AxiosError && error.response) {
     throw new Error(error.response.data.msg || "Ocurrió un error inesperado.");
@@ -21,23 +17,14 @@ const handleErrors = (error: unknown) => {
 };
 
 // ---
-// ✅ Crear un nuevo examen de laboratorio para un paciente
 export async function createLabExam(
-  formData: LabExamFormData,
-  patientId: string
+  formData: LabExamFormData
 ): Promise<LabExam> {
   try {
-    const { data } = await api.post(
-      `/patients/${patientId}/lab-exams`,
-      formData
-    );
+    const { data } = await api.post(`/lab-exams`, formData);
 
-    const result = labExamSchema.safeParse(data.labExam);
+    const result = labExamSchema.safeParse(data);
     if (!result.success) {
-      console.error(
-        "❌ Error de validación Zod al crear examen:",
-        result.error
-      );
       throw new Error("Datos del examen inválidos recibidos del servidor.");
     }
     return result.data;
@@ -48,22 +35,14 @@ export async function createLabExam(
 }
 
 // ---
-// ✅ Obtener todos los exámenes de laboratorio de un paciente
-export async function getLabExamsByPatient(
-  patientId: string
-): Promise<LabExam[]> {
+//  Obtener todos los exámenes de laboratorio
+export async function getAllLabExams(): Promise<LabExam[]> {
   try {
-    const { data } = await api.get(`/patients/${patientId}/lab-exams`);
+    const { data } = await api.get(`/lab-exams`);
 
-    const result = labExamsListSchema.safeParse(data.exams);
+    const result = labExamsListSchema.safeParse(data);
     if (!result.success) {
-      console.error(
-        "❌ Error de validación Zod al obtener la lista de exámenes:",
-        result.error
-      );
-      throw new Error(
-        "Datos de la lista de exámenes inválidos recibidos del servidor."
-      );
+      throw new Error("Datos de la lista de exámenes inválidos.");
     }
     return result.data;
   } catch (error) {
@@ -73,19 +52,13 @@ export async function getLabExamsByPatient(
 }
 
 // ---
-export async function getLabExamById(
-  patientId: string,
-  id: string
-): Promise<LabExam> {
+//  Obtener un examen por ID
+export async function getLabExamById(id: string): Promise<LabExam> {
   try {
-    const { data } = await api.get(`/patients/${patientId}/lab-exams/${id}`);
-    console.log({ data });
+    const { data } = await api.get(`/lab-exams/${id}`);
 
-    const result = labExamSchema.safeParse(data.labExam || data);
-    console.log(result);
-
+    const result = labExamSchema.safeParse(data);
     if (!result.success) {
-      console.error("❌ Error de validación Zod:", result.error);
       throw new Error("Datos del examen inválidos.");
     }
     return result.data;
@@ -95,8 +68,26 @@ export async function getLabExamById(
   }
 }
 
+//  Obtener exámenes por paciente
+export async function getLabExamsByPatient(
+  patientId: string
+): Promise<LabExam[]> {
+  try {
+    const { data } = await api.get(`/lab-exams/patient/${patientId}`);
+
+    const result = labExamsListSchema.safeParse(data);
+    if (!result.success) {
+      throw new Error("Datos de exámenes inválidos.");
+    }
+    return result.data;
+  } catch (error) {
+    handleErrors(error);
+    return Promise.reject(error);
+  }
+}
+
 // ---
-// ✅ Actualizar un examen de laboratorio
+//  Actualizar un examen
 export async function updateLabExam(
   id: string,
   formData: Partial<LabExamFormData>
@@ -104,12 +95,8 @@ export async function updateLabExam(
   try {
     const { data } = await api.put(`/lab-exams/${id}`, formData);
 
-    const result = labExamSchema.safeParse(data.labExam);
+    const result = labExamSchema.safeParse(data);
     if (!result.success) {
-      console.error(
-        "❌ Error de validación Zod al actualizar examen:",
-        result.error
-      );
       throw new Error("Datos del examen inválidos recibidos del servidor.");
     }
     return result.data;
@@ -120,13 +107,17 @@ export async function updateLabExam(
 }
 
 // ---
-// ✅ Eliminar un examen de laboratorio
+//  Eliminar un examen
 export async function deleteLabExam(id: string): Promise<void> {
   try {
-    const { data } = await api.delete(`/lab-exams/${id}`);
-    return data;
+    await api.delete(`/lab-exams/${id}`);
   } catch (error) {
     handleErrors(error);
     return Promise.reject(error);
   }
+}
+
+export async function searchPatients(query: string) {
+  const { data } = await api.get(`/patients/search?q=${query}`);
+  return data;
 }

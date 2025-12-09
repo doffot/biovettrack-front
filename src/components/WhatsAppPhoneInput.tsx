@@ -45,6 +45,18 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const isUserTyping = useRef(false);
 
+  // Función para validación visual
+  const getValidationMessage = (phone: string, countryCode: string) => {
+    if (!phone) return "Ingrese el número de teléfono";
+    
+    const fullNumber = countryCode + phone;
+    if (!/^\+[0-9]{10,15}$/.test(fullNumber)) {
+      return "Número incompleto o inválido";
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     if (isUserTyping.current) {
       return;
@@ -87,6 +99,8 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
     onChange(selectedCountry.dialCode + val);
     setTimeout(() => { isUserTyping.current = false; }, 100);
   };
+
+  const validationMessage = getValidationMessage(phoneNumber, selectedCountry.dialCode);
 
   return (
     <div>
@@ -136,7 +150,25 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
         </p>
       )}
 
-      {!error && (
+      {/* Información visual del número y validación */}
+      {!error && phoneNumber && (
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-vet-muted text-xs">
+            Número completo:
+          </span>
+          <span className="font-mono text-xs text-green-600">
+            {selectedCountry.dialCode}{phoneNumber}
+          </span>
+          {validationMessage && (
+            <span className="text-xs text-amber-600 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-amber-600 rounded-full" />
+              {validationMessage}
+            </span>
+          )}
+        </div>
+      )}
+
+      {!error && !phoneNumber && (
         <p className="text-vet-muted text-xs mt-1">
           Ej: <span className="font-mono text-vet-text">3001234567</span> → se convierte en <span className="font-mono text-vet-primary">{selectedCountry.dialCode}3001234567</span>
         </p>

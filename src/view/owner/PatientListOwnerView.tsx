@@ -1,287 +1,188 @@
-// src/components/PatientListView.tsx
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+// src/views/owners/PatientListOwnerView.tsx
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { PawPrint, Heart } from "lucide-react";
-import { getPatientsByOwner, deletePatient } from "../../api/patientAPI";
-import { toast } from "../../components/Toast";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { PawPrint, ChevronRight, Calendar, Weight } from "lucide-react";
+import { getPatientsByOwner } from "../../api/patientAPI";
+import type { Patient } from "../../types";
 
 interface PatientListViewProps {
   ownerId: string;
   ownerName: string;
 }
 
-export default function PatientListView({ ownerId, ownerName }: PatientListViewProps) {
-  const queryClient = useQueryClient();
-  const [petToDelete, setPetToDelete] = useState<{id: string, name: string} | null>(null);
-
-  const { data: patients = [], isLoading: patientsLoading } = useQuery({
-    queryKey: ['patients', { ownerId }],
+export default function PatientListView({ ownerId }: PatientListViewProps) {
+  const { data: patients = [], isLoading } = useQuery<Patient[]>({
+    queryKey: ["patients", { ownerId }],
     queryFn: () => getPatientsByOwner(ownerId),
     enabled: !!ownerId,
   });
 
-  const { mutate: removePatient, isPending: isDeleting } = useMutation({
-    mutationFn: (patientId: string) => deletePatient(patientId),
-    onError: (error: Error) => {
-      toast.error(error.message);
-      setPetToDelete(null);
-    },
-    onSuccess: () => {
-      toast.success("Mascota eliminada con éxito");
-      queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
-      setPetToDelete(null);
-    },
-  });
+  const calculateAge = (birthDate: string): string => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    const years = today.getFullYear() - birth.getFullYear();
+    const months = today.getMonth() - birth.getMonth();
 
-
-
-  const confirmDelete = () => {
-    if (petToDelete) {
-      removePatient(petToDelete.id);
+    if (years === 0) {
+      return `${months < 0 ? 12 + months : months} meses`;
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    });
-  };
-
-  const getSpeciesIcon = (species: string) => {
-    switch (species.toLowerCase()) {
-      case 'perro':
-      case 'dog':
-        return '🐕';
-      case 'gato':
-      case 'cat':
-        return '🐱';
-      case 'ave':
-      case 'bird':
-        return '🐦';
-      case 'conejo':
-      case 'rabbit':
-        return '🐰';
-      default:
-        return '🐾';
+    if (years === 1 && months < 0) {
+      return `${12 + months} meses`;
     }
+    return `${years} año${years > 1 ? "s" : ""}`;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="w-6 h-6 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (patients.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+          <PawPrint className="w-7 h-7 text-gray-400" />
+        </div>
+        <p className="text-gray-500 text-sm">Sin mascotas registradas</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="mt-6 pt-4 border-t border-primary/20">
-        {/* Header con información del propietario */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Heart className="w-4 h-4 text-primary" />
+    <div className="space-y-3">
+      {patients.map((pet) => (
+        <Link
+          key={pet._id}
+          to={`/patients/${pet._id}`}
+          className="block rounded-xl bg-gray-50 hover:bg-vet-primary/5 border border-transparent hover:border-vet-primary/20 transition-all duration-200 group"
+        >
+          {/* Mobile: Layout vertical compacto */}
+          <div className="flex items-center gap-3 p-3 sm:hidden">
+            {/* Foto */}
+            {pet.photo ? (
+              <img
+                src={pet.photo}
+                alt={pet.name}
+                className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
+                <PawPrint className="w-6 h-6 text-vet-primary" />
+              </div>
+            )}
+
+            {/* Info compacta */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="font-semibold text-gray-900 truncate group-hover:text-vet-primary transition-colors">
+                  {pet.name}
+                </h4>
+                <span
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                    pet.sex === "Macho"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-pink-100 text-pink-700"
+                  }`}
+                >
+                  {pet.sex === "Macho" ? "M" : "H"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                <span>{pet.species}</span>
+                {pet.breed && (
+                  <>
+                    <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                    <span className="truncate">{pet.breed}</span>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {calculateAge(pet.birthDate)}
+                </span>
+                {pet.weight && (
+                  <span className="flex items-center gap-1">
+                    <Weight className="w-3 h-3" />
+                    {pet.weight} kg
+                  </span>
+                )}
+              </div>
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-text">Mascotas de {ownerName}</h4>
-              <p className="text-xs text-muted">
-                {patients.length} {patients.length === 1 ? 'mascota registrada' : 'mascotas registradas'}
+
+            <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-vet-primary transition-colors flex-shrink-0" />
+          </div>
+
+          {/* Tablet/Desktop: Layout horizontal expandido */}
+          <div className="hidden sm:flex items-center gap-4 p-4">
+            {/* Foto */}
+            {pet.photo ? (
+              <img
+                src={pet.photo}
+                alt={pet.name}
+                className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-xl bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
+                <PawPrint className="w-7 h-7 text-vet-primary" />
+              </div>
+            )}
+
+            {/* Nombre y sexo */}
+            <div className="min-w-0 w-40">
+              <div className="flex items-center gap-2">
+                <h4 className="font-semibold text-gray-900 truncate group-hover:text-vet-primary transition-colors">
+                  {pet.name}
+                </h4>
+                <span
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${
+                    pet.sex === "Macho"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-pink-100 text-pink-700"
+                  }`}
+                >
+                  {pet.sex === "Macho" ? "M" : "H"}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">{pet.species}</p>
+            </div>
+
+            {/* Raza */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-400">Raza</p>
+              <p className="text-sm text-gray-700 truncate">
+                {pet.breed || "Sin especificar"}
               </p>
             </div>
-          </div>
-          
-          {patients.length > 0 && (
-            <div className="text-xs text-muted bg-primary/10 px-2 py-1 rounded-full">
-              Total: {patients.length}
+
+            {/* Edad */}
+            <div className="w-24 text-center">
+              <p className="text-xs text-gray-400">Edad</p>
+              <p className="text-sm text-gray-700 flex items-center justify-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                {calculateAge(pet.birthDate)}
+              </p>
             </div>
-          )}
-        </div>
 
-        {/* Lista de mascotas */}
-        {patientsLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-              <p className="text-muted text-sm">Cargando mascotas...</p>
+            {/* Peso */}
+            <div className="w-20 text-center">
+              <p className="text-xs text-gray-400">Peso</p>
+              <p className="text-sm text-gray-700 flex items-center justify-center gap-1">
+                <Weight className="w-3.5 h-3.5 text-gray-400" />
+                {pet.weight ? `${pet.weight} kg` : "—"}
+              </p>
             </div>
+
+            {/* Arrow */}
+            <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-vet-primary transition-colors flex-shrink-0" />
           </div>
-        ) : patients.length > 0 ? (
-          <div className="space-y-3 
-                         xl:max-h-[280px] 
-                         xl:overflow-y-auto 
-                         xl:pr-2 
-                         scrollbar-thin 
-                         scrollbar-track-transparent 
-                         scrollbar-thumb-primary-20 
-                         hover:scrollbar-thumb-primary-40">
-            {patients.map((pet, index) => (
-              <Link
-                key={pet._id}
-                to={`/patients/${pet._id}`}
-                className="block"
-              >
-                <div
-                  className="relative overflow-hidden rounded-xl border bg-gradient-radial-center backdrop-blur-sm bg-background/70 border-primary/20 p-3 sm:p-4 
-           group hover:shadow-premium-hover hover:-translate-y-1 hover:mt-1 transition-all duration-300 hover:border-primary/40 cursor-pointer"
-                  style={{ 
-                    animationDelay: `${index * 100}ms`,
-                  }}
-                >
-                  {/* Efecto de shimmer al hacer hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100" />
-
-                  {/* Layout móvil vs desktop */}
-                  <div className="relative z-10">
-                    {/* Vista Mobile - Layout vertical */}
-                    <div className="block sm:hidden">
-                      {/* Header móvil con foto y nombre */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          {/* Foto de la mascota con indicador de especie */}
-                          <div className="relative">
-                            {pet.photo ? (
-                              <img
-                                src={pet.photo}
-                                alt={pet.name}
-                                className="w-10 h-10 rounded-full object-cover border-2 border-primary/40 group-hover:border-primary/60 transition-all duration-300"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary/40 group-hover:border-primary/60 transition-all duration-300">
-                                <PawPrint className="w-5 h-5 text-primary" />
-                              </div>
-                            )}
-                            
-                            {/* Indicador de especie */}
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-background/90 rounded-full flex items-center justify-center text-xs border border-primary/30">
-                              {getSpeciesIcon(pet.species)}
-                            </div>
-                          </div>
-
-                          {/* Nombre y género */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h5 className="text-text font-bold text-sm truncate">{pet.name}</h5>
-                              <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex-shrink-0">
-                                {pet.sex === 'Macho' ? 'M' : 'H'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Información detallada móvil */}
-                      <div className="grid grid-cols-2 gap-2 text-xs text-muted pl-13">
-                        <span className="flex items-center gap-1">
-                          <span className="w-1 h-1 bg-primary rounded-full flex-shrink-0"></span>
-                          <span className="truncate">{pet.species}</span>
-                        </span>
-                        
-                        {pet.breed && (
-                          <span className="flex items-center gap-1">
-                            <span className="w-1 h-1 bg-muted rounded-full flex-shrink-0"></span>
-                            <span className="truncate">{pet.breed}</span>
-                          </span>
-                        )}
-                        
-                        <span className="flex items-center gap-1">
-                          <span className="w-1 h-1 bg-muted rounded-full flex-shrink-0"></span>
-                          <span className="truncate">{formatDate(pet.birthDate)}</span>
-                        </span>
-                        
-                        {pet.weight && (
-                          <span className="flex items-center gap-1">
-                            <span className="w-1 h-1 bg-muted rounded-full flex-shrink-0"></span>
-                            <span className="truncate">{pet.weight} kg</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Vista Tablet/Desktop - Layout horizontal */}
-                    <div className="hidden sm:flex items-center gap-4">
-                      {/* Foto de la mascota con indicador de especie */}
-                      <div className="relative">
-                        {pet.photo ? (
-                          <img
-                            src={pet.photo}
-                            alt={pet.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-primary/40 group-hover:border-primary/60 transition-all duration-300"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary/40 group-hover:border-primary/60 transition-all duration-300">
-                            <PawPrint className="w-6 h-6 text-primary" />
-                          </div>
-                        )}
-                        
-                        {/* Indicador de especie */}
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-background/90 rounded-full flex items-center justify-center text-sm border border-primary/30">
-                          {getSpeciesIcon(pet.species)}
-                        </div>
-                      </div>
-
-                      {/* Información de la mascota */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h5 className="text-text font-bold text-base truncate">{pet.name}</h5>
-                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                            {pet.sex === 'Macho' ? 'Macho' : 'Hembra'}
-                          </span>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 text-xs text-muted">
-                          <span className="flex items-center gap-1">
-                            <span className="w-1 h-1 bg-primary rounded-full"></span>
-                            {pet.species}
-                          </span>
-                          
-                          {pet.breed && (
-                            <span className="flex items-center gap-1">
-                              <span className="w-1 h-1 bg-muted rounded-full"></span>
-                              {pet.breed}
-                            </span>
-                          )}
-                          
-                          <span className="flex items-center gap-1">
-                            <span className="w-1 h-1 bg-muted rounded-full"></span>
-                            {formatDate(pet.birthDate)}
-                          </span>
-                          
-                          {pet.weight && (
-                            <span className="flex items-center gap-1">
-                              <span className="w-1 h-1 bg-muted rounded-full"></span>
-                              {pet.weight} kg
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Punto de estado activo */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-neon-pulse opacity-60" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mb-4">
-              <PawPrint className="w-8 h-8 text-muted/60" />
-            </div>
-            <p className="text-muted font-medium mb-1">Sin mascotas registradas</p>
-            <p className="text-muted/70 text-sm px-4">
-              {ownerName} aún no tiene mascotas asociadas a su perfil
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Modal de confirmación */}
-      <DeleteConfirmationModal
-        isOpen={!!petToDelete}
-        onClose={() => setPetToDelete(null)}
-        onConfirm={confirmDelete}
-        petName={petToDelete?.name || ''}
-        isDeleting={isDeleting}
-      />
-    </>
+        </Link>
+      ))}
+    </div>
   );
 }

@@ -1,80 +1,178 @@
 // src/views/labExams/LabExamListView.tsx
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getLabExamsByPatient } from "../../api/labExamAPI";
-import { getPatientById } from "../../api/patientAPI";
+import { useNavigate, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAllLabExams, deleteLabExam } from "../../api/labExamAPI";
 import {
-  PlusCircle,
+  Plus,
   ArrowLeft,
-  Activity,
+  Eye,
+  Trash2,
+  FlaskConical,
   Calendar,
-  TrendingUp,
-  FileText,
+  Search,
+  ChevronLeft,
   ChevronRight,
+  FileText,
+  PawPrint,
+  Microscope,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { toast } from "../../components/Toast";
 
 export default function LabExamListView() {
-  const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [mounted, setMounted] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const itemsPerPage = 5;
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [examToDelete, setExamToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const {
-    data: labExams,
-    isLoading: isLoadingExams,
-    isError: isErrorExams,
-    error: errorExams,
+    data: labExams = [],
+    isLoading,
+    isError,
+    error,
   } = useQuery({
-    queryKey: ["labExams", { patientId }],
-    queryFn: () => {
-      if (!patientId) throw new Error("ID del paciente no encontrado");
-      return getLabExamsByPatient(patientId);
-    },
-    enabled: !!patientId,
+    queryKey: ["labExams"],
+    queryFn: getAllLabExams,
   });
 
-  const {
-    data: patient,
-    isLoading: isLoadingPatient,
-    isError: isErrorPatient,
-    error: errorPatient,
-  } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: () => {
-      if (!patientId) throw new Error("ID del paciente no encontrado");
-      return getPatientById(patientId);
+  //  eliminar
+  const { mutate: confirmDelete, isPending: isDeleting } = useMutation({
+    mutationFn: (id: string) => deleteLabExam(id),
+    onSuccess: () => {
+      toast.success("Examen eliminado correctamente");
+      queryClient.invalidateQueries({ queryKey: ["labExams"] });
+      setIsDeleteModalOpen(false);
+      setExamToDelete(null);
     },
-    enabled: !!patientId,
+    onError: (error: Error) => {
+      toast.error(error.message || "Error al eliminar el examen");
+    },
   });
 
-  const handleCreateLabExam = () => {
-    navigate(`/patients/${patientId}/lab-exams/create`);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Filtrado de exámenes
+  const filteredExams = useMemo(() => {
+    return labExams.filter((exam) => {
+      const matchesSearch =
+        exam.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.breed?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesSpecies =
+        speciesFilter === "all" ||
+        exam.species.toLowerCase() === speciesFilter.toLowerCase();
+
+      return matchesSearch && matchesSpecies;
+    });
+  }, [labExams, searchTerm, speciesFilter]);
+
+  const handleDeleteClick = (exam: { _id: string; patientName: string }) => {
+    setExamToDelete({ id: exam._id, name: exam.patientName });
+    setIsDeleteModalOpen(true);
   };
 
-  if (isLoadingExams || isLoadingPatient) {
+  const handleConfirmDelete = () => {
+    if (examToDelete) {
+      confirmDelete(examToDelete.id);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Función para obtener el estado del hematocrito
+  const getHematocritStatus = (value: number, species: string) => {
+    const ranges = {
+      canino: [37, 55],
+      felino: [30, 45],
+    };
+    const range = species.toLowerCase() === "felino" ? ranges.felino : ranges.canino;
+    if (value < range[0]) return "low";
+    if (value > range[1]) return "high";
+    return "normal";
+  };
+
+  // Paginación
+  const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
+
+  useEffect(() => {
+    if (filteredExams.length === 0) {
+      setCurrentPage(1);
+    } else if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredExams.length, currentPage, totalPages]);
+
+  // Reset página al filtrar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, speciesFilter]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentExams = filteredExams.slice(startIndex, startIndex + itemsPerPage);
+
+  // Estadísticas rápidas
+  const stats = useMemo(() => {
+    const total = labExams.length;
+    const caninos = labExams.filter((e) => e.species.toLowerCase() === "canino").length;
+    const felinos = labExams.filter((e) => e.species.toLowerCase() === "felino").length;
+    const thisMonth = labExams.filter((e) => {
+      const examDate = new Date(e.date);
+      const now = new Date();
+      return examDate.getMonth() === now.getMonth() && examDate.getFullYear() === now.getFullYear();
+    }).length;
+    return { total, caninos, felinos, thisMonth };
+  }, [labExams]);
+
+  // Loading State
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-vet-gradient flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-vet-text font-medium">Cargando información...</p>
+          <div className="relative">
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-vet-light border-t-vet-primary rounded-full animate-spin" />
+            <FlaskConical className="w-6 h-6 text-vet-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          </div>
+          <p className="text-vet-text font-medium font-montserrat">Cargando exámenes...</p>
+          <p className="text-vet-muted text-sm mt-1">Por favor espere</p>
         </div>
       </div>
     );
   }
 
-  if (isErrorExams || isErrorPatient) {
+  // Error State
+  if (isError) {
     return (
       <div className="min-h-screen bg-vet-gradient flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl p-8 shadow-card border-l-4 border-red-500 max-w-md">
-          <Activity className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-vet-text text-center mb-2">
-            Error al cargar
-          </h2>
-          <p className="text-vet-muted text-center text-sm">
-            {errorExams?.message || errorPatient?.message}
-          </p>
+        <div className="bg-white rounded-2xl p-8 shadow-card max-w-md text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-vet-danger via-vet-danger to-vet-danger" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-vet-danger/10 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-vet-danger" />
+          </div>
+          <h2 className="text-xl font-bold text-vet-text mb-2 font-montserrat">Error al cargar</h2>
+          <p className="text-vet-muted text-sm mb-6">{error?.message || "No se pudieron cargar los exámenes"}</p>
           <button
             onClick={() => navigate(-1)}
-            className="mt-6 w-full py-2.5 bg-vet-primary text-white rounded-lg font-medium hover:bg-vet-accent transition-colors"
+            className="w-full py-3 bg-vet-primary text-white rounded-xl font-semibold hover:bg-vet-secondary transition-all duration-200 shadow-soft hover:shadow-card flex items-center justify-center gap-2"
           >
+            <ArrowLeft className="w-4 h-4" />
             Volver
           </button>
         </div>
@@ -82,219 +180,493 @@ export default function LabExamListView() {
     );
   }
 
-  // Calcular estadísticas
-  const stats =
-    labExams && labExams.length > 0
-      ? {
-          total: labExams.length,
-          promedio: (
-            labExams.reduce((sum, exam) => sum + exam.hematocrit, 0) /
-            labExams.length
-          ).toFixed(1),
-          ultimo: labExams[0]?.hematocrit || 0,
-        }
-      : null;
-
   return (
     <div className="min-h-screen bg-vet-gradient">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2.5 rounded-xl hover:bg-white/80 text-vet-primary transition-all hover:scale-105 shadow-sm"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2.5">
-              <div className="p-3 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl shadow-soft">
-                <Activity className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-vet-text">
-                  Hematología
-                </h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-vet-muted">Paciente:</p>
-                  <p className="text-lg font-bold text-vet-primary bg-vet-light/50 px-3 py-1 rounded-lg">
-                    {patient?.name || "Paciente"}
+      {/* Header Profesional */}
+      <header className="bg-white shadow-soft border-b border-vet-light sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side */}
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                className="p-2 rounded-xl bg-vet-light text-vet-primary hover:bg-vet-accent/20 transition-all duration-200 group"
+              >
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+              </Link>
+
+              <div className="hidden sm:block h-8 w-px bg-vet-light" />
+
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">
+                  <Microscope className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-vet-text font-montserrat leading-tight">
+                    Exámenes de Laboratorio
+                  </h1>
+                  <p className="text-xs text-vet-muted">
+                    {stats.total} examen{stats.total !== 1 ? "es" : ""} registrado{stats.total !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <button
-            onClick={handleCreateLabExam}
-            className="flex items-center gap-2 px-4 py-2.5 bg-vet-primary text-white rounded-xl font-semibold hover:bg-vet-accent transition-all shadow-md hover:shadow-lg"
-          >
-            <PlusCircle className="w-5 h-5" />
-            <span className="hidden sm:inline">Nuevo Examen</span>
-          </button>
+            {/* Right side - Actions */}
+            <Link
+              to="create"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-vet-primary text-white font-semibold hover:bg-vet-secondary transition-all duration-200 shadow-soft hover:shadow-card text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nuevo Examen</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Stats Cards */}
+        <div
+          className={`grid grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-500 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+        >
+          <StatCard 
+            icon={FileText} 
+            label="Total Exámenes" 
+            value={stats.total} 
+            variant="primary" 
+          />
+          <StatCard 
+            icon={PawPrint} 
+            label="Caninos" 
+            value={stats.caninos} 
+            variant="secondary" 
+          />
+          <StatCard 
+            icon={PawPrint} 
+            label="Felinos" 
+            value={stats.felinos} 
+            variant="accent" 
+          />
+          <StatCard 
+            icon={Calendar} 
+            label="Este Mes" 
+            value={stats.thisMonth} 
+            variant="light" 
+          />
         </div>
 
-        {/* Estadísticas */}
-        {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-5 shadow-card border-l-4 border-vet-primary">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-vet-light rounded-lg">
-                  <FileText className="w-5 h-5 text-vet-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-vet-muted font-medium">
-                    Total Exámenes
-                  </p>
-                  <p className="text-2xl font-bold text-vet-text">
-                    {stats.total}
-                  </p>
-                </div>
+        {/* Table Container */}
+        <div
+          className={`bg-white rounded-2xl shadow-soft border border-vet-light/50 overflow-hidden transition-all duration-500 delay-100 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+        >
+          {/* Filters & Search */}
+          <div className="p-4 border-b border-vet-light/50 bg-gradient-to-r from-vet-light/30 to-transparent">
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o raza..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all"
+                />
               </div>
+
+              {/* Species Filter */}
+              <select
+                value={speciesFilter}
+                onChange={(e) => setSpeciesFilter(e.target.value)}
+                className="px-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all appearance-none cursor-pointer min-w-[160px]"
+              >
+                <option value="all">Todas las especies</option>
+                <option value="canino">Caninos</option>
+                <option value="felino">Felinos</option>
+              </select>
             </div>
 
-            <div className="bg-white rounded-xl p-5 shadow-card border-l-4 border-blue-500">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-vet-muted font-medium">
-                    Promedio HCT
-                  </p>
-                  <p className="text-2xl font-bold text-vet-text">
-                    {stats.promedio}%
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-5 shadow-card border-l-4 border-pink-500">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-pink-50 rounded-lg">
-                  <Activity className="w-5 h-5 text-pink-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-vet-muted font-medium">
-                    Último HCT
-                  </p>
-                  <p className="text-2xl font-bold text-vet-text">
-                    {stats.ultimo}%
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Lista de Exámenes */}
-        <div className="bg-white rounded-xl shadow-card border-l-4 border-vet-primary overflow-hidden">
-          <div className="p-5 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-vet-text flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-vet-primary" />
-              Historial de Exámenes
-            </h2>
-            <p className="text-sm text-vet-muted mt-1">
-              {labExams && labExams.length > 0
-                ? `${labExams.length} examen${
-                    labExams.length !== 1 ? "es" : ""
-                  } registrado${labExams.length !== 1 ? "s" : ""}`
-                : "No hay exámenes registrados"}
-            </p>
-          </div>
-
-          <div className="divide-y divide-gray-100">
-            {labExams && labExams.length > 0 ? (
-              labExams.map((exam, index) => {
-                const isRecent = index === 0;
-
-                return (
-                  <Link
-                    key={exam._id}
-                    to={`/patients/${patientId}/lab-exams/${exam._id}`}
-                    className="block hover:bg-vet-light/30 transition-colors"
-                  >
-                    <div className="p-5 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        {/* Indicador visual */}
-                        <div
-                          className={`w-1 h-12 rounded-full ${
-                            isRecent ? "bg-vet-primary" : "bg-gray-300"
-                          }`}
-                        />
-
-                        {/* Contenido */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-vet-text text-sm">
-                              {new Date(
-                                exam.date.split("T")[0] + "T12:00:00"
-                              ).toLocaleDateString("es-ES", {
-                                weekday: "short",
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </p>
-                            {isRecent && (
-                              <span className="px-2 py-0.5 bg-vet-primary text-white text-xs font-semibold rounded-full">
-                                Reciente
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-vet-muted">
-                            Hematocrito:{" "}
-                            <span className="font-bold text-vet-primary">
-                              {exam.hematocrit}%
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Indicador de HCT */}
-                      <div className="flex items-center gap-3">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-2xl font-black text-vet-primary">
-                            {exam.hematocrit}
-                          </p>
-                          <p className="text-xs text-vet-muted">HCT %</p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })
-            ) : (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Activity className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-bold text-vet-text mb-2">
-                  Sin exámenes registrados
-                </h3>
-                <p className="text-sm text-vet-muted mb-6">
-                  Aún no hay exámenes de laboratorio para este paciente.
-                </p>
+            {/* Active filters indicator */}
+            {(searchTerm || speciesFilter !== "all") && (
+              <div className="mt-3 pt-3 border-t border-vet-light/50 flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-vet-muted">Filtros:</span>
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/10 text-vet-primary rounded-lg text-xs font-medium">
+                    "{searchTerm}"
+                    <button onClick={() => setSearchTerm("")} className="hover:text-vet-secondary ml-1">
+                      ×
+                    </button>
+                  </span>
+                )}
+                {speciesFilter !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/10 text-vet-primary rounded-lg text-xs font-medium capitalize">
+                    {speciesFilter}
+                    <button onClick={() => setSpeciesFilter("all")} className="hover:text-vet-secondary ml-1">
+                      ×
+                    </button>
+                  </span>
+                )}
                 <button
-                  onClick={handleCreateLabExam}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-vet-primary text-white rounded-lg font-medium hover:bg-vet-accent transition-colors"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSpeciesFilter("all");
+                  }}
+                  className="text-xs text-vet-muted hover:text-vet-primary transition-colors ml-2"
                 >
-                  <PlusCircle className="w-4 h-4" />
-                  Crear Primer Examen
+                  Limpiar todo
                 </button>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Botón flotante móvil */}
-        <button
-          onClick={handleCreateLabExam}
-          className="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-vet-primary text-white rounded-full shadow-lg hover:bg-vet-accent transition-all hover:scale-110 flex items-center justify-center z-50"
-        >
-          <PlusCircle className="w-6 h-6" />
-        </button>
+          {/* Table */}
+          {currentExams.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-vet-light/30 border-b border-vet-light/50">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-vet-muted uppercase tracking-wider">
+                        Paciente
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-vet-muted uppercase tracking-wider hidden sm:table-cell">
+                        Especie
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-vet-muted uppercase tracking-wider hidden md:table-cell">
+                        Fecha
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider">
+                        Hematocrito
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider hidden lg:table-cell">
+                        Leucocitos
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-vet-light/50">
+                    {currentExams.map((exam, index) => {
+                      const hematocritStatus = getHematocritStatus(exam.hematocrit, exam.species);
+                      const isAltered = hematocritStatus !== "normal";
+
+                      return (
+                        <tr
+                          key={exam._id}
+                          className={`hover:bg-vet-light/30 transition-colors ${
+                            isAltered ? "bg-vet-danger/5" : ""
+                          }`}
+                          style={{ animationDelay: `${index * 30}ms` }}
+                        >
+                          {/* Paciente */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${
+                                  exam.species.toLowerCase() === "felino" 
+                                    ? "bg-vet-secondary/10" 
+                                    : "bg-vet-primary/10"
+                                }`}
+                              >
+                                <PawPrint
+                                  className={`w-4 h-4 ${
+                                    exam.species.toLowerCase() === "felino" 
+                                      ? "text-vet-secondary" 
+                                      : "text-vet-primary"
+                                  }`}
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-vet-text font-montserrat truncate">
+                                  {exam.patientName}
+                                </p>
+                                <p className="text-xs text-vet-muted truncate">{exam.breed || "Sin raza"}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Especie */}
+                          <td className="px-6 py-4 hidden sm:table-cell">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                                exam.species.toLowerCase() === "felino"
+                                  ? "bg-vet-secondary/10 text-vet-secondary"
+                                  : "bg-vet-primary/10 text-vet-primary"
+                              }`}
+                            >
+                              {exam.species}
+                            </span>
+                          </td>
+
+                          {/* Fecha */}
+                          <td className="px-6 py-4 hidden md:table-cell">
+                            <div className="flex items-center gap-2 text-sm text-vet-muted">
+                              <Calendar className="w-4 h-4" />
+                              <span>{formatDate(exam.date)}</span>
+                            </div>
+                          </td>
+
+                          {/* Hematocrito */}
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex flex-col items-center">
+                              <span
+                                className={`text-lg font-bold ${
+                                  isAltered ? "text-vet-danger" : "text-vet-primary"
+                                }`}
+                              >
+                                {exam.hematocrit}%
+                              </span>
+                              {isAltered && (
+                                <span className="text-xs mt-0.5 text-vet-danger">
+                                  {hematocritStatus === "low" ? "↓ Bajo" : "↑ Alto"}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Leucocitos */}
+                          <td className="px-6 py-4 text-center hidden lg:table-cell">
+                            <span className="text-sm font-medium text-vet-text">
+                              {exam.whiteBloodCells}
+                              <span className="text-vet-muted text-xs ml-1">x10³/μL</span>
+                            </span>
+                          </td>
+
+                          {/* Estado */}
+                          <td className="px-6 py-4 text-center">
+                            {isAltered ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-vet-danger/10 text-vet-danger border border-vet-danger/20">
+                                <AlertCircle className="w-3 h-3" />
+                                Alterado
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-vet-accent/10 text-vet-secondary border border-vet-accent/30">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Normal
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Acciones */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Link
+                                to={`${exam._id}`}
+                                className="p-2 rounded-lg bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all duration-200"
+                                title="Ver detalles"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  if (exam._id && exam.patientName) {
+                                    handleDeleteClick({ _id: exam._id, patientName: exam.patientName });
+                                  }
+                                }}
+                                className="p-2 rounded-lg bg-vet-danger/10 text-vet-danger hover:bg-vet-danger hover:text-white transition-all duration-200"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-vet-light/50 bg-vet-light/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <p className="text-sm text-vet-muted">
+                    Mostrando{" "}
+                    <span className="font-semibold text-vet-text">{startIndex + 1}</span> -{" "}
+                    <span className="font-semibold text-vet-text">
+                      {Math.min(startIndex + itemsPerPage, filteredExams.length)}
+                    </span>{" "}
+                    de <span className="font-semibold text-vet-text">{filteredExams.length}</span> exámenes
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg transition-all ${
+                        currentPage === 1
+                          ? "bg-vet-light/50 text-vet-muted cursor-not-allowed"
+                          : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
+                      }`}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNum = index + 1;
+                        const isCurrentPage = currentPage === pageNum;
+
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                                isCurrentPage
+                                  ? "bg-vet-primary text-white shadow-soft"
+                                  : "bg-white border border-vet-light text-vet-text hover:border-vet-primary hover:text-vet-primary"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                          return (
+                            <span key={pageNum} className="text-vet-muted px-1">
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg transition-all ${
+                        currentPage === totalPages
+                          ? "bg-vet-light/50 text-vet-muted cursor-not-allowed"
+                          : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
+                      }`}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Empty State */
+            <div className="p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-vet-light rounded-full flex items-center justify-center">
+                <Microscope className="w-10 h-10 text-vet-muted" />
+              </div>
+
+              {labExams.length === 0 ? (
+                <>
+                  <h3 className="text-xl font-bold text-vet-text mb-2 font-montserrat">
+                    No hay exámenes registrados
+                  </h3>
+                  <p className="text-vet-muted mb-8 max-w-md mx-auto">
+                    Comienza registrando el primer examen de hematología para tus pacientes.
+                  </p>
+                  <Link
+                    to="create"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-soft hover:shadow-card transition-all"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Crear Primer Examen
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold text-vet-text mb-2 font-montserrat">
+                    No se encontraron resultados
+                  </h3>
+                  <p className="text-vet-muted mb-6">Intenta ajustar los filtros de búsqueda</p>
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSpeciesFilter("all");
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all font-medium"
+                  >
+                    Limpiar filtros
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Delete Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setExamToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        petName={examToDelete?.name || "este examen"}
+        isDeleting={isDeleting}
+      />
+    </div>
+  );
+}
+
+interface StatCardProps {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  variant: "primary" | "secondary" | "accent" | "light";
+}
+
+function StatCard({ icon: Icon, label, value, variant }: StatCardProps) {
+  const variantClasses = {
+    primary: {
+      bg: "bg-vet-light",
+      iconBg: "bg-vet-primary/10",
+      icon: "text-vet-primary",
+      value: "text-vet-primary",
+    },
+    secondary: {
+      bg: "bg-vet-secondary/5",
+      iconBg: "bg-vet-secondary/10",
+      icon: "text-vet-secondary",
+      value: "text-vet-secondary",
+    },
+    accent: {
+      bg: "bg-vet-accent/5",
+      iconBg: "bg-vet-accent/20",
+      icon: "text-vet-accent",
+      value: "text-vet-secondary",
+    },
+    light: {
+      bg: "bg-white",
+      iconBg: "bg-vet-light",
+      icon: "text-vet-primary",
+      value: "text-vet-text",
+    },
+  };
+
+  const classes = variantClasses[variant];
+
+  return (
+    <div className={`${classes.bg} rounded-2xl p-4 shadow-soft border border-vet-light/50 hover:shadow-card transition-all duration-300`}>
+      <div className="flex items-center gap-3">
+        <div className={`p-2.5 rounded-xl ${classes.iconBg}`}>
+          <Icon className={`w-5 h-5 ${classes.icon}`} />
+        </div>
+        <div>
+          <p className="text-xs text-vet-muted font-medium">{label}</p>
+          <p className={`text-xl font-bold ${classes.value} font-montserrat`}>{value}</p>
+        </div>
       </div>
     </div>
   );

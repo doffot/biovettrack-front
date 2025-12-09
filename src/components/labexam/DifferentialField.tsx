@@ -8,7 +8,7 @@ interface DifferentialFieldProps {
   percentage: string;
   absolute: string;
   totalWhiteCells: number;
-  species: 'perro' | 'gato';
+  species: 'canino' | 'felino';
   totalCells: number;
   onIncrement: (field: keyof LabExamFormData["differentialCount"], sound: HTMLAudioElement) => void;
   isOutOfRange: (value: number | string | undefined, rangeKey: keyof LabExamFormData["differentialCount"]) => boolean;
@@ -16,7 +16,7 @@ interface DifferentialFieldProps {
 }
 
 const normalValues = {
-  perro: {
+  canino: {
     segmentedNeutrophils: [3.3, 11.4],
     bandNeutrophils: [0, 0.3],
     lymphocytes: [1.0, 4.8],
@@ -26,7 +26,7 @@ const normalValues = {
     nrbc: [0, 0.2],
     reticulocytes: [0, 1.5]
   },
-  gato: {
+  felino: {
     segmentedNeutrophils: [2.5, 12.5],
     bandNeutrophils: [0, 0.3],
     lymphocytes: [1.5, 7.0],

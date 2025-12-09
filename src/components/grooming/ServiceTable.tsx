@@ -1,11 +1,9 @@
 // src/components/grooming/ServiceTable.tsx
-import { Calendar, User, CreditCard, CheckCircle, Edit, Eye } from 'lucide-react';
-import { formatCurrency, getPaymentMethodInfo } from '../../utils/currencyUtils';
+import { Calendar, User, CheckCircle, Edit, Eye, AlertCircle } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { GroomingService } from '../../types';
 
-// Tipo para patientId que puede ser string o objeto poblado
 type PatientIdType = string | { 
   _id: string; 
   name?: string; 
@@ -14,15 +12,16 @@ type PatientIdType = string | {
 };
 
 interface ServiceTableProps {
-  filteredServices: GroomingService[];
+  filteredServices: any[]; 
   getPatientName: (patientId: PatientIdType) => string;
   getPatientSpecies: (patientId: PatientIdType) => string;
   getPatientBreed: (patientId: PatientIdType) => string;
   formatDate: (dateString: string) => string;
   getServiceIcon: (serviceType: string) => string;
   getServiceStatusBadge: (status: GroomingService['status']) => string;
-  getPaymentStatusBadge: (status: GroomingService['paymentStatus']) => string;
-  getPaymentStatusIcon: (status: GroomingService['paymentStatus']) => React.JSX.Element;
+  getPaymentStatusBadge: (status: string) => string;
+  getPaymentStatusIcon: (status: string) => React.JSX.Element;
+  formatCurrency: (amount: number, currency: string, exchangeRate?: number) => string;
 }
 
 export default function ServiceTable({ 
@@ -34,10 +33,10 @@ export default function ServiceTable({
   getServiceIcon, 
   getServiceStatusBadge, 
   getPaymentStatusBadge, 
-  getPaymentStatusIcon 
+  getPaymentStatusIcon,
+  formatCurrency
 }: ServiceTableProps) {
   
-  // Función para obtener el ID del paciente, ya sea que patientId sea string o objeto
   const getPatientId = (patientId: PatientIdType): string => {
     if (typeof patientId === 'string') {
       return patientId;
@@ -48,7 +47,6 @@ export default function ServiceTable({
 
   return (
     <div className="hidden lg:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* Header compacto */}
       <div className="px-4 py-3 bg-gradient-to-r from-vet-primary/5 to-vet-secondary/5 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -67,14 +65,13 @@ export default function ServiceTable({
               <span>Proceso</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-              <span>Cancelado</span>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span>Sin facturar</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabla compacta */}
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full">
           <thead className="bg-gray-50/60 text-xs">
@@ -97,13 +94,9 @@ export default function ServiceTable({
               <th className="px-4 py-3 text-left font-semibold text-gray-700 uppercase tracking-wider">
                 Pago
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700 uppercase tracking-wider">
-                Método
-              </th>
               <th className="px-4 py-3 text-right font-semibold text-gray-700 uppercase tracking-wider">
                 Montos
               </th>
-              {/* Columna de Acciones */}
               <th className="px-4 py-3 text-center font-semibold text-gray-700 uppercase tracking-wider">
                 Acciones
               </th>
@@ -111,8 +104,9 @@ export default function ServiceTable({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {filteredServices.map((service, index) => {
-              const paymentMethodInfo = getPaymentMethodInfo(service.paymentMethod);
               const patientId = service.patientId as PatientIdType;
+              const paymentInfo = service.paymentInfo || {};
+              const serviceCost = Number(service.cost) || 0;
               
               return (
                 <tr 
@@ -142,8 +136,12 @@ export default function ServiceTable({
                         </p>
                         <div className="flex items-center gap-1 text-[10px] text-gray-500">
                           <span className="truncate max-w-[80px]">{getPatientSpecies(patientId)}</span>
-                          <span>•</span>
-                          <span className="truncate max-w-[80px]">{getPatientBreed(patientId)}</span>
+                          {getPatientBreed(patientId) && (
+                            <>
+                              <span>•</span>
+                              <span className="truncate max-w-[80px]">{getPatientBreed(patientId)}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -178,44 +176,18 @@ export default function ServiceTable({
                   {/* Estado del Pago */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-col gap-1.5">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold ${getPaymentStatusBadge(service.paymentStatus)}`}>
-                        {getPaymentStatusIcon(service.paymentStatus)}
-                        {service.paymentStatus}
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold ${getPaymentStatusBadge(paymentInfo.paymentStatus || 'Sin facturar')}`}>
+                        {getPaymentStatusIcon(paymentInfo.paymentStatus || 'Sin facturar')}
+                        {paymentInfo.paymentStatus || 'Sin facturar'}
                       </span>
-                      {service.amountPaid > 0 && (
+                      {paymentInfo.amountPaid > 0 && (
                         <div className="flex items-center gap-1 text-[10px]">
                           <CheckCircle className="w-2.5 h-2.5 text-green-500" />
                           <span className="text-gray-600">
-                            {formatCurrency(service.amountPaid, paymentMethodInfo.currency)}
+                            {formatCurrency(paymentInfo.amountPaid, paymentInfo.currency || 'USD')}
                           </span>
                         </div>
                       )}
-                    </div>
-                  </td>
-                  
-                  {/* Método de Pago */}
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200">
-                        <CreditCard className="w-3.5 h-3.5 text-gray-500" />
-                      </div>
-                      <div className="flex flex-col">
-                        <p className="text-xs font-medium text-gray-900">
-                          {typeof service.paymentMethod === 'string' 
-                            ? service.paymentMethod 
-                            : service.paymentMethod?.name || 'No especificado'
-                          }
-                        </p>
-                        <div className="flex items-center gap-0.5 text-[10px] text-gray-500">
-                          <span>{paymentMethodInfo.currency}</span>
-                          {service.paymentReference && (
-                            <>
-                              <span>•</span>
-                              <span>Ref: {service.paymentReference}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   </td>
                   
@@ -223,25 +195,36 @@ export default function ServiceTable({
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-sm font-bold text-gray-900">
-                        {formatCurrency(service.cost, paymentMethodInfo.currency)}
+                        ${serviceCost.toFixed(2)}
                       </span>
                       
-                      {service.amountPaid < service.cost ? (
+                      {paymentInfo.paymentStatus === 'Pendiente' ? (
                         <div className="flex flex-col items-end gap-0.5">
                           <span className="text-[10px] font-medium text-orange-600">
-                            Pendiente: {formatCurrency(service.cost - service.amountPaid, paymentMethodInfo.currency)}
+                            Por cobrar
+                          </span>
+                        </div>
+                      ) : paymentInfo.paymentStatus === 'Parcial' ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="text-[10px] font-medium text-blue-600">
+                            Pendiente: ${(serviceCost - paymentInfo.amountPaid).toFixed(2)}
                           </span>
                           <div className="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-orange-500 rounded-full"
-                              style={{ width: `${(service.amountPaid / service.cost) * 100}%` }}
+                              className="h-full bg-blue-500 rounded-full"
+                              style={{ width: `${(paymentInfo.amountPaid / serviceCost) * 100}%` }}
                             />
                           </div>
                         </div>
-                      ) : (
+                      ) : paymentInfo.paymentStatus === 'Pagado' ? (
                         <div className="flex items-center gap-1 text-[10px] text-green-600">
                           <CheckCircle className="w-2.5 h-2.5" />
                           <span>Completado</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                          <AlertCircle className="w-2.5 h-2.5" />
+                          <span>Sin facturar</span>
                         </div>
                       )}
                     </div>
@@ -250,7 +233,6 @@ export default function ServiceTable({
                   {/* Columna: Acciones */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center justify-center gap-2">
-                      {/* Botón Ver */}
                       <Link
                         to={`/patients/${getPatientId(patientId)}/grooming-services/${service._id}`}
                         className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium transition-colors duration-150"
@@ -259,7 +241,6 @@ export default function ServiceTable({
                         <Eye className="w-3 h-3" />
                       </Link>
                       
-                      {/* Botón Editar */}
                       <Link
                         to={`/patients/${getPatientId(patientId)}/grooming-services/${service._id}/edit`}
                         className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium transition-colors duration-150"

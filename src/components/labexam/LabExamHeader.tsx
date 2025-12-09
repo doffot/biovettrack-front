@@ -1,7 +1,6 @@
 // components/LabExamHeader.tsx
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, PawPrint, Calendar, TestTube, Scissors, Camera } from "lucide-react";
-import { extractId } from "../../utils/extractId";
 import type { Patient } from "../../types";
 import { toast } from "../Toast";
 
@@ -18,18 +17,19 @@ export function LabExamHeader({
   patientLoading, 
   hasActiveAppointments 
 }: LabExamHeaderProps) {
+  const navigate =useNavigate()
   return (
     <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-30 bg-white/95 backdrop-blur-sm border-b border-vet-muted/20 shadow-sm">
       <div className="px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to={patient?.owner ? `/owners/${extractId(patient.owner)}` : "/patients"}
+            <button
+              onClick={() => navigate(-1)}
               className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-vet-light text-vet-muted hover:text-vet-primary transition-all duration-200"
               title="Volver al propietario"
             >
               <ArrowLeft className="w-5 h-5" />
-            </Link>
+            </button>
 
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">

@@ -8,7 +8,7 @@ interface DifferentialTabProps {
   differentialCount: LabExamFormData["differentialCount"];
   totalCells: number;
   totalWhiteCells: number;
-  species: 'perro' | 'gato';
+  species: 'canino' | 'felino';
   lastAction: { field: keyof LabExamFormData["differentialCount"] } | null;
   calculatedValues: Record<keyof LabExamFormData["differentialCount"], {
     percentage: string;

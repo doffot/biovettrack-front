@@ -14,33 +14,54 @@ export const differentialCountSchema = z.object({
 
 export const labExamSchema = z.object({
   _id: z.string().optional(),
-  patientId: z.string().min(1, "El ID del paciente es obligatorio"),
+  vetId: z.string(),
+
+  patientId: z.string().optional(),
+
+  patientName: z.string().min(1, "El nombre del paciente es obligatorio"),
+  species: z.string().min(1, "La especie es obligatoria"),
+  breed: z.string().optional(),
+  sex: z.string().optional(),
+  age: z.string().optional(),
+  weight: z.number().min(0).optional(),
+
+  cost: z.number().min(0, "El costo debe ser un valor positivo"),
+
   date: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
     message: "La fecha del examen debe ser válida",
   }),
   hematocrit: z.number().min(0, "El hematocrito debe ser un valor positivo"),
-  whiteBloodCells: z
-    .number()
-    .min(0, "Los glóbulos blancos deben ser un valor positivo"),
-  totalProtein: z
-    .number()
-    .min(0, "La proteína total debe ser un valor positivo"),
+  whiteBloodCells: z.number().min(0, "Los glóbulos blancos deben ser un valor positivo"),
+  totalProtein: z.number().min(0, "La proteína total debe ser un valor positivo"),
   platelets: z.number().min(0, "Las plaquetas deben ser un valor positivo"),
   differentialCount: differentialCountSchema,
-  totalCells: z
-    .number()
-    .min(0)
-    .max(100, "El total de células debe ser un porcentaje válido"),
+  totalCells: z.number().min(0).max(100, "El total de células debe ser un porcentaje válido"),
   hemotropico: z.string().optional(),
   observacion: z.string().optional(),
+  treatingVet: z.string().optional(),
+
+  ownerName: z.string().optional(),
+  ownerPhone: z.string().optional(),
+  
+  paymentMethod: z.string().optional(),
+  paymentReference: z.string().optional(),
 });
 
 export const labExamsListSchema = z.array(labExamSchema);
 
 export type LabExam = z.infer<typeof labExamSchema>;
+
+// 👇 Actualizado para incluir los nuevos campos
 export type LabExamFormData = Pick<
   LabExam,
-  | "patientId"
+  | "patientId" 
+  | "patientName"
+  | "species"
+  | "breed"
+  | "sex"
+  | "age"
+  | "weight"
+  | "cost" 
   | "date"
   | "hematocrit"
   | "whiteBloodCells"
@@ -50,11 +71,15 @@ export type LabExamFormData = Pick<
   | "totalCells"
   | "hemotropico"
   | "observacion"
+  | "treatingVet"
+  | "ownerName" 
+  | "ownerPhone"
+  | "paymentMethod"        
+  | "paymentReference"     
 >;
 
 export type DifferentialCount = LabExamFormData["differentialCount"];
 
-// Agregar este tipo
 export interface DifferentialField {
   key: keyof DifferentialCount;
   sound: HTMLAudioElement;

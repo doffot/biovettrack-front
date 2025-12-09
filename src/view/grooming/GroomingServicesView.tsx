@@ -1,18 +1,104 @@
+// src/views/grooming/GroomingServicesView.tsx
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Scissors, AlertCircle, Plus, Search, ArrowLeft } from 'lucide-react';
 import { getAllGroomingServices } from '../../api/groomingAPI';
+import { getInvoices } from '../../api/invoiceAPI';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import ServiceStatsCards from '../../components/grooming/ServiceStatsCards';
 import ServiceMobileCards from '../../components/grooming/ServiceMobileCards';
 import ServiceTable from '../../components/grooming/ServiceTable';
+import type { Invoice } from '../../types/invoice';
+import type { GroomingService } from '../../types/grooming';
 
 export default function GroomingServicesView() {
   const [searchTerm, setSearchTerm] = useState('');
- 
 
-  // ✅ Helpers seguros: manejan string y objeto
+  const { data: services = [], isLoading: isLoadingServices, isError, error } = useQuery({
+    queryKey: ['groomingServices'],
+    queryFn: getAllGroomingServices,
+    retry: 2,
+  });
+
+  const { data: invoicesData, isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ['invoices'],
+    queryFn: () => getInvoices({}),
+  });
+
+  const invoices = invoicesData?.invoices || [];
+  const isLoading = isLoadingServices || isLoadingInvoices;
+
+  // Buscar factura asociada a un servicio
+  const findInvoiceForService = (serviceId: string): Invoice | undefined => {
+    return invoices.find(invoice => 
+      invoice.items.some(item => 
+        item.type === "grooming" && 
+        item.resourceId === serviceId
+      )
+    );
+  };
+
+  // Obtener información de pago para mostrar en cada servicio
+  const getPaymentInfo = (service: GroomingService) => {
+    const invoice = findInvoiceForService(service._id!);
+    
+    if (!invoice) {
+      return {
+        paymentStatus: "Sin facturar",
+        paymentMethod: null,
+        paymentReference: null,
+        amountPaid: 0,
+        amountPaidInCurrency: 0,
+        currency: "USD",
+        isPaid: false
+      };
+    }
+
+    const serviceItem = invoice.items.find(
+      item => item.type === "grooming" && item.resourceId === service._id
+    );
+    
+    const serviceAmount = serviceItem ? serviceItem.cost * serviceItem.quantity : 0;
+
+    let amountPaid = 0;
+    let amountPaidInCurrency = 0;
+    
+    if (invoice.amountPaid && invoice.amountPaid > 0 && invoice.total > 0) {
+      const proportion = serviceAmount / invoice.total;
+      amountPaid = invoice.amountPaid * proportion;
+      
+      if (invoice.currency === "Bs" && invoice.exchangeRate) {
+        amountPaidInCurrency = amountPaid * invoice.exchangeRate;
+      } else {
+        amountPaidInCurrency = amountPaid;
+      }
+    }
+
+    return {
+      paymentStatus: invoice.paymentStatus,
+      paymentMethod: invoice.paymentMethod,
+      paymentReference: invoice.paymentReference,
+      amountPaid: amountPaid,
+      amountPaidInCurrency: amountPaidInCurrency,
+      currency: invoice.currency || "USD",
+      exchangeRate: invoice.exchangeRate,
+      isPaid: invoice.paymentStatus === "Pagado"
+    };
+  };
+
+  // Formatear moneda
+  const formatCurrency = (amount: number, currency: string) => {
+    if (currency === "Bs") {
+      return `Bs. ${amount.toLocaleString('es-VE', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      })}`;
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
+  // Helpers para datos de paciente
   const getPatientName = (patientId: any) => {
     if (!patientId) return '—';
     if (typeof patientId === 'string') return 'Mascota';
@@ -29,6 +115,7 @@ export default function GroomingServicesView() {
     return patientId.breed || '';
   };
 
+  // Iconos y badges
   const getServiceIcon = (serviceType: string) => {
     const icons: Record<string, string> = {
       'Corte': '✂️',
@@ -53,7 +140,8 @@ export default function GroomingServicesView() {
       'Pendiente': 'bg-orange-100 text-orange-700 border border-orange-200',
       'Pagado': 'bg-green-100 text-green-700 border border-green-200',
       'Parcial': 'bg-blue-100 text-blue-700 border border-blue-200',
-      'Cancelado': 'bg-red-100 text-red-700 border border-red-200'
+      'Cancelado': 'bg-red-100 text-red-700 border border-red-200',
+      'Sin facturar': 'bg-gray-100 text-gray-700 border border-gray-200'
     };
     return styles[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
   };
@@ -64,6 +152,7 @@ export default function GroomingServicesView() {
       case 'Pendiente': return <Clock className="w-3 h-3 text-orange-600" />;
       case 'Parcial': return <AlertTriangle className="w-3 h-3 text-blue-600" />;
       case 'Cancelado': return <XCircle className="w-3 h-3 text-red-600" />;
+      case 'Sin facturar': return <AlertCircle className="w-3 h-3 text-gray-500" />;
       default: return <Clock className="w-3 h-3 text-gray-500" />;
     }
   };
@@ -75,21 +164,22 @@ export default function GroomingServicesView() {
     }).format(date);
   };
 
-  // ✅ Query: usa tu API existente
-  const {  data:services = [], isLoading, isError, error } = useQuery({
-    queryKey: ['groomingServices'],
-    queryFn: getAllGroomingServices,
-    retry: 2,
-  });
+  // Enriquecer servicios con info de pago
+  const enrichedServices = useMemo(() => {
+    return services.map((service: GroomingService) => ({
+      ...service,
+      paymentInfo: getPaymentInfo(service)
+    }));
+  }, [services, invoices]);
 
-  // ✅ Filtro seguro: hoy + búsqueda
+  // Filtrar servicios del día
   const filteredServices = useMemo(() => {
-    if (!Array.isArray(services)) return [];
+    if (!Array.isArray(enrichedServices)) return [];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todaysServices = services.filter(service => {
+    const todaysServices = enrichedServices.filter((service: any) => {
       if (!service.date) return false;
       const serviceDate = new Date(service.date);
       serviceDate.setHours(0, 0, 0, 0);
@@ -98,14 +188,67 @@ export default function GroomingServicesView() {
 
     if (!searchTerm) return todaysServices;
 
-    return todaysServices.filter(service => {
+    return todaysServices.filter((service: any) => {
       const searchLower = searchTerm.toLowerCase();
       const patientName = getPatientName(service.patientId).toLowerCase();
       const serviceName = (service.service || '').toLowerCase();
       const specs = (service.specifications || '').toLowerCase();
       return patientName.includes(searchLower) || serviceName.includes(searchLower) || specs.includes(searchLower);
     });
-  }, [services, searchTerm]);
+  }, [enrichedServices, searchTerm]);
+
+  // ✅ Calcular ingresos DIRECTAMENTE desde las facturas del día
+  const incomeStats = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Filtrar facturas del día que tengan items de grooming
+    const todayGroomingInvoices = invoices.filter(invoice => {
+      if (!invoice.date) return false;
+      
+      const invoiceDate = new Date(invoice.date);
+      invoiceDate.setHours(0, 0, 0, 0);
+      
+      const isToday = invoiceDate.getTime() === today.getTime();
+      const hasGrooming = invoice.items.some(item => item.type === "grooming");
+      
+      return isToday && hasGrooming;
+    });
+
+    let paidUSD = 0;
+    let paidBs = 0;
+    let pendingUSD = 0;
+
+    // Usar los nuevos campos amountPaidUSD y amountPaidBs
+    todayGroomingInvoices.forEach(invoice => {
+      // Sumar pagos por moneda
+      paidUSD += invoice.amountPaidUSD || 0;
+      paidBs += invoice.amountPaidBs || 0;
+      
+      // Calcular pendiente (total - lo pagado en USD equivalente)
+      const totalPaidInUSD = (invoice.amountPaidUSD || 0) + 
+        (invoice.exchangeRate ? (invoice.amountPaidBs || 0) / invoice.exchangeRate : 0);
+      
+      const pending = invoice.total - totalPaidInUSD;
+      if (pending > 0) pendingUSD += pending;
+    });
+
+    const totalServicesValue = filteredServices.reduce(
+      (sum, service) => sum + (service.cost || 0), 
+      0
+    );
+
+    return {
+      totalUSD: totalServicesValue,
+      totalBs: 0,
+      paidUSD,
+      paidBs,
+      pendingUSD,
+      pendingBs: 0,
+      hasBsTransactions: paidBs > 0,
+      hasUSDTransactions: paidUSD > 0
+    };
+  }, [invoices, filteredServices]);
 
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState error={error} />;
@@ -120,12 +263,19 @@ export default function GroomingServicesView() {
       
       <div className="h-32 lg:h-28"></div>
 
-      <Link to="/patients" className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all">
+      <Link 
+        to="/patients" 
+        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
+      >
         <Plus className="w-5 h-5" />
       </Link>
 
       <div className="px-4 mt-10 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
-        <ServiceStatsCards filteredServices={filteredServices} />
+        {/* Stats Cards con ingresos por moneda */}
+        <ServiceStatsCards 
+          filteredServices={filteredServices} 
+          incomeStats={incomeStats}
+        />
 
         {filteredServices.length === 0 ? (
           <EmptyState searchTerm={searchTerm} />
@@ -141,6 +291,7 @@ export default function GroomingServicesView() {
               getServiceStatusBadge={getServiceStatusBadge}
               getPaymentStatusBadge={getPaymentStatusBadge}
               getPaymentStatusIcon={getPaymentStatusIcon}
+              formatCurrency={formatCurrency}
             />
             
             <ServiceTable
@@ -153,6 +304,7 @@ export default function GroomingServicesView() {
               getServiceStatusBadge={getServiceStatusBadge}
               getPaymentStatusBadge={getPaymentStatusBadge}
               getPaymentStatusIcon={getPaymentStatusIcon}
+              formatCurrency={formatCurrency}
             />
           </>
         )}
@@ -161,7 +313,6 @@ export default function GroomingServicesView() {
   );
 }
 
-// Componentes auxiliares (sin cambios)
 function LoadingState() {
   return (
     <div className="w-full">
@@ -206,7 +357,10 @@ function EmptyState({ searchTerm }: { searchTerm: string }) {
         {searchTerm ? "Intenta con otros términos de búsqueda" : "No se encontraron servicios programados para hoy"}
       </p>
       {!searchTerm && (
-        <Link to="/patients" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all">
+        <Link 
+          to="/patients" 
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+        >
           <Plus className="w-5 h-5" />
           Crear Primer Servicio
         </Link>
@@ -215,13 +369,20 @@ function EmptyState({ searchTerm }: { searchTerm: string }) {
   );
 }
 
-function Header({ totalsCount, searchTerm, setSearchTerm }: any) {
+function Header({ totalsCount, searchTerm, setSearchTerm }: {
+  totalsCount: number;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+}) {
   return (
     <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-100 shadow-sm">
       <div className="px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-6 mb-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <Link to="/" className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0">
+            <Link 
+              to="/" 
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+            >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex-1 min-w-0">
@@ -240,7 +401,10 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: any) {
           </div>
 
           <div className="hidden sm:block flex-shrink-0">
-            <Link to="/patients" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-sm hover:shadow-md">
+            <Link 
+              to="/patients" 
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-sm hover:shadow-md"
+            >
               <Plus className="w-4 h-4" />
               <span>Nuevo Servicio</span>
             </Link>

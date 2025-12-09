@@ -1,14 +1,13 @@
 // src/api/paymentAPI.ts
 import { AxiosError } from "axios";
-import { 
-  PaymentMethodSchema, 
+import {
+  PaymentMethodSchema,
   PaymentMethodFormSchema,
   type PaymentMethod,
-  type PaymentMethodFormData 
+  type PaymentMethodFormData,
 } from "../types/payment";
-import api from "../lib/axioa";
+import api from "../lib/axios";
 
-// Tipos de respuesta
 type PaymentMethodsResponse = {
   success: boolean;
   paymentMethods: PaymentMethod[];
@@ -36,7 +35,7 @@ type DeletePaymentMethodResponse = {
   msg: string;
 };
 
-// ✅ OBTENER TODOS LOS MÉTODOS DE PAGO DEL VETERINARIO
+//  OBTENER TODOS LOS MÉTODOS DE PAGO DEL VETERINARIO
 export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   try {
     const { data } = await api.get<PaymentMethodsResponse>("/payment-methods");
@@ -57,10 +56,12 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   }
 }
 
-// ✅ OBTENER MÉTODO DE PAGO POR ID
+//  OBTENER MÉTODO DE PAGO POR ID
 export async function getPaymentMethodById(id: string): Promise<PaymentMethod> {
   try {
-    const { data } = await api.get<PaymentMethodResponse>(`/payment-methods/${id}`);
+    const { data } = await api.get<PaymentMethodResponse>(
+      `/payment-methods/${id}`
+    );
 
     const response = PaymentMethodSchema.safeParse(data.paymentMethod);
     if (!response.success) {
@@ -78,7 +79,7 @@ export async function getPaymentMethodById(id: string): Promise<PaymentMethod> {
   }
 }
 
-// ✅ CREAR MÉTODO DE PAGO
+//  CREAR MÉTODO DE PAGO
 export async function createPaymentMethod(
   formData: PaymentMethodFormData
 ): Promise<PaymentMethod> {
@@ -107,7 +108,7 @@ export async function createPaymentMethod(
   }
 }
 
-// ✅ ACTUALIZAR MÉTODO DE PAGO
+//  ACTUALIZAR MÉTODO DE PAGO
 export async function updatePaymentMethod(
   id: string,
   formData: Partial<PaymentMethodFormData>
@@ -134,7 +135,7 @@ export async function updatePaymentMethod(
   }
 }
 
-// ✅ ELIMINAR MÉTODO DE PAGO
+//  ELIMINAR MÉTODO DE PAGO
 export async function deletePaymentMethod(id: string): Promise<void> {
   try {
     await api.delete<DeletePaymentMethodResponse>(`/payment-methods/${id}`);

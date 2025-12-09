@@ -1,256 +1,210 @@
 // src/views/owners/CreateOwnerView.tsx
-import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
-import type { OwnerFormData } from "../../types";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Loader2, User, Phone, Mail, MapPin, CreditCard } from "lucide-react";
 import { createOwner } from "../../api/OwnerAPI";
-import { useNavigate, Link } from "react-router-dom";
 import { toast } from "../../components/Toast";
-import { useMutation } from "@tanstack/react-query";
-import { Save, User, Mail, MapPin, ArrowLeft, Users } from "lucide-react";
-import { WhatsAppPhoneInput } from "../../components/WhatsAppPhoneInput";
+import type { OwnerFormData } from "../../types/owner";
+
+const initialFormData: OwnerFormData = {
+  name: "",
+  contact: "",
+  email: "",
+  address: "",
+  nationalId: "",
+};
 
 export default function CreateOwnerView() {
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
+  const queryClient = useQueryClient();
 
-  const initialValues: OwnerFormData = {
-    name: "",
-    contact: "",
-    email: "",
-    address: "",
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-  } = useForm({
-    defaultValues: initialValues,
-  });
+  const [formData, setFormData] = useState<OwnerFormData>(initialFormData);
 
   const { mutate, isPending } = useMutation({
     mutationFn: createOwner,
-    onError: (error) => {
-      toast.error(error.message);
+    onSuccess: () => {
+      toast.success("Propietario registrado correctamente");
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+      navigate("/owners");
     },
-    onSuccess: (data) => {
-      toast.success(data.msg);
-      navigate(`/owners/${data.owner._id}`);
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleForm = async (formData: OwnerFormData) => mutate(formData);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Contar campos completados
-  const formValues = watch();
-  const requiredFields = ['name', 'contact'];
-  const allFields = ['name', 'contact', 'email', 'address'];
-  
-  const completedRequired = requiredFields.filter(field => 
-    formValues[field as keyof OwnerFormData] && formValues[field as keyof OwnerFormData]!.trim() !== ''
-  ).length;
-  
-  const completedAll = allFields.filter(field => 
-    formValues[field as keyof OwnerFormData] && formValues[field as keyof OwnerFormData]!.trim() !== ''
-  ).length;
+    if (!formData.name.trim()) {
+      toast.error("El nombre es obligatorio");
+      return;
+    }
 
-  const completionPercentage = (completedAll / allFields.length) * 100;
+    if (!formData.contact.trim()) {
+      toast.error("El teléfono es obligatorio");
+      return;
+    }
+
+    // Limpiar valores vacíos
+    const dataToSend: OwnerFormData = {
+      name: formData.name.trim(),
+      contact: formData.contact.trim(),
+      email: formData.email?.trim() || null,
+      address: formData.address?.trim() || null,
+      nationalId: formData.nationalId?.trim() || null,
+    };
+
+    mutate(dataToSend);
+  };
+
+  const isValid = formData.name.trim() !== "" && formData.contact.trim() !== "";
 
   return (
-    <>
-      {/* Header Compacto */}
-      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            {/* BackButton */}
-            <Link
-              to="/owners"
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors flex-shrink-0"
-              title="Volver a la lista"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-vet-primary/10 rounded-lg">
-                  <Users className="w-5 h-5 text-vet-primary" />
-                </div>
-                <h1 className="text-xl font-bold text-vet-text">
-                  Nuevo Propietario
-                </h1>
-              </div>
-              
-              {/* Contadores de progreso */}
-              <div className="flex items-center justify-between text-sm text-vet-muted">
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">Campos requeridos:</span>
-                  <span className="font-semibold">{completedRequired}/{requiredFields.length}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">{completedAll}/{allFields.length} completos</span>
-                </div>
-              </div>
-
-              {/* Barra de progreso */}
-              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                <div 
-                  className="bg-vet-primary h-1.5 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
-            </div>
+    <div className="p-4 lg:p-6 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Nuevo Propietario</h1>
+            <p className="text-sm text-gray-500">Registrar datos del cliente</p>
           </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!isValid || isPending}
+            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
+              isValid && !isPending
+                ? "bg-vet-primary hover:bg-vet-secondary text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              "Guardar"
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Espaciador reducido para el header fijo */}
-      <div className="h-28"></div>
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="space-y-5">
+          {/* Nombre */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <User className="w-4 h-4 text-gray-400" />
+              Nombre completo *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Ej: Juan Pérez"
+              maxLength={100}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
+          </div>
 
-      {/* Formulario - Sin márgenes grandes */}
-      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg border border-gray-200">
-            <form id="owner-form" onSubmit={handleSubmit(handleForm)} noValidate>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Nombre */}
-                  <div className="md:col-span-2">
-                    <label className="block text-vet-text font-semibold mb-2 text-sm">
-                      Nombre completo <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className={`
-                        flex items-center gap-3 px-3 py-2 rounded-lg border transition-all duration-200
-                        ${errors.name 
-                          ? 'bg-red-50 border-red-300' 
-                          : 'bg-vet-light border-gray-300 hover:border-gray-400 focus-within:border-vet-primary'
-                        }
-                      `}>
-                        <div className={`p-1.5 rounded ${errors.name ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
-                          <User className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Ej: Juan Pérez"
-                          {...register("name", {
-                            required: "El nombre es requerido",
-                            minLength: { value: 2, message: "Mínimo 2 caracteres" },
-                          })}
-                          className="flex-1 bg-transparent text-vet-text placeholder-vet-muted focus:outline-none text-sm"
-                        />
-                      </div>
-                      {errors.name && (
-                        <p className="mt-1 text-red-600 text-xs flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-                          {errors.name.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+          {/* Teléfono */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Phone className="w-4 h-4 text-gray-400" />
+              Teléfono *
+            </label>
+            <input
+              type="tel"
+              name="contact"
+              value={formData.contact}
+              onChange={handleChange}
+              placeholder="Ej: 0414-1234567"
+              maxLength={20}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
+          </div>
 
-                  {/* WhatsApp */}
-                  <div className="md:col-span-2">
-                    <WhatsAppPhoneInput
-                      value={watch("contact") || ""}
-                      onChange={(val) => setValue("contact", val)}
-                      error={errors.contact?.message}
-                      required={true}
-                    />
-                  </div>
+          {/* Cédula/ID */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <CreditCard className="w-4 h-4 text-gray-400" />
+              Cédula / ID Nacional
+            </label>
+            <input
+              type="text"
+              name="nationalId"
+              value={formData.nationalId || ""}
+              onChange={handleChange}
+              placeholder="Ej: V-12345678"
+              maxLength={20}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
+          </div>
 
-                  {/* Email */}
-                  <div className="md:col-span-2">
-                    <label className="block text-vet-text font-semibold mb-2 text-sm">
-                      Correo electrónico
-                    </label>
-                    <div className="relative">
-                      <div className={`
-                        flex items-center gap-3 px-3 py-2 rounded-lg border transition-all duration-200
-                        ${errors.email 
-                          ? 'bg-red-50 border-red-300' 
-                          : 'bg-vet-light border-gray-300 hover:border-gray-400 focus-within:border-vet-primary'
-                        }
-                      `}>
-                        <div className={`p-1.5 rounded ${errors.email ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
-                          <Mail className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="email"
-                          placeholder="ejemplo@correo.com"
-                          {...register("email", {
-                            pattern: {
-                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: "Formato de email inválido",
-                            },
-                          })}
-                          className="flex-1 bg-transparent text-vet-text placeholder-vet-muted focus:outline-none text-sm"
-                        />
-                      </div>
-                      {errors.email && (
-                        <p className="mt-1 text-red-600 text-xs flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+          {/* Email */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Mail className="w-4 h-4 text-gray-400" />
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email || ""}
+              onChange={handleChange}
+              placeholder="Ej: juan@email.com"
+              maxLength={100}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
+          </div>
 
-                  {/* Dirección */}
-                  <div className="md:col-span-2">
-                    <label className="block text-vet-text font-semibold mb-2 text-sm">
-                      Dirección
-                    </label>
-                    <div className="flex items-center gap-3 px-3 py-2 rounded-lg border bg-vet-light border-gray-300 hover:border-gray-400 focus-within:border-vet-primary transition-all duration-200">
-                      <div className="p-1.5 rounded bg-gray-100 text-gray-600">
-                        <MapPin className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Dirección completa"
-                        {...register("address")}
-                        className="flex-1 bg-transparent text-vet-text placeholder-vet-muted focus:outline-none text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Botones en la parte inferior del card */}
-              <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 rounded-b-lg">
-                <div className="flex flex-col sm:flex-row justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/owners")}
-                    className="px-5 py-2.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors order-2 sm:order-1"
-                  >
-                    Cancelar
-                  </button>
-                  
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-50 order-1 sm:order-2"
-                  >
-                    {isPending ? (
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    {isPending ? "Guardando..." : "Guardar Propietario"}
-                  </button>
-                </div>
-              </div>
-            </form>
+          {/* Dirección */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <MapPin className="w-4 h-4 text-gray-400" />
+              Dirección
+            </label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address || ""}
+              onChange={handleChange}
+              placeholder="Ej: Av. Principal, Edificio Centro, Piso 2"
+              maxLength={200}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
           </div>
         </div>
-      </div>
-    </>
+
+        {/* Nota */}
+        <p className="mt-6 text-xs text-gray-400">
+          * Campos obligatorios
+        </p>
+      </form>
+    </div>
   );
 }

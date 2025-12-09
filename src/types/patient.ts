@@ -1,13 +1,11 @@
 // src/types/patient.ts
 import { z } from "zod";
 
-// Esquema para el owner (objeto poblado)
 const OwnerPopulatedSchema = z.object({
   _id: z.string(),
   name: z.string(),
 });
 
-// Definición flexible para owner: puede ser ID (string) o objeto
 export const OwnerFieldSchema = z.union([
   z.string().min(1, "El dueño es obligatorio"),
   OwnerPopulatedSchema,
@@ -31,13 +29,12 @@ export const patientSchema = z.object({
   weight: z.number().optional().nullable(),
   color: z.string().optional().nullable(),
   identification: z.string().optional().nullable(),
-  owner: OwnerFieldSchema, // ✅ Ahora admite string o { _id, name }
+  owner: OwnerFieldSchema, 
   photo: z.string().optional().nullable(),
   mainVet: z.string().min(1, "El nombre del veterinario principal es obligatorio"),
   referringVet: z.string().optional().nullable(),
 });
 
-// Schema para listas (mismo tipo flexible)
 export const patientsListSchema = z.array(
   z.object({
     _id: z.string(),
@@ -49,7 +46,7 @@ export const patientsListSchema = z.array(
     weight: z.number().optional().nullable(),
     color: z.string().optional().nullable(),
     identification: z.string().optional().nullable(),
-    owner: OwnerFieldSchema, // ✅ También flexible en listas
+    owner: OwnerFieldSchema, 
     photo: z.string().optional().nullable(),
     mainVet: z.string(),
     referringVet: z.string().optional().nullable(),

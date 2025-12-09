@@ -1,36 +1,42 @@
-// views/CreateLabExamView.tsx
+// src/views/labExams/CreateLabExamView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  FlaskConical,
+  Calendar,
+  User,
+  Stethoscope,
+  X,
+} from "lucide-react";
 import { toast } from "../../components/Toast";
 import { createLabExam } from "../../api/labExamAPI";
-import { getPatientById } from "../../api/patientAPI";
-import { getOwnersById } from "../../api/OwnerAPI";
-import { extractId } from "../../utils/extractId";
-
 import ShareResultsModal from "../../components/ShareResultsModal";
+import { PatientSelectionTab } from "../../components/labexam/PatientSelectionTab";
 
 // Sonidos
-import segmentedSound from '/sounds/segmented.mp3';
-import bandSound from '/sounds/band.mp3';
-import lymphocytesSound from '/sounds/lymphocytes.mp3';
-import monocytesSound from '/sounds/monocytes.mp3';
-import basophilsSound from '/sounds/basophils.mp3';
-import reticulocytesSound from '/sounds/reticulocytes.mp3';
-import eosinophilsSound from '/sounds/eosinophils.mp3';
-import nrbcSound from '/sounds/nrbc.mp3';
-import errorSound from '/sounds/error.mp3';
+import segmentedSound from "/sounds/segmented.mp3";
+import bandSound from "/sounds/band.mp3";
+import lymphocytesSound from "/sounds/lymphocytes.mp3";
+import monocytesSound from "/sounds/monocytes.mp3";
+import basophilsSound from "/sounds/basophils.mp3";
+import reticulocytesSound from "/sounds/reticulocytes.mp3";
+import eosinophilsSound from "/sounds/eosinophils.mp3";
+import nrbcSound from "/sounds/nrbc.mp3";
+import errorSound from "/sounds/error.mp3";
+
 import type { DifferentialField, LabExamFormData } from "../../types";
 import { GeneralTab } from "../../components/labexam/GeneralTab";
 import { DifferentialTab } from "../../components/labexam/DifferentialTab";
 import { ObservationsTab } from "../../components/labexam/ObservationsTab";
-import { LabExamHeader } from "../../components/labexam/LabExamHeader";
 import { TabNavigation } from "../../components/labexam/TabNavigation";
+import { PaymentModal } from "../../components/payment/PaymentModal";
 
 // Valores normales
 const normalValues = {
-  perro: {
+  canino: {
     hematocrit: [37, 55],
     whiteBloodCells: [6, 17],
     totalProtein: [5.4, 7.8],
@@ -42,9 +48,9 @@ const normalValues = {
     eosinophils: [0.1, 1.3],
     basophils: [0, 0.2],
     nrbc: [0, 0.2],
-    reticulocytes: [0, 1.5]
+    reticulocytes: [0, 1.5],
   },
-  gato: {
+  felino: {
     hematocrit: [30, 45],
     whiteBloodCells: [5.5, 19.5],
     totalProtein: [5.7, 8.9],
@@ -56,19 +62,22 @@ const normalValues = {
     eosinophils: [0.1, 1.5],
     basophils: [0, 0.2],
     nrbc: [0, 0.2],
-    reticulocytes: [0, 1.5]
-  }
+    reticulocytes: [0, 1.5],
+  },
 };
 
 export default function CreateLabExamView() {
-  const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-  const [species, setSpecies] = useState<'perro' | 'gato'>('perro');
-  const [activeTab, setActiveTab] = useState<'general' | 'differential' | 'observations'>('general');
+  const [species] = useState<"canino" | "felino">("canino");
+  const [activeTab, setActiveTab] = useState<
+    "patient" | "general" | "differential" | "observations"
+  >("patient");
 
-  const [differentialCount, setDifferentialCount] = useState<LabExamFormData["differentialCount"]>({
+  const [differentialCount, setDifferentialCount] = useState<
+    LabExamFormData["differentialCount"]
+  >({
     segmentedNeutrophils: 0,
     bandNeutrophils: 0,
     lymphocytes: 0,
@@ -80,19 +89,34 @@ export default function CreateLabExamView() {
   });
 
   const [totalCells, setTotalCells] = useState(0);
-  const [lastAction, setLastAction] = useState<{ field: keyof LabExamFormData["differentialCount"] } | null>(null);
+  const [lastAction, setLastAction] = useState<{
+    field: keyof LabExamFormData["differentialCount"];
+  } | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [savedExamData, setSavedExamData] = useState<LabExamFormData | null>(null);
+  const [savedExamData, setSavedExamData] = useState<LabExamFormData | null>(
+    null
+  );
   const errorAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [examCostUSD, setExamCostUSD] = useState(0);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<Omit<LabExamFormData, "differentialCount" | "totalCells">>({
+    setValue,
+  } = useForm<LabExamFormData>({
     defaultValues: {
-      patientId: patientId || "",
+      patientName: "",
+      species: "canino",
+      breed: "",
+      sex: "",
+      age: "",
+      weight: undefined,
+      cost: 0,
       date: new Date().toISOString().split("T")[0],
       hematocrit: 0,
       whiteBloodCells: 0,
@@ -100,21 +124,40 @@ export default function CreateLabExamView() {
       platelets: 0,
       hemotropico: "",
       observacion: "",
+      treatingVet: "",
+      ownerName: "",
+      ownerPhone: "",
+      patientId: undefined,
     },
   });
 
+  useEffect(() => {
+    setValue("species", species);
+  }, [species, setValue]);
+
   const totalWhiteCells = watch("whiteBloodCells") || 0;
+  const patientName = watch("patientName");
+  const ownerName = watch("ownerName");
+  const treatingVet = watch("treatingVet");
+  const examDate = watch("date");
+
+  // Determinar si hay paciente seleccionado
+  const isPatientSelected = Boolean(patientName && patientName.trim() !== "");
 
   const calculatedValues = useMemo(() => {
-    const calculated = {} as Record<keyof LabExamFormData["differentialCount"], {
-      percentage: string;
-      absolute: string;
-    }>;
+    const calculated = {} as Record<
+      keyof LabExamFormData["differentialCount"],
+      {
+        percentage: string;
+        absolute: string;
+      }
+    >;
 
     Object.keys(differentialCount).forEach((key) => {
       const cellKey = key as keyof LabExamFormData["differentialCount"];
-      const percentage = totalCells > 0 ? ((differentialCount[cellKey] ?? 0) / totalCells) : 0;
-      const absolute = (percentage * totalWhiteCells) || 0;
+      const percentage =
+        totalCells > 0 ? (differentialCount[cellKey] ?? 0) / totalCells : 0;
+      const absolute = percentage * totalWhiteCells || 0;
 
       calculated[cellKey] = {
         percentage: (percentage * 100).toFixed(1),
@@ -125,104 +168,107 @@ export default function CreateLabExamView() {
     return calculated;
   }, [differentialCount, totalCells, totalWhiteCells]);
 
-  const differentialFields: DifferentialField[] = useMemo(() => [
-    { 
-      key: "segmentedNeutrophils" as const, 
-      sound: new Audio(segmentedSound), 
-      label: "Neutrófilos Segmentados", 
-      image: "/img/segmentedNeutrophils.png" 
-    },
-    { 
-      key: "bandNeutrophils" as const, 
-      sound: new Audio(bandSound), 
-      label: "Neutrófilos en Banda", 
-      image: "/img/band.png" 
-    },
-    { 
-      key: "lymphocytes" as const, 
-      sound: new Audio(lymphocytesSound), 
-      label: "Linfocitos", 
-      image: "/img/lymphocytes.png" 
-    },
-    { 
-      key: "monocytes" as const, 
-      sound: new Audio(monocytesSound), 
-      label: "Monocitos", 
-      image: "/img/monocytes.png" 
-    },
-    { 
-      key: "basophils" as const, 
-      sound: new Audio(basophilsSound), 
-      label: "Basófilos", 
-      image: "/img/basophils.png" 
-    },
-    { 
-      key: "reticulocytes" as const, 
-      sound: new Audio(reticulocytesSound), 
-      label: "Reticulocitos", 
-      image: "/img/reticulocytes.png" 
-    },
-    { 
-      key: "eosinophils" as const, 
-      sound: new Audio(eosinophilsSound), 
-      label: "Eosinófilos", 
-      image: "/img/eosinophils.png" 
-    },
-    { 
-      key: "nrbc" as const, 
-      sound: new Audio(nrbcSound), 
-      label: "NRBC", 
-      image: "/img/nrbc.png" 
-    },
-  ], []);
-
-  const { data: patient, isLoading: patientLoading } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: () => getPatientById(patientId!),
-    enabled: !!patientId,
-  });
-
-  const { data: owner } = useQuery({
-    queryKey: ["owner", patient?.owner],
-    queryFn: () => {
-      const ownerId = extractId(patient?.owner);
-      return ownerId ? getOwnersById(ownerId) : null;
-    },
-    enabled: !!patient?.owner,
-  });
-
-  const hasActiveAppointments = false;
+  const differentialFields: DifferentialField[] = useMemo(
+    () => [
+      {
+        key: "segmentedNeutrophils" as const,
+        sound: new Audio(segmentedSound),
+        label: "Neutrófilos Segmentados",
+        image: "/img/segmentedNeutrophils.png",
+      },
+      {
+        key: "bandNeutrophils" as const,
+        sound: new Audio(bandSound),
+        label: "Neutrófilos en Banda",
+        image: "/img/band.png",
+      },
+      {
+        key: "lymphocytes" as const,
+        sound: new Audio(lymphocytesSound),
+        label: "Linfocitos",
+        image: "/img/lymphocytes.png",
+      },
+      {
+        key: "monocytes" as const,
+        sound: new Audio(monocytesSound),
+        label: "Monocitos",
+        image: "/img/monocytes.png",
+      },
+      {
+        key: "basophils" as const,
+        sound: new Audio(basophilsSound),
+        label: "Basófilos",
+        image: "/img/basophils.png",
+      },
+      {
+        key: "reticulocytes" as const,
+        sound: new Audio(reticulocytesSound),
+        label: "Reticulocitos",
+        image: "/img/reticulocytes.png",
+      },
+      {
+        key: "eosinophils" as const,
+        sound: new Audio(eosinophilsSound),
+        label: "Eosinófilos",
+        image: "/img/eosinophils.png",
+      },
+      {
+        key: "nrbc" as const,
+        sound: new Audio(nrbcSound),
+        label: "NRBC",
+        image: "/img/nrbc.png",
+      },
+    ],
+    []
+  );
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data: LabExamFormData) => {
-      if (!patientId) {
-        throw new Error("ID del paciente no encontrado.");
-      }
-      return createLabExam(data, patientId);
+    mutationFn: (data: LabExamFormData) => createLabExam(data),
+    onSuccess: (data) => {
+      toast.success("Examen de laboratorio creado con éxito");
+      setSavedExamData(data);
+      setShowShareModal(true);
+      queryClient.invalidateQueries({ queryKey: ["labExams"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
-    onSuccess: (data) => {
-      toast.success("Examen de laboratorio creado con éxito");
-      setSavedExamData({
-        ...data,
-        differentialCount,
-        totalCells,
-        whiteBloodCells: watch("whiteBloodCells"),
-        hematocrit: watch("hematocrit"),
-        totalProtein: watch("totalProtein"),
-        platelets: watch("platelets"),
-        date: watch("date")
-      } as LabExamFormData);
-      setShowShareModal(true);
-      queryClient.invalidateQueries({
-        queryKey: ["labExams", { patientId }],
-      });
-    },
   });
 
-  const handleIncrement = (field: keyof LabExamFormData["differentialCount"], sound: HTMLAudioElement) => {
+
+const handlePaymentConfirm = (paymentData: { 
+  paymentMethodId: string; 
+  reference?: string; 
+  amountPaidUSD: number;
+  amountPaidBs: number;
+  exchangeRate: number;
+  isPartial: boolean;
+}) => {
+  const finalData = {
+    ...watch(),
+    differentialCount,
+    totalCells,
+    ownerName: watch("ownerName")?.trim() || undefined,
+    ownerPhone: watch("ownerPhone")?.trim() || undefined,
+    // Datos del pago
+    paymentMethodId: paymentData.paymentMethodId,
+    paymentReference: paymentData.reference,
+    exchangeRate: paymentData.exchangeRate,
+    amountPaidUSD: paymentData.amountPaidUSD,
+    amountPaidBs: paymentData.amountPaidBs,
+    isPartialPayment: paymentData.isPartial,
+  };
+
+
+  mutate(finalData);
+  setShowPaymentModal(false);
+};
+
+
+  const handleIncrement = (
+    field: keyof LabExamFormData["differentialCount"],
+    sound: HTMLAudioElement
+  ) => {
     if (totalCells >= 100) {
       toast.error("El conteo total no puede superar 100");
       return;
@@ -271,20 +317,76 @@ export default function CreateLabExamView() {
     toast.success("Conteo diferencial reiniciado");
   };
 
-  const onSubmit = (data: Omit<LabExamFormData, "differentialCount" | "totalCells">) => {
-    const finalData = {
+
+  const handleClearPatient = () => {
+    setValue("patientId", undefined);
+    setValue("patientName", "");
+    setValue("species", "canino");
+    setValue("breed", "");
+    setValue("sex", "");
+    setValue("age", "");
+    setValue("weight", undefined);
+    setValue("ownerName", "");
+    setValue("treatingVet", "");
+    setActiveTab("patient");
+  };
+
+  const onSubmit = (data: LabExamFormData) => {
+    if (!isPatientSelected) {
+      toast.error("Debes seleccionar un paciente primero");
+      setActiveTab("patient");
+      return;
+    }
+
+    const finalData: LabExamFormData = {
       ...data,
       differentialCount,
       totalCells,
-    } as LabExamFormData;
-    mutate(finalData);
+      ownerName: data.ownerName?.trim() || undefined,
+      ownerPhone: data.ownerPhone?.trim() || undefined,
+    };
+
+    if ((finalData.cost ?? 0) <= 0) {
+      toast.error("El costo del examen debe ser mayor a 0");
+      setActiveTab("general");
+      return;
+    }
+
+   
+    setExamCostUSD(finalData.cost || 0);
+
+   
+    if (finalData.patientId) {
+      //  Paciente propio → crear factura pendiente automáticamente
+      mutate(finalData);
+    } else if (finalData.ownerName) {
+      //  Dueño referido → mostrar modal de pago
+      setShowPaymentModal(true);
+    } else {
+      toast.error("Debe ingresar los datos del dueño");
+      return;
+    }
   };
 
-  const isOutOfRange = (value: number | string | undefined, rangeKey: keyof typeof normalValues.perro) => {
+  const isOutOfRange = (
+    value: number | string | undefined,
+    rangeKey: keyof typeof normalValues.canino
+  ) => {
     if (value === undefined || value === null) return false;
     const numValue = Number(value);
     const range = normalValues[species][rangeKey];
     return numValue < range[0] || numValue > range[1];
+  };
+
+  // Manejar cambio de tab con validación
+  const handleTabChange = (
+    tab: "patient" | "general" | "differential" | "observations"
+  ) => {
+    if (tab !== "patient" && !isPatientSelected) {
+      toast.error("Primero selecciona un paciente");
+      return;
+    }
+    setActiveTab(tab);
   };
 
   useEffect(() => {
@@ -293,7 +395,9 @@ export default function CreateLabExamView() {
         errorAudioRef.current = new Audio(errorSound);
       }
       errorAudioRef.current.currentTime = 0;
-      errorAudioRef.current.play().catch((e) => console.warn("Error al reproducir sonido de 100:", e));
+      errorAudioRef.current
+        .play()
+        .catch((e) => console.warn("Error al reproducir sonido de 100:", e));
     }
   }, [totalCells]);
 
@@ -301,20 +405,37 @@ export default function CreateLabExamView() {
     setMounted(true);
   }, []);
 
+  // Formatear fecha para mostrar
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Sin fecha";
+    const date = new Date(dateString + "T00:00:00");
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'general':
+      case "patient":
+        return (
+          <PatientSelectionTab
+            onPatientSelected={() => setActiveTab("general")}
+            setValues={setValue}
+            currentPatientName={watch("patientName")}
+          />
+        );
+      case "general":
         return (
           <GeneralTab
             species={species}
-            onSpeciesChange={setSpecies}
             register={register}
             errors={errors}
             watch={watch}
-            isOutOfRange={isOutOfRange}
           />
         );
-      case 'differential':
+      case "differential":
         return (
           <DifferentialTab
             differentialCount={differentialCount}
@@ -330,7 +451,7 @@ export default function CreateLabExamView() {
             isOutOfRange={isOutOfRange}
           />
         );
-      case 'observations':
+      case "observations":
         return (
           <ObservationsTab
             register={register}
@@ -343,47 +464,254 @@ export default function CreateLabExamView() {
   };
 
   return (
-    <div className="min-h-screen bg-vet-light pb-20">
-      <LabExamHeader
-        patientId={patientId!}
-        patient={patient}
-        patientLoading={patientLoading}
-        hasActiveAppointments={hasActiveAppointments}
-      />
+    <div className="min-h-screen">
+      {/* Header de la Vista */}
+      <div className="px-4 sm:px-6 py-4 sm:py-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Barra Superior con Navegación */}
+          <div
+            className={`transform transition-all duration-500 ${
+              mounted ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              {/* Lado Izquierdo - Título y Navegación */}
+              <div className="flex items-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-white hover:bg-vet-primary hover:text-white text-vet-muted transition-all duration-200 shadow-soft group"
+                >
+                  <ArrowLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
 
-      <div className="pt-32 lg:pt-36 px-3 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className={`transform transition-all duration-1200 delay-300 ${mounted ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"}`}>
-            <div className="bg-white rounded-xl shadow-card border-l-4 border-vet-primary overflow-hidden">
-              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-              
-              <form onSubmit={handleSubmit(onSubmit)} noValidate className="p-4">
-                <div className="space-y-4">
-                  {renderActiveTab()}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary text-white shadow-lg shadow-vet-primary/25">
+                    <FlaskConical className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-vet-text">
+                      Nuevo Hemograma
+                    </h1>
+                    <p className="text-xs sm:text-sm text-vet-muted">
+                      Análisis hematológico completo
+                    </p>
+                  </div>
                 </div>
+              </div>
+
+              {/* Botón Cambiar Paciente  */}
+              {isPatientSelected && (
+                <button
+                  type="button"
+                  onClick={handleClearPatient}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Cambiar paciente
+                </button>
+              )}
+            </div>
+
+            {/* Info Cards - Solo si hay paciente */}
+            {isPatientSelected && (
+              <div className="space-y-3 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  {/* Paciente */}
+                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-vet-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
+                          Paciente
+                        </p>
+                        <p className="text-sm font-bold text-vet-text truncate">
+                          {patientName}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dueño */}
+                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-cyan-100 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-cyan-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
+                          Dueño
+                        </p>
+                        <p className="text-sm font-bold text-vet-text truncate">
+                          {ownerName || "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Veterinario */}
+                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <Stethoscope className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
+                          Veterinario
+                        </p>
+                        <p className="text-sm font-bold text-vet-text truncate">
+                          {treatingVet || "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fecha */}
+                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="w-4 h-4 text-amber-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
+                          Fecha
+                        </p>
+                        <p className="text-sm font-bold text-vet-text">
+                          {formatDate(examDate)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card Principal del Formulario */}
+          <div
+            className={`transform transition-all duration-700 delay-150 ${
+              mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            }`}
+          >
+            <div className="bg-white rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden">
+              {/* Navegación de Tabs */}
+              <TabNavigation
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                isPatientSelected={isPatientSelected}
+              />
+
+              {/* Contenido del Form */}
+              <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <div className="p-4 sm:p-6">{renderActiveTab()}</div>
               </form>
+            </div>
+
+            {/* Footer con Progreso */}
+            <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-1">
+              {/* Indicador de Progreso */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  {["patient", "general", "differential", "observations"].map(
+                    (tab, index) => {
+                      const currentIndex = [
+                        "patient",
+                        "general",
+                        "differential",
+                        "observations",
+                      ].indexOf(activeTab);
+                      const isCompleted = index < currentIndex;
+                      const isCurrent = index === currentIndex;
+                      const isLocked = index > 0 && !isPatientSelected;
+
+                      return (
+                        <div
+                          key={tab}
+                          className={`transition-all duration-300 ${
+                            isLocked
+                              ? "w-2 h-2 rounded-full bg-gray-200"
+                              : isCompleted
+                              ? "w-6 h-2 rounded-full bg-emerald-500"
+                              : isCurrent
+                              ? "w-6 h-2 rounded-full bg-vet-primary animate-pulse"
+                              : "w-2 h-2 rounded-full bg-gray-300"
+                          }`}
+                        />
+                      );
+                    }
+                  )}
+                </div>
+                <span className="text-sm text-vet-muted font-medium">
+                  {isPatientSelected
+                    ? `Paso ${
+                        [
+                          "patient",
+                          "general",
+                          "differential",
+                          "observations",
+                        ].indexOf(activeTab) + 1
+                      } de 4`
+                    : "Selecciona un paciente"}
+                </span>
+              </div>
+
+              {/* Contador de Células */}
+              {totalCells > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white shadow-soft border border-gray-100">
+                  <span className="text-sm text-vet-muted">Células:</span>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className={`text-lg font-bold ${
+                        totalCells === 100
+                          ? "text-emerald-600"
+                          : "text-vet-primary"
+                      }`}
+                    >
+                      {totalCells}
+                    </span>
+                    <span className="text-sm text-vet-muted">/100</span>
+                  </div>
+                  {totalCells === 100 && (
+                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                      ✓ Completo
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {showShareModal && savedExamData && patient && (
+      {/*  Modal de Pago */}
+      {showPaymentModal && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={handlePaymentConfirm}
+          amountUSD={examCostUSD}
+        />
+      )}
+
+      {/* Modal de Compartir */}
+      {showShareModal && savedExamData && (
         <ShareResultsModal
           isOpen={showShareModal}
           onClose={() => {
             setShowShareModal(false);
-            navigate(`/patients/${patientId}`);
+            navigate("/lab-exams");
           }}
           examData={savedExamData}
           patientData={{
-            name: patient.name || 'Paciente',
-            species: species,
+            name: savedExamData.patientName || "Paciente",
+            species: savedExamData.species as "canino" | "felino",
             owner: {
-              name: owner?.name || 'Propietario',
-              contact: owner?.contact || ''
+              name: savedExamData.ownerName || "—",
+              contact: savedExamData.ownerPhone || "—",
             },
-            mainVet: patient.mainVet || 'No especificado',
-            refVet: patient.referringVet || 'No especificado'
+            mainVet: savedExamData.treatingVet || "—",
+            refVet: "—",
           }}
         />
       )}

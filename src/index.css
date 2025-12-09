@@ -1,32 +1,336 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
-/* ========= PALETA VETERINARIA PROFESIONAL ========= */
+/* ========= PALETA VETERINARIA PROFESIONAL - AZUL OCÉANO ========= */
 @theme {
-  /* Colores basados en TU logo (#289c2c, #5DC060, #39913D, #E4F4E5) */
-  --color-vet-primary: #289c2c;
-  --color-vet-secondary: #39913d;
-  --color-vet-accent: #5dc060;
-  --color-vet-light: #e4f4e5;
-  --color-vet-text: #1e3a2c;
-  --color-vet-muted: #6b8c7d;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  
+  /* 🌊 Paleta Azul Océano Profundo - Ultra Profesional */
+  --color-vet-primary: #0A7EA4;
+  --color-vet-secondary: #085F7A;
+  --color-vet-accent: #36BCD4;
+  --color-vet-light: #E0F4F8;
+  --color-vet-text: #1A3E4A;
+  --color-vet-muted: #5A7C88;
   --color-vet-danger: #dc3545;
 
   /* Alias funcionales */
-  --color-primary:   var(--color-vet-primary);
+  --color-primary: var(--color-vet-primary);
   --color-background: var(--color-vet-light);
-  --color-text:      var(--color-vet-text);
-  --color-muted:     var(--color-vet-muted);
-  --color-danger:    var(--color-vet-danger);
+  --color-text: var(--color-vet-text);
+  --color-muted: var(--color-vet-muted);
+  --color-danger: var(--color-vet-danger);
 
-  /* Sombras suaves */
-  --shadow-soft: 0 4px 6px -1px rgba(40, 156, 44, 0.1), 0 2px 4px -1px rgba(40, 156, 44, 0.06);
-  --shadow-card: 0 10px 15px -3px rgba(40, 156, 44, 0.1), 0 4px 6px -2px rgba(40, 156, 44, 0.05);
+  /* Sombras suaves adaptadas al azul */
+  --shadow-soft: 0 4px 6px -1px rgba(10, 126, 164, 0.1), 0 2px 4px -1px rgba(10, 126, 164, 0.06);
+  --shadow-card: 0 10px 15px -3px rgba(10, 126, 164, 0.1), 0 4px 6px -2px rgba(10, 126, 164, 0.05);
+
+  /* ========= ANIMACIONES PERSONALIZADAS ========= */
+  
+  /* Animación de gradiente */
+  --animate-gradient-shift: gradient-shift 3s ease infinite;
+  
+  /* Animaciones de rotación */
+  --animate-spin-slow: spin-slow 20s linear infinite;
+  --animate-reverse-spin: reverse-spin 15s linear infinite;
+  
+  /* Animaciones de pulso */
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-gentle-pulse: gentle-pulse 3s ease-in-out infinite;
+  
+  /* Animaciones de partículas */
+  --animate-float-particle: float-particle 6s ease-in-out infinite;
+  --animate-float-up: float-up 3s ease-in-out infinite;
+  
+  /* Animaciones de brillo */
+  --animate-shine: shine 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite;
+  
+  /* Animaciones de rebote y escala */
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-bounce: scale-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Animaciones de destellos */
+  --animate-twinkle: twinkle 1.5s ease-in-out infinite;
+  --animate-twinkle-delayed: twinkle-delayed 1.5s ease-in-out infinite;
+  --animate-sparkle: sparkle 2s ease-in-out infinite;
+  
+  /* Animaciones de fade */
+  --animate-fade-in: fadeIn 0.3s ease-out;
+  --animate-fade-in-up: fade-in-up 0.5s ease-out;
+  
+  /* Animación de progreso */
+  --animate-progress-bar: progress-bar 1.5s ease-in-out infinite;
+  --animate-progress-fill: progress-fill 0.7s ease-out forwards;
+  
+  /* Animación de ondas */
+  --animate-ripple: ripple 1.5s ease-out infinite;
+  
+  /* Animación de morphing */
+  --animate-morph: morph 8s ease-in-out infinite;
 }
 
 :root {
-  --gradient-vet-from: #e4f4e5;
-  --gradient-vet-via:  #f0f9f0;
-  --gradient-vet-to:   #ffffff;
+  /* Gradiente azul profesional */
+  --gradient-vet-from: #E0F4F8;
+  --gradient-vet-via: #EEF9FC;
+  --gradient-vet-to: #ffffff;
+}
+
+/* ========= KEYFRAMES ========= */
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reverse-spin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(90vh) translateX(10px) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(10vh) translateX(-10px) scale(1);
+  }
+  100% {
+    transform: translateY(-10vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes float-up {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(54, 188, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(54, 188, 212, 0.6), 0 0 60px rgba(10, 126, 164, 0.3);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-bounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes twinkle-delayed {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-bar {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width, 100%);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes morph {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-5px) scaleY(1.1);
+  }
 }
 
 /* ========= UTILIDADES VETERINARIAS ========= */
@@ -42,33 +346,117 @@
 
   .bg-vet-card {
     background: white;
-    border-left: 4px solid #289c2c;
+    border-left: 4px solid #0A7EA4;
     box-shadow: var(--shadow-card);
   }
 
   .bg-vet-sidebar {
-    background: linear-gradient(180deg, #289c2c 0%, #39913d 100%);
+    background: linear-gradient(180deg, #0A7EA4 0%, #085F7A 100%);
   }
 
-  /* Scrollbar veterinario */
+  /* Scrollbar veterinario azul */
   .scrollbar-thumb-vet::-webkit-scrollbar-thumb {
-    background: rgba(40, 156, 44, 0.3);
+    background: rgba(10, 126, 164, 0.3);
     border-radius: 999px;
   }
 
   .scrollbar-thumb-vet:hover::-webkit-scrollbar-thumb {
-    background: rgba(40, 156, 44, 0.5);
+    background: rgba(10, 126, 164, 0.5);
   }
-}
 
-/* ========= ANIMACIONES SUAVES ========= */
-@keyframes gentle-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
+  /* ========= CLASES DE ANIMACIÓN ========= */
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
 
-.animate-gentle-pulse {
-  animation: gentle-pulse 3s ease-in-out infinite;
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+
+  .animate-reverse-spin {
+    animation: reverse-spin 15s linear infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  .animate-gentle-pulse {
+    animation: gentle-pulse 3s ease-in-out infinite;
+  }
+
+  .animate-float-particle {
+    animation: float-particle 6s ease-in-out infinite;
+  }
+
+  .animate-float-up {
+    animation: float-up 3s ease-in-out infinite;
+  }
+
+  .animate-shine {
+    animation: shine 2s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-scale-bounce {
+    animation: scale-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-twinkle {
+    animation: twinkle 1.5s ease-in-out infinite;
+  }
+
+  .animate-twinkle-delayed {
+    animation: twinkle-delayed 1.5s ease-in-out infinite;
+  }
+
+  .animate-sparkle {
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out;
+  }
+
+  .animate-progress-bar {
+    animation: progress-bar 1.5s ease-in-out infinite;
+  }
+
+  .animate-ripple {
+    animation: ripple 1.5s ease-out infinite;
+  }
+
+  .animate-morph {
+    animation: morph 8s ease-in-out infinite;
+  }
+
+  .animate-orbit {
+    animation: orbit 10s linear infinite;
+  }
+
+  .animate-wave {
+    animation: wave 1s ease-in-out infinite;
+  }
 }
 
 /* ========= COMPONENTES ESPECÍFICOS ========= */
@@ -88,27 +476,166 @@
   @apply bg-white/30 font-semibold;
 }
 
-/* Scrollbar personalizado para tablas */
+/* Scrollbar personalizado para tablas - Azul océano */
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #E0F4F8;
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  background: linear-gradient(to right, #0A7EA4, #36BCD4);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right, #2563eb, #7c3aed);
+  background: linear-gradient(to right, #085F7A, #0A7EA4);
 }
 
 /* Para Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #3b82f6 #f1f5f9;
+  scrollbar-color: #0A7EA4 #E0F4F8;
+}
+
+/* Scrollbar para sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   🗓️ ESTILOS PERSONALIZADOS PARA CALENDARIO - TEMA AZUL OCÉANO
+   ======================================== */
+
+/* Contenedor del calendario */
+.react-datepicker {
+  background-color: #0C4A5E;
+  border: 1px solid #0A7EA4;
+  border-radius: 0.75rem;
+  font-family: var(--font-inter), sans-serif;
+  color: white;
+  width: 100%;
+  max-width: 300px;
+  padding: 1rem;
+}
+
+/* Encabezado del calendario */
+.react-datepicker__header {
+  background-color: #0C4A5E;
+  border-bottom: 1px solid #0A7EA4;
+  padding: 0.5rem 0;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: #E0F4F8;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Navegación (flechas) */
+.react-datepicker__navigation {
+  top: 0.5rem;
+  border: none;
+}
+
+.react-datepicker__navigation--previous {
+  border-right-color: #5A7C88;
+}
+
+.react-datepicker__navigation--next {
+  border-left-color: #5A7C88;
+}
+
+/* Días de la semana */
+.react-datepicker__day-name {
+  color: #5A7C88;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+/* Días del mes */
+.react-datepicker__day {
+  color: white;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin: 0.125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__day:hover {
+  background-color: #085F7A;
+  color: white;
+}
+
+/* Día seleccionado */
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  background-color: #0A7EA4;
+  color: #E0F4F8;
+  font-weight: bold;
+}
+
+/* Día con cita (marcado con punto) */
+.has-appointment {
+  position: relative;
+}
+
+.has-appointment::after {
+  content: '';
+  position: absolute;
+  top: 0.125rem;
+  right: 0.125rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #36BCD4;
+  border-radius: 50%;
+}
+
+/* Texto del día con cita */
+.has-appointment {
+  background-color: #085F7A;
+  color: #E0F4F8;
+}
+
+/* Foco y selección */
+.react-datepicker__day:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #36BCD4;
+}
+
+/* Ajuste de tamaño para mobile */
+@media (max-width: 640px) {
+  .react-datepicker {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+
+  .react-datepicker__day {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
 }
