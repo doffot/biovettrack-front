@@ -17,3 +17,14 @@ export const QUERY_CONFIG_EXTENDED = {
   staleTime: 60 * 1000,
   gcTime: 5 * 60 * 1000,
 } as const;
+
+// Tipos para moneda
+export interface CurrencyAmounts {
+  USD: number;
+  Bs: number;
+}
+
+export const EMPTY_CURRENCY: CurrencyAmounts = {
+  USD: 0,
+  Bs: 0,
+};

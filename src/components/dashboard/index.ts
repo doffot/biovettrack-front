@@ -2,6 +2,7 @@
 export { DashboardLoading } from "./DashboardLoading";
 export { DashboardHeader } from "./DashboardHeader";
 export { MetricCard } from "./MetricCard";
+export { DualCurrencyCard } from "./DualCurrencyCard";
 export { MetricsGrid } from "./MetricsGrid";
 export { AgendaItem } from "./AgendaItem";
 export { AgendaSection } from "./AgendaSection";

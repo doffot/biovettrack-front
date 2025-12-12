@@ -10,18 +10,20 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { MetricCard } from "./MetricCard";
-import { formatCurrency } from "../../utils/currencyUtils";
+import { DualCurrencyCard } from "./DualCurrencyCard";
+import type { CurrencyAmounts } from "../../constants/dashboardConstants";
+
 
 interface MetricsGridProps {
   todayAppointments: number;
   todayConsultations: number;
   todayGrooming: number;
-  todayRevenue: number;
+  todayRevenue: CurrencyAmounts;
   totalPatients: number;
   totalOwners: number;
-  pendingDebt: number;
+  pendingDebt: CurrencyAmounts;
   pendingInvoicesCount: number;
-  monthRevenue: number;
+  monthRevenue: CurrencyAmounts;
 }
 
 export function MetricsGrid({
@@ -60,9 +62,9 @@ export function MetricsGrid({
           color="text-purple-600"
           bgColor="bg-purple-50"
         />
-        <MetricCard
+        <DualCurrencyCard
           title="Ingresos Hoy"
-          value={formatCurrency(todayRevenue)}
+          amounts={todayRevenue}
           icon={DollarSign}
           color="text-green-600"
           bgColor="bg-green-50"
@@ -85,17 +87,17 @@ export function MetricsGrid({
           color="text-indigo-600"
           bgColor="bg-indigo-50"
         />
-        <MetricCard
+        <DualCurrencyCard
           title="Deuda Pendiente"
-          value={formatCurrency(pendingDebt)}
+          amounts={pendingDebt}
           subtitle={`${pendingInvoicesCount} facturas`}
           icon={CreditCard}
           color="text-red-600"
           bgColor="bg-red-50"
         />
-        <MetricCard
+        <DualCurrencyCard
           title="Ingresos Mes"
-          value={formatCurrency(monthRevenue)}
+          amounts={monthRevenue}
           subtitle="Últimos 30 días"
           icon={TrendingUp}
           color="text-teal-600"

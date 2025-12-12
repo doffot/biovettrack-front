@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PawPrint, ArrowLeft, Calendar,  Scissors, Camera, User, Stethoscope, FileText, Edit, Trash2, Mail, Phone, Home, X } from "lucide-react";
+import { PawPrint, ArrowLeft, Calendar, Scissors, Camera, User, Stethoscope, FileText, Edit, Trash2, Mail, Phone, Home, X } from "lucide-react";
 import { toast } from "../../components/Toast";
 import { getPatientById, deletePatient } from "../../api/patientAPI";
 import { getActiveAppointmentsByPatient, updateAppointmentStatus } from "../../api/appointmentAPI";
@@ -10,6 +10,8 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import PhotoModal from "../../components/patients/PhotoModal";
 import { extractId } from "../../utils/extractId";
 import type { Appointment } from "../../types/appointment";
+// Nuevo import
+import PendingPaymentsBanner from "../../components/patients/PendingPaymentsBanner";
 
 export default function PatientDetailView() {
   const { patientId } = useParams<{ patientId?: string }>();
@@ -29,16 +31,17 @@ export default function PatientDetailView() {
   });
 
   const { data: owner, isLoading: isLoadingOwner } = useQuery({
-  queryKey: ["owner", patient?.owner],
-  queryFn: () => {
-  const ownerId = extractId(patient?.owner);
-  if (!ownerId) {
-    throw new Error("ID del propietario no disponible");
-  }
-  return getOwnersById(ownerId);
-},
-  enabled: !!patient?.owner,
-});
+    queryKey: ["owner", patient?.owner],
+    queryFn: () => {
+      const ownerId = extractId(patient?.owner);
+      if (!ownerId) {
+        throw new Error("ID del propietario no disponible");
+      }
+      return getOwnersById(ownerId);
+    },
+    enabled: !!patient?.owner,
+  });
+
   const { data: activeAppointments } = useQuery({
     queryKey: ["activeAppointments", patientId],
     queryFn: () => getActiveAppointmentsByPatient(patientId!),
@@ -61,7 +64,7 @@ export default function PatientDetailView() {
 
   // Mutation para cancelar cita
   const { mutate: cancelAppointment, isPending: isCanceling } = useMutation({
-    mutationFn: (appointmentId: string) => 
+    mutationFn: (appointmentId: string) =>
       updateAppointmentStatus(appointmentId, { status: "Cancelada" }),
     onError: (error: Error) => {
       toast.error(error.message);
@@ -141,7 +144,7 @@ export default function PatientDetailView() {
 
   return (
     <>
-      {/* Header*/}
+      {/* Header */}
       <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between gap-4">
@@ -173,64 +176,61 @@ export default function PatientDetailView() {
 
             {/* Lado derecho - Botones de acción */}
             <div className="flex items-center gap-2 flex-shrink-0">
-  {/* Botón Cita -  con tooltip */}
-  <div className="relative group">
-    <Link
-      to={`/patients/${patientId}/appointments/create`}
-      className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200  text-purple-600 transition-all duration-200  hover:shadow-md"
-    >
-      <Stethoscope className="w-5 h-5" />
-    </Link>
-    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
-      Nueva cita
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
-    </div>
-  </div>
+              <div className="relative group">
+                <Link
+                  to={`/patients/${patientId}/appointments/create`}
+                  className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200 text-purple-600 transition-all duration-200 hover:shadow-md"
+                >
+                  <Stethoscope className="w-5 h-5" />
+                </Link>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
+                  Nueva cita
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
+                </div>
+              </div>
 
-  {/* Botón Exámenes - con tooltip */}
-  <div className="relative group">
-    <Link
-      to={`/patients/${patientId}/lab-exams`}
-      className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200  text-green-600 transition-all duration-200  hover:shadow-md"
-    >
-      <FileText className="w-5 h-5" />
-    </Link>
-    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
-      Hematología
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
-    </div>
-  </div>
+              <div className="relative group">
+                <Link
+                  to={`/patients/${patientId}/lab-exams`}
+                  className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200 text-green-600 transition-all duration-200 hover:shadow-md"
+                >
+                  <FileText className="w-5 h-5" />
+                </Link>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
+                  Hematología
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
+                </div>
+              </div>
 
-  {/* Botón Peluquería  */}
-  <div className="relative group">
-    <Link
-      to={`/patients/${patientId}/grooming-services/create`}
-      className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200  text-blue-600 transition-all duration-200  hover:shadow-md"
-    >
-      <Scissors className="w-5 h-5" />
-    </Link>
-    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
-      Servicios
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
-    </div>
-  </div>
-</div>
+              <div className="relative group">
+                <Link
+                  to={`/patients/${patientId}/grooming-services/create`}
+                  className="flex p-2 items-center justify-center w-10 h-10 rounded-md hover:bg-gray-200 text-blue-600 transition-all duration-200 hover:shadow-md"
+                >
+                  <Scissors className="w-5 h-5" />
+                </Link>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-40">
+                  Servicios
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-b-gray-900"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="h-16"></div>
 
+      {/* Banner de pagos pendientes - NUEVO */}
+      <PendingPaymentsBanner patientId={patientId!} />
+
       <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-6 py-3`}>
         <div className="max-w-6xl mx-auto">
-
-        
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
-            
             {/* Columna izquierda */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
-                {/* Foto de perfil  */}
+                {/* Foto de perfil */}
                 <div className="relative bg-gradient-to-br from-vet-light to-white p-3">
                   {patient.photo ? (
                     <div className="relative">
@@ -264,7 +264,7 @@ export default function PatientDetailView() {
                 {/* Información principal */}
                 <div className="p-3 text-center border-b border-gray-100">
                   <h2 className="text-lg font-bold text-vet-text mb-2">{patient.name}</h2>
-                  
+
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <span className="px-2.5 py-1 bg-gradient-to-r from-vet-primary to-vet-secondary text-white rounded-full text-xs font-semibold shadow-sm">
                       {patient.species}
@@ -286,7 +286,7 @@ export default function PatientDetailView() {
                   </div>
                 </div>
 
-                {/*  Tooltips ARRIBA */}
+                {/* Tooltips ARRIBA */}
                 <div className="p-3">
                   <div className="flex items-center justify-center gap-3">
                     <div className="relative group">
@@ -327,7 +327,6 @@ export default function PatientDetailView() {
             <div className="lg:col-span-2 space-y-3">
               {/* Card de Tabs */}
               <div className="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
-                
                 {/* Pestañas con diseño premium */}
                 <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
                   <nav className="flex">
@@ -348,7 +347,7 @@ export default function PatientDetailView() {
                         >
                           <Icon className={`w-5 h-5 transition-all duration-300 ${isActive ? "scale-110" : ""}`} />
                           <span className="hidden sm:inline">{tab.label}</span>
-                          
+
                           {/* Indicador animado */}
                           {isActive && (
                             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-vet-primary to-vet-secondary rounded-t-full transform transition-all duration-300" />
@@ -361,7 +360,6 @@ export default function PatientDetailView() {
 
                 {/* Contenido de las pestañas con animación */}
                 <div className="p-3">
-                  
                   {/* Tab: Propietario */}
                   {activeTab === "propietario" && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -373,7 +371,7 @@ export default function PatientDetailView() {
                           Información del Propietario
                         </h3>
                       </div>
-                      
+
                       {isLoadingOwner ? (
                         <div className="text-center py-8">
                           <div className="w-8 h-8 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
@@ -437,7 +435,7 @@ export default function PatientDetailView() {
                           Información Veterinaria
                         </h3>
                       </div>
-                      
+
                       {patient.referringVet ? (
                         <div className="bg-vet-light/30 rounded-xl p-3 hover:bg-vet-light/50 transition-colors duration-200">
                           <span className="text-xs font-semibold text-vet-muted uppercase tracking-wide block mb-1">Veterinario</span>
@@ -463,7 +461,7 @@ export default function PatientDetailView() {
                           Detalles Adicionales
                         </h3>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="bg-vet-light/30 rounded-xl p-3 hover:bg-vet-light/50 transition-colors duration-200">
                           <span className="text-xs font-semibold text-vet-muted uppercase tracking-wide block mb-1">Fecha de Nacimiento</span>
@@ -502,7 +500,6 @@ export default function PatientDetailView() {
                       </div>
                     </div>
                   )}
-
                 </div>
               </div>
 
@@ -515,10 +512,13 @@ export default function PatientDetailView() {
                       Citas Programadas
                     </h3>
                   </div>
-                  
+
                   <div className="p-3 space-y-3">
                     {activeAppointments.map((appt) => (
-                      <div key={appt._id} className="bg-gradient-to-r from-vet-light/30 to-white rounded-xl p-3 hover:shadow-md transition-all duration-200 border border-gray-100">
+                      <div
+                        key={appt._id}
+                        className="bg-gradient-to-r from-vet-light/30 to-white rounded-xl p-3 hover:shadow-md transition-all duration-200 border border-gray-100"
+                      >
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div>
@@ -546,7 +546,7 @@ export default function PatientDetailView() {
                               <p className="text-vet-text font-medium text-sm">{appt.observations || "Sin observaciones"}</p>
                             </div>
                           </div>
-                          
+
                           {/* Botones de acción - Tooltips ABAJO */}
                           <div className="flex items-center gap-1">
                             <div className="relative group">
@@ -581,9 +581,7 @@ export default function PatientDetailView() {
                 </div>
               )}
             </div>
-
           </div>
-
         </div>
       </div>
 
@@ -613,9 +611,7 @@ export default function PatientDetailView() {
                   <div className="p-2 bg-red-100 rounded-xl">
                     <Calendar className="w-5 h-5 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Cancelar Cita
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-900">Cancelar Cita</h3>
                 </div>
                 <button
                   onClick={() => setCancelingAppointment(null)}
@@ -629,10 +625,8 @@ export default function PatientDetailView() {
             {/* Body */}
             <div className="p-6">
               <div className="mb-6">
-                <p className="text-gray-700 mb-4">
-                  ¿Estás seguro que deseas cancelar esta cita?
-                </p>
-                
+                <p className="text-gray-700 mb-4">¿Estás seguro que deseas cancelar esta cita?</p>
+
                 <div className="bg-gray-50 rounded-xl p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Tipo:</span>

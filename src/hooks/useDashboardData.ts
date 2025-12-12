@@ -3,7 +3,12 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 
-import { QUERY_CONFIG, QUERY_CONFIG_EXTENDED } from "../constants/dashboardConstants";
+import {
+  QUERY_CONFIG,
+  QUERY_CONFIG_EXTENDED,
+  EMPTY_CURRENCY,
+  type CurrencyAmounts,
+} from "../constants/dashboardConstants";
 import {
   getTodayDateString,
   getDatePart,
@@ -14,8 +19,10 @@ import {
 } from "../utils/dashboardUtils";
 import type { Vaccination } from "../types/vaccination";
 import type { Deworming } from "../types/deworming";
-import type {  GroomingService, Owner, Patient } from "../types";
+import type { Invoice } from "../types/invoice";
+import type { Appointment } from "../types/appointment";
 import { getAllAppointments } from "../api/appointmentAPI";
+import type { GroomingService, Owner, Patient } from "../types";
 import { getAllGroomingServices } from "../api/groomingAPI";
 import type { Consultation } from "../types/consultation";
 import { getAllConsultations } from "../api/consultationAPI";
@@ -24,7 +31,6 @@ import { getAllDewormings } from "../api/dewormingAPI";
 import { getInvoices } from "../api/invoiceAPI";
 import { getPatients } from "../api/patientAPI";
 import { getOwners } from "../api/OwnerAPI";
-import type { Appointment } from "../types/appointment";
 
 
 export interface VaccinationWithDaysLeft extends Vaccination {
@@ -42,7 +48,50 @@ export interface ChartDataItem {
 
 export interface RevenueChartItem {
   day: string;
-  ingresos: number;
+  USD: number;
+  Bs: number;
+}
+
+// Re-exportar para uso en componentes
+export type { CurrencyAmounts };
+
+/**
+ * Calcula ingresos por moneda de un array de facturas
+ */
+function calculateRevenue(invoices: Invoice[]): CurrencyAmounts {
+  return invoices.reduce(
+    (acc, inv) => ({
+      USD: acc.USD + (inv.amountPaidUSD || 0),
+      Bs: acc.Bs + (inv.amountPaidBs || 0),
+    }),
+    { ...EMPTY_CURRENCY }
+  );
+}
+
+/**
+ * Calcula deuda pendiente por moneda
+ */
+function calculatePendingDebt(invoices: Invoice[]): CurrencyAmounts {
+  return invoices
+    .filter((inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial")
+    .reduce(
+      (acc, inv) => {
+        const remainingTotal = inv.total - (inv.amountPaid || 0);
+
+        if (inv.currency === "USD") {
+          return {
+            USD: acc.USD + remainingTotal,
+            Bs: acc.Bs,
+          };
+        } else {
+          return {
+            USD: acc.USD,
+            Bs: acc.Bs + remainingTotal,
+          };
+        }
+      },
+      { ...EMPTY_CURRENCY }
+    );
 }
 
 export function useDashboardData() {
@@ -101,7 +150,7 @@ export function useDashboardData() {
   const consultations = consultationsQuery.data ?? [];
   const vaccinations = vaccinationsQuery.data ?? [];
   const dewormings = dewormingsQuery.data ?? [];
-  const invoices = invoicesQuery.data?.invoices ?? [];
+  const invoices = (invoicesQuery.data?.invoices ?? []) as Invoice[];
   const patients = patientsQuery.data ?? [];
   const owners = ownersQuery.data ?? [];
 
@@ -123,8 +172,7 @@ export function useDashboardData() {
   const todayAppointments = useMemo(
     () =>
       appointments.filter(
-        (apt) =>
-          getDatePart(apt.date) === todayStr && apt.status === "Programada"
+        (apt) => getDatePart(apt.date) === todayStr && apt.status === "Programada"
       ),
     [appointments, todayStr]
   );
@@ -140,44 +188,34 @@ export function useDashboardData() {
   );
 
   const todayConsultations = useMemo(
-    () =>
-      consultations.filter(
-        (c) => getDatePart(c.consultationDate) === todayStr
-      ),
+    () => consultations.filter((c) => getDatePart(c.consultationDate) === todayStr),
     [consultations, todayStr]
   );
 
-  // ========== INGRESOS ==========
-  const todayRevenue = useMemo(
-    () =>
-      invoices
-        .filter((inv) => getDatePart(inv.date) === todayStr)
-        .reduce((sum, inv) => sum + (inv.amountPaid || 0), 0),
+  // ========== INGRESOS (Multi-moneda) ==========
+  const todayInvoices = useMemo(
+    () => invoices.filter((inv) => getDatePart(inv.date) === todayStr),
     [invoices, todayStr]
   );
 
-  const weekRevenue = useMemo(() => {
+  const todayRevenue = useMemo(() => calculateRevenue(todayInvoices), [todayInvoices]);
+
+  const weekInvoices = useMemo(() => {
     const weekAgo = getDaysAgoString(7);
-    return invoices
-      .filter((inv) => getDatePart(inv.date) >= weekAgo)
-      .reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+    return invoices.filter((inv) => getDatePart(inv.date) >= weekAgo);
   }, [invoices]);
 
-  const monthRevenue = useMemo(() => {
+  const weekRevenue = useMemo(() => calculateRevenue(weekInvoices), [weekInvoices]);
+
+  const monthInvoices = useMemo(() => {
     const monthAgo = getDaysAgoString(30);
-    return invoices
-      .filter((inv) => getDatePart(inv.date) >= monthAgo)
-      .reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+    return invoices.filter((inv) => getDatePart(inv.date) >= monthAgo);
   }, [invoices]);
 
-  // ========== DEUDAS ==========
-  const pendingDebt = useMemo(
-    () =>
-      invoices
-        .filter((inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial")
-        .reduce((sum, inv) => sum + (inv.total - (inv.amountPaid || 0)), 0),
-    [invoices]
-  );
+  const monthRevenue = useMemo(() => calculateRevenue(monthInvoices), [monthInvoices]);
+
+  // ========== DEUDAS (Multi-moneda) ==========
+  const pendingDebt = useMemo(() => calculatePendingDebt(invoices), [invoices]);
 
   const pendingInvoicesCount = useMemo(
     () =>
@@ -228,16 +266,16 @@ export function useDashboardData() {
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      
+
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-      const dayRevenue = invoices
-        .filter((inv) => getDatePart(inv.date) === dateStr)
-        .reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+      const dayInvoices = invoices.filter((inv) => getDatePart(inv.date) === dateStr);
+      const dayRevenue = calculateRevenue(dayInvoices);
 
       data.push({
         day: formatShortDay(date),
-        ingresos: dayRevenue,
+        USD: dayRevenue.USD,
+        Bs: dayRevenue.Bs,
       });
     }
     return data;

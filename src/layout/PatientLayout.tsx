@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -24,6 +23,8 @@ import { getGroomingServicesByPatient } from "../api/groomingAPI";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PhotoModal from "../components/patients/PhotoModal";
 import { toast } from "../components/Toast";
+// Nuevo import
+import PendingPaymentsIndicator from "../components/patients/PendingPaymentsIndicator";
 
 export default function PatientLayout() {
   const { patientId } = useParams<{ patientId?: string }>();
@@ -117,16 +118,16 @@ export default function PatientLayout() {
   }, [location.pathname]);
 
   const getActiveSectionName = () => {
-  const menuItems = [
-  { id: "datos", label: "Datos de la Mascota", icon: PawPrint, path: "" },
-  { id: "consultas", label: "Consultas", icon: Stethoscope, path: "" },
-  { id: "vacunas", label: "Vacunas", icon: Syringe, path: "" },
-  { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams" },
-  { id: "estudios", label: "Estudios", icon: FileText, path: "studies" }, // ← NUEVO
-  { id: "peluqueria", label: "Servicio de Peluquería", icon: Scissors, path: "grooming-services" },
-  { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create" },
-  { id: "cliente", label: "Datos del Cliente", icon: User, path: "" },
-];
+    const menuItems = [
+      { id: "datos", label: "Datos de la Mascota", icon: PawPrint, path: "" },
+      { id: "consultas", label: "Consultas", icon: Stethoscope, path: "" },
+      { id: "vacunas", label: "Vacunas", icon: Syringe, path: "" },
+      { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams" },
+      { id: "estudios", label: "Estudios", icon: FileText, path: "studies" },
+      { id: "peluqueria", label: "Servicio de Peluquería", icon: Scissors, path: "grooming-services" },
+      { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create" },
+      { id: "cliente", label: "Datos del Cliente", icon: User, path: "" },
+    ];
     const activeItem = menuItems.find(item => {
       const baseUrl = item.path ? `/patients/${patientId}/${item.path}` : `/patients/${patientId}`;
       return item.path ? location.pathname.startsWith(baseUrl) : location.pathname === baseUrl;
@@ -139,8 +140,6 @@ export default function PatientLayout() {
 
   const formatDate = (date: Date) =>
     date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-  
 
   if (isLoading) {
     return (
@@ -173,17 +172,17 @@ export default function PatientLayout() {
     );
   }
 
-const menuItems = [
-  { id: "datos", label: "Datos", icon: PawPrint, path: "" },
-  { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations" },
-  { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations" },
-  { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings" }, // ← NUEVO
-  { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams" },
-  { id: "estudios", label: "Estudios", icon: FileText, path: "studies" },
-  { id: "peluqueria", label: "Peluquería", icon: Scissors, path: "grooming-services" },
-  { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create" },
-  { id: "cliente", label: "Cliente", icon: User, path: "" },
-];
+  const menuItems = [
+    { id: "datos", label: "Datos", icon: PawPrint, path: "" },
+    { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations" },
+    { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations" },
+    { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings" },
+    { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams" },
+    { id: "estudios", label: "Estudios", icon: FileText, path: "studies" },
+    { id: "peluqueria", label: "Peluquería", icon: Scissors, path: "grooming-services" },
+    { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create" },
+    { id: "cliente", label: "Cliente", icon: User, path: "" },
+  ];
 
   return (
     <>
@@ -209,7 +208,10 @@ const menuItems = [
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 relative">
-       
+          {/* Indicador de pagos pendientes - NUEVO */}
+          <PendingPaymentsIndicator patientId={patientId!} />
+
+          {/* Botón de citas */}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -230,11 +232,9 @@ const menuItems = [
               <Calendar className="w-5 h-5" />
               {hasActiveAppointments && (
                 <>
-                  {/* Badge con animación */}
                   <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold text-white bg-gradient-to-br from-red-500 to-red-600 rounded-full border-2 border-white shadow-lg animate-pulse">
                     {activeAppointments?.length || 0}
                   </span>
-                  {/* Efecto de onda */}
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 rounded-full animate-ping opacity-20"></span>
                 </>
               )}
@@ -251,10 +251,8 @@ const menuItems = [
               </div>
             )}
 
-            {/* Dropdown */}
             {hasActiveAppointments && showAppointmentsDropdown && (
               <div className="absolute right-0 top-full mt-3 w-80 max-w-[calc(100vw-24px)] sm:max-w-none bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                {/* Header del dropdown */}
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm flex-shrink-0">
@@ -266,13 +264,11 @@ const menuItems = [
                     </div>
                   </div>
                 </div>
-                
-                {/* Lista de citas */}
                 <div className="max-h-72 overflow-y-auto">
                   {activeAppointments?.map((appt) => (
                     <Link
                       key={appt._id}
-                       to={`/patients/${patient._id}/appointments/${appt._id}`}
+                      to={`/patients/${patient._id}/appointments/${appt._id}`}
                       className="block px-4 py-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-transparent transition-all duration-200 border-b border-gray-100 last:border-b-0 group"
                       onClick={() => setShowAppointmentsDropdown(false)}
                     >
@@ -281,11 +277,9 @@ const menuItems = [
                           <Calendar className="w-5 h-5 text-purple-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          {/* Tipo de cita */}
                           <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-purple-600 transition-colors">
                             {appt.type}
                           </p>
-                          {/* Detalle de la cita */}
                           {appt.reason && (
                             <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                               {appt.reason}
@@ -313,6 +307,7 @@ const menuItems = [
             )}
           </div>
 
+          {/* Botón de peluquería */}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -333,17 +328,14 @@ const menuItems = [
               <Scissors className="w-5 h-5" />
               {hasActiveGrooming && (
                 <>
-                  {/* Badge con animación */}
                   <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold text-white bg-gradient-to-br from-red-500 to-red-600 rounded-full border-2 border-white shadow-lg animate-pulse">
                     {activeGroomingCount}
                   </span>
-                  {/* Efecto de onda */}
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 rounded-full animate-ping opacity-20"></span>
                 </>
               )}
             </button>
 
-            {/* Tooltip */}
             {showGroomingTooltip && !hasActiveGrooming && (
               <div className="absolute right-0 top-full mt-3 z-50 pointer-events-none">
                 <div className="relative">
@@ -355,10 +347,8 @@ const menuItems = [
               </div>
             )}
 
-            {/* Dropdown */}
             {hasActiveGrooming && showGroomingDropdown && (
               <div className="absolute right-0 top-full mt-3 w-80 max-w-[calc(100vw-24px)] sm:max-w-none bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                {/* Header del dropdown */}
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm flex-shrink-0">
@@ -370,8 +360,6 @@ const menuItems = [
                     </div>
                   </div>
                 </div>
-                
-                {/* Lista de servicios */}
                 <div className="max-h-72 overflow-y-auto">
                   {groomingServices
                     ?.filter(svc => svc.status === "Programado" || svc.status === "En progreso")
@@ -487,8 +475,6 @@ const menuItems = [
                   </button>
                 </div>
               </div>
-
-              
 
               <nav className="p-3">
                 <ul className="space-y-1">

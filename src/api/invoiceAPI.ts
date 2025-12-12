@@ -194,3 +194,53 @@ export async function deleteInvoice(id: Invoice["_id"]): Promise<{ msg: string }
     throw new Error("Error de red o desconocido");
   }
 }
+
+// src/api/invoiceAPI.ts - AGREGAR esta función
+
+// Obtener facturas pendientes por paciente
+export async function getPendingInvoicesByPatient(
+  patientId: string
+): Promise<Invoice[]> {
+  try {
+    const { invoices } = await getInvoices({
+      patientId,
+      status: "Pendiente",
+    });
+    
+    // También incluir facturas parciales
+    const { invoices: partialInvoices } = await getInvoices({
+      patientId,
+      status: "Parcial",
+    });
+    
+    return [...invoices, ...partialInvoices];
+  } catch (error) {
+    console.error("Error obteniendo facturas pendientes:", error);
+    return [];
+  }
+}
+
+// Obtener resumen de deuda por paciente
+export async function getPatientDebtSummary(patientId: string): Promise<{
+  totalDebt: number;
+  invoicesCount: number;
+  invoices: Invoice[];
+}> {
+  try {
+    const invoices = await getPendingInvoicesByPatient(patientId);
+    
+    const totalDebt = invoices.reduce((sum, inv) => {
+      const remaining = inv.total - (inv.amountPaid || 0);
+      return sum + remaining;
+    }, 0);
+    
+    return {
+      totalDebt,
+      invoicesCount: invoices.length,
+      invoices,
+    };
+  } catch (error) {
+    console.error("Error obteniendo resumen de deuda:", error);
+    return { totalDebt: 0, invoicesCount: 0, invoices: [] };
+  }
+}

@@ -2,12 +2,13 @@
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, ArrowLeft, PawPrint } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Save, ArrowLeft, PawPrint, User, Loader2 } from "lucide-react";
 import PatientForm from "../../components/patients/PatientForm";
 import type { PatientFormData } from "../../types";
 import { toast } from "../../components/Toast";
 import { createPatient } from "../../api/patientAPI";
+import { getOwnersById } from "../../api/OwnerAPI";
 import { defaultPhotoFile } from "../../utils/defaultPhoto";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -16,7 +17,14 @@ export default function CreatePatientView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-  const { data: vetmain } = useAuth();
+  const { data: vetData } = useAuth();
+
+  // Obtener información del dueño
+  const { data: owner, isLoading: isLoadingOwner } = useQuery({
+    queryKey: ["owner", ownerId],
+    queryFn: () => getOwnersById(ownerId!),
+    enabled: !!ownerId,
+  });
 
   const {
     register,
@@ -31,11 +39,22 @@ export default function CreatePatientView() {
       breed: "",
       sex: undefined,
       weight: 0,
+      color: "",
+      identification: "",
       photo: undefined,
-      mainVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
-      referringVet: `${vetmain?.name || ""} ${vetmain?.lastName || ""}`.trim(),
+      mainVet: "",
+      referringVet: "",
     },
   });
+
+  // Establecer el veterinario automáticamente
+  useEffect(() => {
+    if (vetData?.name) {
+      const vetName = `M.V. ${vetData.name} ${vetData.lastName || ""}`.trim();
+      setValue("mainVet", vetName);
+      setValue("referringVet", vetName);
+    }
+  }, [vetData, setValue]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: PatientFormData) => {
@@ -49,12 +68,11 @@ export default function CreatePatientView() {
       form.append("species", data.species);
       form.append("sex", data.sex);
       if (data.breed) form.append("breed", data.breed);
+      if (data.color) form.append("color", data.color);
+      if (data.identification) form.append("identification", data.identification);
       if (data.weight) form.append("weight", String(data.weight));
       form.append("mainVet", data.mainVet);
-
-      if (data.referringVet && data.referringVet.trim()) {
-        form.append("referringVet", data.referringVet);
-      }
+      form.append("referringVet", data.referringVet || data.mainVet);
 
       if (data.photo && data.photo.length > 0) {
         form.append("photo", data.photo[0]);
@@ -65,12 +83,13 @@ export default function CreatePatientView() {
 
       return await createPatient(form, ownerId);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Error al registrar mascota");
     },
     onSuccess: () => {
       toast.success("Mascota registrada con éxito");
       queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
+      queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
       navigate(`/owners/${ownerId}`);
     },
   });
@@ -80,108 +99,106 @@ export default function CreatePatientView() {
   }, []);
 
   const onSubmit = (data: PatientFormData) => {
-    const processedData = {
-      ...data,
-      referringVet: data.referringVet && data.referringVet.trim()
-        ? data.referringVet
-        : vetmain?.name,
-    };
-    mutate(processedData);
+    mutate(data);
   };
 
   return (
     <>
-      {/* Header Mejorado */}
-      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
-        <div className="px-6 lg:px-8 pt-6 pb-4">
-          <div className="flex items-center justify-between gap-6 mb-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              {/* BackButton siempre visible */}
-              <Link
-                to={`/owners/${ownerId}`}
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
-                title="Volver al propietario"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-vet-primary/10 rounded-lg">
-                    <PawPrint className="w-6 h-6 text-vet-primary" />
-                  </div>
-                  <h1 className="text-2xl font-bold text-vet-text">
-                    Nueva Mascota
-                  </h1>
-                </div>
-                <p className="text-vet-muted text-sm">
-                  Registra la información de la nueva mascota
-                </p>
-              </div>
-            </div>
+      {/* Header Fijo */}
+      <div className="fixed top-16 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            {/* Botón Volver */}
+            <Link
+              to={`/owners/${ownerId}`}
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors flex-shrink-0"
+              title="Volver al propietario"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
 
-            {/* Botón Guardar para desktop */}
-            <div className="hidden sm:block flex-shrink-0">
-              <button
-                type="submit"
-                form="patient-form"
-                disabled={isPending}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50"
-              >
-                {isPending ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            {/* Información del Header */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="p-2 bg-green-100 rounded-xl flex-shrink-0">
+                <PawPrint className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-gray-900">
+                  Nueva Mascota
+                </h1>
+                
+                {/* Información del dueño */}
+                {isLoadingOwner ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Cargando propietario...</span>
+                  </div>
+                ) : owner ? (
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <User className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">
+                      Propietario: <span className="font-medium text-gray-700">{owner.name}</span>
+                    </span>
+                  </div>
                 ) : (
-                  <Save className="w-5 h-5" />
+                  <p className="text-sm text-gray-500">
+                    Registra la información de la mascota
+                  </p>
                 )}
-                {isPending ? "Guardando..." : "Guardar Mascota"}
-              </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-40"></div>
+      <div className="h-28 sm:h-24"></div>
 
-      {/* Formulario */}
-      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <form id="patient-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-              <PatientForm register={register} errors={errors} setValue={setValue} />
+      {/* Contenido Principal */}
+      <div 
+        className={`
+          ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} 
+          transition-all duration-500 px-4 sm:px-6 lg:px-8 pb-8
+        `}
+      >
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              {/* Formulario */}
+              <div className="p-6">
+                <PatientForm 
+                  register={register} 
+                  errors={errors} 
+                  setValue={setValue} 
+                />
+              </div>
 
-              {/* Botones para móvil */}
-              <div className="sm:hidden flex flex-col gap-3 pt-6 mt-6 border-t border-gray-100">
+              {/* Footer con botones */}
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:justify-end">
                 <button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
+                  type="button"
+                  onClick={() => navigate(`/owners/${ownerId}`)}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors"
                 >
-                  {isPending ? (
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Save className="w-5 h-5" />
-                  )}
-                  {isPending ? "Guardando..." : "Guardar Mascota"}
+                  Cancelar
                 </button>
                 
                 <button
-                  type="button"
-                  onClick={() => navigate(`/owners/${ownerId}`)}
-                  className="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancelar
-                </button>
-              </div>
-
-              {/* Botón Cancelar para desktop */}
-              <div className="hidden sm:flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/owners/${ownerId}`)}
-                  className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-                >
-                  Cancelar
+                  {isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      <span>Guardar Mascota</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

@@ -294,7 +294,7 @@ export default function OwnerListView() {
           </p>
           {!searchTerm && (
             <Link
-              to="/owners/create"
+              to="/owners/new"
               className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
             >
               <Plus className="w-4 h-4" />
