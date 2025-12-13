@@ -506,7 +506,7 @@ export default function PatientLayout() {
                     {menuItems.map((item) => {
                       const Icon = item.icon;
                       const basePath = `/patients/${patientId}`;
-                      const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
+                      // const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
                       const isActive = item.path
                         ? location.pathname.includes(item.path)
                         : location.pathname === basePath;
