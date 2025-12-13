@@ -45,6 +45,7 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -55,19 +56,23 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
     refetchInterval: 30000,
   });
 
-  const { mutate: processPayment } = useMutation({
-    mutationFn: async (paymentData: {
-      invoiceId: string;
-      paymentMethodId: string;
-      reference?: string;
-      amountPaidUSD: number;
-      amountPaidBs: number;
-      exchangeRate: number;
+  const { mutate: processPayment} = useMutation({
+    mutationFn: async ({
+      invoice,
+      paymentData,
+    }: {
+      invoice: Invoice;
+      paymentData: {
+        paymentMethodId: string;
+        reference?: string;
+        amountPaidUSD: number;
+        amountPaidBs: number;
+        exchangeRate: number;
+      };
     }) => {
-      const invoice = selectedInvoice;
-      if (!invoice) throw new Error("No hay factura seleccionada");
+      if (!invoice._id) throw new Error("ID de factura no válido");
 
-      return updateInvoice(paymentData.invoiceId, {
+      return updateInvoice(invoice._id, {
         paymentMethod: paymentData.paymentMethodId,
         paymentReference: paymentData.reference,
         amountPaidUSD: (invoice.amountPaidUSD || 0) + paymentData.amountPaidUSD,
@@ -78,7 +83,9 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
     onSuccess: () => {
       toast.success("Pago procesado con éxito");
       queryClient.invalidateQueries({ queryKey: ["patientDebt", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setSelectedInvoice(null);
+      setIsPaymentModalOpen(false);
     },
     onError: (error: Error) => {
       toast.error(error.message || "Error al procesar el pago");
@@ -105,6 +112,12 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
   const handleInvoiceClick = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowDropdown(false);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    setSelectedInvoice(null);
   };
 
   const handlePaymentConfirm = (paymentData: {
@@ -115,11 +128,20 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
     exchangeRate: number;
     isPartial: boolean;
   }) => {
-    if (!selectedInvoice?._id) return;
+    if (!selectedInvoice) {
+      toast.error("No hay factura seleccionada");
+      return;
+    }
 
     processPayment({
-      invoiceId: selectedInvoice._id,
-      ...paymentData,
+      invoice: selectedInvoice,
+      paymentData: {
+        paymentMethodId: paymentData.paymentMethodId,
+        reference: paymentData.reference,
+        amountPaidUSD: paymentData.amountPaidUSD,
+        amountPaidBs: paymentData.amountPaidBs,
+        exchangeRate: paymentData.exchangeRate,
+      },
     });
   };
 
@@ -277,23 +299,21 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
       </div>
 
       {/* Modal de Pago usando Portal */}
-      {selectedInvoice && (
-        <Portal>
-          <PaymentModal
-            isOpen={!!selectedInvoice}
-            onClose={() => setSelectedInvoice(null)}
-            onConfirm={handlePaymentConfirm}
-            amountUSD={getInvoiceRemainingAmount(selectedInvoice)}
-            items={selectedInvoice.items.map(item => ({
-              id: item.resourceId.toString(),
-              description: item.description,
-            }))}
-            title="Procesar Pago"
-            subtitle={`Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}`}
-            allowPartial={true}
-          />
-        </Portal>
-      )}
+      <Portal>
+        <PaymentModal
+          isOpen={isPaymentModalOpen && !!selectedInvoice}
+          onClose={handleClosePaymentModal}
+          onConfirm={handlePaymentConfirm}
+          amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
+          items={selectedInvoice?.items.map(item => ({
+            id: item.resourceId.toString(),
+            description: item.description,
+          })) || []}
+          title="Procesar Pago"
+          subtitle={selectedInvoice ? `Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}` : ""}
+          allowPartial={true}
+        />
+      </Portal>
     </>
   );
 }
