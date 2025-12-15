@@ -19,7 +19,7 @@ export const consultationSchema = z.object({
   appetite: z.enum(["Normal", "Mucho", "Poco", "Nada"]),
   vomiting: z.string().optional(),
   bowelMovementFrequency: z.string().optional(),
-  stoolConsistency: z.enum(["dura", "pastosa", "líquida"]).optional(),
+  stoolConsistency: z.enum(["normal", "dura", "pastosa", "líquida"]).optional(), // ✅ Agregado 'normal'
   bloodOrParasitesInStool: z.string().optional(),
   normalUrination: z.string().optional(),
   urineFrequencyAndAmount: z.string().optional(),
@@ -108,7 +108,7 @@ export type ConsultationFormData = {
   appetite: "Normal" | "Mucho" | "Poco" | "Nada" | "";
   vomiting?: string;
   bowelMovementFrequency?: string;
-  stoolConsistency?: "normal" |"dura" | "pastosa" | "líquida" | "";
+  stoolConsistency?: "normal" | "dura" | "pastosa" | "líquida" | ""; 
   bloodOrParasitesInStool?: string;
   normalUrination?: string;
   urineFrequencyAndAmount?: string;

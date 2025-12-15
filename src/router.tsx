@@ -61,9 +61,8 @@ import ConsultationListView from "./view/consultations/ConsultationListView";
 import CreateConsultationView from "./view/consultations/CreateConsultationView";
 import EditOwnerView from "./view/owner/EditOwnerView";
 
-// 👇 NUEVO: STAFF
-// import CreateStaffView from "./view/settings/CreateStaffView";
-// import EditStaffView from "./view/settings/EditStaffView"; // Lo agregaremos después
+// Invoices / Reportes
+import InvoiceReportView from "./view/invoices/InvoiceReportView";
 
 export default function Router() {
   return (
@@ -109,36 +108,36 @@ export default function Router() {
               <Route path="edit" element={<EditPatientView />} />
 
               <Route path="studies">
-  <Route index element={<MedicalStudyListView />} />
-  <Route path="create" element={<CreateMedicalStudyView />} />
-</Route>
+                <Route index element={<MedicalStudyListView />} />
+                <Route path="create" element={<CreateMedicalStudyView />} />
+              </Route>
 
-<Route path="vaccinations">
-  <Route index element={<VaccinationListView />} />
-  <Route path="create" element={<CreateVaccinationView />} />
-</Route>
+              <Route path="vaccinations">
+                <Route index element={<VaccinationListView />} />
+                <Route path="create" element={<CreateVaccinationView />} />
+              </Route>
 
-<Route path="dewormings">
-  <Route index element={<DewormingListView />} />
-  <Route path="create" element={<CreateDewormingView />} />
-</Route>
-              
+              <Route path="dewormings">
+                <Route index element={<DewormingListView />} />
+                <Route path="create" element={<CreateDewormingView />} />
+              </Route>
 
-   <Route path="consultations">
-  <Route index element={<ConsultationListView />} />
-  <Route path="create" element={<CreateConsultationView />} />
-</Route>           
+              <Route path="consultations">
+                <Route index element={<ConsultationListView />} />
+                <Route path="create" element={<CreateConsultationView />} />
+              </Route>
+
               {/* Citas */}
               <Route path="appointments/create" element={<CreateAppointmentView />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailsView />} />
               <Route path="appointments/:appointmentId/edit" element={<EditAppointmentView />} />
-            
+
               {/* Exámenes (opcional: desde paciente) */}
               <Route path="lab-exams">
-  <Route index element={<PatientLabExamListView />} />
-  <Route path="create" element={<CreateLabExamView />} />
-  <Route path=":labExamId" element={<LabExamDetailView />} />
-</Route>
+                <Route index element={<PatientLabExamListView />} />
+                <Route path="create" element={<CreateLabExamView />} />
+                <Route path=":labExamId" element={<LabExamDetailView />} />
+              </Route>
 
               {/* Peluquería */}
               <Route path="grooming-services">
@@ -159,13 +158,18 @@ export default function Router() {
           <Route path="/grooming/report" element={<GroomingReportView />} />
 
           {/* ==================== */}
+          {/* REPORTES DE FACTURACIÓN */}
+          {/* ==================== */}
+          <Route path="/invoices/report" element={<InvoiceReportView />} />
+
+          {/* ==================== */}
           {/* RUTAS DE PAYMENT */}
           {/* ==================== */}
           <Route path="/payment-methods" element={<PaymentMethodsView />} />
           <Route path="/payment-methods/new" element={<CreatePaymentMethodView />} />
 
           {/* ==================== */}
-          {/* 👇 NUEVO: RUTAS DE STAFF */}
+          {/* RUTAS DE STAFF */}
           {/* ==================== */}
           <Route path="/staff">
             <Route index element={<StaffListView />} />

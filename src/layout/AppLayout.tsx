@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Users,
   Lock,
+  FileText,
 } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
@@ -42,13 +43,20 @@ const menuItems: MenuItem[] = [
   { to: "/patients", label: "Mascota", icon: PawPrint },
   { to: "/lab-exams", label: "Crear Hemograma", icon: Activity },
   { to: "/grooming-services", label: "Peluquería", icon: Scissors },
-  { to: "/grooming/report", label: "Reportes", icon: BarChart3 },
+  {
+    label: "Reportes",
+    icon: BarChart3,
+    subItems: [
+      { to: "/grooming/report", label: "Peluquería", icon: Scissors },
+      { to: "/invoices/report", label: "Facturación", icon: FileText },
+    ],
+  },
   {
     label: "Configuraciones",
     icon: Settings,
     subItems: [
       { to: "/payment-methods", label: "Métodos de Pago", icon: CreditCard },
-      { to: "/staff", label: "Staff", icon: Users, badge: "Próximamente" },
+      { to: "/staff", label: "Staff", icon: Users },
     ],
   },
 ];
@@ -60,19 +68,9 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const [selectedTitle, setSelectedTitle] = useState<string>(() => {
-    const saved = localStorage.getItem("user_title");
-    return saved === "Dr." || saved === "Dra." ? saved : "Dr.";
-  });
-
   useEffect(() => {
     setActiveItem(location.pathname);
   }, [location.pathname]);
-
-  const handleTitleChange = (newTitle: "Dr." | "Dra.") => {
-    setSelectedTitle(newTitle);
-    localStorage.setItem("user_title", newTitle);
-  };
 
   const logout = () => {
     localStorage.removeItem("AUTH_TOKEN_LABVET");
@@ -99,8 +97,8 @@ const AppLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-vet-gradient text-vet-text overflow-hidden relative">
-      <HeaderDesktop selectedTitle={selectedTitle} onTitleChange={handleTitleChange} />
-      <HeaderMobile selectedTitle={selectedTitle} onTitleChange={handleTitleChange} />
+      <HeaderDesktop />
+      <HeaderMobile />
       <Footer logout={logout} />
 
       <SidebarDesktop activeItem={activeItem} setActiveItem={setActiveItem} />
@@ -112,13 +110,13 @@ const AppLayout: React.FC = () => {
   );
 };
 
-const HeaderDesktop: React.FC<{
-  selectedTitle: string;
-  onTitleChange: (title: "Dr." | "Dra.") => void;
-}> = ({ selectedTitle, onTitleChange }) => {
+// Header Desktop - Simplificado sin Dr./Dra.
+const HeaderDesktop: React.FC = () => {
   const { data } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,6 +127,12 @@ const HeaderDesktop: React.FC<{
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const logout = () => {
+    localStorage.removeItem("AUTH_TOKEN_LABVET");
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+    navigate("/auth/login");
+  };
 
   const displayName = data?.name && data?.lastName
     ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
@@ -149,9 +153,7 @@ const HeaderDesktop: React.FC<{
 
           <div className="flex flex-col items-start">
             <span className="text-xs text-vet-muted font-medium">Bienvenido/a</span>
-            <span className="text-sm font-bold text-vet-text">
-              {selectedTitle} {displayName}
-            </span>
+            <span className="text-sm font-bold text-vet-text">{displayName}</span>
           </div>
 
           <div
@@ -169,45 +171,9 @@ const HeaderDesktop: React.FC<{
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-vet-text truncate">
-                    {selectedTitle} {displayName}
-                  </p>
+                  <p className="text-sm font-bold text-vet-text truncate">{displayName}</p>
                   <p className="text-xs text-vet-muted truncate">{data?.email}</p>
                 </div>
-              </div>
-            </div>
-
-            <div className="px-4 py-3 border-b border-vet-light">
-              <div className="text-xs font-semibold text-vet-muted mb-2 uppercase tracking-wide">
-                Título profesional
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    onTitleChange("Dr.");
-                    setIsOpen(false);
-                  }}
-                  className={`text-sm px-4 py-2 rounded-lg flex-1 font-medium transition-all ${
-                    selectedTitle === "Dr."
-                      ? "bg-vet-primary text-white shadow-soft"
-                      : "bg-vet-light text-vet-text hover:bg-vet-accent/20"
-                  }`}
-                >
-                  Dr.
-                </button>
-                <button
-                  onClick={() => {
-                    onTitleChange("Dra.");
-                    setIsOpen(false);
-                  }}
-                  className={`text-sm px-4 py-2 rounded-lg flex-1 font-medium transition-all ${
-                    selectedTitle === "Dra."
-                      ? "bg-vet-primary text-white shadow-soft"
-                      : "bg-vet-light text-vet-text hover:bg-vet-accent/20"
-                  }`}
-                >
-                  Dra.
-                </button>
               </div>
             </div>
 
@@ -220,6 +186,19 @@ const HeaderDesktop: React.FC<{
               </div>
               <span className="text-sm font-medium">Mi Perfil</span>
             </button>
+
+            <button
+              onClick={() => {
+                logout();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-left border-t border-vet-light"
+            >
+              <div className="p-2 bg-red-50 rounded-lg">
+                <LogOut className="w-4 h-4 text-red-500" />
+              </div>
+              <span className="text-sm font-medium text-red-600">Cerrar Sesión</span>
+            </button>
           </div>
         )}
       </div>
@@ -227,7 +206,7 @@ const HeaderDesktop: React.FC<{
   );
 };
 
-//  Sidebar Desktop 
+// Sidebar Desktop
 const SidebarDesktop: React.FC<{
   activeItem: string;
   setActiveItem: (to: string) => void;
@@ -245,7 +224,7 @@ const SidebarDesktop: React.FC<{
         }
       }
     });
-  }, [activeItem, expandedMenus]);
+  }, [activeItem]);
 
   const toggleSubmenu = (label: string) => {
     setExpandedMenus((prev) =>
@@ -396,11 +375,8 @@ const SidebarDesktop: React.FC<{
   );
 };
 
-//  Header Mobile 
-const HeaderMobile: React.FC<{
-  selectedTitle: string;
-  onTitleChange: (title: "Dr." | "Dra.") => void;
-}> = ({ selectedTitle, onTitleChange }) => {
+// Header Mobile - Simplificado sin Dr./Dra.
+const HeaderMobile: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const queryClient = useQueryClient();
@@ -419,6 +395,12 @@ const HeaderMobile: React.FC<{
     queryClient.invalidateQueries({ queryKey: ["user"] });
     navigate("/auth/login");
   };
+
+  const displayName = data?.name && data?.lastName
+    ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
+    : data?.name
+    ? data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()
+    : "Usuario";
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-vet-primary to-vet-secondary shadow-soft">
@@ -452,49 +434,68 @@ const HeaderMobile: React.FC<{
                       <User className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-vet-text truncate">
-                        {data?.name && data?.lastName
-                          ? `${selectedTitle} ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
-                          : data?.name
-                          ? `${selectedTitle} ${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()}`
-                          : `${selectedTitle} Usuario`}
-                      </p>
+                      <p className="text-sm font-bold text-vet-text truncate">{displayName}</p>
                       <p className="text-xs text-vet-muted truncate">{data?.email}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="px-4 py-3 border-b border-vet-light">
-                  <div className="text-xs font-semibold text-vet-muted mb-2 uppercase tracking-wide">
-                    Título profesional
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        onTitleChange("Dr.");
-                        setShowDropdown(false);
-                      }}
-                      className={`text-sm px-4 py-2 rounded-lg flex-1 font-medium transition-all ${
-                        selectedTitle === "Dr."
-                          ? "bg-vet-primary text-white shadow-soft"
-                          : "bg-vet-light text-vet-text"
+                {/* Reportes Submenu */}
+                <div className="border-b border-vet-light">
+                  <button
+                    onClick={() => toggleSubmenu("reportes")}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-vet-light rounded-lg">
+                      <BarChart3 className="w-4 h-4 text-vet-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-vet-text flex-1">Reportes</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-vet-muted transition-transform duration-300 ${
+                        expandedMenus.includes("reportes") ? "rotate-180" : ""
                       }`}
-                    >
-                      Dr.
-                    </button>
-                    <button
-                      onClick={() => {
-                        onTitleChange("Dra.");
-                        setShowDropdown(false);
-                      }}
-                      className={`text-sm px-4 py-2 rounded-lg flex-1 font-medium transition-all ${
-                        selectedTitle === "Dra."
-                          ? "bg-vet-primary text-white shadow-soft"
-                          : "bg-vet-light text-vet-text"
-                      }`}
-                    >
-                      Dra.
-                    </button>
+                    />
+                  </button>
+
+                  <div
+                    className={`
+                      overflow-hidden transition-all duration-300 ease-in-out bg-vet-light/30
+                      ${expandedMenus.includes("reportes") ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
+                    `}
+                  >
+                    <div className="py-2 px-2 space-y-1">
+                      <Link
+                        to="/grooming/report"
+                        onClick={() => setShowDropdown(false)}
+                        className={`
+                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
+                          ${
+                            location.pathname === "/grooming/report"
+                              ? "bg-vet-primary text-white"
+                              : "text-vet-text hover:bg-vet-light"
+                          }
+                        `}
+                      >
+                        <Scissors className="w-4 h-4" />
+                        <span className="text-sm">Peluquería</span>
+                      </Link>
+
+                      <Link
+                        to="/invoices/report"
+                        onClick={() => setShowDropdown(false)}
+                        className={`
+                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
+                          ${
+                            location.pathname === "/invoices/report"
+                              ? "bg-vet-primary text-white"
+                              : "text-vet-text hover:bg-vet-light"
+                          }
+                        `}
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span className="text-sm">Facturación</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
 
@@ -538,14 +539,21 @@ const HeaderMobile: React.FC<{
                         <span className="text-sm">Métodos de Pago</span>
                       </Link>
 
-                      <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-vet-muted/60 cursor-not-allowed">
+                      <Link
+                        to="/staff"
+                        onClick={() => setShowDropdown(false)}
+                        className={`
+                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
+                          ${
+                            location.pathname === "/staff"
+                              ? "bg-vet-primary text-white"
+                              : "text-vet-text hover:bg-vet-light"
+                          }
+                        `}
+                      >
                         <Users className="w-4 h-4" />
-                        <span className="text-sm flex-1">Staff</span>
-                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-vet-muted/20 text-vet-muted rounded-full flex items-center gap-1">
-                          <Lock className="w-2.5 h-2.5" />
-                          Próximamente
-                        </span>
-                      </div>
+                        <span className="text-sm">Staff</span>
+                      </Link>
                     </div>
                   </div>
                 </div>

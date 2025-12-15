@@ -1,4 +1,4 @@
-// src/views/owners/OwnerDetailView.tsx
+// src/views/owner/OwnerDetailView.tsx
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
@@ -71,6 +71,7 @@ export default function OwnerDetailView() {
       updateInvoice(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", { ownerId }] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] }); // Para el reporte
     },
     onError: (error: Error) => {
       toast.error(error.message || "Error al procesar el pago");
@@ -80,27 +81,34 @@ export default function OwnerDetailView() {
   const allInvoices = invoicesData?.invoices || [];
   const invoices = allInvoices.filter((inv) => getOwnerId(inv) === ownerId);
 
+  // ✅ CORREGIDO: Enviar los campos correctos al backend
   const handlePayInvoice = async (invoiceId: string, paymentData: PaymentData) => {
     const invoice = invoices.find((inv) => inv._id === invoiceId);
     if (!invoice) return;
 
-    const currentPaid = invoice.amountPaid || 0;
-    const paymentAmount =
-      paymentData.amountPaidUSD > 0
-        ? paymentData.amountPaidUSD
-        : paymentData.amountPaidBs / paymentData.exchangeRate;
+    // Acumular los pagos existentes
+    const currentPaidUSD = invoice.amountPaidUSD || 0;
+    const currentPaidBs = invoice.amountPaidBs || 0;
 
-    const newAmountPaid = currentPaid + paymentAmount;
-    const isPaidInFull = newAmountPaid >= invoice.total;
+    // Sumar el nuevo pago
+    const newAmountPaidUSD = currentPaidUSD + paymentData.amountPaidUSD;
+    const newAmountPaidBs = currentPaidBs + paymentData.amountPaidBs;
+
+    // Calcular si está pagado completamente
+    // El total siempre está en la moneda de la factura
+    const exchangeRate = paymentData.exchangeRate || invoice.exchangeRate || 1;
+    const totalPaidInUSD = newAmountPaidUSD + (newAmountPaidBs / exchangeRate);
+    const isPaidInFull = totalPaidInUSD >= invoice.total;
 
     try {
       await payInvoiceMutation({
         id: invoiceId,
         data: {
-          amountPaid: newAmountPaid,
-          paymentMethod: paymentData.paymentMethodId,
+          amountPaidUSD: newAmountPaidUSD,
+          amountPaidBs: newAmountPaidBs,
+          exchangeRate: exchangeRate,
+          paymentMethod: paymentData.paymentMethodId, // ✅ Ahora se envía
           paymentReference: paymentData.reference,
-          exchangeRate: paymentData.exchangeRate,
           paymentStatus: isPaidInFull ? "Pagado" : "Parcial",
         },
       });
@@ -112,20 +120,43 @@ export default function OwnerDetailView() {
     }
   };
 
+  // ✅ CORREGIDO: handlePayAll también
   const handlePayAll = async (invoiceIds: string[], paymentData: PaymentData) => {
     try {
       let successCount = 0;
+      const exchangeRate = paymentData.exchangeRate || 1;
 
       for (const id of invoiceIds) {
         const invoice = invoices.find((inv) => inv._id === id);
         if (invoice) {
+          // Calcular el monto pendiente de esta factura
+          const currentPaidUSD = invoice.amountPaidUSD || 0;
+          const currentPaidBs = invoice.amountPaidBs || 0;
+          const currentPaidTotal = currentPaidUSD + (currentPaidBs / (invoice.exchangeRate || exchangeRate));
+          const pendingAmount = invoice.total - currentPaidTotal;
+
+          if (pendingAmount <= 0) continue; // Ya está pagada
+
+          // Determinar cuánto pagar según la moneda del método
+          let newAmountPaidUSD = currentPaidUSD;
+          let newAmountPaidBs = currentPaidBs;
+
+          if (paymentData.amountPaidBs > 0) {
+            // Pago en Bs: convertir el pendiente a Bs
+            newAmountPaidBs = currentPaidBs + (pendingAmount * exchangeRate);
+          } else {
+            // Pago en USD
+            newAmountPaidUSD = currentPaidUSD + pendingAmount;
+          }
+
           await payInvoiceMutation({
             id,
             data: {
-              amountPaid: invoice.total,
-              paymentMethod: paymentData.paymentMethodId,
+              amountPaidUSD: newAmountPaidUSD,
+              amountPaidBs: newAmountPaidBs,
+              exchangeRate: exchangeRate,
+              paymentMethod: paymentData.paymentMethodId, // ✅ Ahora se envía
               paymentReference: paymentData.reference,
-              exchangeRate: paymentData.exchangeRate,
               paymentStatus: "Pagado",
             },
           });

@@ -63,6 +63,11 @@ export async function getInvoices(params?: {
     const { data } = await api.get<GetInvoicesResponse>("/invoices", {
       params,
     });
+
+     console.log("=== DEBUG INVOICES ===");
+    console.log("Raw data from API:", data);
+    console.log("Invoices count:", data.invoices?.length);
+
     const parsed = invoicesListSchema.safeParse(data.invoices);
     if (!parsed.success) {
       throw new Error("Datos de las facturas inválidos");
