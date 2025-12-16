@@ -1,5 +1,12 @@
 // src/components/consultations/AnamnesisTab.tsx
 import type { ConsultationFormData } from "../../types/consultation";
+import {
+  TextInput,
+  TextArea,
+  SelectInput,
+  RadioGroup,
+  Section,
+} from "./form-fields";
 
 interface AnamnesisTabProps {
   formData: ConsultationFormData;
@@ -12,897 +19,471 @@ export default function AnamnesisTab({
   formData,
   setFormData,
   patientSpecies,
-  patientSex,
 }: AnamnesisTabProps) {
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleBooleanChange = (name: string, value: boolean) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isPerro = patientSpecies?.toLowerCase().includes("perro") || patientSpecies?.toLowerCase().includes("canino");
-  const isGato = patientSpecies?.toLowerCase().includes("gato") || patientSpecies?.toLowerCase().includes("felino");
-  const isHembra = patientSex === "Hembra";
-  const isMacho = patientSex === "Macho";
+  const isPerro =
+    patientSpecies?.toLowerCase().includes("perro") ||
+    patientSpecies?.toLowerCase().includes("canino");
+  const isGato =
+    patientSpecies?.toLowerCase().includes("gato") ||
+    patientSpecies?.toLowerCase().includes("felino");
 
   return (
     <div className="space-y-6">
       {/* MOTIVO DE CONSULTA */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Motivo de consulta
-        </h3>
+      <Section title="Motivo de consulta">
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Qué lo trae hoy a la clínica? *
-            </label>
-            <textarea
-              name="reasonForVisit"
-              value={formData.reasonForVisit}
+          <TextArea
+            label="¿Qué lo trae hoy a la clínica? *"
+            name="reasonForVisit"
+            value={formData.reasonForVisit}
+            onChange={handleChange}
+            placeholder="Describa el motivo de la visita..."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <TextInput
+              label="¿Cuándo comenzaron los síntomas? *"
+              name="symptomOnset"
+              value={formData.symptomOnset}
               onChange={handleChange}
-              rows={2}
-              maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
-              placeholder="Describa el motivo de la visita..."
+              placeholder="Ej: Hace 3 días"
+              maxLength={100}
+            />
+            <SelectInput
+              label="¿Ha empeorado, mejorado o se mantiene estable? *"
+              name="symptomEvolution"
+              value={formData.symptomEvolution}
+              onChange={handleChange}
+              options={[
+                { value: "empeorado", label: "Empeorado" },
+                { value: "mejorado", label: "Mejorado" },
+                { value: "estable", label: "Estable" },
+              ]}
             />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Cuándo comenzaron los síntomas? *
-              </label>
-              <input
-                type="text"
-                name="symptomOnset"
-                value={formData.symptomOnset}
-                onChange={handleChange}
-                maxLength={100}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Ej: Hace 3 días"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Ha empeorado, mejorado o se mantiene estable? *
-              </label>
-              <select
-                name="symptomEvolution"
-                value={formData.symptomEvolution}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
-              >
-                <option value="">Seleccionar</option>
-                <option value="empeorado">Empeorado</option>
-                <option value="mejorado">Mejorado</option>
-                <option value="estable">Estable</option>
-              </select>
-            </div>
-          </div>
         </div>
-      </section>
+      </Section>
 
       {/* DATOS GENERALES */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Datos generales
-        </h3>
+      <Section title="Datos generales">
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Está esterilizado/castrado? *
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="isNeutered"
-                  checked={formData.isNeutered === true}
-                  onChange={() => handleBooleanChange("isNeutered", true)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">Sí</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="isNeutered"
-                  checked={formData.isNeutered === false}
-                  onChange={() => handleBooleanChange("isNeutered", false)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          </div>
-
+          <RadioGroup
+            label="¿Está esterilizado/castrado? *"
+            name="isNeutered"
+            value={formData.isNeutered}
+            onChange={(v) => handleBooleanChange("isNeutered", v)}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Con cuántos animales convive?
-              </label>
-              <input
-                type="text"
-                name="cohabitantAnimals"
-                value={formData.cohabitantAnimals || ""}
-                onChange={handleChange}
-                maxLength={100}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Ej: 2 perros, 1 gato"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Tiene contacto con animales callejeros?
-              </label>
-              <input
-                type="text"
-                name="contactWithStrays"
-                value={formData.contactWithStrays || ""}
-                onChange={handleChange}
-                maxLength={100}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Sí/No, frecuencia..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Tipo de alimentación?
-              </label>
-              <input
-                type="text"
-                name="feeding"
-                value={formData.feeding || ""}
-                onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Marca, tipo, frecuencia..."
-              />
-            </div>
+            <TextInput
+              label="¿Con cuántos animales convive?"
+              name="cohabitantAnimals"
+              value={formData.cohabitantAnimals || ""}
+              onChange={handleChange}
+              placeholder="Ej: 2 perros, 1 gato"
+              maxLength={100}
+            />
+            <TextInput
+              label="¿Tiene contacto con animales callejeros?"
+              name="contactWithStrays"
+              value={formData.contactWithStrays || ""}
+              onChange={handleChange}
+              placeholder="Sí/No, frecuencia..."
+              maxLength={100}
+            />
+            <TextInput
+              label="¿Tipo de alimentación?"
+              name="feeding"
+              value={formData.feeding || ""}
+              onChange={handleChange}
+              placeholder="Marca, tipo, frecuencia..."
+            />
           </div>
         </div>
-      </section>
+      </Section>
 
       {/* SISTEMA DIGESTIVO */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Sistema digestivo
-        </h3>
+      <Section title="Sistema digestivo">
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Cómo está de apetito? *
-              </label>
-              <select
-                name="appetite"
-                value={formData.appetite}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
-              >
-                <option value="">Seleccionar</option>
-                <option value="Normal">Normal</option>
-                <option value="Mucho">Mucho</option>
-                <option value="Poco">Poco</option>
-                <option value="Nada">Nada</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Vómitos? ¿Frecuencia? ¿Contenido?
-              </label>
-              <input
-                type="text"
-                name="vomiting"
-                value={formData.vomiting || ""}
-                onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Alimento, bilis, sangre..."
-              />
-            </div>
+            <SelectInput
+              label="¿Cómo está de apetito? *"
+              name="appetite"
+              value={formData.appetite}
+              onChange={handleChange}
+              options={[
+                { value: "Normal", label: "Normal" },
+                { value: "Mucho", label: "Mucho" },
+                { value: "Poco", label: "Poco" },
+                { value: "Nada", label: "Nada" },
+              ]}
+            />
+            <TextInput
+              label="¿Vómitos? ¿Frecuencia? ¿Contenido?"
+              name="vomiting"
+              value={formData.vomiting || ""}
+              onChange={handleChange}
+              placeholder="Alimento, bilis, sangre..."
+            />
           </div>
-
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">Heces:</label>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Heces:
+            </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Frecuencia</label>
-                <input
-                  type="text"
-                  name="bowelMovementFrequency"
-                  value={formData.bowelMovementFrequency || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Ej: 2 veces al día"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Consistencia</label>
-                <select
-                  name="stoolConsistency"
-                  value={formData.stoolConsistency || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="normal">Normal</option>
-                  <option value="dura">Dura</option>
-                  <option value="pastosa">Pastosa</option>
-                  <option value="líquida">Líquida</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">¿Sangre, Moco o parásitos?</label>
-                <input
-                  type="text"
-                  name="bloodOrParasitesInStool"
-                  value={formData.bloodOrParasitesInStool || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, descripción..."
-                />
-              </div>
+              <TextInput
+                label="Frecuencia"
+                name="bowelMovementFrequency"
+                value={formData.bowelMovementFrequency || ""}
+                onChange={handleChange}
+                placeholder="Ej: 2 veces al día"
+                maxLength={100}
+                sublabel
+              />
+              <SelectInput
+                label="Consistencia"
+                name="stoolConsistency"
+                value={formData.stoolConsistency || ""}
+                onChange={handleChange}
+                options={[
+                  { value: "normal", label: "Normal" },
+                  { value: "dura", label: "Dura" },
+                  { value: "pastosa", label: "Pastosa" },
+                  { value: "líquida", label: "Líquida" },
+                ]}
+                sublabel
+              />
+              <TextInput
+                label="¿Sangre, Moco o parásitos?"
+                name="bloodOrParasitesInStool"
+                value={formData.bloodOrParasitesInStool || ""}
+                onChange={handleChange}
+                placeholder="Sí/No, descripción..."
+                maxLength={100}
+                sublabel
+              />
             </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* SISTEMA URINARIO */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Sistema urinario
-        </h3>
+      <Section title="Sistema urinario">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Orina con normalidad?
-            </label>
-            <input
-              type="text"
-              name="normalUrination"
-              value={formData.normalUrination || ""}
-              onChange={handleChange}
-              maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Sí/No, observaciones..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Frecuencia y cantidad?
-            </label>
-            <input
-              type="text"
-              name="urineFrequencyAndAmount"
-              value={formData.urineFrequencyAndAmount || ""}
-              onChange={handleChange}
-              maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Ej: 3-4 veces, cantidad normal"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Color de la orina?
-            </label>
-            <input
-              type="text"
-              name="urineColor"
-              value={formData.urineColor || ""}
-              onChange={handleChange}
-              maxLength={50}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Normal, rojiza, oscura..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Dolor o dificultad al orinar?
-            </label>
-            <input
-              type="text"
-              name="painOrDifficultyUrinating"
-              value={formData.painOrDifficultyUrinating || ""}
-              onChange={handleChange}
-              maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Sí/No, descripción..."
-            />
-          </div>
+          <TextInput
+            label="¿Orina con normalidad?"
+            name="normalUrination"
+            value={formData.normalUrination || ""}
+            onChange={handleChange}
+            placeholder="Sí/No, observaciones..."
+            maxLength={100}
+          />
+          <TextInput
+            label="¿Frecuencia y cantidad?"
+            name="urineFrequencyAndAmount"
+            value={formData.urineFrequencyAndAmount || ""}
+            onChange={handleChange}
+            placeholder="Ej: 3-4 veces, cantidad normal"
+            maxLength={100}
+          />
+          <TextInput
+            label="¿Color de la orina?"
+            name="urineColor"
+            value={formData.urineColor || ""}
+            onChange={handleChange}
+            placeholder="Normal, rojiza, oscura..."
+            maxLength={50}
+          />
+          <TextInput
+            label="¿Dolor o dificultad al orinar?"
+            name="painOrDifficultyUrinating"
+            value={formData.painOrDifficultyUrinating || ""}
+            onChange={handleChange}
+            placeholder="Sí/No, descripción..."
+            maxLength={100}
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* SISTEMA RESPIRATORIO */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Sistema respiratorio
-        </h3>
+      <Section title="Sistema respiratorio">
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Tos? ¿Severidad y frecuencia? ¿Seca o húmeda?
-              </label>
-              <input
-                type="text"
-                name="cough"
-                value={formData.cough || ""}
-                onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Descripción..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Estornudos? ¿Con secreción?
-              </label>
-              <input
-                type="text"
-                name="sneezing"
-                value={formData.sneezing || ""}
-                onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Clara, purulenta, sanguinolenta..."
-              />
-            </div>
+            <TextInput
+              label="¿Tos? ¿Severidad y frecuencia? ¿Seca o húmeda?"
+              name="cough"
+              value={formData.cough || ""}
+              onChange={handleChange}
+              placeholder="Descripción..."
+            />
+            <TextInput
+              label="¿Estornudos? ¿Con secreción?"
+              name="sneezing"
+              value={formData.sneezing || ""}
+              onChange={handleChange}
+              placeholder="Clara, purulenta, sanguinolenta..."
+            />
           </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Dificultad para respirar? *
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="breathingDifficulty"
-                  checked={formData.breathingDifficulty === true}
-                  onChange={() => handleBooleanChange("breathingDifficulty", true)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">Sí</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="breathingDifficulty"
-                  checked={formData.breathingDifficulty === false}
-                  onChange={() => handleBooleanChange("breathingDifficulty", false)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          </div>
+          <RadioGroup
+            label="¿Dificultad para respirar? *"
+            name="breathingDifficulty"
+            value={formData.breathingDifficulty}
+            onChange={(v) => handleBooleanChange("breathingDifficulty", v)}
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* PIEL Y PELAJE */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Piel y pelaje
-        </h3>
+      <Section title="Piel y pelaje">
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Picazón, rascado excesivo o lamido? *
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="itchingOrExcessiveLicking"
-                  checked={formData.itchingOrExcessiveLicking === true}
-                  onChange={() => handleBooleanChange("itchingOrExcessiveLicking", true)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">Sí</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="itchingOrExcessiveLicking"
-                  checked={formData.itchingOrExcessiveLicking === false}
-                  onChange={() => handleBooleanChange("itchingOrExcessiveLicking", false)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Caída de pelo, caspa o lesiones en la piel?
-            </label>
-            <input
-              type="text"
-              name="hairLossOrSkinLesions"
-              value={formData.hairLossOrSkinLesions || ""}
-              onChange={handleChange}
-              maxLength={200}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Descripción..."
-            />
-          </div>
+          <RadioGroup
+            label="¿Picazón, rascado excesivo o lamido? *"
+            name="itchingOrExcessiveLicking"
+            value={formData.itchingOrExcessiveLicking}
+            onChange={(v) =>
+              handleBooleanChange("itchingOrExcessiveLicking", v)
+            }
+          />
+          <TextInput
+            label="¿Caída de pelo, caspa o lesiones en la piel?"
+            name="hairLossOrSkinLesions"
+            value={formData.hairLossOrSkinLesions || ""}
+            onChange={handleChange}
+            placeholder="Descripción..."
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* OJOS Y OÍDOS */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Ojos y oídos
-        </h3>
+      <Section title="Ojos y oídos">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Secreción ocular?
-            </label>
-            <input
-              type="text"
-              name="eyeDischarge"
-              value={formData.eyeDischarge || ""}
-              onChange={handleChange}
-              maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Clara, purulenta..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Oídos: ¿Sacudidas, olor, secreción, rascado?
-            </label>
-            <input
-              type="text"
-              name="earIssues"
-              value={formData.earIssues || ""}
-              onChange={handleChange}
-              maxLength={200}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Descripción..."
-            />
-          </div>
+          <TextInput
+            label="¿Secreción ocular?"
+            name="eyeDischarge"
+            value={formData.eyeDischarge || ""}
+            onChange={handleChange}
+            placeholder="Clara, purulenta..."
+            maxLength={100}
+          />
+          <TextInput
+            label="Oídos: ¿Sacudidas, olor, secreción, rascado?"
+            name="earIssues"
+            value={formData.earIssues || ""}
+            onChange={handleChange}
+            placeholder="Descripción..."
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* ESTADO GENERAL */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Estado general
-        </h3>
+      <Section title="Estado general">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Ha notado fiebre (nariz seca, orejas calientes)? *
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="feverSigns"
-                  checked={formData.feverSigns === true}
-                  onChange={() => handleBooleanChange("feverSigns", true)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">Sí</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="feverSigns"
-                  checked={formData.feverSigns === false}
-                  onChange={() => handleBooleanChange("feverSigns", false)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Letargo, debilidad o falta de energía? *
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="lethargyOrWeakness"
-                  checked={formData.lethargyOrWeakness === true}
-                  onChange={() => handleBooleanChange("lethargyOrWeakness", true)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">Sí</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="lethargyOrWeakness"
-                  checked={formData.lethargyOrWeakness === false}
-                  onChange={() => handleBooleanChange("lethargyOrWeakness", false)}
-                  className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          </div>
+          <RadioGroup
+            label="¿Ha notado fiebre (nariz seca, orejas calientes)? *"
+            name="feverSigns"
+            value={formData.feverSigns}
+            onChange={(v) => handleBooleanChange("feverSigns", v)}
+          />
+          <RadioGroup
+            label="¿Letargo, debilidad o falta de energía? *"
+            name="lethargyOrWeakness"
+            value={formData.lethargyOrWeakness}
+            onChange={(v) => handleBooleanChange("lethargyOrWeakness", v)}
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* TRATAMIENTO ACTUAL */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Tratamiento actual
-        </h3>
+      <Section title="Tratamiento actual">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Está bajo algún tratamiento?
-            </label>
-            <input
-              type="text"
-              name="currentTreatment"
-              value={formData.currentTreatment || ""}
-              onChange={handleChange}
-              maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Descripción del tratamiento..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Toma medicamentos? (nombre, dosis, frecuencia)
-            </label>
-            <input
-              type="text"
-              name="medications"
-              value={formData.medications || ""}
-              onChange={handleChange}
-              maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              placeholder="Medicamentos actuales..."
-            />
-          </div>
+          <TextInput
+            label="¿Está bajo algún tratamiento?"
+            name="currentTreatment"
+            value={formData.currentTreatment || ""}
+            onChange={handleChange}
+            placeholder="Descripción del tratamiento..."
+            maxLength={300}
+          />
+          <TextInput
+            label="¿Toma medicamentos? (nombre, dosis, frecuencia)"
+            name="medications"
+            value={formData.medications || ""}
+            onChange={handleChange}
+            placeholder="Medicamentos actuales..."
+            maxLength={300}
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
       {/* VACUNAS PERRO */}
-      {/* ===================== */}
       {isPerro && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-            🐕 Vacunas (Perro)
-          </h3>
+        <Section title="🐕 Vacunas (Perro)">
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  ¿Vacuna contra parvovirus?
-                </label>
-                <input
-                  type="text"
-                  name="parvovirusVaccine"
-                  value={formData.parvovirusVaccine || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, observaciones..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  name="parvovirusVaccineDate"
-                  value={formData.parvovirusVaccineDate || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  ¿Quíntuple o séxtuple?
-                </label>
-                <input
-                  type="text"
-                  name="quintupleSextupleVaccine"
-                  value={formData.quintupleSextupleVaccine || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, observaciones..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  name="quintupleSextupleVaccineDate"
-                  value={formData.quintupleSextupleVaccineDate || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  ¿Antirrábica?
-                </label>
-                <input
-                  type="text"
-                  name="rabiesVaccineDogs"
-                  value={formData.rabiesVaccineDogs || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, observaciones..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  name="rabiesVaccineDateDogs"
-                  value={formData.rabiesVaccineDateDogs || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Desparasitación interna y externa? ¿Frecuencia y producto?
-              </label>
-              <input
-                type="text"
-                name="dewormingDogs"
-                value={formData.dewormingDogs || ""}
+              <TextInput
+                label="¿Vacuna contra parvovirus?"
+                name="parvovirusVaccine"
+                value={formData.parvovirusVaccine || ""}
                 onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Producto, frecuencia..."
+                placeholder="Sí/No, observaciones..."
+                maxLength={100}
+              />
+              <TextInput
+                label="Fecha"
+                name="parvovirusVaccineDate"
+                value={formData.parvovirusVaccineDate || ""}
+                onChange={handleChange}
+                type="date"
               />
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <TextInput
+                label="¿Quíntuple o séxtuple?"
+                name="quintupleSextupleVaccine"
+                value={formData.quintupleSextupleVaccine || ""}
+                onChange={handleChange}
+                placeholder="Sí/No, observaciones..."
+                maxLength={100}
+              />
+              <TextInput
+                label="Fecha"
+                name="quintupleSextupleVaccineDate"
+                value={formData.quintupleSextupleVaccineDate || ""}
+                onChange={handleChange}
+                type="date"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <TextInput
+                label="¿Antirrábica?"
+                name="rabiesVaccineDogs"
+                value={formData.rabiesVaccineDogs || ""}
+                onChange={handleChange}
+                placeholder="Sí/No, observaciones..."
+                maxLength={100}
+              />
+              <TextInput
+                label="Fecha"
+                name="rabiesVaccineDateDogs"
+                value={formData.rabiesVaccineDateDogs || ""}
+                onChange={handleChange}
+                type="date"
+              />
+            </div>
+            <TextInput
+              label="¿Desparasitación interna y externa? ¿Frecuencia y producto?"
+              name="dewormingDogs"
+              value={formData.dewormingDogs || ""}
+              onChange={handleChange}
+              placeholder="Producto, frecuencia..."
+            />
           </div>
-        </section>
+        </Section>
       )}
 
-      {/* ===================== */}
       {/* VACUNAS GATO */}
-      {/* ===================== */}
       {isGato && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-            🐱 Vacunas (Gato)
-          </h3>
+        <Section title="🐱 Vacunas (Gato)">
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  ¿Triple felina o quíntuple felina?
-                </label>
-                <input
-                  type="text"
-                  name="tripleQuintupleFelineVaccine"
-                  value={formData.tripleQuintupleFelineVaccine || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, observaciones..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  name="tripleQuintupleFelineVaccineDate"
-                  value={formData.tripleQuintupleFelineVaccineDate || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  ¿Antirrábica?
-                </label>
-                <input
-                  type="text"
-                  name="rabiesVaccineCats"
-                  value={formData.rabiesVaccineCats || ""}
-                  onChange={handleChange}
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                  placeholder="Sí/No, observaciones..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  name="rabiesVaccineDateCats"
-                  value={formData.rabiesVaccineDateCats || ""}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Desparasitación? ¿Frecuencia y producto?
-              </label>
-              <input
-                type="text"
-                name="dewormingCats"
-                value={formData.dewormingCats || ""}
+              <TextInput
+                label="¿Triple felina o quíntuple felina?"
+                name="tripleQuintupleFelineVaccine"
+                value={formData.tripleQuintupleFelineVaccine || ""}
                 onChange={handleChange}
-                maxLength={200}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Producto, frecuencia..."
+                placeholder="Sí/No, observaciones..."
+                maxLength={100}
+              />
+              <TextInput
+                label="Fecha"
+                name="tripleQuintupleFelineVaccineDate"
+                value={formData.tripleQuintupleFelineVaccineDate || ""}
+                onChange={handleChange}
+                type="date"
               />
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <TextInput
+                label="¿Antirrábica?"
+                name="rabiesVaccineCats"
+                value={formData.rabiesVaccineCats || ""}
+                onChange={handleChange}
+                placeholder="Sí/No, observaciones..."
+                maxLength={100}
+              />
+              <TextInput
+                label="Fecha"
+                name="rabiesVaccineDateCats"
+                value={formData.rabiesVaccineDateCats || ""}
+                onChange={handleChange}
+                type="date"
+              />
+            </div>
+            <TextInput
+              label="¿Desparasitación? ¿Frecuencia y producto?"
+              name="dewormingCats"
+              value={formData.dewormingCats || ""}
+              onChange={handleChange}
+              placeholder="Producto, frecuencia..."
+            />
           </div>
-        </section>
+        </Section>
       )}
 
-      {/* ===================== */}
       {/* HISTORIAL MÉDICO */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Historial médico
-        </h3>
+      <Section title="Historial médico">
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Enfermedades previas?
-              </label>
-              <input
-                type="text"
-                name="previousIllnesses"
-                value={formData.previousIllnesses || ""}
-                onChange={handleChange}
-                maxLength={300}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Alergias, diabetes, epilepsia..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Cirugías anteriores?
-              </label>
-              <input
-                type="text"
-                name="previousSurgeries"
-                value={formData.previousSurgeries || ""}
-                onChange={handleChange}
-                maxLength={300}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Descripción..."
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              ¿Reacciones adversas a medicamentos o vacunas?
-            </label>
-            <input
-              type="text"
-              name="adverseReactions"
-              value={formData.adverseReactions || ""}
+            <TextInput
+              label="¿Enfermedades previas?"
+              name="previousIllnesses"
+              value={formData.previousIllnesses || ""}
               onChange={handleChange}
+              placeholder="Alergias, diabetes, epilepsia..."
               maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            />
+            <TextInput
+              label="¿Cirugías anteriores?"
+              name="previousSurgeries"
+              value={formData.previousSurgeries || ""}
+              onChange={handleChange}
               placeholder="Descripción..."
+              maxLength={300}
             />
           </div>
+          <TextInput
+            label="¿Reacciones adversas a medicamentos o vacunas?"
+            name="adverseReactions"
+            value={formData.adverseReactions || ""}
+            onChange={handleChange}
+            placeholder="Descripción..."
+            maxLength={300}
+          />
         </div>
-      </section>
+      </Section>
 
-      {/* ===================== */}
-      {/* REPRODUCTIVO */}
-      {/* ===================== */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-          Historial reproductivo
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {isHembra && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Último celo? ¿Último parto?
-              </label>
-              <input
-                type="text"
-                name="lastHeatOrBirth"
-                value={formData.lastHeatOrBirth || ""}
-                onChange={handleChange}
-                maxLength={100}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Fechas aproximadas..."
-              />
-            </div>
-          )}
-
-          {isMacho && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                ¿Monta?
-              </label>
-              <input
-                type="text"
-                name="mounts"
-                value={formData.mounts || ""}
-                onChange={handleChange}
-                maxLength={100}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-                placeholder="Sí/No, frecuencia..."
-              />
-            </div>
-          )}
-        </div>
-      </section>
+      {/* OBSERVACIONES */}
+      <Section>
+        <TextArea
+          label="Observaciones"
+          name="lastHeatOrBirth"
+          value={formData.lastHeatOrBirth || ""}
+          onChange={handleChange}
+          placeholder="Información general"
+          rows={3}
+        />
+      </Section>
     </div>
   );
 }

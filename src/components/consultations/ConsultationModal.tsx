@@ -310,6 +310,16 @@ export default function ConsultationModal({
               />
             </Section>
           )}
+
+          {/* Observaciones */}
+{consultation.lastHeatOrBirth && (
+  <Section title="Observaciones">
+    <TextField
+      label="Observaciones generales"
+      value={consultation.lastHeatOrBirth}
+    />
+  </Section>
+)}
         </div>
 
         {/* Footer */}
