@@ -15,6 +15,7 @@ import {
   Users,
   Lock,
   FileText,
+  Calendar,
 } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
@@ -41,6 +42,7 @@ const menuItems: MenuItem[] = [
   { to: "/", label: "Inicio", icon: HomeIcon },
   { to: "/owners", label: "Dueño", icon: User },
   { to: "/patients", label: "Mascota", icon: PawPrint },
+  { to: "/appointments", label: "Citas", icon: Calendar }, 
   { to: "/lab-exams", label: "Crear Hemograma", icon: Activity },
   { to: "/grooming-services", label: "Peluquería", icon: Scissors },
   {

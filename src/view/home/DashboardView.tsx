@@ -4,8 +4,17 @@ import { Stethoscope, PawPrint } from "lucide-react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useDashboardData } from "../../hooks/useDashboardData";
-import { AgendaSection, AlertsSection, DashboardHeader, DashboardLoading, MetricsGrid, PieChartCard, RevenueChart } from "../../components/dashboard";
-
+import { 
+  AgendaSection, 
+  AlertsSection, 
+  DashboardHeader, 
+  DashboardLoading, 
+  MetricsGrid, 
+  PieChartCard, 
+  RevenueChart 
+} from "../../components/dashboard";
+import { ConsultationsSection } from "../../components/dashboard/ConsultationsSection";
+import { GroomingSection } from "../../components/dashboard/GroomingSection";
 
 export default function DashboardView() {
   const { data: authData } = useAuth();
@@ -29,7 +38,7 @@ export default function DashboardView() {
       {/* Header */}
       <DashboardHeader userName={displayName} />
 
-      {/* Métricas */}
+      {/* Métricas Financieras (solo 3 cards) */}
       <MetricsGrid
         todayAppointments={dashboard.todayAppointments.length}
         todayConsultations={dashboard.todayConsultations.length}
@@ -42,16 +51,24 @@ export default function DashboardView() {
         monthRevenue={dashboard.monthRevenue}
       />
 
-      {/* Agenda y Alertas */}
+      {/* Citas y Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AgendaSection
           appointments={dashboard.todayAppointments}
-          groomingServices={dashboard.todayGrooming}
-          consultations={dashboard.todayConsultations}
         />
         <AlertsSection
           vaccinations={dashboard.upcomingVaccinations}
           dewormings={dashboard.upcomingDewormings}
+        />
+      </div>
+
+      {/* Consultas y Peluquería */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ConsultationsSection
+          consultations={dashboard.todayConsultations}
+        />
+        <GroomingSection
+          groomingServices={dashboard.todayGrooming}
         />
       </div>
 

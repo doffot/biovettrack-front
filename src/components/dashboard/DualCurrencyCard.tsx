@@ -27,23 +27,23 @@ export function DualCurrencyCard({
     })}`;
 
   return (
-    <div className={`${bgColor} rounded-2xl p-4 border border-gray-100`}>
+    <div className={`${bgColor} rounded-xl p-3 border border-vet-light shadow-soft hover:shadow-card transition-all duration-200 animate-scale-in group`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          <p className="text-[10px] font-semibold text-vet-muted uppercase tracking-wide">
             {title}
           </p>
 
           {/* USD */}
-          <p className={`text-xl font-bold ${color} mt-1`}>{formatUSD(amounts.USD)}</p>
+          <p className={`text-lg font-bold ${color} mt-0.5`}>{formatUSD(amounts.USD)}</p>
 
           {/* Bolívares */}
-          <p className="text-sm font-semibold text-gray-600">{formatBs(amounts.Bs)}</p>
+          <p className="text-xs font-semibold text-vet-muted">{formatBs(amounts.Bs)}</p>
 
-          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-[10px] text-vet-muted mt-0.5">{subtitle}</p>}
         </div>
-        <div className={`p-3 rounded-xl ${bgColor}`}>
-          <Icon className={`w-6 h-6 ${color}`} />
+        <div className={`p-2 rounded-lg bg-white/50 group-hover:bg-white/70 transition-colors`}>
+          <Icon className={`w-5 h-5 ${color}`} />
         </div>
       </div>
     </div>

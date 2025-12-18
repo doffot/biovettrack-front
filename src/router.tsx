@@ -1,4 +1,5 @@
 // src/router/Router.tsx
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import AuthLayout from "./layout/AuthLayout";
@@ -63,6 +64,8 @@ import EditOwnerView from "./view/owner/EditOwnerView";
 
 // Invoices / Reportes
 import InvoiceReportView from "./view/invoices/InvoiceReportView";
+import AppointmentsView from "./view/appointment/AppointmentsView";
+import SelectPatientForAppointment from "./components/appointments/SelectPatientForAppointment";
 
 export default function Router() {
   return (
@@ -81,6 +84,14 @@ export default function Router() {
         {/* Rutas Protegidas (App) */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomeView />} index />
+
+          {/* ==================== */}
+          {/* CITAS (RUTA GLOBAL) ✅ NUEVO */}
+          {/* ==================== */}
+          <Route path="/appointments">
+            <Route index element={<AppointmentsView />} />
+            <Route path="select-patient" element={<SelectPatientForAppointment />} />
+          </Route>
 
           {/* EXÁMENES DE LABORATORIO (RUTA INDEPENDIENTE) */}
           <Route path="/lab-exams">
@@ -127,7 +138,7 @@ export default function Router() {
                 <Route path="create" element={<CreateConsultationView />} />
               </Route>
 
-              {/* Citas */}
+              {/* Citas dentro del paciente */}
               <Route path="appointments/create" element={<CreateAppointmentView />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailsView />} />
               <Route path="appointments/:appointmentId/edit" element={<EditAppointmentView />} />

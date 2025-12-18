@@ -42,7 +42,6 @@ export const getDaysAgoString = (days: number): string => {
   return `${year}-${month}-${day}`;
 };
 
-
 //  Obtiene una fecha N días en el futuro en formato YYYY-MM-DD
 export const getDaysFromNowString = (days: number): string => {
   const date = new Date();
@@ -64,7 +63,7 @@ export const getDaysLeft = (targetDate: Date | string): number => {
   return Math.ceil((targetDateObj.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
 };
 
-//  Formatea hora de una fecha
+//  Formatea hora de una fecha (ej: "14:30")
 export const formatTime = (date: Date | string): string => {
   return new Date(date).toLocaleTimeString("es-ES", {
     hour: "2-digit",
@@ -72,8 +71,7 @@ export const formatTime = (date: Date | string): string => {
   });
 };
 
-//  Formatea fecha larga
- 
+//  Formatea fecha larga (ej: "lunes, 15 de enero de 2025")
 export const formatLongDate = (date: Date): string => {
   return date.toLocaleDateString("es-ES", {
     weekday: "long",
@@ -83,22 +81,34 @@ export const formatLongDate = (date: Date): string => {
   });
 };
 
-//  Formatea día corto
-
+//  Formatea día corto (ej: "lun", "mar")
 export const formatShortDay = (date: Date): string => {
   return date.toLocaleDateString("es-ES", { weekday: "short" });
 };
 
+//  Formatea fecha corta (ej: "15 ene" o "15 de enero")
+export const formatShortDate = (date: Date): string => {
+  return date.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+  });
+};
 
-  // Formatea moneda USD
- 
+//  Formatea fecha numérica (ej: "15/01/2025")
+export const formatNumericDate = (date: Date): string => {
+  return date.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+//  Formatea moneda USD
 export const formatUSD = (amount: number): string => {
   return `$${amount.toFixed(2)}`;
 };
 
-
-  // Formatea moneda Bolívares
-
+//  Formatea moneda Bolívares
 export const formatBs = (amount: number): string => {
   return `Bs ${amount.toLocaleString("es-VE", {
     minimumFractionDigits: 2,
@@ -107,7 +117,6 @@ export const formatBs = (amount: number): string => {
 };
 
 //  Formatea moneda con símbolo
-
 export const formatCurrency = (amount: number, currency: "USD" | "Bs" = "USD"): string => {
   if (currency === "Bs") {
     return formatBs(amount);

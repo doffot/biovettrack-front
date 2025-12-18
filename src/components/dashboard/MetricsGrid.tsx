@@ -1,18 +1,11 @@
 // src/views/dashboard/components/MetricsGrid.tsx
 import {
-  Calendar,
-  Stethoscope,
-  Scissors,
   DollarSign,
-  PawPrint,
-  Users,
   CreditCard,
   TrendingUp,
 } from "lucide-react";
-import { MetricCard } from "./MetricCard";
 import { DualCurrencyCard } from "./DualCurrencyCard";
 import type { CurrencyAmounts } from "../../constants/dashboardConstants";
-
 
 interface MetricsGridProps {
   todayAppointments: number;
@@ -27,83 +20,35 @@ interface MetricsGridProps {
 }
 
 export function MetricsGrid({
-  todayAppointments,
-  todayConsultations,
-  todayGrooming,
   todayRevenue,
-  totalPatients,
-  totalOwners,
   pendingDebt,
   pendingInvoicesCount,
   monthRevenue,
 }: MetricsGridProps) {
   return (
-    <>
-      {/* Métricas de hoy */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Citas Hoy"
-          value={todayAppointments}
-          icon={Calendar}
-          color="text-blue-600"
-          bgColor="bg-blue-50"
-        />
-        <MetricCard
-          title="Consultas Hoy"
-          value={todayConsultations}
-          icon={Stethoscope}
-          color="text-emerald-600"
-          bgColor="bg-emerald-50"
-        />
-        <MetricCard
-          title="Peluquería Hoy"
-          value={todayGrooming}
-          icon={Scissors}
-          color="text-purple-600"
-          bgColor="bg-purple-50"
-        />
-        <DualCurrencyCard
-          title="Ingresos Hoy"
-          amounts={todayRevenue}
-          icon={DollarSign}
-          color="text-green-600"
-          bgColor="bg-green-50"
-        />
-      </div>
-
-      {/* Resumen general */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Total Pacientes"
-          value={totalPatients}
-          icon={PawPrint}
-          color="text-amber-600"
-          bgColor="bg-amber-50"
-        />
-        <MetricCard
-          title="Total Propietarios"
-          value={totalOwners}
-          icon={Users}
-          color="text-indigo-600"
-          bgColor="bg-indigo-50"
-        />
-        <DualCurrencyCard
-          title="Deuda Pendiente"
-          amounts={pendingDebt}
-          subtitle={`${pendingInvoicesCount} facturas`}
-          icon={CreditCard}
-          color="text-red-600"
-          bgColor="bg-red-50"
-        />
-        <DualCurrencyCard
-          title="Ingresos Mes"
-          amounts={monthRevenue}
-          subtitle="Últimos 30 días"
-          icon={TrendingUp}
-          color="text-teal-600"
-          bgColor="bg-teal-50"
-        />
-      </div>
-    </>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <DualCurrencyCard
+        title="Ingresos Hoy"
+        amounts={todayRevenue}
+        icon={DollarSign}
+        color="text-green-600"
+        bgColor="bg-gradient-to-br from-green-50 to-emerald-50"
+      />
+      <DualCurrencyCard
+        title="Por Cobrar"
+        amounts={pendingDebt}
+        subtitle={`${pendingInvoicesCount} facturas`}
+        icon={CreditCard}
+        color="text-orange-600"
+        bgColor="bg-gradient-to-br from-orange-50 to-amber-50"
+      />
+      <DualCurrencyCard
+        title="Ingresos del Mes"
+        amounts={monthRevenue}
+        icon={TrendingUp}
+        color="text-vet-primary"
+        bgColor="bg-gradient-to-br from-vet-light to-blue-50"
+      />
+    </div>
   );
 }

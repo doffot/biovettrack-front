@@ -1,77 +1,112 @@
 // src/views/dashboard/components/AgendaSection.tsx
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronRight} from "lucide-react";
+import { Link } from "react-router-dom";
 import { AgendaItem } from "./AgendaItem";
-import type { GroomingService } from "../../types";
-import type { Consultation } from "../../types/consultation";
 import { formatTime } from "../../utils/dashboardUtils";
 import type { Appointment } from "../../types/appointment";
 
 interface AgendaSectionProps {
   appointments: Appointment[];
-  groomingServices: GroomingService[];
-  consultations: Consultation[];
 }
 
-export function AgendaSection({
-  appointments,
-  groomingServices,
-  consultations,
-}: AgendaSectionProps) {
-  const totalEvents = appointments.length + groomingServices.length + consultations.length;
-  const isEmpty = totalEvents === 0;
+export function AgendaSection({ appointments }: AgendaSectionProps) {
+  const isEmpty = appointments.length === 0;
+
+  // Obtener información del paciente y dueño
+  const getPatientInfo = (patient: any) => {
+    if (typeof patient === "object" && patient) {
+      const ownerName = typeof patient.owner === "object" 
+        ? patient.owner?.name || "Sin dueño" 
+        : "Sin dueño";
+      return {
+        name: patient.name || "Paciente",
+        photo: patient.photo,
+        owner: ownerName
+      };
+    }
+    return { name: "Paciente", photo: null, owner: "Sin dueño" };
+  };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-vet-primary" />
-          Agenda de Hoy
+    <div className="bg-white rounded-2xl shadow-card border border-vet-light overflow-hidden animate-fade-in-up">
+      <div className="px-4 py-3 bg-gradient-to-r from-vet-light via-white to-vet-light border-b border-gray-100 flex items-center justify-between">
+        <h2 className="font-semibold text-vet-text flex items-center gap-2">
+          <div className="p-1.5 bg-white rounded-lg shadow-soft">
+            <Calendar className="w-4 h-4 text-vet-primary" />
+          </div>
+          Citas de Hoy
         </h2>
-        <span className="text-xs bg-vet-primary/10 text-vet-primary px-2 py-1 rounded-lg font-medium">
-          {totalEvents} eventos
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs bg-white px-2 py-1 rounded-full font-medium text-vet-muted shadow-soft">
+            {appointments.length} {appointments.length === 1 ? 'cita' : 'citas'}
+          </span>
+          <Link
+            to="/appointments"
+            className="text-xs text-vet-primary hover:text-vet-accent font-medium flex items-center gap-0.5 transition-colors group"
+          >
+            Ver todas
+            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
       </div>
       
-      <div className="p-4 space-y-2 max-h-80 overflow-y-auto">
+      <div className="p-4">
         {isEmpty ? (
-          <div className="text-center py-8">
-            <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 text-sm">No hay eventos para hoy</p>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-3 bg-vet-light rounded-full flex items-center justify-center animate-gentle-pulse">
+              <Calendar className="w-8 h-8 text-vet-muted" />
+            </div>
+            <p className="text-vet-text text-sm font-medium">No hay citas programadas</p>
+            <p className="text-vet-muted text-xs mt-1">Agenda libre para hoy</p>
           </div>
         ) : (
-          <>
-            {appointments.map((apt) => (
-              <AgendaItem
-                key={apt._id}
-                time={formatTime(apt.date)}
-                title={
-                  typeof apt.patient === "object"
-                    ? apt.patient?.name || "Paciente"
-                    : "Paciente"
-                }
-                subtitle={apt.reason}
-                type="cita"
-              />
-            ))}
-            {groomingServices.map((svc) => (
-              <AgendaItem
-                key={svc._id}
-                time={formatTime(svc.date)}
-                title={svc.service}
-                subtitle={svc.specifications}
-                type="peluqueria"
-              />
-            ))}
-            {consultations.map((c) => (
-              <AgendaItem
-                key={c._id}
-                time={formatTime(c.consultationDate)}
-                title={c.presumptiveDiagnosis}
-                subtitle={c.reasonForVisit}
-                type="consulta"
-              />
-            ))}
-          </>
+          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
+            {/* Mostrar primeras 3 citas */}
+            {appointments.slice(0, 3).map((apt) => {
+              const patientInfo = getPatientInfo(apt.patient);
+              return (
+                <AgendaItem
+                  key={apt._id}
+                  time={formatTime(apt.date)}
+                  patientName={patientInfo.name}
+                  patientPhoto={patientInfo.photo}
+                  ownerName={patientInfo.owner}
+                  reason={apt.reason}
+                  type="cita"
+                />
+              );
+            })}
+            
+            {/* Mostrar el resto con scroll si hay más de 3 */}
+            {appointments.length > 3 && (
+              <>
+                <div className="relative my-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-vet-light"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-2 text-vet-muted">
+                      {appointments.length - 3} más
+                    </span>
+                  </div>
+                </div>
+                {appointments.slice(3).map((apt) => {
+                  const patientInfo = getPatientInfo(apt.patient);
+                  return (
+                    <AgendaItem
+                      key={apt._id}
+                      time={formatTime(apt.date)}
+                      patientName={patientInfo.name}
+                      patientPhoto={patientInfo.photo}
+                      ownerName={patientInfo.owner}
+                      reason={apt.reason}
+                      type="cita"
+                    />
+                  );
+                })}
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>
