@@ -472,12 +472,12 @@ export default function ShareResultsModal({
     };
   };
 
-  const neutrofilosSegPer = calculatePercentage(cells.segmentedNeutrophils || 0);
-  const neutrofilosBandPer = calculatePercentage(cells.bandNeutrophils || 0);
-  const linfocitosPer = calculatePercentage(cells.lymphocytes || 0);
-  const monocitosPer = calculatePercentage(cells.monocytes || 0);
-  const eosinofilosPer = calculatePercentage(cells.eosinophils || 0);
-  const basofilosPer = calculatePercentage(cells.basophils || 0);
+  // const neutrofilosSegPer = calculatePercentage(cells.segmentedNeutrophils || 0);
+  // const neutrofilosBandPer = calculatePercentage(cells.bandNeutrophils || 0);
+  // const linfocitosPer = calculatePercentage(cells.lymphocytes || 0);
+  // const monocitosPer = calculatePercentage(cells.monocytes || 0);
+  // const eosinofilosPer = calculatePercentage(cells.eosinophils || 0);
+  // const basofilosPer = calculatePercentage(cells.basophils || 0);
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
