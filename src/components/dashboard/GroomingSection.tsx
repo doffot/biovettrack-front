@@ -1,25 +1,120 @@
 // src/views/dashboard/components/GroomingSection.tsx
-import { Scissors, ChevronRight, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Scissors, ChevronRight, User, Phone } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { formatTime } from "../../utils/dashboardUtils";
+import { getOwners } from "../../api/OwnerAPI";
+import { getPatients } from "../../api/patientAPI";
 import type { GroomingService } from "../../types";
+import type { Owner } from "../../types/owner";
+import type { Patient } from "../../types/patient";
+import { useMemo } from "react";
 
 interface GroomingSectionProps {
   groomingServices: GroomingService[];
 }
 
 export function GroomingSection({ groomingServices }: GroomingSectionProps) {
+  const navigate = useNavigate();
   const isEmpty = groomingServices.length === 0;
 
-  const getPatientInfo = (service: GroomingService) => {
-    if (service.patientId && typeof service.patientId === "object") {
-      const patientName = service.patientId.name || "Paciente";
-      const ownerName = typeof service.patientId.owner === "object" 
-        ? service.patientId.owner?.name || "Sin dueño"
-        : "Sin dueño";
-      return { patientName, ownerName };
+  // Obtener owners y pacientes con tipos explícitos
+  const { data: owners = [] } = useQuery<Owner[]>({
+    queryKey: ["owners"],
+    queryFn: getOwners,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: patients = [] } = useQuery<Patient[]>({
+    queryKey: ["patients"],
+    queryFn: getPatients,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Crear mapas con tipos explícitos
+  const ownersMap = useMemo(() => {
+    const map = new Map<string, Owner>();
+    (owners as Owner[]).forEach((owner: Owner) => {
+      map.set(owner._id, owner);
+    });
+    return map;
+  }, [owners]);
+
+  const patientsMap = useMemo(() => {
+    const map = new Map<string, Patient>();
+    (patients as Patient[]).forEach((patient: Patient) => {
+      map.set(patient._id, patient);
+    });
+    return map;
+  }, [patients]);
+
+  const getServiceInfo = (service: GroomingService) => {
+    let patientId = "";
+    let patientName = "Paciente";
+    let ownerName = "Sin dueño";
+    let ownerContact = "";
+
+    // Si patientId es string, buscar en el mapa de pacientes
+    if (typeof service.patientId === "string") {
+      patientId = service.patientId;
+      const patient = patientsMap.get(patientId);
+      
+      if (patient) {
+        patientName = patient.name;
+        
+        // Buscar información del owner
+        if (typeof patient.owner === "string") {
+          const owner = ownersMap.get(patient.owner);
+          if (owner) {
+            ownerName = owner.name;
+            ownerContact = owner.contact || "";
+          }
+        } else if (typeof patient.owner === "object" && patient.owner) {
+          ownerName = patient.owner.name;
+          // Si necesitas el contacto, busca en el mapa
+          const owner = ownersMap.get(patient.owner._id);
+          if (owner) {
+            ownerContact = owner.contact || "";
+          }
+        }
+      }
+    } 
+    // Si patientId es objeto
+    else if (typeof service.patientId === "object" && service.patientId) {
+      patientId = service.patientId._id || "";
+      patientName = service.patientId.name || "Paciente";
+      
+      // Extraer información del owner
+      if (service.patientId.owner) {
+        if (typeof service.patientId.owner === "string") {
+          // Buscar en el mapa de owners
+          const owner = ownersMap.get(service.patientId.owner);
+          if (owner) {
+            ownerName = owner.name;
+            ownerContact = owner.contact || "";
+          }
+        } else if (typeof service.patientId.owner === "object") {
+          ownerName = service.patientId.owner.name || "Sin dueño";
+          // Buscar contacto completo en el mapa
+          const ownerId = service.patientId.owner._id;
+          if (ownerId) {
+            const owner = ownersMap.get(ownerId);
+            if (owner) {
+              ownerContact = owner.contact || "";
+            }
+          }
+        }
+      }
     }
-    return { patientName: "Paciente", ownerName: "Sin dueño" };
+
+    return { patientId, patientName, ownerName, ownerContact };
+  };
+
+  const handleServiceClick = (service: GroomingService) => {
+    const { patientId } = getServiceInfo(service);
+    if (patientId) {
+      navigate(`/patients/${patientId}/grooming-services/${service._id}`);
+    }
   };
 
   return (
@@ -36,7 +131,7 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
             {groomingServices.length} {groomingServices.length === 1 ? 'servicio' : 'servicios'}
           </span>
           <Link
-            to="/grooming"
+            to="/grooming-services"
             className="text-xs text-vet-primary hover:text-vet-accent font-medium flex items-center gap-0.5 transition-colors group"
           >
             Ver todos
@@ -57,17 +152,23 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
         ) : (
           <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
             {groomingServices.slice(0, 3).map((service) => {
-              const { patientName, ownerName } = getPatientInfo(service);
+              const serviceInfo = getServiceInfo(service);
               return (
-                <GroomingItem
+                <div 
                   key={service._id}
-                  time={formatTime(service.date)}
-                  patientName={patientName}
-                  ownerName={ownerName}
-                  service={service.service}
-                  specifications={service.specifications}
-                  status={service.status}
-                />
+                  onClick={() => handleServiceClick(service)}
+                  className="cursor-pointer"
+                >
+                  <GroomingItem
+                    time={formatTime(service.date)}
+                    patientName={serviceInfo.patientName}
+                    ownerName={serviceInfo.ownerName}
+                    ownerContact={serviceInfo.ownerContact}
+                    service={service.service}
+                    specifications={service.specifications}
+                    status={service.status}
+                  />
+                </div>
               );
             })}
             
@@ -84,17 +185,23 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
                   </div>
                 </div>
                 {groomingServices.slice(3).map((service) => {
-                  const { patientName, ownerName } = getPatientInfo(service);
+                  const serviceInfo = getServiceInfo(service);
                   return (
-                    <GroomingItem
+                    <div 
                       key={service._id}
-                      time={formatTime(service.date)}
-                      patientName={patientName}
-                      ownerName={ownerName}
-                      service={service.service}
-                      specifications={service.specifications}
-                      status={service.status}
-                    />
+                      onClick={() => handleServiceClick(service)}
+                      className="cursor-pointer"
+                    >
+                      <GroomingItem
+                        time={formatTime(service.date)}
+                        patientName={serviceInfo.patientName}
+                        ownerName={serviceInfo.ownerName}
+                        ownerContact={serviceInfo.ownerContact}
+                        service={service.service}
+                        specifications={service.specifications}
+                        status={service.status}
+                      />
+                    </div>
                   );
                 })}
               </>
@@ -106,11 +213,12 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
   );
 }
 
-// Componente interno para cada servicio de grooming
+// Componente interno
 function GroomingItem({ 
   time, 
   patientName, 
-  ownerName, 
+  ownerName,
+  ownerContact, 
   service, 
   specifications,
   status 
@@ -118,6 +226,7 @@ function GroomingItem({
   time: string;
   patientName: string;
   ownerName: string;
+  ownerContact: string;
   service: string;
   specifications: string;
   status: string;
@@ -131,22 +240,43 @@ function GroomingItem({
     }
   };
 
+  const formatContact = (contact: string) => {
+    if (!contact) return "";
+    if (contact.length > 11) {
+      return `...${contact.slice(-8)}`;
+    }
+    return contact;
+  };
+
   return (
-    <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-purple-200/50 hover:shadow-md transition-all duration-200 group animate-fadeIn">
+    <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-purple-200/50 hover:shadow-md hover:border-purple-300 transition-all duration-200 group animate-fadeIn">
       <div className="p-2 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
         <Scissors className="w-4 h-4 text-purple-600" />
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="font-semibold text-vet-text text-sm truncate">{patientName}</p>
+          <p className="font-semibold text-vet-text text-sm truncate group-hover:text-vet-primary transition-colors">
+            {patientName}
+          </p>
           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${getStatusColor()}`}>
             {status}
           </span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-vet-muted">
-          <User className="w-3 h-3" />
-          <span className="truncate">{ownerName}</span>
+        <div className="flex items-center gap-2 text-xs text-vet-muted">
+          <div className="flex items-center gap-1">
+            <User className="w-3 h-3" />
+            <span className="truncate">{ownerName}</span>
+          </div>
+          {ownerContact && (
+            <>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-1">
+                <Phone className="w-3 h-3" />
+                <span className="text-[10px]">{formatContact(ownerContact)}</span>
+              </div>
+            </>
+          )}
         </div>
         <p className="text-xs text-purple-600 mt-0.5">{service} - {specifications}</p>
       </div>

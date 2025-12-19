@@ -1,6 +1,6 @@
 // src/views/dashboard/components/AgendaSection.tsx
 import { Calendar, ChevronRight} from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AgendaItem } from "./AgendaItem";
 import { formatTime } from "../../utils/dashboardUtils";
 import type { Appointment } from "../../types/appointment";
@@ -10,6 +10,7 @@ interface AgendaSectionProps {
 }
 
 export function AgendaSection({ appointments }: AgendaSectionProps) {
+  const navigate = useNavigate();
   const isEmpty = appointments.length === 0;
 
   // Obtener información del paciente y dueño
@@ -19,12 +20,20 @@ export function AgendaSection({ appointments }: AgendaSectionProps) {
         ? patient.owner?.name || "Sin dueño" 
         : "Sin dueño";
       return {
+        id: patient._id,
         name: patient.name || "Paciente",
         photo: patient.photo,
         owner: ownerName
       };
     }
-    return { name: "Paciente", photo: null, owner: "Sin dueño" };
+    return { id: null, name: "Paciente", photo: null, owner: "Sin dueño" };
+  };
+
+  const handleAppointmentClick = (appointment: Appointment) => {
+    const patientInfo = getPatientInfo(appointment.patient);
+    if (patientInfo.id) {
+      navigate(`/patients/${patientInfo.id}/appointments/${appointment._id}`);
+    }
   };
 
   return (
@@ -61,23 +70,26 @@ export function AgendaSection({ appointments }: AgendaSectionProps) {
           </div>
         ) : (
           <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
-            {/* Mostrar primeras 3 citas */}
             {appointments.slice(0, 3).map((apt) => {
               const patientInfo = getPatientInfo(apt.patient);
               return (
-                <AgendaItem
-                  key={apt._id}
-                  time={formatTime(apt.date)}
-                  patientName={patientInfo.name}
-                  patientPhoto={patientInfo.photo}
-                  ownerName={patientInfo.owner}
-                  reason={apt.reason}
-                  type="cita"
-                />
+                <div 
+                  key={apt._id} 
+                  onClick={() => handleAppointmentClick(apt)}
+                  className="cursor-pointer group"
+                >
+                  <AgendaItem
+                    time={formatTime(apt.date)}
+                    patientName={patientInfo.name}
+                    patientPhoto={patientInfo.photo}
+                    ownerName={patientInfo.owner}
+                    reason={apt.reason}
+                    type="cita"
+                  />
+                </div>
               );
             })}
             
-            {/* Mostrar el resto con scroll si hay más de 3 */}
             {appointments.length > 3 && (
               <>
                 <div className="relative my-2">
@@ -93,15 +105,20 @@ export function AgendaSection({ appointments }: AgendaSectionProps) {
                 {appointments.slice(3).map((apt) => {
                   const patientInfo = getPatientInfo(apt.patient);
                   return (
-                    <AgendaItem
-                      key={apt._id}
-                      time={formatTime(apt.date)}
-                      patientName={patientInfo.name}
-                      patientPhoto={patientInfo.photo}
-                      ownerName={patientInfo.owner}
-                      reason={apt.reason}
-                      type="cita"
-                    />
+                    <div 
+                      key={apt._id} 
+                      onClick={() => handleAppointmentClick(apt)}
+                      className="cursor-pointer group"
+                    >
+                      <AgendaItem
+                        time={formatTime(apt.date)}
+                        patientName={patientInfo.name}
+                        patientPhoto={patientInfo.photo}
+                        ownerName={patientInfo.owner}
+                        reason={apt.reason}
+                        type="cita"
+                      />
+                    </div>
                   );
                 })}
               </>

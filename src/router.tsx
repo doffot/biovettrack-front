@@ -66,6 +66,7 @@ import EditOwnerView from "./view/owner/EditOwnerView";
 import InvoiceReportView from "./view/invoices/InvoiceReportView";
 import AppointmentsView from "./view/appointment/AppointmentsView";
 import SelectPatientForAppointment from "./components/appointments/SelectPatientForAppointment";
+import AllConsultationsView from "./view/consultations/AllConsultationsView";
 
 export default function Router() {
   return (
@@ -86,12 +87,14 @@ export default function Router() {
           <Route path="/" element={<HomeView />} index />
 
           {/* ==================== */}
-          {/* CITAS (RUTA GLOBAL) ✅ NUEVO */}
+          {/* CITAS (RUTA GLOBAL) }
           {/* ==================== */}
           <Route path="/appointments">
             <Route index element={<AppointmentsView />} />
             <Route path="select-patient" element={<SelectPatientForAppointment />} />
           </Route>
+
+          <Route path="/consultations" element={<AllConsultationsView />} />
 
           {/* EXÁMENES DE LABORATORIO (RUTA INDEPENDIENTE) */}
           <Route path="/lab-exams">
