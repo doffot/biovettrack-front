@@ -1,7 +1,8 @@
 // src/components/ShareResultsModal.tsx
-import { X,  FileText, Printer, CheckCircle2 } from "lucide-react";
-import { useRef } from "react";
+import { X, FileText, Printer, CheckCircle2, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import html2pdf from "html2pdf.js";
 import type { LabExamFormData } from "../types";
 
 interface ShareResultsModalProps {
@@ -20,14 +21,14 @@ interface ShareResultsModalProps {
   };
 }
 
-//  Rangos normales en células/µL completas 
+// Rangos normales en células/µL completas
 const normalValues = {
   canino: {
     hematocrit: [37, 55],
     whiteBloodCells: [6000, 17000],
     totalProtein: [5.4, 7.8],
     platelets: [200000, 500000],
-    segmentedNeutrophils: [60, 77],
+    segmentedNeutrophills: [60, 77],
     bandNeutrophils: [0, 3],
     lymphocytes: [12, 30],
     monocytes: [3, 10],
@@ -39,8 +40,8 @@ const normalValues = {
     whiteBloodCells: [5000, 19500],
     totalProtein: [5.7, 8.9],
     platelets: [300000, 800000],
-    segmentedNeutrophils: [35, 75],
-    bandNeutrophils: [0, 3],
+    segmentedNeutrophills: [35, 75],
+    bandNeutrophills: [0, 3],
     lymphocytes: [20, 55],
     monocytes: [1, 4],
     eosinophils: [2, 12],
@@ -55,7 +56,9 @@ export default function ShareResultsModal({
   patientData,
 }: ShareResultsModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
-  //  Obtener veterinario autenticado 
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Obtener veterinario autenticado
   const { data: authUser } = useAuth();
 
   if (!isOpen) return null;
@@ -68,7 +71,7 @@ export default function ShareResultsModal({
     year: "numeric",
   });
 
-  //  Formatear nombre completo del veterinario autenticado
+  // Formatear nombre completo del veterinario autenticado
   const getVetFullName = (): string => {
     if (!authUser) return "Médico Veterinario";
     const name = authUser.name || "";
@@ -76,7 +79,6 @@ export default function ShareResultsModal({
     return `Dr(a). ${name} ${lastName}`.trim();
   };
 
- 
   const wbcDisplay = examData.whiteBloodCells.toLocaleString("es-ES");
   const plateletsDisplay = examData.platelets.toLocaleString("es-ES");
 
@@ -93,167 +95,57 @@ export default function ShareResultsModal({
     return num.toLocaleString("es-ES");
   };
 
-  const handlePrintPDF = () => {
-    const printContent = printRef.current;
-    if (!printContent) return;
+  // Generar PDF con html2pdf.js (funciona en móviles)
+  const handlePrintPDF = async () => {
+    const element = printRef.current;
+    if (!element) return;
 
-    const printWindow = window.open("", "", "height=800,width=800");
-    if (!printWindow) return;
+    setIsGenerating(true);
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Hematología - ${patientData.name}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: 'Segoe UI', Arial, sans-serif; 
-              padding: 40px;
-              color: #1A3E4A;
-              background: white;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 3px solid #0A7EA4;
-              padding-bottom: 20px;
-              margin-bottom: 30px;
-            }
-            h1 { 
-              color: #0A7EA4;
-              font-size: 26px;
-              font-weight: 700;
-              margin-bottom: 5px;
-            }
-            .subtitle {
-              color: #5A7C88;
-              font-size: 14px;
-            }
-            .info-section {
-              margin-bottom: 25px;
-              padding: 20px;
-              background: #E0F4F8;
-              border-radius: 10px;
-              border-left: 4px solid #0A7EA4;
-            }
-            .info-grid {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              gap: 12px;
-            }
-            .info-row {
-              font-size: 13px;
-              line-height: 1.6;
-            }
-            .info-label {
-              font-weight: 600;
-              color: #085F7A;
-              display: inline-block;
-              min-width: 120px;
-            }
-            h2 {
-              background: linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%);
-              color: white;
-              padding: 12px 20px;
-              margin: 25px 0 15px 0;
-              border-radius: 8px;
-              font-size: 16px;
-              font-weight: 700;
-              text-align: center;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 15px 0;
-              font-size: 12px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            th {
-              background: linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%);
-              color: white;
-              padding: 10px 8px;
-              text-align: center;
-              font-weight: 600;
-              border: 1px solid #0A7EA4;
-              font-size: 11px;
-              text-transform: uppercase;
-            }
-            td {
-              padding: 10px 8px;
-              border: 1px solid #E0F4F8;
-              text-align: center;
-              font-size: 12px;
-            }
-            tr:nth-child(even) {
-              background-color: #F8FCFD;
-            }
-            tr:hover {
-              background-color: #E0F4F8;
-            }
-            .param-name {
-              text-align: left;
-              font-weight: 600;
-              background: #E0F4F8;
-              color: #085F7A;
-              padding-left: 15px;
-            }
-            .value-cell {
-              font-weight: 700;
-              color: #0A7EA4;
-              font-size: 13px;
-            }
-            .notes-section {
-              margin: 25px 0;
-              padding: 20px;
-              background: #E0F4F8;
-              border-left: 4px solid #36BCD4;
-              border-radius: 0 8px 8px 0;
-            }
-            .notes-title {
-              font-weight: 700;
-              color: #085F7A;
-              margin-bottom: 8px;
-              font-size: 13px;
-            }
-            .notes-content {
-              color: #1A3E4A;
-              line-height: 1.6;
-              font-size: 12px;
-            }
-            .footer {
-              margin-top: 50px;
-              padding-top: 25px;
-              border-top: 2px solid #E0F4F8;
-              text-align: center;
-              color: #5A7C88;
-              font-size: 11px;
-            }
-            .footer p {
-              margin: 4px 0;
-            }
-            .footer-vet {
-              font-weight: 700;
-              color: #0A7EA4;
-              font-size: 13px;
-              margin-bottom: 5px;
-            }
-            @media print {
-              body { padding: 15px; }
-              @page { margin: 1.5cm; }
-            }
-          </style>
-        </head>
-        <body onload="window.print()">
-          ${printContent.innerHTML}
-        </body>
-      </html>
-    `);
+    try {
+      const filename = `Hematologia_${patientData.name}_${new Date().toISOString().split("T")[0]}.pdf`;
 
-    printWindow.document.close();
+      const worker = html2pdf();
+
+      worker
+        .set({
+          margin: [8, 8, 8, 8], // Márgenes simétricos en mm
+          filename: filename,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            scrollX: 0,
+            scrollY: 0,
+            width: 794, // A4 width @ 96dpi
+            windowWidth: 794,
+          },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait",
+          },
+          // pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+        })
+        .from(element)
+        .save()
+        .then(() => {
+          setIsGenerating(false);
+        })
+        .catch((error: Error) => {
+          console.error("Error generando PDF:", error);
+          alert("Error al generar el PDF. Por favor intenta de nuevo.");
+          setIsGenerating(false);
+        });
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+      alert("Error al generar el PDF. Por favor intenta de nuevo.");
+      setIsGenerating(false);
+    }
   };
 
-  const neutrofilosSegPer = calculatePercentage(
-    cells.segmentedNeutrophils || 0
-  );
+  const neutrofilosSegPer = calculatePercentage(cells.segmentedNeutrophils || 0);
   const neutrofilosBandPer = calculatePercentage(cells.bandNeutrophils || 0);
   const linfocitosPer = calculatePercentage(cells.lymphocytes || 0);
   const monocitosPer = calculatePercentage(cells.monocytes || 0);
@@ -291,226 +183,331 @@ export default function ShareResultsModal({
           </button>
         </div>
 
-        {/* PDF Preview Content  */}
-        <div ref={printRef} className="hidden">
-          <div className="header">
-            <h1>RESULTADOS DE HEMATOLOGÍA</h1>
-            <p className="subtitle">Análisis Hematológico Completo</p>
-          </div>
+        {/* PDF Content - Oculto pero renderizado para html2pdf */}
+        <div style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
+          <div
+            ref={printRef}
+            style={{
+              width: "210mm",
+              padding: "8mm 10mm",
+              backgroundColor: "white",
+              fontFamily: "'Segoe UI', Arial, sans-serif",
+              color: "#1A3E4A",
+              fontSize: "10px",
+              overflow: "hidden",
+              boxSizing: "border-box",
+            }}
+          >
+            {/* Header del PDF - Compacto */}
+            <div
+              style={{
+                textAlign: "center",
+                borderBottom: "2px solid #0A7EA4",
+                paddingBottom: "8px",
+                marginBottom: "10px",
+              }}
+            >
+              <h1
+                style={{
+                  color: "#0A7EA4",
+                  fontSize: "18px",
+                  fontWeight: 700,
+                  margin: 0,
+                }}
+              >
+                RESULTADOS DE HEMATOLOGÍA
+              </h1>
+              <p
+                style={{
+                  color: "#5A7C88",
+                  fontSize: "10px",
+                  margin: "2px 0 0 0",
+                }}
+              >
+                Análisis Hematológico Completo
+              </p>
+            </div>
 
-          <div className="info-section">
-            <div className="info-grid">
-              <div className="info-row">
-                <span className="info-label">Fecha:</span> {date}
-              </div>
-              <div className="info-row">
-                <span className="info-label">Paciente:</span> {patientData.name}
-              </div>
-              <div className="info-row">
-                <span className="info-label">Especie:</span>{" "}
-                {patientData.species}
-              </div>
-              <div className="info-row">
-                <span className="info-label">Raza:</span>{" "}
-                {examData.breed || "No especificado"}
-              </div>
-              <div className="info-row">
-                <span className="info-label">Propietario:</span>{" "}
-                {patientData.owner.name || "No especificado"}
-              </div>
-              <div className="info-row">
-                <span className="info-label">Médico Tratante:</span>{" "}
-                {examData.treatingVet || "No especificado"}
+            {/* Info Section - Compacta */}
+            <div
+              style={{
+                marginBottom: "10px",
+                padding: "8px 12px",
+                backgroundColor: "#E0F4F8",
+                borderRadius: "6px",
+                borderLeft: "3px solid #0A7EA4",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "4px 12px",
+                }}
+              >
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Fecha:</span>{" "}
+                  {date}
+                </div>
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Paciente:</span>{" "}
+                  {patientData.name}
+                </div>
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Especie:</span>{" "}
+                  {patientData.species}
+                </div>
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Raza:</span>{" "}
+                  {examData.breed || "No especificado"}
+                </div>
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Propietario:</span>{" "}
+                  {patientData.owner.name || "No especificado"}
+                </div>
+                <div style={{ fontSize: "9px", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "#085F7A" }}>Médico Tratante:</span>{" "}
+                  {examData.treatingVet || "No especificado"}
+                </div>
               </div>
             </div>
-          </div>
 
-          <h2>Valores del Hemograma</h2>
-          <table>
-            <thead>
-              <tr>
-                <th rowSpan={2}>PARÁMETRO</th>
-                <th rowSpan={2}>RESULTADO</th>
-                <th rowSpan={2}>UNIDAD</th>
-                <th colSpan={2}>Valores Referenciales</th>
-              </tr>
-              <tr>
-                <th>CANINO</th>
-                <th>FELINO</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="param-name">Hematocrito</td>
-                <td className="value-cell">{examData.hematocrit}</td>
-                <td>%</td>
-                <td>
-                  {normalValues.canino.hematocrit[0]} -{" "}
-                  {normalValues.canino.hematocrit[1]}
-                </td>
-                <td>
-                  {normalValues.felino.hematocrit[0]} -{" "}
-                  {normalValues.felino.hematocrit[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Glóbulos Blancos</td>
-                <td className="value-cell">{wbcDisplay}</td>
-                <td>células/µL</td>
-                <td>
-                  {formatNumber(normalValues.canino.whiteBloodCells[0])} -{" "}
-                  {formatNumber(normalValues.canino.whiteBloodCells[1])}
-                </td>
-                <td>
-                  {formatNumber(normalValues.felino.whiteBloodCells[0])} -{" "}
-                  {formatNumber(normalValues.felino.whiteBloodCells[1])}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Plaquetas</td>
-                <td className="value-cell">{plateletsDisplay}</td>
-                <td>células/µL</td>
-                <td>
-                  {formatNumber(normalValues.canino.platelets[0])} -{" "}
-                  {formatNumber(normalValues.canino.platelets[1])}
-                </td>
-                <td>
-                  {formatNumber(normalValues.felino.platelets[0])} -{" "}
-                  {formatNumber(normalValues.felino.platelets[1])}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Proteínas Totales</td>
-                <td className="value-cell">{examData.totalProtein}</td>
-                <td>g/dL</td>
-                <td>
-                  {normalValues.canino.totalProtein[0]} -{" "}
-                  {normalValues.canino.totalProtein[1]}
-                </td>
-                <td>
-                  {normalValues.felino.totalProtein[0]} -{" "}
-                  {normalValues.felino.totalProtein[1]}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h2>Fórmula Leucocitaria</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>TIPO CELULAR</th>
-                <th>%</th>
-                <th>ABSOLUTO (células/µL)</th>
-                <th>CANINO (%)</th>
-                <th>FELINO (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="param-name">Neutrófilos Segmentados</td>
-                <td className="value-cell">{neutrofilosSegPer}%</td>
-                <td>{calculateAbsolute(Number(neutrofilosSegPer))}</td>
-                <td>
-                  {normalValues.canino.segmentedNeutrophils[0]} -{" "}
-                  {normalValues.canino.segmentedNeutrophils[1]}
-                </td>
-                <td>
-                  {normalValues.felino.segmentedNeutrophils[0]} -{" "}
-                  {normalValues.felino.segmentedNeutrophils[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Neutrófilos en Banda</td>
-                <td className="value-cell">{neutrofilosBandPer}%</td>
-                <td>{calculateAbsolute(Number(neutrofilosBandPer))}</td>
-                <td>
-                  {normalValues.canino.bandNeutrophils[0]} -{" "}
-                  {normalValues.canino.bandNeutrophils[1]}
-                </td>
-                <td>
-                  {normalValues.felino.bandNeutrophils[0]} -{" "}
-                  {normalValues.felino.bandNeutrophils[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Linfocitos</td>
-                <td className="value-cell">{linfocitosPer}%</td>
-                <td>{calculateAbsolute(Number(linfocitosPer))}</td>
-                <td>
-                  {normalValues.canino.lymphocytes[0]} -{" "}
-                  {normalValues.canino.lymphocytes[1]}
-                </td>
-                <td>
-                  {normalValues.felino.lymphocytes[0]} -{" "}
-                  {normalValues.felino.lymphocytes[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Monocitos</td>
-                <td className="value-cell">{monocitosPer}%</td>
-                <td>{calculateAbsolute(Number(monocitosPer))}</td>
-                <td>
-                  {normalValues.canino.monocytes[0]} -{" "}
-                  {normalValues.canino.monocytes[1]}
-                </td>
-                <td>
-                  {normalValues.felino.monocytes[0]} -{" "}
-                  {normalValues.felino.monocytes[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Eosinófilos</td>
-                <td className="value-cell">{eosinofilosPer}%</td>
-                <td>{calculateAbsolute(Number(eosinofilosPer))}</td>
-                <td>
-                  {normalValues.canino.eosinophils[0]} -{" "}
-                  {normalValues.canino.eosinophils[1]}
-                </td>
-                <td>
-                  {normalValues.felino.eosinophils[0]} -{" "}
-                  {normalValues.felino.eosinophils[1]}
-                </td>
-              </tr>
-              <tr>
-                <td className="param-name">Basófilos</td>
-                <td className="value-cell">{basofilosPer}%</td>
-                <td>{calculateAbsolute(Number(basofilosPer))}</td>
-                <td>Raros</td>
-                <td>Raros</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {(examData.hemotropico || examData.observacion) && (
-            <div className="notes-section">
-              {examData.hemotropico && (
-                <div className="margin-bottom: 15px;">
-                  <div className="notes-title">Hallazgos Hemotrópicos:</div>
-                  <div className="notes-content">{examData.hemotropico}</div>
-                </div>
-              )}
-              {examData.observacion && (
-                <div>
-                  <div className="notes-title">Observaciones Clínicas:</div>
-                  <div className="notes-content">{examData.observacion}</div>
-                </div>
-              )}
+            {/* Valores del Hemograma */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%)",
+                color: "white",
+                padding: "6px 12px",
+                marginBottom: "6px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontWeight: 700,
+                textAlign: "center",
+              }}
+            >
+              Valores del Hemograma
             </div>
-          )}
 
-          {/* ✅ Footer con veterinario autenticado (dueño de la clínica) */}
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginBottom: "10px",
+                fontSize: "9px",
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={thStyle}>PARÁMETRO</th>
+                  <th style={thStyle}>RESULTADO</th>
+                  <th style={thStyle}>UNIDAD</th>
+                  <th style={thStyle}>REF. CANINO</th>
+                  <th style={thStyle}>REF. FELINO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={tdParamStyle}>Hematocrito</td>
+                  <td style={tdValueStyle}>{examData.hematocrit}</td>
+                  <td style={tdStyle}>%</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.hematocrit[0]} - {normalValues.canino.hematocrit[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.hematocrit[0]} - {normalValues.felino.hematocrit[1]}
+                  </td>
+                </tr>
+                <tr style={{ backgroundColor: "#FAFEFE" }}>
+                  <td style={tdParamStyle}>Glóbulos Blancos</td>
+                  <td style={tdValueStyle}>{wbcDisplay}</td>
+                  <td style={tdStyle}>células/µL</td>
+                  <td style={tdStyle}>
+                    {formatNumber(normalValues.canino.whiteBloodCells[0])} -{" "}
+                    {formatNumber(normalValues.canino.whiteBloodCells[1])}
+                  </td>
+                  <td style={tdStyle}>
+                    {formatNumber(normalValues.felino.whiteBloodCells[0])} -{" "}
+                    {formatNumber(normalValues.felino.whiteBloodCells[1])}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={tdParamStyle}>Plaquetas</td>
+                  <td style={tdValueStyle}>{plateletsDisplay}</td>
+                  <td style={tdStyle}>células/µL</td>
+                  <td style={tdStyle}>
+                    {formatNumber(normalValues.canino.platelets[0])} -{" "}
+                    {formatNumber(normalValues.canino.platelets[1])}
+                  </td>
+                  <td style={tdStyle}>
+                    {formatNumber(normalValues.felino.platelets[0])} -{" "}
+                    {formatNumber(normalValues.felino.platelets[1])}
+                  </td>
+                </tr>
+                <tr style={{ backgroundColor: "#FAFEFE" }}>
+                  <td style={tdParamStyle}>Proteínas Totales</td>
+                  <td style={tdValueStyle}>{examData.totalProtein}</td>
+                  <td style={tdStyle}>g/dL</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.totalProtein[0]} - {normalValues.canino.totalProtein[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.totalProtein[0]} - {normalValues.felino.totalProtein[1]}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-          <div className="footer">
-            <p className="footer-vet">{getVetFullName()}</p>
-            <p>
-              C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642
-            </p>
-            <br />
-            <p className="font-style: italic;">
-              Para cualquier consulta sobre estos resultados, no dude en
-              contactarnos.
-            </p>
+            {/* Fórmula Leucocitaria */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%)",
+                color: "white",
+                padding: "6px 12px",
+                marginBottom: "6px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontWeight: 700,
+                textAlign: "center",
+              }}
+            >
+              Fórmula Leucocitaria
+            </div>
+
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginBottom: "10px",
+                fontSize: "9px",
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={thStyle}>TIPO CELULAR</th>
+                  <th style={thStyle}>%</th>
+                  <th style={thStyle}>ABSOLUTO (cél/µL)</th>
+                  <th style={thStyle}>REF. CANINO (%)</th>
+                  <th style={thStyle}>REF. FELINO (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={tdParamStyle}>Neutrófilos Segmentados</td>
+                  <td style={tdValueStyle}>{neutrofilosSegPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(neutrofilosSegPer))}</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.segmentedNeutrophills[0]} - {normalValues.canino.segmentedNeutrophills[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.segmentedNeutrophills[0]} - {normalValues.felino.segmentedNeutrophills[1]}
+                  </td>
+                </tr>
+                <tr style={{ backgroundColor: "#FAFEFE" }}>
+                  <td style={tdParamStyle}>Neutrófilos en Banda</td>
+                  <td style={tdValueStyle}>{neutrofilosBandPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(neutrofilosBandPer))}</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.bandNeutrophils[0]} - {normalValues.canino.bandNeutrophils[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.bandNeutrophills[0]} - {normalValues.felino.bandNeutrophills[1]}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={tdParamStyle}>Linfocitos</td>
+                  <td style={tdValueStyle}>{linfocitosPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(linfocitosPer))}</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.lymphocytes[0]} - {normalValues.canino.lymphocytes[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.lymphocytes[0]} - {normalValues.felino.lymphocytes[1]}
+                  </td>
+                </tr>
+                <tr style={{ backgroundColor: "#FAFEFE" }}>
+                  <td style={tdParamStyle}>Monocitos</td>
+                  <td style={tdValueStyle}>{monocitosPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(monocitosPer))}</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.monocytes[0]} - {normalValues.canino.monocytes[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.monocytes[0]} - {normalValues.felino.monocytes[1]}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={tdParamStyle}>Eosinófilos</td>
+                  <td style={tdValueStyle}>{eosinofilosPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(eosinofilosPer))}</td>
+                  <td style={tdStyle}>
+                    {normalValues.canino.eosinophils[0]} - {normalValues.canino.eosinophils[1]}
+                  </td>
+                  <td style={tdStyle}>
+                    {normalValues.felino.eosinophils[0]} - {normalValues.felino.eosinophils[1]}
+                  </td>
+                </tr>
+                <tr style={{ backgroundColor: "#FAFEFE" }}>
+                  <td style={tdParamStyle}>Basófilos</td>
+                  <td style={tdValueStyle}>{basofilosPer}%</td>
+                  <td style={tdStyle}>{calculateAbsolute(Number(basofilosPer))}</td>
+                  <td style={tdStyle}>Raros</td>
+                  <td style={tdStyle}>Raros</td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Notas si existen */}
+            {(examData.hemotropico || examData.observacion) && (
+              <div
+                style={{
+                  marginBottom: "10px",
+                  padding: "8px 12px",
+                  backgroundColor: "#E0F4F8",
+                  borderLeft: "3px solid #36BCD4",
+                  borderRadius: "0 6px 6px 0",
+                  fontSize: "9px",
+                }}
+              >
+                {examData.hemotropico && (
+                  <div style={{ marginBottom: examData.observacion ? "6px" : "0" }}>
+                    <span style={{ fontWeight: 700, color: "#085F7A" }}>
+                      Hallazgos Hemotrópicos:{" "}
+                    </span>
+                    <span style={{ color: "#1A3E4A" }}>{examData.hemotropico}</span>
+                  </div>
+                )}
+                {examData.observacion && (
+                  <div>
+                    <span style={{ fontWeight: 700, color: "#085F7A" }}>
+                      Observaciones:{" "}
+                    </span>
+                    <span style={{ color: "#1A3E4A" }}>{examData.observacion}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Footer - sin marginTop: auto */}
+            <div
+              style={{
+                paddingTop: "10px",
+                borderTop: "1px solid #E0F4F8",
+                textAlign: "center",
+                color: "#5A7C88",
+                fontSize: "9px",
+                marginTop: "10px",
+              }}
+            >
+              <p style={{ fontWeight: 700, color: "#0A7EA4", fontSize: "11px", margin: "0 0 3px 0" }}>
+                {getVetFullName()}
+              </p>
+              <p style={{ margin: "2px 0" }}>
+                C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642
+              </p>
+              <p style={{ fontStyle: "italic", margin: "4px 0 0 0", fontSize: "8px" }}>
+                Para cualquier consulta sobre estos resultados, no dude en contactarnos.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -521,15 +518,11 @@ export default function ShareResultsModal({
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs text-vet-muted font-medium">Paciente</p>
-                <p className="text-sm font-bold text-vet-text">
-                  {patientData.name}
-                </p>
+                <p className="text-sm font-bold text-vet-text">{patientData.name}</p>
               </div>
               <div>
                 <p className="text-xs text-vet-muted font-medium">Especie</p>
-                <p className="text-sm font-bold text-vet-text capitalize">
-                  {patientData.species}
-                </p>
+                <p className="text-sm font-bold text-vet-text capitalize">{patientData.species}</p>
               </div>
               <div>
                 <p className="text-xs text-vet-muted font-medium">Fecha</p>
@@ -541,34 +534,20 @@ export default function ShareResultsModal({
           {/* Quick values */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-vet-muted font-medium uppercase">
-                Hematocrito
-              </p>
-              <p className="text-xl font-bold text-vet-primary">
-                {examData.hematocrit}%
-              </p>
+              <p className="text-[10px] text-vet-muted font-medium uppercase">Hematocrito</p>
+              <p className="text-xl font-bold text-vet-primary">{examData.hematocrit}%</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-vet-muted font-medium uppercase">
-                Leucocitos
-              </p>
+              <p className="text-[10px] text-vet-muted font-medium uppercase">Leucocitos</p>
               <p className="text-xl font-bold text-vet-primary">{wbcDisplay}</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-vet-muted font-medium uppercase">
-                Plaquetas
-              </p>
-              <p className="text-xl font-bold text-vet-primary">
-                {plateletsDisplay}
-              </p>
+              <p className="text-[10px] text-vet-muted font-medium uppercase">Plaquetas</p>
+              <p className="text-xl font-bold text-vet-primary">{plateletsDisplay}</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-vet-muted font-medium uppercase">
-                Proteínas
-              </p>
-              <p className="text-xl font-bold text-vet-primary">
-                {examData.totalProtein}
-              </p>
+              <p className="text-[10px] text-vet-muted font-medium uppercase">Proteínas</p>
+              <p className="text-xl font-bold text-vet-primary">{examData.totalProtein}</p>
             </div>
           </div>
 
@@ -577,22 +556,14 @@ export default function ShareResultsModal({
             <div className="space-y-3">
               {examData.hemotropico && (
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                  <p className="text-xs font-bold text-blue-800 mb-1">
-                    Hallazgos Hemotrópicos
-                  </p>
-                  <p className="text-sm text-blue-900">
-                    {examData.hemotropico}
-                  </p>
+                  <p className="text-xs font-bold text-blue-800 mb-1">Hallazgos Hemotrópicos</p>
+                  <p className="text-sm text-blue-900">{examData.hemotropico}</p>
                 </div>
               )}
               {examData.observacion && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                  <p className="text-xs font-bold text-amber-800 mb-1">
-                    Observaciones Clínicas
-                  </p>
-                  <p className="text-sm text-amber-900">
-                    {examData.observacion}
-                  </p>
+                  <p className="text-xs font-bold text-amber-800 mb-1">Observaciones Clínicas</p>
+                  <p className="text-sm text-amber-900">{examData.observacion}</p>
                 </div>
               )}
             </div>
@@ -611,15 +582,26 @@ export default function ShareResultsModal({
         <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex gap-3">
           <button
             onClick={handlePrintPDF}
-            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl px-6 py-3 transition-all duration-300 shadow-lg shadow-vet-primary/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+            disabled={isGenerating}
+            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl px-6 py-3 transition-all duration-300 shadow-lg shadow-vet-primary/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            <Printer className="w-5 h-5" />
-            <span>Generar PDF</span>
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Generando PDF...</span>
+              </>
+            ) : (
+              <>
+                <Printer className="w-5 h-5" />
+                <span>Generar PDF</span>
+              </>
+            )}
           </button>
 
           <button
             onClick={onClose}
-            className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all duration-200"
+            disabled={isGenerating}
+            className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all duration-200 disabled:opacity-50"
           >
             Cerrar
           </button>
@@ -628,3 +610,40 @@ export default function ShareResultsModal({
     </div>
   );
 }
+
+// Estilos reutilizables para tablas (definidos fuera del render para evitar recreación)
+const thStyle: React.CSSProperties = {
+  background: "linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%)",
+  color: "white",
+  padding: "5px 4px",
+  textAlign: "center",
+  fontWeight: 600,
+  border: "1px solid #0A7EA4",
+  fontSize: "8px",
+  textTransform: "uppercase",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "4px 6px",
+  border: "1px solid #E0F4F8",
+  textAlign: "center",
+  fontSize: "9px",
+};
+
+const tdParamStyle: React.CSSProperties = {
+  padding: "4px 6px",
+  border: "1px solid #E0F4F8",
+  textAlign: "left",
+  fontWeight: 600,
+  backgroundColor: "#F0F9FB",
+  color: "#085F7A",
+};
+
+const tdValueStyle: React.CSSProperties = {
+  padding: "4px 6px",
+  border: "1px solid #E0F4F8",
+  textAlign: "center",
+  fontWeight: 700,
+  color: "#0A7EA4",
+  fontSize: "9px",
+};
