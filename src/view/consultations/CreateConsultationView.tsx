@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, ClipboardList, Stethoscope, FileText } from "lucide-react";
+import { ArrowLeft, Loader2, ClipboardList, Stethoscope, FileText, Check } from "lucide-react";
 import { getPatientById } from "../../api/patientAPI";
 import { createConsultation } from "../../api/consultationAPI";
 import { toast } from "../../components/Toast";
@@ -184,7 +184,6 @@ export default function CreateConsultationView() {
 
   const handleSubmit = () => {
     if (!isFormValid) {
-      // Mostrar qué tab tiene errores
       if (!isAnamnesisValid()) {
         toast.error("Complete los campos obligatorios en Anamnesis");
         setActiveTab("anamnesis");
@@ -203,7 +202,6 @@ export default function CreateConsultationView() {
       return;
     }
 
-    // Construir objeto limpio 
     const dataToSend: ConsultationFormData = {
       consultationDate: formData.consultationDate,
 
@@ -243,7 +241,7 @@ export default function CreateConsultationView() {
       currentTreatment: cleanValue(formData.currentTreatment),
       medications: cleanValue(formData.medications),
 
-      // Vacunas perro - limpiar fechas vacías
+      // Vacunas perro
       parvovirusVaccine: cleanValue(formData.parvovirusVaccine),
       parvovirusVaccineDate: cleanValue(formData.parvovirusVaccineDate),
       quintupleSextupleVaccine: cleanValue(formData.quintupleSextupleVaccine),
@@ -252,7 +250,7 @@ export default function CreateConsultationView() {
       rabiesVaccineDateDogs: cleanValue(formData.rabiesVaccineDateDogs),
       dewormingDogs: cleanValue(formData.dewormingDogs),
 
-      // Vacunas gato - limpiar fechas vacías
+      // Vacunas gato
       tripleQuintupleFelineVaccine: cleanValue(formData.tripleQuintupleFelineVaccine),
       tripleQuintupleFelineVaccineDate: cleanValue(formData.tripleQuintupleFelineVaccineDate),
       rabiesVaccineCats: cleanValue(formData.rabiesVaccineCats),
@@ -266,7 +264,7 @@ export default function CreateConsultationView() {
       lastHeatOrBirth: cleanValue(formData.lastHeatOrBirth),
       mounts: cleanValue(formData.mounts),
 
-      // Examen físico - obligatorios (convertir a número)
+      // Examen físico - obligatorios
       temperature: Number(formData.temperature),
       heartRate: Number(formData.heartRate),
       respiratoryRate: Number(formData.respiratoryRate),
@@ -295,8 +293,6 @@ export default function CreateConsultationView() {
       requestedTests: cleanValue(formData.requestedTests),
     };
 
-   
-
     mutate(dataToSend);
   };
 
@@ -313,6 +309,23 @@ export default function CreateConsultationView() {
     }
   };
 
+  const goToPreviousTab = () => {
+    const currentIndex = TABS.findIndex((t) => t.id === activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(TABS[currentIndex - 1].id);
+    }
+  };
+
+  const goToNextTab = () => {
+    const currentIndex = TABS.findIndex((t) => t.id === activeTab);
+    if (currentIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentIndex + 1].id);
+    }
+  };
+
+  const isLastTab = activeTab === "diagnostico";
+  const isFirstTab = activeTab === "anamnesis";
+
   return (
     <div>
       {/* Header */}
@@ -324,36 +337,23 @@ export default function CreateConsultationView() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Nueva Consulta</h1>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">Nueva Consulta</h1>
+            {patient && (
+              <p className="text-sm text-gray-500">
+                {patient.name} • {patient.species}
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!isFormValid || isPending}
-            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
-              isFormValid && !isPending
-                ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              "Guardar Consulta"
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
       </div>
 
       {/* Tabs */}
@@ -382,7 +382,7 @@ export default function CreateConsultationView() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-gray-50 rounded-xl p-4 sm:p-6 max-h-[60vh] overflow-y-auto">
+      <div className="bg-gray-50 rounded-xl p-4 sm:p-6 max-h-[55vh] overflow-y-auto">
         {activeTab === "anamnesis" && (
           <AnamnesisTab
             formData={formData}
@@ -404,15 +404,10 @@ export default function CreateConsultationView() {
       {/* Navigation buttons */}
       <div className="flex justify-between mt-4">
         <button
-          onClick={() => {
-            const currentIndex = TABS.findIndex((t) => t.id === activeTab);
-            if (currentIndex > 0) {
-              setActiveTab(TABS[currentIndex - 1].id);
-            }
-          }}
-          disabled={activeTab === "anamnesis"}
+          onClick={goToPreviousTab}
+          disabled={isFirstTab}
           className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "anamnesis"
+            isFirstTab
               ? "text-gray-300 cursor-not-allowed"
               : "text-gray-600 hover:bg-gray-100"
           }`}
@@ -420,22 +415,36 @@ export default function CreateConsultationView() {
           ← Anterior
         </button>
 
-        <button
-          onClick={() => {
-            const currentIndex = TABS.findIndex((t) => t.id === activeTab);
-            if (currentIndex < TABS.length - 1) {
-              setActiveTab(TABS[currentIndex + 1].id);
-            }
-          }}
-          disabled={activeTab === "diagnostico"}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "diagnostico"
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-vet-primary hover:bg-vet-primary/10"
-          }`}
-        >
-          Siguiente →
-        </button>
+        {isLastTab ? (
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid || isPending}
+            className={`px-6 py-2.5 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
+              isFormValid && !isPending
+                ? "bg-vet-primary hover:bg-vet-secondary text-white shadow-sm"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                Guardar Consulta
+                <Check className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={goToNextTab}
+            className="px-4 py-2 text-sm font-medium rounded-lg text-vet-primary hover:bg-vet-primary/10 transition-colors"
+          >
+            Siguiente →
+          </button>
+        )}
       </div>
     </div>
   );
