@@ -9,6 +9,14 @@ import type { CreateAppointmentForm } from "../../types/appointment";
 import AppointmentTimeSelector from "../../components/appointments/AppointmentTimeSelector";
 import AppointmentForm from "../../components/appointments/AppointmentForm";
 
+// ✅ Función helper para formatear fecha local
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function EditAppointmentView() {
   const { appointmentId, patientId } = useParams<{ appointmentId: string; patientId: string }>();
   const navigate = useNavigate();
@@ -18,14 +26,16 @@ export default function EditAppointmentView() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
 
-  const {  data:appointment, isLoading: loadingAppointment } = useQuery({
+  const { data: appointment, isLoading: loadingAppointment } = useQuery({
     queryKey: ["appointment", appointmentId],
     queryFn: () => getAppointmentById(appointmentId!),
     enabled: !!appointmentId,
   });
 
-  const selectedDateStr = selectedDate.toISOString().split("T")[0];
-  const {  data:vetAppointmentsOnDate = [], isLoading: loadingVetAppointments } = useQuery({
+  //  Usar formato local para la fecha
+  const selectedDateStr = formatLocalDate(selectedDate);
+  
+  const { data: vetAppointmentsOnDate = [], isLoading: loadingVetAppointments } = useQuery({
     queryKey: ["vetAppointments", selectedDateStr],
     queryFn: () => getAppointmentsByDateForVeterinarian(selectedDateStr),
     enabled: !!appointmentId && mounted,
@@ -35,9 +45,17 @@ export default function EditAppointmentView() {
     if (appointment) {
       const appointmentDate = new Date(appointment.date);
       setSelectedDate(appointmentDate);
-      setSelectedTime(appointmentDate.toTimeString().slice(0, 5));
+      
+      //  Extraer hora de forma local
+      const hours = String(appointmentDate.getHours()).padStart(2, '0');
+      const minutes = String(appointmentDate.getMinutes()).padStart(2, '0');
+      setSelectedTime(`${hours}:${minutes}`);
     }
   }, [appointment]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { mutate: updateMutate, isPending } = useMutation({
     mutationFn: (formData: CreateAppointmentForm) => {
@@ -45,7 +63,7 @@ export default function EditAppointmentView() {
       return updateAppointment(appointmentId, formData);
     },
     onSuccess: () => {
-      toast.success("✅ Cita actualizada con éxito");
+      toast.success(" Cita actualizada con éxito");
       queryClient.invalidateQueries({ queryKey: ["appointment", appointmentId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
       navigate(`/patients/${patientId}/appointments/${appointmentId}`);
@@ -54,10 +72,6 @@ export default function EditAppointmentView() {
       toast.error(` ${error.message}`);
     },
   });
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
@@ -69,14 +83,15 @@ export default function EditAppointmentView() {
       return;
     }
     
-    const [hours, minutes] = selectedTime.split(":").map(Number);
-    const dateWithTime = new Date(selectedDate);
-    dateWithTime.setHours(hours, minutes, 0, 0);
+    // ✅ SOLUCIÓN: Construir el string de fecha manualmente (sin toISOString)
+    const dateStr = formatLocalDate(selectedDate);
     
     const formDataWithDate = {
       ...data,
-      date: dateWithTime.toISOString().slice(0, 16),
+      date: `${dateStr}T${selectedTime}`, // Formato: "2024-01-15T10:00"
     };
+    
+    console.log("📅 Fecha enviada:", formDataWithDate.date); // Debug
     
     updateMutate(formDataWithDate);
   };
@@ -108,9 +123,10 @@ export default function EditAppointmentView() {
 
   return (
     <div className={`-mx-4 lg:-mx-0 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500`}>
-        <h3 className=" capitalize bg-vet-primary mb-2 rounded-t-md text-center p-2 font-montserrat text-white font-semibold">actualizar cita</h3>
+      <h3 className="capitalize bg-vet-primary mb-2 rounded-t-md text-center p-2 font-montserrat text-white font-semibold">
+        actualizar cita
+      </h3>
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 lg:px-0">
-        {/* Columna Izquierda: Selector de fecha y hora */}
         <div className="space-y-6">
           <AppointmentTimeSelector
             selectedDate={selectedDate}
@@ -121,7 +137,6 @@ export default function EditAppointmentView() {
           />
         </div>
 
-        {/* Columna Derecha: Formulario */}
         <div>
           <AppointmentForm
             onSubmit={handleSubmitForm}
