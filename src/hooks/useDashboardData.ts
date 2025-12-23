@@ -2,7 +2,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-
 import {
   QUERY_CONFIG,
   QUERY_CONFIG_EXTENDED,
@@ -31,7 +30,6 @@ import { getAllDewormings } from "../api/dewormingAPI";
 import { getInvoices } from "../api/invoiceAPI";
 import { getPatients } from "../api/patientAPI";
 import { getOwners } from "../api/OwnerAPI";
-
 
 export interface VaccinationWithDaysLeft extends Vaccination {
   daysLeft: number;
@@ -225,6 +223,17 @@ export function useDashboardData() {
     [invoices]
   );
 
+  // ========== FACTURAS PENDIENTES (para el modal) ==========
+  const pendingInvoices = useMemo(
+    () =>
+      invoices
+        .filter(
+          (inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial"
+        )
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [invoices]
+  );
+
   // ========== ALERTAS (próximos 7 días) ==========
   const upcomingVaccinations = useMemo((): VaccinationWithDaysLeft[] => {
     const nextWeek = getDaysFromNowString(7);
@@ -326,6 +335,7 @@ export function useDashboardData() {
     // Deudas
     pendingDebt,
     pendingInvoicesCount,
+    pendingInvoices, 
 
     // Alertas
     upcomingVaccinations,

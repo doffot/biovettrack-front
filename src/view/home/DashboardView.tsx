@@ -1,5 +1,5 @@
 // src/views/dashboard/DashboardView.tsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Stethoscope, PawPrint } from "lucide-react";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -15,10 +15,14 @@ import {
 } from "../../components/dashboard";
 import { ConsultationsSection } from "../../components/dashboard/ConsultationsSection";
 import { GroomingSection } from "../../components/dashboard/GroomingSection";
+import { PendingInvoicesModal } from "../../components/dashboard/PendingInvoicesModal";
 
 export default function DashboardView() {
   const { data: authData } = useAuth();
   const dashboard = useDashboardData();
+  
+  // Estado para el modal de facturas pendientes
+  const [showPendingInvoices, setShowPendingInvoices] = useState(false);
 
   // Nombre del usuario
   const displayName = useMemo(() => {
@@ -49,13 +53,12 @@ export default function DashboardView() {
         pendingDebt={dashboard.pendingDebt}
         pendingInvoicesCount={dashboard.pendingInvoicesCount}
         monthRevenue={dashboard.monthRevenue}
+        onPendingDebtClick={() => setShowPendingInvoices(true)}
       />
 
       {/* Citas y Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AgendaSection
-          appointments={dashboard.todayAppointments}
-        />
+        <AgendaSection appointments={dashboard.todayAppointments} />
         <AlertsSection
           vaccinations={dashboard.upcomingVaccinations}
           dewormings={dashboard.upcomingDewormings}
@@ -64,12 +67,8 @@ export default function DashboardView() {
 
       {/* Consultas y Peluquería */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ConsultationsSection
-          consultations={dashboard.todayConsultations}
-        />
-        <GroomingSection
-          groomingServices={dashboard.todayGrooming}
-        />
+        <ConsultationsSection consultations={dashboard.todayConsultations} />
+        <GroomingSection groomingServices={dashboard.todayGrooming} />
       </div>
 
       {/* Gráfico de ingresos */}
@@ -94,6 +93,13 @@ export default function DashboardView() {
           tooltipLabel="Pacientes"
         />
       </div>
+
+      {/* Modal de Facturas Pendientes */}
+      <PendingInvoicesModal
+        isOpen={showPendingInvoices}
+        onClose={() => setShowPendingInvoices(false)}
+        invoices={dashboard.pendingInvoices}
+      />
     </div>
   );
 }

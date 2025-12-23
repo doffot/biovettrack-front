@@ -10,3 +10,4 @@ export { AlertItem } from "./AlertItem";
 export { AlertsSection } from "./AlertsSection";
 export { RevenueChart } from "./RevenueChart";
 export { PieChartCard } from "./PieChartCard";
+export { PendingInvoicesModal } from "./PendingInvoicesModal";

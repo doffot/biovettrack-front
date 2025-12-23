@@ -1,4 +1,4 @@
-// src/views/dashboard/components/MetricsGrid.tsx
+// src/components/dashboard/MetricsGrid.tsx
 import {
   DollarSign,
   CreditCard,
@@ -17,6 +17,8 @@ interface MetricsGridProps {
   pendingDebt: CurrencyAmounts;
   pendingInvoicesCount: number;
   monthRevenue: CurrencyAmounts;
+  // Nuevo callback
+  onPendingDebtClick?: () => void;
 }
 
 export function MetricsGrid({
@@ -24,6 +26,7 @@ export function MetricsGrid({
   pendingDebt,
   pendingInvoicesCount,
   monthRevenue,
+  onPendingDebtClick,
 }: MetricsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -41,6 +44,7 @@ export function MetricsGrid({
         icon={CreditCard}
         color="text-orange-600"
         bgColor="bg-gradient-to-br from-orange-50 to-amber-50"
+        onClick={onPendingDebtClick}
       />
       <DualCurrencyCard
         title="Ingresos del Mes"
