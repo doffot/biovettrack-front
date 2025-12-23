@@ -13,31 +13,28 @@ import {
   Edit, 
   Trash2,
   ArrowLeft,
-  RefreshCw,
-  CheckCircle2,
   XCircle,
-  AlertCircle,
-  CalendarClock,
   ClipboardList,
   MessageSquareText,
 } from "lucide-react";
 import type { AppointmentStatus } from "../../types/appointment";
-import UpdateStatusModal from "../../components/appointments/UpdateStatusModal";
+import StatusDropdown from "../../components/appointments/StatusDropdown";
 
 export default function AppointmentDetailsView() {
   const { appointmentId, patientId } = useParams<{ appointmentId: string; patientId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Query para obtener los detalles de la cita
   const { data: appointment, isLoading, error } = useQuery({
     queryKey: ["appointment", appointmentId],
     queryFn: () => getAppointmentById(appointmentId!),
     enabled: !!appointmentId,
   });
 
+  // Mutation para eliminar la cita
   const { mutate: deleteAppointmentMutate, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteAppointment(appointmentId!),
     onSuccess: () => {
@@ -51,15 +48,15 @@ export default function AppointmentDetailsView() {
     },
   });
 
+  // Mutation para actualizar el estado
   const { mutate: updateStatusMutate, isPending: isUpdatingStatus } = useMutation({
     mutationFn: (status: AppointmentStatus) => 
       updateAppointmentStatus(appointmentId!, { status }),
     onSuccess: () => {
-      toast.success(" Estado actualizado con éxito");
+      toast.success("Estado actualizado con éxito");
       queryClient.invalidateQueries({ queryKey: ["appointment", appointmentId] });
       queryClient.invalidateQueries({ queryKey: ["activeAppointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
-      setShowStatusModal(false);
     },
     onError: (error: Error) => {
       toast.error(` ${error.message}`);
@@ -144,77 +141,44 @@ export default function AppointmentDetailsView() {
     minute: '2-digit'
   });
 
-  // Configuración de estados
-  const statusConfig: Record<string, { 
-    icon: React.ReactNode; 
-    bg: string; 
-    text: string; 
-    border: string;
-    iconBg: string;
-  }> = {
-    'Programada': {
-      icon: <CalendarClock className="w-5 h-5" />,
-      bg: 'bg-blue-50',
-      text: 'text-blue-700',
-      border: 'border-blue-200',
-      iconBg: 'bg-blue-100',
-    },
-    'Completada': {
-      icon: <CheckCircle2 className="w-5 h-5" />,
-      bg: 'bg-emerald-50',
-      text: 'text-emerald-700',
-      border: 'border-emerald-200',
-      iconBg: 'bg-emerald-100',
-    },
-    'Cancelada': {
-      icon: <XCircle className="w-5 h-5" />,
-      bg: 'bg-red-50',
-      text: 'text-red-700',
-      border: 'border-red-200',
-      iconBg: 'bg-red-100',
-    },
-    'No asistió': {
-      icon: <AlertCircle className="w-5 h-5" />,
-      bg: 'bg-amber-50',
-      text: 'text-amber-700',
-      border: 'border-amber-200',
-      iconBg: 'bg-amber-100',
-    },
+  // Configuración de colores por estado (para el header)
+  const statusColors: Record<string, { bg: string; border: string }> = {
+    'Programada': { bg: 'bg-blue-50', border: 'border-blue-200' },
+    'Completada': { bg: 'bg-emerald-50', border: 'border-emerald-200' },
+    'Cancelada': { bg: 'bg-red-50', border: 'border-red-200' },
+    'No asistió': { bg: 'bg-amber-50', border: 'border-amber-200' },
   };
 
-  const currentStatus = statusConfig[appointment.status] || statusConfig['Programada'];
+  const currentStatusColors = statusColors[appointment.status] || statusColors['Programada'];
 
   return (
     <div className={`max-w-4xl mx-auto transition-all duration-500 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
       
-      {/* Header con Estado */}
+      {/* Card Principal */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-        {/* Barra superior con estado */}
-        <div className={`px-6 py-4 ${currentStatus.bg} border-b ${currentStatus.border}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${currentStatus.iconBg} ${currentStatus.text}`}>
-                {currentStatus.icon}
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Estado de la cita</p>
-                <p className={`font-semibold ${currentStatus.text}`}>{appointment.status}</p>
-              </div>
+        
+        {/* Header con Estado y Dropdown */}
+        <div className={`px-6 py-4 ${currentStatusColors.bg} border-b ${currentStatusColors.border}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Estado de la cita</p>
+              <p className="text-lg font-semibold text-gray-800">Gestionar Estado</p>
             </div>
-            <button
-              onClick={() => setShowStatusModal(true)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 ${currentStatus.border} ${currentStatus.text} hover:${currentStatus.bg} font-medium transition-all text-sm`}
-            >
-              <RefreshCw className="w-4 h-4" />
-              Cambiar Estado
-            </button>
+            
+            {/* Dropdown de Estado */}
+            <StatusDropdown
+              currentStatus={appointment.status}
+              onStatusChange={handleStatusUpdate}
+              isUpdating={isUpdatingStatus}
+            />
           </div>
         </div>
 
         {/* Contenido Principal */}
         <div className="p-6">
+          
           {/* Fecha y Hora - Destacado */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8 pb-6 border-b border-gray-100">
             <div className="flex items-center gap-4 flex-1">
               <div className="w-14 h-14 rounded-xl bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-7 h-7 text-vet-primary" />
@@ -278,7 +242,7 @@ export default function AppointmentDetailsView() {
         </div>
       </div>
 
-      {/* Acciones */}
+      {/* Botones de Acción */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <button
           onClick={() => navigate(`/patients/${patientId}`)}
@@ -308,21 +272,13 @@ export default function AppointmentDetailsView() {
         </div>
       </div>
 
-      {/* Modales */}
+      {/* Modal de Confirmación de Eliminación */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         petName={`la cita del ${formattedDate} a las ${formattedTime}`}
         isDeleting={isDeleting}
-      />
-
-      <UpdateStatusModal
-        isOpen={showStatusModal}
-        onClose={() => setShowStatusModal(false)}
-        onSubmit={handleStatusUpdate}
-        currentStatus={appointment.status}
-        isUpdating={isUpdatingStatus}
       />
     </div>
   );
