@@ -119,6 +119,7 @@ export default function PatientLayout() {
     const sections = [
       { path: "", label: "Datos de la Mascota" },
       { path: "consultations", label: "Consultas" },
+       { path: "recipes", label: "Recetas" },
       { path: "vaccinations", label: "Vacunas" },
       { path: "dewormings", label: "Desparasitación" },
       { path: "lab-exams", label: "Hematología" },
@@ -198,6 +199,13 @@ export default function PatientLayout() {
   const menuItems = [
     { id: "datos", label: "Información", icon: PawPrint, path: "", description: "Datos básicos" },
     { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
+    { 
+  id: "recetas", 
+  label: "Recetas", 
+  icon: FileText, // o Pill
+  path: "recipes", 
+  description: "Prescripciones médicas" 
+},
     { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
     { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings", description: "Control de parásitos" },
     { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams", description: "Exámenes de sangre" },

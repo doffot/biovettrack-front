@@ -62,6 +62,10 @@ import ConsultationListView from "./view/consultations/ConsultationListView";
 import CreateConsultationView from "./view/consultations/CreateConsultationView";
 import EditOwnerView from "./view/owner/EditOwnerView";
 
+// Recipes 👈 NUEVO
+import RecipeListView from "./view/recipes/RecipeListView";
+import CreateRecipeView from "./view/recipes/CreateRecipeView";
+
 // Invoices / Reportes
 import InvoiceReportView from "./view/invoices/InvoiceReportView";
 import AppointmentsView from "./view/appointment/AppointmentsView";
@@ -87,7 +91,7 @@ export default function Router() {
           <Route path="/" element={<HomeView />} index />
 
           {/* ==================== */}
-          {/* CITAS (RUTA GLOBAL) }
+          {/* CITAS (RUTA GLOBAL) */}
           {/* ==================== */}
           <Route path="/appointments">
             <Route index element={<AppointmentsView />} />
@@ -139,6 +143,12 @@ export default function Router() {
               <Route path="consultations">
                 <Route index element={<ConsultationListView />} />
                 <Route path="create" element={<CreateConsultationView />} />
+              </Route>
+
+              {/* Recetas 👈 NUEVO */}
+              <Route path="recipes">
+                <Route index element={<RecipeListView />} />
+                <Route path="create" element={<CreateRecipeView />} />
               </Route>
 
               {/* Citas dentro del paciente */}
