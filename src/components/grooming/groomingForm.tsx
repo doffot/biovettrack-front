@@ -4,7 +4,6 @@ import {
   Scissors,
   Calendar,
   DollarSign,
-  ClipboardCheck,
   FileText,
   MessageSquare,
   User,
@@ -23,7 +22,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
   errors,
   groomers = [],
 }) => {
-  // ✅ Campos del servicio (incluye cost, sin campos de pago)
   const serviceFields = [
     {
       name: "date" as const,
@@ -54,16 +52,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       colSpan: "md:col-span-1",
     },
     {
-      name: "status" as const,
-      label: "Estado del Servicio",
-      placeholder: "Estado",
-      icon: ClipboardCheck,
-      type: "select",
-      options: ["Programado", "En progreso", "Completado", "Cancelado"],
-      required: true,
-      colSpan: "md:col-span-1",
-    },
-    {
       name: "cost" as const,
       label: "Costo ($)",
       placeholder: "0.00",
@@ -75,7 +63,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
     },
   ];
 
-  // ✅ Campos de texto
   const textFields = [
     {
       name: "specifications" as const,
@@ -101,7 +88,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
     },
   ];
 
-  // ✅ Tipo para configuración de campos
   type FieldConfig = {
     name: keyof GroomingServiceFormData;
     label: string;
@@ -116,12 +102,10 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
     maxLength?: number;
   };
 
-  // ✅ Renderizar campo individual
   const renderField = (field: FieldConfig) => {
     const Icon = field.icon;
     const error = errors[field.name];
 
-    // Select de Groomers
     if (field.type === "groomer-select") {
       return (
         <div key={field.name} className={field.colSpan}>
@@ -156,7 +140,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       );
     }
 
-    // Select normal
     if (field.type === "select" && field.options && field.options.length > 0) {
       return (
         <div key={field.name} className={field.colSpan}>
@@ -191,7 +174,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       );
     }
 
-    // Textarea
     if (field.type === "textarea" && field.rows) {
       return (
         <div key={field.name} className={field.colSpan}>
@@ -222,7 +204,6 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       );
     }
 
-    // Input (number, date, text)
     return (
       <div key={field.name} className={field.colSpan}>
         <div className="space-y-1.5">
@@ -256,18 +237,16 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* ✅ Sección de Servicio */}
       <div>
         <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <Scissors className="w-4 h-4 text-vet-primary" />
           Información del Servicio
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {serviceFields.map(renderField)}
         </div>
       </div>
 
-      {/* ✅ Sección de Detalles */}
       <div>
         <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <FileText className="w-4 h-4 text-vet-primary" />

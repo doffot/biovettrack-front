@@ -27,7 +27,7 @@ import eosinophilsSound from "/sounds/eosinophils.mp3";
 import nrbcSound from "/sounds/nrbc.mp3";
 import errorSound from "/sounds/error.mp3";
 
-import type { DifferentialField, LabExamFormData } from "../../types";
+import type { DifferentialField, LabExamFormData, LabExam } from "../../types";
 import { GeneralTab } from "../../components/labexam/GeneralTab";
 import { DifferentialTab } from "../../components/labexam/DifferentialTab";
 import { ObservationsTab } from "../../components/labexam/ObservationsTab";
@@ -69,6 +69,7 @@ const normalValues = {
 export default function CreateLabExamView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
   const [mounted, setMounted] = useState(false);
   const [species] = useState<"canino" | "felino">("canino");
   const [activeTab, setActiveTab] = useState<
@@ -93,11 +94,8 @@ export default function CreateLabExamView() {
     field: keyof LabExamFormData["differentialCount"];
   } | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [savedExamData, setSavedExamData] = useState<LabExamFormData | null>(
-    null
-  );
+  const [savedExamData, setSavedExamData] = useState<LabExam | null>(null);
   const errorAudioRef = useRef<HTMLAudioElement | null>(null);
-  
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [examCostUSD, setExamCostUSD] = useState(0);
@@ -141,7 +139,6 @@ export default function CreateLabExamView() {
   const treatingVet = watch("treatingVet");
   const examDate = watch("date");
 
-  // Determinar si hay paciente seleccionado
   const isPatientSelected = Boolean(patientName && patientName.trim() !== "");
 
   const calculatedValues = useMemo(() => {
@@ -229,41 +226,46 @@ export default function CreateLabExamView() {
       setSavedExamData(data);
       setShowShareModal(true);
       queryClient.invalidateQueries({ queryKey: ["labExams"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
 
+  const handlePaymentConfirm = (paymentData: {
+    paymentMethodId?: string;
+    reference?: string;
+    addAmountPaidUSD: number;
+    addAmountPaidBs: number;
+    exchangeRate: number;
+    isPartial: boolean;
+    creditAmountUsed?: number;
+  }) => {
+    const isPayingInBs = paymentData.addAmountPaidBs > 0;
+    const amountPaid = isPayingInBs
+      ? paymentData.addAmountPaidBs
+      : paymentData.addAmountPaidUSD;
+    const currency = isPayingInBs ? "Bs" : "USD";
 
-const handlePaymentConfirm = (paymentData: { 
-  paymentMethodId: string; 
-  reference?: string; 
-  amountPaidUSD: number;
-  amountPaidBs: number;
-  exchangeRate: number;
-  isPartial: boolean;
-}) => {
-  const finalData = {
-    ...watch(),
-    differentialCount,
-    totalCells,
-    ownerName: watch("ownerName")?.trim() || undefined,
-    ownerPhone: watch("ownerPhone")?.trim() || undefined,
-    // Datos del pago
-    paymentMethodId: paymentData.paymentMethodId,
-    paymentReference: paymentData.reference,
-    exchangeRate: paymentData.exchangeRate,
-    amountPaidUSD: paymentData.amountPaidUSD,
-    amountPaidBs: paymentData.amountPaidBs,
-    isPartialPayment: paymentData.isPartial,
+    const finalData: LabExamFormData = {
+      ...watch(),
+      differentialCount,
+      totalCells,
+      ownerName: watch("ownerName")?.trim() || undefined,
+      ownerPhone: watch("ownerPhone")?.trim() || undefined,
+      paymentMethodId: paymentData.paymentMethodId,
+      paymentReference: paymentData.reference,
+      exchangeRate: paymentData.exchangeRate,
+      paymentAmount: amountPaid,
+      paymentCurrency: currency,
+      isPartialPayment: paymentData.isPartial,
+      creditAmountUsed: paymentData.creditAmountUsed,
+    };
+
+    mutate(finalData);
+    setShowPaymentModal(false);
   };
-
-
-  mutate(finalData);
-  setShowPaymentModal(false);
-};
-
 
   const handleIncrement = (
     field: keyof LabExamFormData["differentialCount"],
@@ -317,7 +319,6 @@ const handlePaymentConfirm = (paymentData: {
     toast.success("Conteo diferencial reiniciado");
   };
 
-
   const handleClearPatient = () => {
     setValue("patientId", undefined);
     setValue("patientName", "");
@@ -352,15 +353,11 @@ const handlePaymentConfirm = (paymentData: {
       return;
     }
 
-   
     setExamCostUSD(finalData.cost || 0);
 
-   
     if (finalData.patientId) {
-      //  Paciente propio → crear factura pendiente automáticamente
       mutate(finalData);
     } else if (finalData.ownerName) {
-      //  Dueño referido → mostrar modal de pago
       setShowPaymentModal(true);
     } else {
       toast.error("Debe ingresar los datos del dueño");
@@ -378,7 +375,6 @@ const handlePaymentConfirm = (paymentData: {
     return numValue < range[0] || numValue > range[1];
   };
 
-  // Manejar cambio de tab con validación
   const handleTabChange = (
     tab: "patient" | "general" | "differential" | "observations"
   ) => {
@@ -405,7 +401,6 @@ const handlePaymentConfirm = (paymentData: {
     setMounted(true);
   }, []);
 
-  // Formatear fecha para mostrar
   const formatDate = (dateString: string) => {
     if (!dateString) return "Sin fecha";
     const date = new Date(dateString + "T00:00:00");
@@ -465,17 +460,14 @@ const handlePaymentConfirm = (paymentData: {
 
   return (
     <div className="min-h-screen">
-      {/* Header de la Vista */}
       <div className="px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-5xl mx-auto">
-          {/* Barra Superior con Navegación */}
           <div
             className={`transform transition-all duration-500 ${
               mounted ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
             }`}
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              {/* Lado Izquierdo - Título y Navegación */}
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => navigate(-1)}
@@ -499,7 +491,6 @@ const handlePaymentConfirm = (paymentData: {
                 </div>
               </div>
 
-              {/* Botón Cambiar Paciente  */}
               {isPatientSelected && (
                 <button
                   type="button"
@@ -512,11 +503,9 @@ const handlePaymentConfirm = (paymentData: {
               )}
             </div>
 
-            {/* Info Cards - Solo si hay paciente */}
             {isPatientSelected && (
               <div className="space-y-3 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  {/* Paciente */}
                   <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
@@ -533,7 +522,6 @@ const handlePaymentConfirm = (paymentData: {
                     </div>
                   </div>
 
-                  {/* Dueño */}
                   <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-cyan-100 flex items-center justify-center flex-shrink-0">
@@ -550,7 +538,6 @@ const handlePaymentConfirm = (paymentData: {
                     </div>
                   </div>
 
-                  {/* Veterinario */}
                   <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -567,7 +554,6 @@ const handlePaymentConfirm = (paymentData: {
                     </div>
                   </div>
 
-                  {/* Fecha */}
                   <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -588,29 +574,24 @@ const handlePaymentConfirm = (paymentData: {
             )}
           </div>
 
-          {/* Card Principal del Formulario */}
           <div
             className={`transform transition-all duration-700 delay-150 ${
               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
             <div className="bg-white rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden">
-              {/* Navegación de Tabs */}
               <TabNavigation
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
                 isPatientSelected={isPatientSelected}
               />
 
-              {/* Contenido del Form */}
               <form onSubmit={handleSubmit(onSubmit)} noValidate>
                 <div className="p-4 sm:p-6">{renderActiveTab()}</div>
               </form>
             </div>
 
-            {/* Footer con Progreso */}
             <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-1">
-              {/* Indicador de Progreso */}
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   {["patient", "general", "differential", "observations"].map(
@@ -656,7 +637,6 @@ const handlePaymentConfirm = (paymentData: {
                 </span>
               </div>
 
-              {/* Contador de Células */}
               {totalCells > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white shadow-soft border border-gray-100">
                   <span className="text-sm text-vet-muted">Células:</span>
@@ -684,7 +664,6 @@ const handlePaymentConfirm = (paymentData: {
         </div>
       </div>
 
-      {/*  Modal de Pago */}
       {showPaymentModal && (
         <PaymentModal
           isOpen={showPaymentModal}
@@ -694,7 +673,6 @@ const handlePaymentConfirm = (paymentData: {
         />
       )}
 
-      {/* Modal de Compartir */}
       {showShareModal && savedExamData && (
         <ShareResultsModal
           isOpen={showShareModal}

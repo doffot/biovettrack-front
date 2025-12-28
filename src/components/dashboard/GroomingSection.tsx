@@ -18,7 +18,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
   const navigate = useNavigate();
   const isEmpty = groomingServices.length === 0;
 
-  // Obtener owners y pacientes con tipos explícitos
   const { data: owners = [] } = useQuery<Owner[]>({
     queryKey: ["owners"],
     queryFn: getOwners,
@@ -31,7 +30,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Crear mapas con tipos explícitos
   const ownersMap = useMemo(() => {
     const map = new Map<string, Owner>();
     (owners as Owner[]).forEach((owner: Owner) => {
@@ -54,7 +52,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
     let ownerName = "Sin dueño";
     let ownerContact = "";
 
-    // Si patientId es string, buscar en el mapa de pacientes
     if (typeof service.patientId === "string") {
       patientId = service.patientId;
       const patient = patientsMap.get(patientId);
@@ -62,7 +59,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
       if (patient) {
         patientName = patient.name;
         
-        // Buscar información del owner
         if (typeof patient.owner === "string") {
           const owner = ownersMap.get(patient.owner);
           if (owner) {
@@ -71,7 +67,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
           }
         } else if (typeof patient.owner === "object" && patient.owner) {
           ownerName = patient.owner.name;
-          // Si necesitas el contacto, busca en el mapa
           const owner = ownersMap.get(patient.owner._id);
           if (owner) {
             ownerContact = owner.contact || "";
@@ -79,15 +74,12 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
         }
       }
     } 
-    // Si patientId es objeto
     else if (typeof service.patientId === "object" && service.patientId) {
       patientId = service.patientId._id || "";
       patientName = service.patientId.name || "Paciente";
       
-      // Extraer información del owner
       if (service.patientId.owner) {
         if (typeof service.patientId.owner === "string") {
-          // Buscar en el mapa de owners
           const owner = ownersMap.get(service.patientId.owner);
           if (owner) {
             ownerName = owner.name;
@@ -95,7 +87,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
           }
         } else if (typeof service.patientId.owner === "object") {
           ownerName = service.patientId.owner.name || "Sin dueño";
-          // Buscar contacto completo en el mapa
           const ownerId = service.patientId.owner._id;
           if (ownerId) {
             const owner = ownersMap.get(ownerId);
@@ -166,7 +157,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
                     ownerContact={serviceInfo.ownerContact}
                     service={service.service}
                     specifications={service.specifications}
-                    status={service.status}
                   />
                 </div>
               );
@@ -199,7 +189,6 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
                         ownerContact={serviceInfo.ownerContact}
                         service={service.service}
                         specifications={service.specifications}
-                        status={service.status}
                       />
                     </div>
                   );
@@ -213,15 +202,13 @@ export function GroomingSection({ groomingServices }: GroomingSectionProps) {
   );
 }
 
-// Componente interno
 function GroomingItem({ 
   time, 
   patientName, 
   ownerName,
   ownerContact, 
   service, 
-  specifications,
-  status 
+  specifications
 }: {
   time: string;
   patientName: string;
@@ -229,17 +216,7 @@ function GroomingItem({
   ownerContact: string;
   service: string;
   specifications: string;
-  status: string;
 }) {
-  const getStatusColor = () => {
-    switch (status) {
-      case "Completado": return "bg-green-100 text-green-700";
-      case "En progreso": return "bg-amber-100 text-amber-700";
-      case "Cancelado": return "bg-red-100 text-red-700";
-      default: return "bg-purple-100 text-purple-700";
-    }
-  };
-
   const formatContact = (contact: string) => {
     if (!contact) return "";
     if (contact.length > 11) {
@@ -255,14 +232,9 @@ function GroomingItem({
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-vet-text text-sm truncate group-hover:text-vet-primary transition-colors">
-            {patientName}
-          </p>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${getStatusColor()}`}>
-            {status}
-          </span>
-        </div>
+        <p className="font-semibold text-vet-text text-sm truncate group-hover:text-vet-primary transition-colors">
+          {patientName}
+        </p>
         <div className="flex items-center gap-2 text-xs text-vet-muted">
           <div className="flex items-center gap-1">
             <User className="w-3 h-3" />

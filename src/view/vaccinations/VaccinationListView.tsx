@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Syringe, 
-  Plus, 
-  Calendar, 
+import {
+  Syringe,
+  Plus,
+  Calendar,
   Clock,
   Trash2,
   Eye,
@@ -20,7 +20,7 @@ import VaccinationModal from "../../components/vaccinations/VaccinationModal";
 export default function VaccinationListView() {
   const { patientId } = useParams<{ patientId: string }>();
   const queryClient = useQueryClient();
-  
+
   const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -57,7 +57,9 @@ export default function VaccinationListView() {
     if (!dateStr) return false;
     const date = new Date(dateStr);
     const today = new Date();
-    const diffDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
     return diffDays >= 0 && diffDays <= 30;
   };
 
@@ -80,7 +82,9 @@ export default function VaccinationListView() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Vacunas</h2>
-          <p className="text-sm text-gray-500">{vaccinations.length} registrada{vaccinations.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-gray-500">
+            {vaccinations.length} registrada{vaccinations.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <Link
           to="create"
@@ -107,9 +111,13 @@ export default function VaccinationListView() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-gray-900">{vaccination.vaccineType}</p>
+                  <p className="font-semibold text-gray-900">
+                    {vaccination.vaccineType}
+                  </p>
                   {vaccination.laboratory && (
-                    <span className="text-xs text-gray-400">• {vaccination.laboratory}</span>
+                    <span className="text-xs text-gray-400">
+                      • {vaccination.laboratory}
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
@@ -118,13 +126,15 @@ export default function VaccinationListView() {
                     {formatDate(vaccination.vaccinationDate)}
                   </span>
                   {vaccination.nextVaccinationDate && (
-                    <span className={`flex items-center gap-1 ${
-                      isPastDue(vaccination.nextVaccinationDate)
-                        ? "text-red-600"
-                        : isUpcoming(vaccination.nextVaccinationDate)
-                        ? "text-amber-600"
-                        : "text-gray-500"
-                    }`}>
+                    <span
+                      className={`flex items-center gap-1 ${
+                        isPastDue(vaccination.nextVaccinationDate)
+                          ? "text-red-600"
+                          : isUpcoming(vaccination.nextVaccinationDate)
+                          ? "text-amber-600"
+                          : "text-gray-500"
+                      }`}
+                    >
                       <Clock className="w-3 h-3" />
                       Próxima: {formatDate(vaccination.nextVaccinationDate)}
                       {isPastDue(vaccination.nextVaccinationDate) && (
@@ -137,7 +147,9 @@ export default function VaccinationListView() {
 
               {/* Precio */}
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-gray-900">${vaccination.cost.toFixed(2)}</p>
+                <p className="font-semibold text-gray-900">
+                  ${vaccination.cost.toFixed(2)}
+                </p>
               </div>
 
               {/* Acciones */}
@@ -197,7 +209,9 @@ export default function VaccinationListView() {
           setShowDeleteModal(false);
           setVaccinationToDelete(null);
         }}
-        onConfirm={() => vaccinationToDelete?._id && removeVaccination(vaccinationToDelete._id)}
+        onConfirm={() =>
+          vaccinationToDelete?._id && removeVaccination(vaccinationToDelete._id)
+        }
         petName={`la vacuna ${vaccinationToDelete?.vaccineType || ""}`}
         isDeleting={isDeleting}
       />

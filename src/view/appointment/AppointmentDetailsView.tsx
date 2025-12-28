@@ -1,8 +1,12 @@
 // src/views/appointment/AppointmentDetailsView.tsx
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAppointmentById, deleteAppointment, updateAppointmentStatus } from "../../api/appointmentAPI";
+import { 
+  getAppointmentById, 
+  deleteAppointment, 
+  updateAppointmentStatus,
+} from "../../api/appointmentAPI";
 import { useState, useEffect } from "react";
 import { toast } from "../../components/Toast";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -16,6 +20,10 @@ import {
   XCircle,
   ClipboardList,
   MessageSquareText,
+  Scissors,
+  Plus,
+  AlertTriangle,
+  DollarSign,
 } from "lucide-react";
 import type { AppointmentStatus } from "../../types/appointment";
 import StatusDropdown from "../../components/appointments/StatusDropdown";
@@ -25,16 +33,15 @@ export default function AppointmentDetailsView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Query para obtener los detalles de la cita
   const { data: appointment, isLoading, error } = useQuery({
     queryKey: ["appointment", appointmentId],
     queryFn: () => getAppointmentById(appointmentId!),
     enabled: !!appointmentId,
   });
 
-  // Mutation para eliminar la cita
   const { mutate: deleteAppointmentMutate, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteAppointment(appointmentId!),
     onSuccess: () => {
@@ -44,22 +51,26 @@ export default function AppointmentDetailsView() {
       navigate(`/patients/${patientId}`);
     },
     onError: (error: Error) => {
-      toast.error(` ${error.message}`);
+      toast.error(error.message);
     },
   });
 
-  // Mutation para actualizar el estado
   const { mutate: updateStatusMutate, isPending: isUpdatingStatus } = useMutation({
-    mutationFn: (status: AppointmentStatus) => 
-      updateAppointmentStatus(appointmentId!, { status }),
+    mutationFn: async ({ status, shouldRefund }: { status: AppointmentStatus; shouldRefund?: boolean }) => {
+      return updateAppointmentStatus(appointmentId!, { status, shouldRefund });
+    },
     onSuccess: () => {
       toast.success("Estado actualizado con éxito");
       queryClient.invalidateQueries({ queryKey: ["appointment", appointmentId] });
       queryClient.invalidateQueries({ queryKey: ["activeAppointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["groomingServices", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+      setShowCancelModal(false);
     },
     onError: (error: Error) => {
-      toast.error(` ${error.message}`);
+      toast.error(error.message);
     },
   });
 
@@ -73,10 +84,19 @@ export default function AppointmentDetailsView() {
   };
 
   const handleStatusUpdate = (status: AppointmentStatus) => {
-    updateStatusMutate(status);
+    // Si es cancelación y hay prepago, mostrar modal
+    if (status === "Cancelada" && appointment?.prepaidAmount && appointment.prepaidAmount > 0) {
+      setShowCancelModal(true);
+      return;
+    }
+    // Si no hay prepago, cancelar directamente
+    updateStatusMutate({ status });
   };
 
-  // Loading State
+  const handleCancelWithRefund = (shouldRefund: boolean) => {
+    updateStatusMutate({ status: "Cancelada", shouldRefund });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -88,7 +108,6 @@ export default function AppointmentDetailsView() {
     );
   }
 
-  // Error State
   if (error) {
     return (
       <div className="text-center py-20">
@@ -108,7 +127,6 @@ export default function AppointmentDetailsView() {
     );
   }
 
-  // Not Found State
   if (!appointment) {
     return (
       <div className="text-center py-20">
@@ -128,7 +146,6 @@ export default function AppointmentDetailsView() {
     );
   }
 
-  // Formatear fecha y hora
   const appointmentDate = new Date(appointment.date);
   const formattedDate = appointmentDate.toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -141,7 +158,6 @@ export default function AppointmentDetailsView() {
     minute: '2-digit'
   });
 
-  // Configuración de colores por estado (para el header)
   const statusColors: Record<string, { bg: string; border: string }> = {
     'Programada': { bg: 'bg-blue-50', border: 'border-blue-200' },
     'Completada': { bg: 'bg-emerald-50', border: 'border-emerald-200' },
@@ -151,13 +167,14 @@ export default function AppointmentDetailsView() {
 
   const currentStatusColors = statusColors[appointment.status] || statusColors['Programada'];
 
+  const canCreateService = appointment.type === "Peluquería" && 
+                          (appointment.status === "Programada" || appointment.status === "Completada");
+
   return (
     <div className={`max-w-4xl mx-auto transition-all duration-500 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
       
-      {/* Card Principal */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         
-        {/* Header con Estado y Dropdown */}
         <div className={`px-6 py-4 ${currentStatusColors.bg} border-b ${currentStatusColors.border}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -165,7 +182,6 @@ export default function AppointmentDetailsView() {
               <p className="text-lg font-semibold text-gray-800">Gestionar Estado</p>
             </div>
             
-            {/* Dropdown de Estado */}
             <StatusDropdown
               currentStatus={appointment.status}
               onStatusChange={handleStatusUpdate}
@@ -174,10 +190,8 @@ export default function AppointmentDetailsView() {
           </div>
         </div>
 
-        {/* Contenido Principal */}
         <div className="p-6">
           
-          {/* Fecha y Hora - Destacado */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8 pb-6 border-b border-gray-100">
             <div className="flex items-center gap-4 flex-1">
               <div className="w-14 h-14 rounded-xl bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
@@ -199,7 +213,21 @@ export default function AppointmentDetailsView() {
             </div>
           </div>
 
-          {/* Tipo de Cita */}
+          {/* Mostrar prepago si existe */}
+          {appointment.prepaidAmount && appointment.prepaidAmount > 0 && (
+            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-emerald-800">Prepago registrado</p>
+                  <p className="text-lg font-bold text-emerald-600">${appointment.prepaidAmount.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList className="w-5 h-5 text-vet-primary" />
@@ -210,7 +238,6 @@ export default function AppointmentDetailsView() {
             </div>
           </div>
 
-          {/* Motivo */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="w-5 h-5 text-vet-primary" />
@@ -225,7 +252,6 @@ export default function AppointmentDetailsView() {
             </div>
           </div>
 
-          {/* Observaciones */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <MessageSquareText className="w-5 h-5 text-vet-primary" />
@@ -239,10 +265,25 @@ export default function AppointmentDetailsView() {
               </p>
             </div>
           </div>
+
+          {canCreateService && (
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <Link
+                to={`/patients/${patientId}/grooming-services/create?appointmentId=${appointmentId}`}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-200 shadow-lg shadow-blue-500/25"
+              >
+                <Scissors className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
+                Crear Servicio de Peluquería
+              </Link>
+              <p className="text-xs text-gray-500 mt-2">
+                Este servicio se vinculará automáticamente a la cita
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Botones de Acción */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <button
           onClick={() => navigate(`/patients/${patientId}`)}
@@ -272,7 +313,6 @@ export default function AppointmentDetailsView() {
         </div>
       </div>
 
-      {/* Modal de Confirmación de Eliminación */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -280,6 +320,67 @@ export default function AppointmentDetailsView() {
         petName={`la cita del ${formattedDate} a las ${formattedTime}`}
         isDeleting={isDeleting}
       />
+
+      {/* Modal de cancelación con prepago */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Cita con prepago</h3>
+                <p className="text-sm text-gray-500">Esta cita tiene un prepago registrado</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <span className="font-semibold text-gray-800">Monto prepagado:</span>
+              </div>
+              <p className="text-2xl font-bold text-green-600">
+                ${appointment?.prepaidAmount?.toFixed(2)}
+              </p>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-6">
+              ¿Qué deseas hacer con el prepago al cancelar esta cita?
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => handleCancelWithRefund(true)}
+                disabled={isUpdatingStatus}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors disabled:opacity-50"
+              >
+                {isUpdatingStatus ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  "Reembolsar y cancelar"
+                )}
+              </button>
+              
+              <button
+                onClick={() => handleCancelWithRefund(false)}
+                disabled={isUpdatingStatus}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors disabled:opacity-50"
+              >
+                Mantener como crédito
+              </button>
+
+              <button
+                onClick={() => setShowCancelModal(false)}
+                disabled={isUpdatingStatus}
+                className="w-full px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                No cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

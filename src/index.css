@@ -17,6 +17,7 @@
   --color-vet-text: #1A3E4A;
   --color-vet-muted: #5A7C88;
   --color-vet-danger: #dc3545;
+  --color-sky-soft: #F0F9FC;
 
   /* Alias funcionales */
   --color-primary: var(--color-vet-primary);

@@ -1,15 +1,15 @@
 // src/components/ShareResultsModal.tsx
-import {  Printer, CheckCircle2, Loader2 } from "lucide-react";
+import { Printer, CheckCircle2, Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import html2pdf from "html2pdf.js";
-import { toast } from "./Toast"; // Tu componente
-import type { LabExamFormData } from "../types";
+import { toast } from "./Toast";
+import type { LabExam } from "../types";
 
 interface ShareResultsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  examData: LabExamFormData;
+  examData: LabExam;
   patientData: {
     name: string;
     species: string;
@@ -102,7 +102,6 @@ export default function ShareResultsModal({
         .from(element)
         .save();
 
-      // Cerrar modal y mostrar toast de éxito
       onClose();
       toast.success(
         "PDF Descargado",

@@ -11,7 +11,7 @@ export const vaccinationSchema = z.object({
   laboratory: z.string().optional(),
   batchNumber: z.string().optional(),
   expirationDate: z.string().optional(),
-  nextVaccinationDate: z.string().optional(),
+nextVaccinationDate: z.string().optional(),
   observations: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),

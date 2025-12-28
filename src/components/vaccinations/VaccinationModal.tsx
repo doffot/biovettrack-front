@@ -1,14 +1,20 @@
 // src/components/vaccinations/VaccinationModal.tsx
-import { X, Calendar, Syringe, Building, Hash, Clock, FileText } from "lucide-react";
-import type { Vaccination } from "../../types/vaccination";
+import { X, Calendar, Syringe, Building, Hash, Clock, FileText, CheckCircle2, XCircle } from "lucide-react";
+import type { Vaccination, VaccinationStatus } from "../../types/vaccination";
 
 interface VaccinationModalProps {
   isOpen: boolean;
   onClose: () => void;
   vaccination: Vaccination;
+  onStatusChange?: (status: VaccinationStatus) => void;
 }
 
-export default function VaccinationModal({ isOpen, onClose, vaccination }: VaccinationModalProps) {
+export default function VaccinationModal({ 
+  isOpen, 
+  onClose, 
+  vaccination,
+  onStatusChange 
+}: VaccinationModalProps) {
   if (!isOpen) return null;
 
   const formatDate = (dateStr?: string) => {
@@ -19,6 +25,33 @@ export default function VaccinationModal({ isOpen, onClose, vaccination }: Vacci
       year: "numeric",
     });
   };
+
+  const getStatusConfig = (status?: VaccinationStatus) => {
+    if (!status) return null;
+    
+    switch (status) {
+      case "Aplicada":
+        return {
+          color: "bg-green-100 text-green-700",
+          icon: CheckCircle2,
+          label: "Aplicada",
+        };
+      case "Programada":
+        return {
+          color: "bg-blue-100 text-blue-700",
+          icon: Clock,
+          label: "Programada",
+        };
+      case "Cancelada":
+        return {
+          color: "bg-red-100 text-red-700",
+          icon: XCircle,
+          label: "Cancelada",
+        };
+    }
+  };
+
+  const statusConfig = getStatusConfig(vaccination.status);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
@@ -44,6 +77,53 @@ export default function VaccinationModal({ isOpen, onClose, vaccination }: Vacci
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Status si está vinculada a cita */}
+        {vaccination.status && statusConfig && (
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Estado de aplicación</p>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 text-sm rounded-full font-medium flex items-center gap-1 ${statusConfig.color}`}>
+                    <statusConfig.icon className="w-3.5 h-3.5" />
+                    {statusConfig.label}
+                  </span>
+                  {vaccination.appointmentId && (
+                    <span className="text-xs text-gray-400">• Vinculada a cita</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Botones de acción para cambiar status */}
+              {vaccination.status === "Programada" && onStatusChange && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onStatusChange("Aplicada")}
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    Marcar aplicada
+                  </button>
+                  <button
+                    onClick={() => onStatusChange("Cancelada")}
+                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+              
+              {vaccination.status === "Aplicada" && onStatusChange && (
+                <button
+                  onClick={() => onStatusChange("Cancelada")}
+                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors"
+                >
+                  Cancelar aplicación
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Contenido */}
         <div className="p-4 space-y-3">

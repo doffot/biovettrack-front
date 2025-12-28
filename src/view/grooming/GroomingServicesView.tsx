@@ -1,16 +1,32 @@
 // src/views/grooming/GroomingServicesView.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Scissors, AlertCircle, Plus, Search, ArrowLeft } from 'lucide-react';
+import { Scissors, AlertCircle, Plus, Search, ArrowLeft, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import { getAllGroomingServices } from '../../api/groomingAPI';
 import { getInvoices } from '../../api/invoiceAPI';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import ServiceStatsCards from '../../components/grooming/ServiceStatsCards';
 import ServiceMobileCards from '../../components/grooming/ServiceMobileCards';
 import ServiceTable from '../../components/grooming/ServiceTable';
 import type { Invoice } from '../../types/invoice';
 import type { GroomingService } from '../../types/grooming';
+
+interface PaymentInfo {
+  paymentStatus: string;
+  paymentMethod: string | null;
+  paymentReference: string | null;
+  amountPaid: number;
+  amountPaidInCurrency: number;
+  currency: string;
+  exchangeRate?: number;
+  isPaid: boolean;
+}
+
+interface EnrichedGroomingService extends GroomingService {
+  paymentInfo: PaymentInfo;
+}
+
+type PatientField = GroomingService['patientId'];
 
 export default function GroomingServicesView() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,7 +45,6 @@ export default function GroomingServicesView() {
   const invoices = invoicesData?.invoices || [];
   const isLoading = isLoadingServices || isLoadingInvoices;
 
-  // Buscar factura asociada a un servicio
   const findInvoiceForService = (serviceId: string): Invoice | undefined => {
     return invoices.find(invoice => 
       invoice.items.some(item => 
@@ -39,8 +54,7 @@ export default function GroomingServicesView() {
     );
   };
 
-  // Obtener información de pago para mostrar en cada servicio
-  const getPaymentInfo = (service: GroomingService) => {
+  const getPaymentInfo = (service: GroomingService): PaymentInfo => {
     const invoice = findInvoiceForService(service._id!);
     
     if (!invoice) {
@@ -77,8 +91,8 @@ export default function GroomingServicesView() {
 
     return {
       paymentStatus: invoice.paymentStatus,
-      paymentMethod: invoice.paymentMethod,
-      paymentReference: invoice.paymentReference,
+      paymentMethod: invoice.paymentMethod ? String(invoice.paymentMethod) : null,
+      paymentReference: invoice.paymentReference || null,
       amountPaid: amountPaid,
       amountPaidInCurrency: amountPaidInCurrency,
       currency: invoice.currency || "USD",
@@ -87,8 +101,7 @@ export default function GroomingServicesView() {
     };
   };
 
-  // Formatear moneda
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount: number, currency: string): string => {
     if (currency === "Bs") {
       return `Bs. ${amount.toLocaleString('es-VE', { 
         minimumFractionDigits: 2, 
@@ -98,25 +111,23 @@ export default function GroomingServicesView() {
     return `$${amount.toFixed(2)}`;
   };
 
-  // Helpers para datos de paciente
-  const getPatientName = (patientId: any) => {
+  const getPatientName = (patientId: PatientField): string => {
     if (!patientId) return '—';
     if (typeof patientId === 'string') return 'Mascota';
     return patientId.name || 'Mascota';
   };
 
-  const getPatientSpecies = (patientId: any) => {
+  const getPatientSpecies = (patientId: PatientField): string => {
     if (!patientId || typeof patientId === 'string') return '';
     return patientId.species || '';
   };
 
-  const getPatientBreed = (patientId: any) => {
+  const getPatientBreed = (patientId: PatientField): string => {
     if (!patientId || typeof patientId === 'string') return '';
     return patientId.breed || '';
   };
 
-  // Iconos y badges
-  const getServiceIcon = (serviceType: string) => {
+  const getServiceIcon = (serviceType: string): string => {
     const icons: Record<string, string> = {
       'Corte': '✂️',
       'Baño': '🛁',
@@ -125,17 +136,7 @@ export default function GroomingServicesView() {
     return icons[serviceType] || '🐾';
   };
 
-  const getServiceStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      'Programado': 'bg-blue-100 text-blue-700 border border-blue-200',
-      'En progreso': 'bg-yellow-100 text-yellow-700 border border-yellow-200',
-      'Completado': 'bg-green-100 text-green-700 border border-green-200',
-      'Cancelado': 'bg-red-100 text-red-700 border border-red-200'
-    };
-    return styles[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
-  };
-
-  const getPaymentStatusBadge = (status: string) => {
+  const getPaymentStatusBadge = (status: string): string => {
     const styles: Record<string, string> = {
       'Pendiente': 'bg-orange-100 text-orange-700 border border-orange-200',
       'Pagado': 'bg-green-100 text-green-700 border border-green-200',
@@ -146,7 +147,7 @@ export default function GroomingServicesView() {
     return styles[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
   };
 
-  const getPaymentStatusIcon = (status: string) => {
+  const getPaymentStatusIcon = (status: string): ReactElement => {
     switch (status) {
       case 'Pagado': return <CheckCircle className="w-3 h-3 text-green-600" />;
       case 'Pendiente': return <Clock className="w-3 h-3 text-orange-600" />;
@@ -157,30 +158,29 @@ export default function GroomingServicesView() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('es-ES', {
       day: '2-digit', month: 'short', year: 'numeric'
     }).format(date);
   };
 
-  // Enriquecer servicios con info de pago
-  const enrichedServices = useMemo(() => {
+  const enrichedServices: EnrichedGroomingService[] = useMemo(() => {
     return services.map((service: GroomingService) => ({
       ...service,
       paymentInfo: getPaymentInfo(service)
     }));
   }, [services, invoices]);
 
-  // Filtrar servicios del día
-  const filteredServices = useMemo(() => {
+  const filteredServices: EnrichedGroomingService[] = useMemo(() => {
     if (!Array.isArray(enrichedServices)) return [];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todaysServices = enrichedServices.filter((service: any) => {
+    const todaysServices = enrichedServices.filter((service: EnrichedGroomingService) => {
       if (!service.date) return false;
+      
       const serviceDate = new Date(service.date);
       serviceDate.setHours(0, 0, 0, 0);
       return serviceDate.getTime() === today.getTime();
@@ -188,21 +188,19 @@ export default function GroomingServicesView() {
 
     if (!searchTerm) return todaysServices;
 
-    return todaysServices.filter((service: any) => {
+    return todaysServices.filter((service: EnrichedGroomingService) => {
       const searchLower = searchTerm.toLowerCase();
       const patientName = getPatientName(service.patientId).toLowerCase();
-      const serviceName = (service.service || '').toLowerCase();
-      const specs = (service.specifications || '').toLowerCase();
+      const serviceName = service.service.toLowerCase();
+      const specs = service.specifications.toLowerCase();
       return patientName.includes(searchLower) || serviceName.includes(searchLower) || specs.includes(searchLower);
     });
   }, [enrichedServices, searchTerm]);
 
-  // ✅ Calcular ingresos DIRECTAMENTE desde las facturas del día
   const incomeStats = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Filtrar facturas del día que tengan items de grooming
     const todayGroomingInvoices = invoices.filter(invoice => {
       if (!invoice.date) return false;
       
@@ -219,13 +217,10 @@ export default function GroomingServicesView() {
     let paidBs = 0;
     let pendingUSD = 0;
 
-    // Usar los nuevos campos amountPaidUSD y amountPaidBs
     todayGroomingInvoices.forEach(invoice => {
-      // Sumar pagos por moneda
       paidUSD += invoice.amountPaidUSD || 0;
       paidBs += invoice.amountPaidBs || 0;
       
-      // Calcular pendiente (total - lo pagado en USD equivalente)
       const totalPaidInUSD = (invoice.amountPaidUSD || 0) + 
         (invoice.exchangeRate ? (invoice.amountPaidBs || 0) / invoice.exchangeRate : 0);
       
@@ -251,7 +246,7 @@ export default function GroomingServicesView() {
   }, [invoices, filteredServices]);
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState error={error} />;
+  if (isError) return <ErrorState error={error as Error} />;
 
   return (
     <>
@@ -271,7 +266,6 @@ export default function GroomingServicesView() {
       </Link>
 
       <div className="px-4 mt-10 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
-        {/* Stats Cards con ingresos por moneda */}
         <ServiceStatsCards 
           filteredServices={filteredServices} 
           incomeStats={incomeStats}
@@ -288,7 +282,6 @@ export default function GroomingServicesView() {
               getPatientBreed={getPatientBreed}
               formatDate={formatDate}
               getServiceIcon={getServiceIcon}
-              getServiceStatusBadge={getServiceStatusBadge}
               getPaymentStatusBadge={getPaymentStatusBadge}
               getPaymentStatusIcon={getPaymentStatusIcon}
               formatCurrency={formatCurrency}
@@ -301,7 +294,6 @@ export default function GroomingServicesView() {
               getPatientBreed={getPatientBreed}
               formatDate={formatDate}
               getServiceIcon={getServiceIcon}
-              getServiceStatusBadge={getServiceStatusBadge}
               getPaymentStatusBadge={getPaymentStatusBadge}
               getPaymentStatusIcon={getPaymentStatusIcon}
               formatCurrency={formatCurrency}
@@ -326,14 +318,14 @@ function LoadingState() {
   );
 }
 
-function ErrorState({ error }: { error: any }) {
+function ErrorState({ error }: { error: Error }) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-center h-[70vh]">
         <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
           <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Error al cargar servicios</h2>
-          <p className="text-gray-600 mb-6">{error?.message || 'Error desconocido'}</p>
+          <p className="text-gray-600 mb-6">{error.message || 'Error desconocido'}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"

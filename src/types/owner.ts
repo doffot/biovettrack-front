@@ -5,9 +5,10 @@ export const ownerSchema = z.object({
   _id: z.string(),
   name: z.string().min(1, "El nombre es obligatorio"),
   contact: z.string().min(1, "El contacto es obligatorio"),
-  email: z.string().nullable().optional(), 
+  email: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
-  nationalId: z.string().nullable().optional(), 
+  nationalId: z.string().nullable().optional(),
+  creditBalance: z.number().default(0),
 });
 
 export const ownersListSchema = z.array(
@@ -17,7 +18,8 @@ export const ownersListSchema = z.array(
     contact: true,
     email: true,
     address: true,
-    nationalId: true, 
+    nationalId: true,
+    creditBalance: true,
   })
 );
 

@@ -15,7 +15,7 @@ export default function CreateGroomingServiceView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const {  data:groomers = [], isLoading: isLoadingGroomers } = useQuery({
+  const { data: groomers = [], isLoading: isLoadingGroomers } = useQuery({
     queryKey: ["staff"],
     queryFn: getStaffList,
   });
@@ -32,7 +32,6 @@ export default function CreateGroomingServiceView() {
       observations: "",
       cost: undefined,
       groomer: undefined,
-      status: "Programado",
     },
   });
 
@@ -51,12 +50,16 @@ export default function CreateGroomingServiceView() {
     },
     onSuccess: () => {
       toast.success("Servicio registrado con éxito");
-      queryClient.invalidateQueries({ queryKey: ["groomingServices", { patientId }] });
-      navigate('/grooming-services');
+      queryClient.invalidateQueries({ queryKey: ["groomingServices", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["activeAppointments"] });
+      navigate(-1);
     },
   });
 
-  const onSubmit = (data: GroomingServiceFormData) => mutate(data);
+  const onSubmit = (data: GroomingServiceFormData) => {
+    mutate(data);
+  };
 
   if (isLoadingGroomers) {
     return (
@@ -72,7 +75,7 @@ export default function CreateGroomingServiceView() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       <div className="max-w-4xl mx-auto">
-        <div className="">
+        <div>
           <form id="grooming-form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <GroomingServiceForm register={register} errors={errors} groomers={groomers} />
             <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-gray-100">

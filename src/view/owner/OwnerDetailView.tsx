@@ -2,41 +2,41 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import {
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Edit,
-  Trash2,
-  PawPrint,
-  ArrowLeft,
-  CreditCard,
-  Plus,
-} from "lucide-react";
+import { PawPrint, ArrowLeft, Plus } from "lucide-react";
 
-import { getOwnersById, deleteOwners } from "../../api/OwnerAPI";
-import { getInvoices, updateInvoice } from "../../api/invoiceAPI";
+import { getOwnersById, deleteOwners, getOwnerAppointments, getOwnerGroomingServices } from "../../api/OwnerAPI";
+import { getInvoices } from "../../api/invoiceAPI";
+import { createPayment } from "../../api/paymentAPI";
+import { getPatientsByOwner } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
 import PatientListView from "./PatientListOwnerView";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
-import { getOwnerId } from "../../types/invoice";
-import { FinancialSummary } from "../../components/owners/FinancialSummary";
+import { getOwnerId, getPatientName } from "../../types/invoice";
+import { OwnerAccountHeader } from "../../components/owners/OwnerAccountHeader";
+import { TransactionHistory } from "../../components/owners/TransactionHistory";
+import { PaymentModal } from "../../components/payment/PaymentModal";
 import type { Owner } from "../../types/owner";
+import type { Invoice } from "../../types/invoice";
+import type { GroomingService } from "../../types/grooming";
 
 interface PaymentData {
-  paymentMethodId: string;
+  paymentMethodId?: string;
   reference?: string;
-  amountPaidUSD: number;
-  amountPaidBs: number;
+  addAmountPaidUSD: number;
+  addAmountPaidBs: number;
   exchangeRate: number;
   isPartial: boolean;
+  creditAmountUsed?: number;
 }
 
 export default function OwnerDetailView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPayAllModal, setShowPayAllModal] = useState(false);
+  const [showSinglePayModal, setShowSinglePayModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [activeTab, setActiveTab] = useState<"pets" | "transactions">("pets");
 
   const { ownerId } = useParams<{ ownerId: string }>();
 
@@ -50,6 +50,40 @@ export default function OwnerDetailView() {
     queryKey: ["invoices", { ownerId }],
     queryFn: () => getInvoices({ ownerId }),
     enabled: !!ownerId,
+  });
+
+  const { data: patientsData = [] } = useQuery({
+    queryKey: ["patients", { ownerId }],
+    queryFn: () => getPatientsByOwner(ownerId!),
+    enabled: !!ownerId,
+  });
+
+  const { data: appointmentsData } = useQuery({
+    queryKey: ["ownerAppointments", ownerId],
+    queryFn: () => getOwnerAppointments(ownerId!),
+    enabled: !!ownerId,
+  });
+
+  const { data: groomingData } = useQuery({
+    queryKey: ["ownerGroomingServices", ownerId],
+    queryFn: () => getOwnerGroomingServices(ownerId!),
+    enabled: !!ownerId,
+  });
+
+  const ownerAppointments = appointmentsData?.appointments || [];
+  const ownerGroomingServices: GroomingService[] = groomingData?.services || [];
+
+  // Filtrar solo los servicios de hoy
+  const todayGroomingServices = ownerGroomingServices.filter((service) => {
+    if (!service.date) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const serviceDate = new Date(service.date);
+    serviceDate.setHours(0, 0, 0, 0);
+
+    return serviceDate.getTime() === today.getTime();
   });
 
   const { mutate: removeOwner, isPending: isDeleting } = useMutation({
@@ -66,12 +100,13 @@ export default function OwnerDetailView() {
     },
   });
 
-  const { mutateAsync: payInvoiceMutation } = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: object }) =>
-      updateInvoice(id, data),
+  const { mutateAsync: createPaymentMutation } = useMutation({
+    mutationFn: createPayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", { ownerId }] });
-      queryClient.invalidateQueries({ queryKey: ["invoices"] }); // Para el reporte
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
     },
     onError: (error: Error) => {
       toast.error(error.message || "Error al procesar el pago");
@@ -81,106 +116,155 @@ export default function OwnerDetailView() {
   const allInvoices = invoicesData?.invoices || [];
   const invoices = allInvoices.filter((inv) => getOwnerId(inv) === ownerId);
 
-  // ✅ CORREGIDO: Enviar los campos correctos al backend
+  // Calcular totales
+  const totalConsumedUSD = invoices.reduce((sum, inv) => {
+    if (inv.currency === "Bs" && inv.exchangeRate) {
+      return sum + inv.total / inv.exchangeRate;
+    }
+    return sum + inv.total;
+  }, 0);
+
+  const totalPaidUSD = invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+  const totalDebtUSD = Math.max(0, totalConsumedUSD - totalPaidUSD);
+
+  const pendingInvoices = invoices.filter(
+    (inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial"
+  );
+
   const handlePayInvoice = async (invoiceId: string, paymentData: PaymentData) => {
     const invoice = invoices.find((inv) => inv._id === invoiceId);
     if (!invoice) return;
 
-    // Acumular los pagos existentes
-    const currentPaidUSD = invoice.amountPaidUSD || 0;
-    const currentPaidBs = invoice.amountPaidBs || 0;
-
-    // Sumar el nuevo pago
-    const newAmountPaidUSD = currentPaidUSD + paymentData.amountPaidUSD;
-    const newAmountPaidBs = currentPaidBs + paymentData.amountPaidBs;
-
-    // Calcular si está pagado completamente
-    // El total siempre está en la moneda de la factura
-    const exchangeRate = paymentData.exchangeRate || invoice.exchangeRate || 1;
-    const totalPaidInUSD = newAmountPaidUSD + (newAmountPaidBs / exchangeRate);
-    const isPaidInFull = totalPaidInUSD >= invoice.total;
-
     try {
-      await payInvoiceMutation({
-        id: invoiceId,
-        data: {
-          amountPaidUSD: newAmountPaidUSD,
-          amountPaidBs: newAmountPaidBs,
-          exchangeRate: exchangeRate,
-          paymentMethod: paymentData.paymentMethodId, // ✅ Ahora se envía
-          paymentReference: paymentData.reference,
-          paymentStatus: isPaidInFull ? "Pagado" : "Parcial",
-        },
-      });
-      toast.success(
-        isPaidInFull ? "Factura pagada completamente" : "Abono registrado correctamente"
-      );
+      const isPayingInBs = paymentData.addAmountPaidBs > 0;
+      const amount = isPayingInBs ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD;
+      const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+
+      const payload: {
+        invoiceId: string;
+        currency: "USD" | "Bs";
+        exchangeRate: number;
+        amount?: number;
+        paymentMethod?: string;
+        reference?: string;
+        creditAmountUsed?: number;
+      } = {
+        invoiceId,
+        currency,
+        exchangeRate: paymentData.exchangeRate || 1,
+      };
+
+      if (amount > 0) {
+        payload.amount = amount;
+        if (paymentData.paymentMethodId) payload.paymentMethod = paymentData.paymentMethodId;
+        if (paymentData.reference) payload.reference = paymentData.reference;
+      }
+
+      if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
+        payload.creditAmountUsed = paymentData.creditAmountUsed;
+      }
+
+      if (!payload.amount && !payload.creditAmountUsed) {
+        toast.error("Debe especificar un monto o usar crédito");
+        return;
+      }
+
+      await createPaymentMutation(payload);
+      toast.success(paymentData.isPartial ? "Abono registrado" : "Pago procesado");
+      setShowSinglePayModal(false);
+      setSelectedInvoice(null);
     } catch {
-      // Error handled in mutation
+      // Error manejado en onError
     }
   };
 
-  // ✅ CORREGIDO: handlePayAll también
   const handlePayAll = async (invoiceIds: string[], paymentData: PaymentData) => {
     try {
       let successCount = 0;
       const exchangeRate = paymentData.exchangeRate || 1;
+      const isPayingInBs = paymentData.addAmountPaidBs > 0;
+      const onlyCredit = paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0 && !paymentData.paymentMethodId;
 
       for (const id of invoiceIds) {
         const invoice = invoices.find((inv) => inv._id === id);
-        if (invoice) {
-          // Calcular el monto pendiente de esta factura
-          const currentPaidUSD = invoice.amountPaidUSD || 0;
-          const currentPaidBs = invoice.amountPaidBs || 0;
-          const currentPaidTotal = currentPaidUSD + (currentPaidBs / (invoice.exchangeRate || exchangeRate));
-          const pendingAmount = invoice.total - currentPaidTotal;
+        if (!invoice) continue;
 
-          if (pendingAmount <= 0) continue; // Ya está pagada
+        const currentPaidUSD = invoice.amountPaidUSD || 0;
+        const currentPaidBs = invoice.amountPaidBs || 0;
+        const invoiceRate = invoice.exchangeRate || exchangeRate;
+        const currentPaidTotal = currentPaidUSD + currentPaidBs / invoiceRate;
+        const invoiceTotalUSD = invoice.currency === "Bs" ? invoice.total / invoiceRate : invoice.total;
+        const pendingUSD = Math.max(0, invoiceTotalUSD - currentPaidTotal);
 
-          // Determinar cuánto pagar según la moneda del método
-          let newAmountPaidUSD = currentPaidUSD;
-          let newAmountPaidBs = currentPaidBs;
+        if (pendingUSD <= 0.01) continue;
 
-          if (paymentData.amountPaidBs > 0) {
-            // Pago en Bs: convertir el pendiente a Bs
-            newAmountPaidBs = currentPaidBs + (pendingAmount * exchangeRate);
-          } else {
-            // Pago en USD
-            newAmountPaidUSD = currentPaidUSD + pendingAmount;
+        const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+
+        const payload: {
+          invoiceId: string;
+          currency: "USD" | "Bs";
+          exchangeRate: number;
+          amount?: number;
+          paymentMethod?: string;
+          reference?: string;
+          creditAmountUsed?: number;
+        } = {
+          invoiceId: id,
+          currency,
+          exchangeRate: paymentData.exchangeRate || 1,
+        };
+
+        if (onlyCredit) {
+          payload.creditAmountUsed = Math.min(paymentData.creditAmountUsed!, pendingUSD);
+        } else {
+          const amount = isPayingInBs ? pendingUSD * exchangeRate : pendingUSD;
+          payload.amount = amount;
+          if (paymentData.paymentMethodId) payload.paymentMethod = paymentData.paymentMethodId;
+          if (paymentData.reference) payload.reference = paymentData.reference;
+          if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
+            payload.creditAmountUsed = paymentData.creditAmountUsed;
           }
-
-          await payInvoiceMutation({
-            id,
-            data: {
-              amountPaidUSD: newAmountPaidUSD,
-              amountPaidBs: newAmountPaidBs,
-              exchangeRate: exchangeRate,
-              paymentMethod: paymentData.paymentMethodId, // ✅ Ahora se envía
-              paymentReference: paymentData.reference,
-              paymentStatus: "Pagado",
-            },
-          });
-          successCount++;
         }
+
+        await createPaymentMutation(payload);
+        successCount++;
       }
 
-      toast.success(
-        `${successCount} factura${successCount > 1 ? "s" : ""} pagada${
-          successCount > 1 ? "s" : ""
-        } correctamente`
-      );
+      if (successCount > 0) {
+        toast.success(`${successCount} factura${successCount > 1 ? "s" : ""} pagada${successCount > 1 ? "s" : ""}`);
+      }
+      setShowPayAllModal(false);
     } catch {
-      // Error handled in mutation
+      // Error manejado en onError
     }
   };
 
-  const getInitials = (name: string): string => {
-    return name
-      .split(" ")
-      .map((part) => part.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const handlePayAllFromModal = async (paymentData: PaymentData) => {
+    const ids = pendingInvoices.map((inv) => inv._id!).filter(Boolean);
+    await handlePayAll(ids, paymentData);
+  };
+
+  const handleSinglePayFromModal = async (paymentData: PaymentData) => {
+    if (selectedInvoice && selectedInvoice._id) {
+      await handlePayInvoice(selectedInvoice._id, paymentData);
+    }
+  };
+
+  const handleOpenSinglePay = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowSinglePayModal(true);
+  };
+
+  const getInvoiceDescription = (invoice: Invoice): string => {
+    if (!invoice.items || invoice.items.length === 0) return "Factura";
+    const descriptions = invoice.items.map((i) => i.description);
+    if (descriptions.length <= 2) return descriptions.join(", ");
+    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
+  };
+
+  const getSelectedInvoicePending = (): number => {
+    if (!selectedInvoice) return 0;
+    return selectedInvoice.total - (selectedInvoice.amountPaid || 0);
   };
 
   if (isLoading) {
@@ -196,14 +280,10 @@ export default function OwnerDetailView() {
       <div className="flex items-center justify-center h-[70vh]">
         <div className="text-center max-w-sm mx-auto p-6">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <User className="w-8 h-8 text-gray-400" />
+            <PawPrint className="w-8 h-8 text-gray-400" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">
-            Propietario no encontrado
-          </h2>
-          <p className="text-gray-500 text-sm mb-4">
-            El propietario que buscas no existe o fue eliminado.
-          </p>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">Propietario no encontrado</h2>
+          <p className="text-gray-500 text-sm mb-4">El propietario que buscas no existe o fue eliminado.</p>
           <Link
             to="/owners"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-vet-primary text-white text-sm font-medium hover:bg-vet-secondary transition-colors"
@@ -218,182 +298,90 @@ export default function OwnerDetailView() {
 
   return (
     <>
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-        <div className="px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between gap-4 max-w-6xl mx-auto">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate("/owners")}
-                className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+      {/* Header tipo cuenta bancaria */}
+      <OwnerAccountHeader
+        owner={owner}
+        creditBalance={owner.creditBalance || 0}
+        totalConsumed={totalConsumedUSD}
+        totalPaid={totalPaidUSD}
+        totalPending={totalDebtUSD}
+        pendingInvoices={pendingInvoices}
+        patients={patientsData}
+        appointments={ownerAppointments}
+        groomingServices={todayGroomingServices}
+        onBack={() => navigate("/owners")}
+        onEdit={() => navigate(`/owners/${owner._id}/edit`)}
+        onDelete={() => setShowDeleteModal(true)}
+        onPayInvoice={handleOpenSinglePay}
+        onOpenPayAll={pendingInvoices.length > 0 ? () => setShowPayAllModal(true) : undefined}
+        isLoadingFinancial={isLoadingInvoices}
+      />
 
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center text-white font-bold text-lg shadow-md">
-                  {getInitials(owner.name)}
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900">{owner.name}</h1>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    {owner.nationalId && (
-                      <>
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>{owner.nationalId}</span>
-                      </>
-                    )}
-                    {!owner.nationalId && <span>Propietario</span>}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                to={`/owners/${owner._id}/edit`}
-                className="p-2.5 rounded-xl hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors"
-                title="Editar"
-              >
-                <Edit className="w-5 h-5" />
-              </Link>
-              <button
-                onClick={() => setShowDeleteModal(true)}
-                disabled={isDeleting}
-                className="p-2.5 rounded-xl hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50"
-                title="Eliminar"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Contenido principal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Tabs para móvil */}
+        <div className="lg:hidden mb-4">
+          <div className="flex bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setActiveTab("pets")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                activeTab === "pets"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <PawPrint className="w-4 h-4" />
+              Mascotas
+            </button>
+            <button
+              onClick={() => setActiveTab("transactions")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                activeTab === "transactions"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Transacciones
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Contenido */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Grid principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna izquierda - Info del propietario */}
-          <div className="space-y-6">
-            {/* Card de contacto */}
+        {/* Layout desktop: 2 columnas */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Mascotas */}
+          <div className={`lg:col-span-2 ${activeTab !== "pets" ? "hidden lg:block" : ""}`}>
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700">
-                  Información de Contacto
-                </h3>
+              <div className="px-4 py-3 bg-gradient-to-r from-vet-primary/5 to-vet-secondary/5 border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <PawPrint className="w-5 h-5 text-vet-primary" />
+                  <h3 className="font-semibold text-gray-900">Mascotas</h3>
+                </div>
+                <Link
+                  to={`/owners/${owner._id}/patients/new`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white text-xs font-medium transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Nueva
+                </Link>
               </div>
-
-              <div className="p-4 space-y-3">
-                {/* Cédula */}
-                {owner.nationalId && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 text-gray-700">
-                    <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <CreditCard className="w-5 h-5 text-gray-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Cédula / ID</p>
-                      <p className="font-medium">{owner.nationalId}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Teléfono */}
-                {owner.contact && (
-                  <a
-                    href={`https://wa.me/${owner.contact.replace(/\D/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-green-200 flex items-center justify-center flex-shrink-0 transition-colors">
-                      <Phone className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-600/70">Teléfono / WhatsApp</p>
-                      <p className="font-medium">{owner.contact}</p>
-                    </div>
-                  </a>
-                )}
-
-                {/* Email */}
-                {owner.email && (
-                  <a
-                    href={`mailto:${owner.email}`}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center flex-shrink-0 transition-colors">
-                      <Mail className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-blue-600/70">Correo electrónico</p>
-                      <p className="font-medium truncate">{owner.email}</p>
-                    </div>
-                  </a>
-                )}
-
-                {/* Dirección */}
-                {owner.address && (
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-50 text-purple-700">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-purple-600/70">Dirección</p>
-                      <p className="font-medium">{owner.address}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sin información */}
-                {!owner.contact && !owner.email && !owner.address && !owner.nationalId && (
-                  <div className="text-center py-6">
-                    <User className="w-10 h-10 mx-auto text-gray-300 mb-2" />
-                    <p className="text-gray-400 text-sm">
-                      Sin información de contacto
-                    </p>
-                    <Link
-                      to={`/owners/${owner._id}/edit`}
-                      className="inline-flex items-center gap-1 mt-2 text-vet-primary text-sm hover:underline"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                      Agregar información
-                    </Link>
-                  </div>
-                )}
+              <div className="p-4">
+                <PatientListView ownerId={ownerId!} ownerName={owner.name} />
               </div>
             </div>
           </div>
 
-          {/* Columna derecha - Finanzas */}
-          <div className="lg:col-span-2">
-            <FinancialSummary
+          {/* Transacciones */}
+          <div className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}>
+            <TransactionHistory
               invoices={invoices}
+              creditBalance={owner.creditBalance || 0}
               isLoading={isLoadingInvoices}
               onPayInvoice={handlePayInvoice}
               onPayAll={handlePayAll}
             />
-          </div>
-        </div>
-
-        {/* Mascotas */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <PawPrint className="w-5 h-5 text-vet-primary" />
-              <h3 className="text-sm font-semibold text-gray-700">Mascotas</h3>
-            </div>
-            <Link
-              to={`/owners/${owner._id}/patients/new`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Nueva mascota
-            </Link>
-          </div>
-
-          <div className="p-4">
-            <PatientListView ownerId={ownerId!} ownerName={owner.name} />
           </div>
         </div>
       </div>
@@ -405,6 +393,43 @@ export default function OwnerDetailView() {
         onConfirm={() => removeOwner()}
         petName={owner.name}
         isDeleting={isDeleting}
+      />
+
+      {/* Modal de Pagar Todo */}
+      <PaymentModal
+        isOpen={showPayAllModal}
+        onClose={() => setShowPayAllModal(false)}
+        amountUSD={totalDebtUSD}
+        creditBalance={owner.creditBalance || 0}
+        title="Pagar Todas las Facturas"
+        subtitle={`${pendingInvoices.length} factura${pendingInvoices.length > 1 ? "s" : ""} pendiente${pendingInvoices.length > 1 ? "s" : ""}`}
+        items={pendingInvoices.map((inv) => ({
+          id: inv._id || "",
+          description: getInvoiceDescription(inv),
+          patientName: getPatientName(inv),
+          date: inv.date,
+        }))}
+        onConfirm={handlePayAllFromModal}
+      />
+
+      {/* Modal de Pagar Factura Individual */}
+      <PaymentModal
+        isOpen={showSinglePayModal}
+        onClose={() => {
+          setShowSinglePayModal(false);
+          setSelectedInvoice(null);
+        }}
+        amountUSD={getSelectedInvoicePending()}
+        creditBalance={owner.creditBalance || 0}
+        title="Pagar Factura"
+        subtitle={selectedInvoice ? getInvoiceDescription(selectedInvoice) : ""}
+        items={selectedInvoice ? [{
+          id: selectedInvoice._id || "",
+          description: getInvoiceDescription(selectedInvoice),
+          patientName: getPatientName(selectedInvoice),
+          date: selectedInvoice.date,
+        }] : []}
+        onConfirm={handleSinglePayFromModal}
       />
     </>
   );

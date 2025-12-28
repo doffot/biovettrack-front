@@ -61,12 +61,13 @@ const populatedPatientSchema = z.object({
 
 export const appointmentSchema = z.object({
   _id: z.string(),
-  patient: z.any(),
+  patient: z.union([z.string(), populatedPatientSchema]),
   type: z.enum(appointmentTypes),
   date: z.string(),
   status: z.enum(appointmentStatuses),
   reason: z.string(),
   observations: z.string().nullable().optional(),
+  prepaidAmount: z.number().optional().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -88,22 +89,34 @@ export type PopulatedPatient = z.infer<typeof populatedPatientSchema>;
 // ============================================
 
 export type PopulatedAppointment = Omit<Appointment, 'patient'> & {
-  patient: PopulatedPatient | string;
+  patient: PopulatedPatient;
 };
 
-// Alias para mantener compatibilidad con código existente
 export type AppointmentWithPatient = PopulatedAppointment;
 
 // ============================================
 // TIPOS PARA FORMULARIOS
 // ============================================
 
-export type CreateAppointmentForm = Pick<
-  Appointment,
-  "type" | "date" | "reason" | "observations"
->;
+export type CreateAppointmentForm = {
+  type: AppointmentType;
+  date: string;
+  reason: string;
+  observations?: string;
+  prepaidAmount?: number;
+};
 
-export type UpdateAppointmentStatusForm = Pick<Appointment, "status">;
+export type UpdateAppointmentForm = {
+  type: AppointmentType;
+  date: string;
+  reason: string;
+  observations?: string;
+};
+
+export type UpdateAppointmentStatusForm = {
+  status: AppointmentStatus;
+  shouldRefund?: boolean
+};
 
 // ============================================
 // UTILIDADES
@@ -111,3 +124,15 @@ export type UpdateAppointmentStatusForm = Pick<Appointment, "status">;
 
 export const appointmentTypesValues = [...appointmentTypes];
 export const appointmentStatusesValues = [...appointmentStatuses];
+
+export const isPatientPopulated = (
+  patient: string | PopulatedPatient
+): patient is PopulatedPatient => {
+  return typeof patient === 'object' && patient !== null && '_id' in patient;
+};
+
+export const isOwnerPopulated = (
+  owner: string | Owner
+): owner is Owner => {
+  return typeof owner === 'object' && owner !== null && '_id' in owner;
+};

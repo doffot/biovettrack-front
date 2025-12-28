@@ -10,7 +10,6 @@ interface ServiceMobileCardsProps {
   getPatientBreed: (patientId: any) => string;
   formatDate: (dateString: string) => string;
   getServiceIcon: (serviceType: string) => string;
-  getServiceStatusBadge: (status: string) => string;
   getPaymentStatusBadge: (status: string) => string;
   getPaymentStatusIcon: (status: string) => React.JSX.Element;
   formatCurrency: (amount: number, currency: string, exchangeRate?: number) => string;
@@ -23,7 +22,6 @@ export default function ServiceMobileCards({
   getPatientBreed,
   formatDate,
   getServiceIcon,
-  getServiceStatusBadge,
   getPaymentStatusBadge,
   getPaymentStatusIcon,
   formatCurrency
@@ -42,11 +40,9 @@ export default function ServiceMobileCards({
         const serviceCost = Number(service.cost) || 0;
         const patientId = getPatientId(service.patientId);
         
-        // Determinar si está pagado completamente
         const isPaid = paymentInfo.paymentStatus === 'Pagado';
         const isPartial = paymentInfo.paymentStatus === 'Parcial';
         const isPending = paymentInfo.paymentStatus === 'Pendiente';
-       
         
         return (
           <div key={service._id} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
@@ -80,17 +76,12 @@ export default function ServiceMobileCards({
             </div>
             
             <div className="space-y-3 pt-4 border-t border-gray-100">
-              {/* Tipo de servicio */}
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{getServiceIcon(service.service)}</span>
-                <span className="font-medium text-gray-900">{service.service}</span>
-              </div>
-              
-              {/* Estados */}
-              <div className="grid grid-cols-2 gap-2">
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getServiceStatusBadge(service.status)}`}>
-                  {service.status}
-                </span>
+              {/* Tipo de servicio y estado de pago */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{getServiceIcon(service.service)}</span>
+                  <span className="font-medium text-gray-900">{service.service}</span>
+                </div>
                 <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusBadge(paymentInfo.paymentStatus || 'Sin facturar')}`}>
                   {getPaymentStatusIcon(paymentInfo.paymentStatus || 'Sin facturar')}
                   {paymentInfo.paymentStatus || 'Sin facturar'}

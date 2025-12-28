@@ -41,8 +41,10 @@ export default function CreateVaccinationView() {
   const { mutate, isPending } = useMutation({
     mutationFn: (data: VaccinationFormData) => createVaccination(patientId!, data),
     onSuccess: () => {
-      toast.success("Vacuna registrada");
+      toast.success("Vacuna registrada correctamente");
       queryClient.invalidateQueries({ queryKey: ["vaccinations", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["activeAppointments"] });
       navigate(-1);
     },
     onError: (error: Error) => {
@@ -60,9 +62,9 @@ export default function CreateVaccinationView() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const vaccineType = formData.vaccineType === "Otra" ? customVaccine : formData.vaccineType;
-    
+
     if (!vaccineType) {
       toast.error("Selecciona el tipo de vacuna");
       return;
@@ -74,7 +76,10 @@ export default function CreateVaccinationView() {
     });
   };
 
-  const isValid = (formData.vaccineType && (formData.vaccineType !== "Otra" || customVaccine)) && formData.cost > 0;
+  const isValid =
+    formData.vaccineType &&
+    (formData.vaccineType !== "Otra" || customVaccine) &&
+    formData.cost > 0;
 
   return (
     <div>
@@ -89,7 +94,7 @@ export default function CreateVaccinationView() {
           </button>
           <h1 className="text-lg font-bold text-gray-900">Registrar Vacuna</h1>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             type="button"
@@ -123,7 +128,9 @@ export default function CreateVaccinationView() {
         {/* Fila 1: Vacuna + Fecha + Costo */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Vacuna *</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Vacuna *
+            </label>
             <select
               name="vaccineType"
               value={formData.vaccineType}
@@ -132,13 +139,17 @@ export default function CreateVaccinationView() {
             >
               <option value="">Seleccionar</option>
               {VACCINE_TYPES.map((type) => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Fecha *
+            </label>
             <input
               type="date"
               name="vaccinationDate"
@@ -150,7 +161,9 @@ export default function CreateVaccinationView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Costo ($) *</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Costo ($) *
+            </label>
             <input
               type="number"
               name="cost"
@@ -164,10 +177,11 @@ export default function CreateVaccinationView() {
           </div>
         </div>
 
-        {/* Vacuna personalizada */}
         {formData.vaccineType === "Otra" && (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Especificar vacuna *</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Especificar vacuna *
+            </label>
             <input
               type="text"
               value={customVaccine}
@@ -182,7 +196,9 @@ export default function CreateVaccinationView() {
         {/* Fila 2: Laboratorio + Lote + Vencimiento */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Laboratorio</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Laboratorio
+            </label>
             <input
               type="text"
               name="laboratory"
@@ -195,7 +211,9 @@ export default function CreateVaccinationView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Nº Lote</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Nº Lote
+            </label>
             <input
               type="text"
               name="batchNumber"
@@ -208,7 +226,9 @@ export default function CreateVaccinationView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Vencimiento</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Vencimiento
+            </label>
             <input
               type="date"
               name="expirationDate"
@@ -222,7 +242,9 @@ export default function CreateVaccinationView() {
         {/* Fila 3: Próxima vacuna + Observaciones */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Próxima vacunación</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Próxima vacunación
+            </label>
             <input
               type="date"
               name="nextVaccinationDate"
@@ -234,7 +256,9 @@ export default function CreateVaccinationView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Observaciones
+            </label>
             <input
               type="text"
               name="observations"

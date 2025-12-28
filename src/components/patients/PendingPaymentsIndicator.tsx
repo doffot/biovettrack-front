@@ -9,7 +9,10 @@ import {
   FileText,
   CheckCircle2
 } from "lucide-react";
-import { getPatientDebtSummary, updateInvoice } from "../../api/invoiceAPI";
+import { getPatientDebtSummary } from "../../api/invoiceAPI";
+import { createPayment } from "../../api/paymentAPI";
+import { getPatientById } from "../../api/patientAPI";
+import { getOwnersById } from "../../api/OwnerAPI";
 import { PaymentModal } from "../payment/PaymentModal";
 import Portal from "../ui/Portal";
 import { toast } from "../Toast";
@@ -56,34 +59,35 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
     refetchInterval: 30000,
   });
 
-  const { mutate: processPayment} = useMutation({
-    mutationFn: async ({
-      invoice,
-      paymentData,
-    }: {
-      invoice: Invoice;
-      paymentData: {
-        paymentMethodId: string;
-        reference?: string;
-        amountPaidUSD: number;
-        amountPaidBs: number;
-        exchangeRate: number;
-      };
-    }) => {
-      if (!invoice._id) throw new Error("ID de factura no válido");
+  // Obtener datos del paciente
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: () => getPatientById(patientId),
+    enabled: !!patientId,
+  });
 
-      return updateInvoice(invoice._id, {
-        paymentMethod: paymentData.paymentMethodId,
-        paymentReference: paymentData.reference,
-        amountPaidUSD: (invoice.amountPaidUSD || 0) + paymentData.amountPaidUSD,
-        amountPaidBs: (invoice.amountPaidBs || 0) + paymentData.amountPaidBs,
-        exchangeRate: paymentData.exchangeRate,
-      });
-    },
+  // Obtener el ownerId del paciente
+  const ownerId = typeof patient?.owner === "object" 
+    ? patient.owner._id 
+    : patient?.owner;
+
+  // Query para obtener el owner con creditBalance
+  const { data: owner } = useQuery({
+    queryKey: ["owner", ownerId],
+    queryFn: () => getOwnersById(ownerId!),
+    enabled: !!ownerId,
+  });
+
+  const ownerCreditBalance = owner?.creditBalance || 0;
+
+  const { mutate: processPayment } = useMutation({
+    mutationFn: createPayment,
     onSuccess: () => {
       toast.success("Pago procesado con éxito");
       queryClient.invalidateQueries({ queryKey: ["patientDebt", patientId] });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
       setSelectedInvoice(null);
       setIsPaymentModalOpen(false);
     },
@@ -120,29 +124,52 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
     setSelectedInvoice(null);
   };
 
-  const handlePaymentConfirm = (paymentData: {
-    paymentMethodId: string;
+  const handlePaymentConfirm = async (paymentData: {
+    paymentMethodId?: string;
     reference?: string;
-    amountPaidUSD: number;
-    amountPaidBs: number;
+    addAmountPaidUSD: number;
+    addAmountPaidBs: number;
     exchangeRate: number;
     isPartial: boolean;
+    creditAmountUsed?: number;
   }) => {
-    if (!selectedInvoice) {
+    if (!selectedInvoice || !selectedInvoice._id) {
       toast.error("No hay factura seleccionada");
       return;
     }
 
-    processPayment({
-      invoice: selectedInvoice,
-      paymentData: {
-        paymentMethodId: paymentData.paymentMethodId,
-        reference: paymentData.reference,
-        amountPaidUSD: paymentData.amountPaidUSD,
-        amountPaidBs: paymentData.amountPaidBs,
-        exchangeRate: paymentData.exchangeRate,
-      },
-    });
+    const isPayingInBs = paymentData.addAmountPaidBs > 0;
+    const amount = isPayingInBs
+      ? paymentData.addAmountPaidBs
+      : paymentData.addAmountPaidUSD;
+    const currency = isPayingInBs ? "Bs" : "USD";
+
+    const payload: any = {
+      invoiceId: selectedInvoice._id,
+      currency,
+      exchangeRate: paymentData.exchangeRate || 1,
+    };
+
+    if (amount > 0) {
+      payload.amount = amount;
+      if (paymentData.paymentMethodId) {
+        payload.paymentMethod = paymentData.paymentMethodId;
+      }
+      if (paymentData.reference) {
+        payload.reference = paymentData.reference;
+      }
+    }
+
+    if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
+      payload.creditAmountUsed = paymentData.creditAmountUsed;
+    }
+
+    if (!payload.amount && !payload.creditAmountUsed) {
+      toast.error("Debe especificar un monto o usar crédito");
+      return;
+    }
+
+    processPayment(payload);
   };
 
   const getInvoiceRemainingAmount = (invoice: Invoice): number => {
@@ -172,11 +199,11 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
           onMouseLeave={() => setShowTooltip(false)}
           className={`relative p-2.5 rounded-xl transition-all duration-300 ${
             hasPendingPayments
-              ? "bg-gradient-to-br from-amber-50 to-orange-100 hover:from-amber-100 hover:to-orange-200 text-amber-600 shadow-sm hover:shadow-md"
-              : "bg-gray-50 hover:bg-gray-100 text-gray-400"
+              ? "bg-gradient-to-br from-amber-50 to-orange-100 hover:from-amber-100 hover:to-orange-200 shadow-sm hover:shadow-md"
+              : "bg-gray-50 hover:bg-gray-100"
           }`}
         >
-          <DollarSign className="w-5 h-5" />
+          <DollarSign className="w-5 h-5 text-gray-900" />
           
           {hasPendingPayments && (
             <>
@@ -298,13 +325,14 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
         )}
       </div>
 
-      {/* Modal de Pago usando Portal */}
+      {/* Modal de Pago */}
       <Portal>
         <PaymentModal
           isOpen={isPaymentModalOpen && !!selectedInvoice}
           onClose={handleClosePaymentModal}
           onConfirm={handlePaymentConfirm}
           amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
+          creditBalance={ownerCreditBalance}
           items={selectedInvoice?.items.map(item => ({
             id: item.resourceId.toString(),
             description: item.description,

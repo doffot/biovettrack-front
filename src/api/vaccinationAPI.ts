@@ -58,13 +58,9 @@ export async function getAllVaccinations(): Promise<Vaccination[]> {
     if (error instanceof AxiosError && error.response) {
       throw new Error(error.response.data.msg || "Error al obtener vacunas");
     }
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Error de red o desconocido");
+    throw new Error("Error de red");
   }
 }
-
 
 // Obtener vacunas por paciente
 export async function getVaccinationsByPatient(
@@ -76,6 +72,7 @@ export async function getVaccinationsByPatient(
     );
     const parsed = vaccinationsListSchema.safeParse(data.vaccinations);
     if (!parsed.success) {
+      console.error("Zod errors:", JSON.stringify(parsed.error.issues, null, 2));
       throw new Error("Datos inválidos");
     }
     return parsed.data;
@@ -116,7 +113,11 @@ export async function updateVaccination(
       msg: string;
       vaccination: Vaccination;
     }>(`/vaccinations/${id}`, data);
-    return response.vaccination;
+    const parsed = vaccinationSchema.safeParse(response.vaccination);
+    if (!parsed.success) {
+      throw new Error("Datos inválidos");
+    }
+    return parsed.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(error.response.data.msg || "Error al actualizar");

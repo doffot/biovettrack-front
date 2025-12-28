@@ -22,7 +22,8 @@ import {
   deleteGroomingService,
   getGroomingServiceById,
 } from "../../api/groomingAPI";
-import { getInvoices, updateInvoice } from "../../api/invoiceAPI";
+import { getInvoices } from "../../api/invoiceAPI";
+import { createPayment } from "../../api/paymentAPI"; // ✅ NUEVO
 import { extractId } from "../../utils/extractId";
 import type { Invoice } from "../../types/invoice";
 
@@ -78,7 +79,6 @@ export default function GroomingDetailView() {
       ? serviceItem.cost * serviceItem.quantity
       : 0;
 
-    // Usar los nuevos campos
     const amountPaidUSD = invoice.amountPaidUSD || 0;
     const amountPaidBs = invoice.amountPaidBs || 0;
     const amountPaid = invoice.amountPaid || 0;
@@ -115,61 +115,59 @@ export default function GroomingDetailView() {
     },
   });
 
-  // Handler para confirmar pago
-  const handlePaymentConfirm = async (paymentData: {
-    paymentMethodId: string;
-    reference?: string;
-    amountPaidUSD: number;
-    amountPaidBs: number;
-    exchangeRate: number;
-    isPartial: boolean;
-  }) => {
-    if (!invoice) {
-      toast.error("No hay factura asociada a este servicio");
-      return;
-    }
+  // ✅ CORREGIDO: Usa createPayment y nombres correctos de parámetros
+ const handlePaymentConfirm = async (paymentData: {
+  paymentMethodId?: string;           // ✅ Opcional
+  reference?: string;
+  addAmountPaidUSD: number;
+  addAmountPaidBs: number;
+  exchangeRate: number;
+  isPartial: boolean;
+  creditAmountUsed?: number;          // ✅ Agregado
+}) => {
+  if (!invoice || !invoice._id) {
+    toast.error("No hay factura asociada");
+    return;
+  }
 
-    try {
-      // Calcular nuevos montos acumulados
-      const newAmountPaidUSD = (invoice.amountPaidUSD || 0) + paymentData.amountPaidUSD;
-      const newAmountPaidBs = (invoice.amountPaidBs || 0) + paymentData.amountPaidBs;
+  // Si no hay método de pago y no hay crédito, error
+  if (!paymentData.paymentMethodId && !paymentData.creditAmountUsed) {
+    toast.error("Debe seleccionar un método de pago");
+    return;
+  }
 
-      console.log("💾 GUARDANDO PAGO:", {
-        anterior: {
-          amountPaidUSD: invoice.amountPaidUSD || 0,
-          amountPaidBs: invoice.amountPaidBs || 0,
-        },
-        nuevo: {
-          amountPaidUSD: paymentData.amountPaidUSD,
-          amountPaidBs: paymentData.amountPaidBs,
-        },
-        acumulado: {
-          newAmountPaidUSD,
-          newAmountPaidBs,
-        },
-      });
+  try {
+    const isPayingInBs = paymentData.addAmountPaidBs > 0;
+    const amount = isPayingInBs 
+      ? paymentData.addAmountPaidBs 
+      : paymentData.addAmountPaidUSD;
+    const currency = isPayingInBs ? "Bs" : "USD";
 
-      await updateInvoice(invoice._id!, {
-        amountPaidUSD: newAmountPaidUSD,
-        amountPaidBs: newAmountPaidBs,
-        paymentMethod: paymentData.paymentMethodId,
-        paymentReference: paymentData.reference,
+    // Solo crear pago si hay monto a pagar
+    if (amount > 0 && paymentData.paymentMethodId) {
+      await createPayment({
+        invoiceId: invoice._id,
+        amount,
+        currency,
         exchangeRate: paymentData.exchangeRate,
+        paymentMethod: paymentData.paymentMethodId,
+        reference: paymentData.reference,
       });
-
-      toast.success(
-        paymentData.isPartial 
-          ? "Abono registrado correctamente" 
-          : "Pago completado correctamente"
-      );
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["groomingService", serviceId] });
-      setShowPaymentModal(false);
-    } catch (error) {
-      console.error("Error al procesar pago:", error);
-      toast.error("Error al procesar el pago");
     }
-  };
+
+    // TODO: Si hay creditAmountUsed, manejar el crédito aquí
+    // if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
+    //   // Lógica para aplicar crédito
+    // }
+
+    toast.success(paymentData.isPartial ? "Abono registrado" : "Pago completado");
+    queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    queryClient.invalidateQueries({ queryKey: ["payments"] });
+    setShowPaymentModal(false);
+  } catch {
+    toast.error("Error al procesar pago");
+  }
+};
 
   if (isLoading) {
     return (

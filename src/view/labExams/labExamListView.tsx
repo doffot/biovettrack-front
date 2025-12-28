@@ -16,7 +16,6 @@ import {
   PawPrint,
   Microscope,
   AlertCircle,
-  CheckCircle2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -44,7 +43,6 @@ export default function LabExamListView() {
     queryFn: getAllLabExams,
   });
 
-  //  eliminar
   const { mutate: confirmDelete, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => deleteLabExam(id),
     onSuccess: () => {
@@ -62,7 +60,6 @@ export default function LabExamListView() {
     setMounted(true);
   }, []);
 
-  // Filtrado de exámenes
   const filteredExams = useMemo(() => {
     return labExams.filter((exam) => {
       const matchesSearch =
@@ -97,7 +94,6 @@ export default function LabExamListView() {
     });
   };
 
-  // Función para obtener el estado del hematocrito
   const getHematocritStatus = (value: number, species: string) => {
     const ranges = {
       canino: [37, 55],
@@ -109,7 +105,6 @@ export default function LabExamListView() {
     return "normal";
   };
 
-  // Paginación
   const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
 
   useEffect(() => {
@@ -120,7 +115,6 @@ export default function LabExamListView() {
     }
   }, [filteredExams.length, currentPage, totalPages]);
 
-  // Reset página al filtrar
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, speciesFilter]);
@@ -128,7 +122,6 @@ export default function LabExamListView() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentExams = filteredExams.slice(startIndex, startIndex + itemsPerPage);
 
-  // Estadísticas rápidas
   const stats = useMemo(() => {
     const total = labExams.length;
     const caninos = labExams.filter((e) => e.species.toLowerCase() === "canino").length;
@@ -138,10 +131,10 @@ export default function LabExamListView() {
       const now = new Date();
       return examDate.getMonth() === now.getMonth() && examDate.getFullYear() === now.getFullYear();
     }).length;
+
     return { total, caninos, felinos, thisMonth };
   }, [labExams]);
 
-  // Loading State
   if (isLoading) {
     return (
       <div className="min-h-screen bg-vet-gradient flex items-center justify-center">
@@ -157,7 +150,6 @@ export default function LabExamListView() {
     );
   }
 
-  // Error State
   if (isError) {
     return (
       <div className="min-h-screen bg-vet-gradient flex items-center justify-center px-4">
@@ -182,11 +174,9 @@ export default function LabExamListView() {
 
   return (
     <div className="min-h-screen bg-vet-gradient">
-      {/* Header Profesional */}
       <header className="bg-white shadow-soft border-b border-vet-light sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left side */}
             <div className="flex items-center gap-4">
               <Link
                 to="/"
@@ -212,7 +202,6 @@ export default function LabExamListView() {
               </div>
             </div>
 
-            {/* Right side - Actions */}
             <Link
               to="create"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-vet-primary text-white font-semibold hover:bg-vet-secondary transition-all duration-200 shadow-soft hover:shadow-card text-sm"
@@ -224,50 +213,25 @@ export default function LabExamListView() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Stats Cards */}
         <div
           className={`grid grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-500 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <StatCard 
-            icon={FileText} 
-            label="Total Exámenes" 
-            value={stats.total} 
-            variant="primary" 
-          />
-          <StatCard 
-            icon={PawPrint} 
-            label="Caninos" 
-            value={stats.caninos} 
-            variant="secondary" 
-          />
-          <StatCard 
-            icon={PawPrint} 
-            label="Felinos" 
-            value={stats.felinos} 
-            variant="accent" 
-          />
-          <StatCard 
-            icon={Calendar} 
-            label="Este Mes" 
-            value={stats.thisMonth} 
-            variant="light" 
-          />
+          <StatCard icon={FileText} label="Total" value={stats.total} variant="primary" />
+          <StatCard icon={PawPrint} label="Caninos" value={stats.caninos} variant="secondary" />
+          <StatCard icon={PawPrint} label="Felinos" value={stats.felinos} variant="accent" />
+          <StatCard icon={Calendar} label="Este Mes" value={stats.thisMonth} variant="light" />
         </div>
 
-        {/* Table Container */}
         <div
           className={`bg-white rounded-2xl shadow-soft border border-vet-light/50 overflow-hidden transition-all duration-500 delay-100 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {/* Filters & Search */}
           <div className="p-4 border-b border-vet-light/50 bg-gradient-to-r from-vet-light/30 to-transparent">
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Search */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
                 <input
@@ -279,19 +243,17 @@ export default function LabExamListView() {
                 />
               </div>
 
-              {/* Species Filter */}
               <select
                 value={speciesFilter}
                 onChange={(e) => setSpeciesFilter(e.target.value)}
-                className="px-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all appearance-none cursor-pointer min-w-[160px]"
+                className="px-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all appearance-none cursor-pointer min-w-[140px]"
               >
-                <option value="all">Todas las especies</option>
+                <option value="all">Todas especies</option>
                 <option value="canino">Caninos</option>
                 <option value="felino">Felinos</option>
               </select>
             </div>
 
-            {/* Active filters indicator */}
             {(searchTerm || speciesFilter !== "all") && (
               <div className="mt-3 pt-3 border-t border-vet-light/50 flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-vet-muted">Filtros:</span>
@@ -324,7 +286,6 @@ export default function LabExamListView() {
             )}
           </div>
 
-          {/* Table */}
           {currentExams.length > 0 ? (
             <>
               <div className="overflow-x-auto">
@@ -347,9 +308,6 @@ export default function LabExamListView() {
                         Leucocitos
                       </th>
                       <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider">
-                        Estado
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-vet-muted uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
@@ -367,20 +325,19 @@ export default function LabExamListView() {
                           }`}
                           style={{ animationDelay: `${index * 30}ms` }}
                         >
-                          {/* Paciente */}
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div
                                 className={`p-2 rounded-lg ${
-                                  exam.species.toLowerCase() === "felino" 
-                                    ? "bg-vet-secondary/10" 
+                                  exam.species.toLowerCase() === "felino"
+                                    ? "bg-vet-secondary/10"
                                     : "bg-vet-primary/10"
                                 }`}
                               >
                                 <PawPrint
                                   className={`w-4 h-4 ${
-                                    exam.species.toLowerCase() === "felino" 
-                                      ? "text-vet-secondary" 
+                                    exam.species.toLowerCase() === "felino"
+                                      ? "text-vet-secondary"
                                       : "text-vet-primary"
                                   }`}
                                 />
@@ -394,7 +351,6 @@ export default function LabExamListView() {
                             </div>
                           </td>
 
-                          {/* Especie */}
                           <td className="px-6 py-4 hidden sm:table-cell">
                             <span
                               className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
@@ -407,7 +363,6 @@ export default function LabExamListView() {
                             </span>
                           </td>
 
-                          {/* Fecha */}
                           <td className="px-6 py-4 hidden md:table-cell">
                             <div className="flex items-center gap-2 text-sm text-vet-muted">
                               <Calendar className="w-4 h-4" />
@@ -415,7 +370,6 @@ export default function LabExamListView() {
                             </div>
                           </td>
 
-                          {/* Hematocrito */}
                           <td className="px-6 py-4 text-center">
                             <div className="flex flex-col items-center">
                               <span
@@ -433,7 +387,6 @@ export default function LabExamListView() {
                             </div>
                           </td>
 
-                          {/* Leucocitos */}
                           <td className="px-6 py-4 text-center hidden lg:table-cell">
                             <span className="text-sm font-medium text-vet-text">
                               {exam.whiteBloodCells}
@@ -441,22 +394,6 @@ export default function LabExamListView() {
                             </span>
                           </td>
 
-                          {/* Estado */}
-                          <td className="px-6 py-4 text-center">
-                            {isAltered ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-vet-danger/10 text-vet-danger border border-vet-danger/20">
-                                <AlertCircle className="w-3 h-3" />
-                                Alterado
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-vet-accent/10 text-vet-secondary border border-vet-accent/30">
-                                <CheckCircle2 className="w-3 h-3" />
-                                Normal
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Acciones */}
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-center gap-2">
                               <Link
@@ -486,7 +423,6 @@ export default function LabExamListView() {
                 </table>
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="px-6 py-4 border-t border-vet-light/50 bg-vet-light/20 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-sm text-vet-muted">
@@ -561,7 +497,6 @@ export default function LabExamListView() {
               )}
             </>
           ) : (
-            /* Empty State */
             <div className="p-12 text-center">
               <div className="w-20 h-20 mx-auto mb-6 bg-vet-light rounded-full flex items-center justify-center">
                 <Microscope className="w-10 h-10 text-vet-muted" />
@@ -605,7 +540,6 @@ export default function LabExamListView() {
         </div>
       </main>
 
-      {/* Delete Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => {

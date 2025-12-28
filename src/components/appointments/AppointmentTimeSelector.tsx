@@ -10,8 +10,6 @@ type HourOption = {
   patientName?: string;
   reason?: string;
 };
-
-// Componente solo para el calendario
 export function Calendar({ selectedDate, onDateChange }: { selectedDate: Date; onDateChange: (date: Date) => void }) {
   const handleDateSelect = (day: number) => {
     const newDate = new Date(selectedDate);
@@ -39,7 +37,6 @@ export function Calendar({ selectedDate, onDateChange }: { selectedDate: Date; o
 
   return (
     <div>
-      {/* <h3 className="text-white font-bold mb-3 text-sm">📅 Fecha</h3> */}
       <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded p-3 border border-slate-600">
         <div className="flex justify-between items-center mb-3">
           <button
@@ -108,7 +105,6 @@ export function Calendar({ selectedDate, onDateChange }: { selectedDate: Date; o
   );
 }
 
-// Componente solo para las horas
 export function TimeSlots({ 
   selectedDate, 
   selectedTime, 
@@ -130,6 +126,10 @@ export function TimeSlots({
   };
 
   const timeSlots = useMemo<HourOption[]>(() => {
+    const activeAppointments = disabledHoursData.filter(
+      apt => apt.status === "Programada"
+    );
+
     const slots: HourOption[] = [];
     const startHour = 7;
     const endHour = 22;
@@ -139,7 +139,7 @@ export function TimeSlots({
       for (let m = 0; m < 60; m += interval) {
         const hour24 = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 
-        const existingAppointment = disabledHoursData.find((apt) => {
+        const existingAppointment = activeAppointments.find((apt) => {
           try {
             const aptDate = new Date(apt.date);
             const aptHours = aptDate.getHours();
@@ -194,7 +194,6 @@ export function TimeSlots({
     <div className="relative">
       <h3 className="text-white font-bold mb-3 text-sm">⏰ Horas</h3>
       
-      {/* Tooltip fijo */}
       {hoveredSlot && (
         <div className="absolute z-50 bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-xl border border-red-400 font-semibold top-0 left-1/2 transform -translate-x-1/2 -translate-y-full">
           🚫 {hoveredSlot.patientName || 'Ocupado'}
@@ -234,7 +233,6 @@ interface AppointmentTimeSelectorProps {
   initialTime?: string;
 }
 
-// Componente principal
 export default function AppointmentTimeSelector({
   selectedDate,
   onDateChange,

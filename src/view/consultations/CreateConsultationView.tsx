@@ -121,7 +121,8 @@ export default function CreateConsultationView() {
     onSuccess: () => {
       toast.success("Consulta registrada correctamente");
       queryClient.invalidateQueries({ queryKey: ["consultations", patientId] });
-      navigate(-1);
+       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
+    queryClient.invalidateQueries({ queryKey: ["activeAppointments"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);

@@ -2,7 +2,6 @@
 import { Calendar, User, CheckCircle, Edit, Eye, AlertCircle } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { GroomingService } from '../../types';
 
 type PatientIdType = string | { 
   _id: string; 
@@ -18,7 +17,6 @@ interface ServiceTableProps {
   getPatientBreed: (patientId: PatientIdType) => string;
   formatDate: (dateString: string) => string;
   getServiceIcon: (serviceType: string) => string;
-  getServiceStatusBadge: (status: GroomingService['status']) => string;
   getPaymentStatusBadge: (status: string) => string;
   getPaymentStatusIcon: (status: string) => React.JSX.Element;
   formatCurrency: (amount: number, currency: string, exchangeRate?: number) => string;
@@ -31,7 +29,6 @@ export default function ServiceTable({
   getPatientBreed, 
   formatDate, 
   getServiceIcon, 
-  getServiceStatusBadge, 
   getPaymentStatusBadge, 
   getPaymentStatusIcon,
   formatCurrency
@@ -58,15 +55,15 @@ export default function ServiceTable({
           <div className="flex items-center gap-3 text-xs text-gray-500">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span>Completado</span>
+              <span>Pagado</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-              <span>Proceso</span>
+              <span>Parcial</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-              <span>Sin facturar</span>
+              <span>Pendiente</span>
             </div>
           </div>
         </div>
@@ -87,9 +84,6 @@ export default function ServiceTable({
               </th>
               <th className="px-4 py-3 text-left font-semibold text-gray-700 uppercase tracking-wider">
                 Servicio
-              </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700 uppercase tracking-wider">
-                Estado
               </th>
               <th className="px-4 py-3 text-left font-semibold text-gray-700 uppercase tracking-wider">
                 Pago
@@ -164,13 +158,6 @@ export default function ServiceTable({
                         )}
                       </div>
                     </div>
-                  </td>
-                  
-                  {/* Estado del Servicio */}
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-[10px] font-semibold ${getServiceStatusBadge(service.status)}`}>
-                      {service.status}
-                    </span>
                   </td>
                   
                   {/* Estado del Pago */}

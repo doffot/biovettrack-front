@@ -7,7 +7,10 @@ import {
   updateGroomingService,
   getGroomingServiceById,
 } from "../../api/groomingAPI";
-import { getInvoices, updateInvoice, updateInvoiceItem } from "../../api/invoiceAPI";
+import { getInvoices, updateInvoiceItem } from "../../api/invoiceAPI";
+import { createPayment } from "../../api/paymentAPI";
+import { getPatientById } from "../../api/patientAPI";
+import { getOwnersById } from "../../api/OwnerAPI";
 import { PaymentModal } from "../../components/payment/PaymentModal";
 
 import {
@@ -19,7 +22,7 @@ import {
   Save,
   CreditCard,
 } from "lucide-react";
-import type { ServiceStatus, ServiceType } from "../../types";
+import type { ServiceType } from "../../types";
 import type { Invoice } from "../../types/invoice";
 
 export default function EditGroomingServiceView() {
@@ -33,7 +36,6 @@ export default function EditGroomingServiceView() {
     specifications: "",
     observations: "",
     cost: 0,
-    status: "Programado" as ServiceStatus,
     date: "",
   });
 
@@ -48,6 +50,27 @@ export default function EditGroomingServiceView() {
     queryFn: () => getInvoices({}),
     enabled: !!service,
   });
+
+  // Obtener datos del paciente
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: () => getPatientById(patientId!),
+    enabled: !!patientId,
+  });
+
+  // Obtener el ownerId del paciente
+  const ownerId = typeof patient?.owner === "object" 
+    ? patient.owner._id 
+    : patient?.owner;
+
+  // Query para obtener el owner con creditBalance
+  const { data: owner } = useQuery({
+    queryKey: ["owner", ownerId],
+    queryFn: () => getOwnersById(ownerId!),
+    enabled: !!ownerId,
+  });
+
+  const ownerCreditBalance = owner?.creditBalance || 0;
 
   const invoices = invoicesData?.invoices || [];
 
@@ -88,7 +111,6 @@ export default function EditGroomingServiceView() {
         specifications: service.specifications,
         observations: service.observations || "",
         cost: service.cost,
-        status: service.status,
         date: service.date.split("T")[0],
       });
     }
@@ -121,34 +143,70 @@ export default function EditGroomingServiceView() {
       queryClient.invalidateQueries({ queryKey: ["groomingService", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["groomingServices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      
       navigate(`/patients/${patientId}/grooming-services/${serviceId}`);
     },
   });
 
   const handlePaymentConfirm = async (paymentData: {
-    paymentMethodId: string;
+    paymentMethodId?: string;
     reference?: string;
-    amountPaidUSD: number;
-    amountPaidBs: number;
+    addAmountPaidUSD: number;
+    addAmountPaidBs: number;
     exchangeRate: number;
     isPartial: boolean;
+    creditAmountUsed?: number;
   }) => {
-    if (!invoice) {
+    if (!invoice || !invoice._id) {
       toast.error("No hay factura asociada");
       return;
     }
 
+    if (!paymentData.paymentMethodId && !paymentData.creditAmountUsed) {
+      toast.error("Debe seleccionar un método de pago o usar crédito");
+      return;
+    }
+
     try {
-      await updateInvoice(invoice._id!, {
-        amountPaidUSD: (invoice.amountPaidUSD || 0) + paymentData.amountPaidUSD,
-        amountPaidBs: (invoice.amountPaidBs || 0) + paymentData.amountPaidBs,
-        paymentMethod: paymentData.paymentMethodId,
-        paymentReference: paymentData.reference,
-        exchangeRate: paymentData.exchangeRate,
-      });
+      const isPayingInBs = paymentData.addAmountPaidBs > 0;
+      const amount = isPayingInBs 
+        ? paymentData.addAmountPaidBs 
+        : paymentData.addAmountPaidUSD;
+     const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+
+     const payload: {
+  invoiceId: string;
+  amount?: number;
+  currency: "USD" | "Bs";
+  exchangeRate: number;
+  paymentMethod?: string;
+  reference?: string;
+  creditAmountUsed?: number;
+} = {
+  invoiceId: invoice._id,
+  currency,
+  exchangeRate: paymentData.exchangeRate,
+};
+
+      if (amount > 0 && paymentData.paymentMethodId) {
+        payload.amount = amount;
+        payload.paymentMethod = paymentData.paymentMethodId;
+        if (paymentData.reference) {
+          payload.reference = paymentData.reference;
+        }
+      }
+
+      if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
+        payload.creditAmountUsed = paymentData.creditAmountUsed;
+      }
+
+      await createPayment(payload);
 
       toast.success(paymentData.isPartial ? "Abono registrado" : "Pago completado");
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
+      queryClient.invalidateQueries({ queryKey: ["patientDebt", patientId] });
       setShowPaymentModal(false);
     } catch {
       toast.error("Error al procesar pago");
@@ -161,7 +219,6 @@ export default function EditGroomingServiceView() {
     if (formData.specifications !== service?.specifications) updates.specifications = formData.specifications;
     if (formData.observations !== (service?.observations || "")) updates.observations = formData.observations;
     if (formData.cost !== service?.cost) updates.cost = formData.cost;
-    if (formData.status !== service?.status) updates.status = formData.status;
     if (formData.date !== service?.date.split("T")[0]) updates.date = formData.date;
 
     if (Object.keys(updates).length === 0) {
@@ -203,7 +260,6 @@ export default function EditGroomingServiceView() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header compacto */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center gap-3">
           <Link
@@ -220,9 +276,7 @@ export default function EditGroomingServiceView() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        {/* Formulario */}
         <section className="space-y-4">
-          {/* Fecha y Servicio */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1.5">Fecha</label>
@@ -247,39 +301,22 @@ export default function EditGroomingServiceView() {
             </div>
           </div>
 
-          {/* Estado y Costo */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Estado</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as ServiceStatus })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all appearance-none bg-white"
-              >
-                <option value="Programado">Programado</option>
-                <option value="En progreso">En progreso</option>
-                <option value="Completado">Completado</option>
-                <option value="Cancelado">Cancelado</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Costo</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.cost || ""}
-                  onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
-                  placeholder="0.00"
-                />
-              </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Costo</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.cost || ""}
+                onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
+                className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                placeholder="0.00"
+              />
             </div>
           </div>
 
-          {/* Aviso cuando el costo cambia */}
           {costChanged && invoice && (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-start gap-2">
@@ -297,7 +334,6 @@ export default function EditGroomingServiceView() {
             </div>
           )}
 
-          {/* Especificaciones */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
               Especificaciones
@@ -312,7 +348,6 @@ export default function EditGroomingServiceView() {
             />
           </div>
 
-          {/* Observaciones */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
               Observaciones <span className="text-gray-400 font-normal">(opcional)</span>
@@ -326,7 +361,6 @@ export default function EditGroomingServiceView() {
             />
           </div>
 
-          {/* Botón Guardar */}
           <button
             onClick={handleSave}
             disabled={isPending}
@@ -346,7 +380,6 @@ export default function EditGroomingServiceView() {
           </button>
         </section>
 
-        {/* Sección de Pago - Fondo diferente, sin card, ancho completo */}
         <section className="mt-6 -mx-4 px-4 py-5 bg-vet-light">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-3">
@@ -369,9 +402,18 @@ export default function EditGroomingServiceView() {
               </span>
             </div>
 
+            {/* Mostrar crédito disponible si el owner tiene */}
+            {ownerCreditBalance > 0 && paymentInfo.status !== "Pagado" && paymentInfo.status !== "Sin facturar" && (
+              <div className="mb-3 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <p className="text-xs text-emerald-700 flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Crédito disponible: <strong>${ownerCreditBalance.toFixed(2)}</strong></span>
+                </p>
+              </div>
+            )}
+
             {paymentInfo.status !== "Sin facturar" ? (
               <div className="space-y-3">
-                {/* Progress bar */}
                 <div className="h-1.5 bg-white rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 ${
@@ -381,7 +423,6 @@ export default function EditGroomingServiceView() {
                   />
                 </div>
 
-                {/* Montos */}
                 <div className="flex items-center justify-between text-sm">
                   <div>
                     <p className="text-gray-500 text-xs">Pagado</p>
@@ -401,7 +442,6 @@ export default function EditGroomingServiceView() {
                   </div>
                 </div>
 
-                {/* Botón de pago pequeño */}
                 {paymentInfo.pending > 0 && (
                   <button
                     onClick={() => setShowPaymentModal(true)}
@@ -421,12 +461,12 @@ export default function EditGroomingServiceView() {
         </section>
       </main>
 
-      {/* Modal de Pago */}
       {showPaymentModal && invoice && (
         <PaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
           amountUSD={paymentInfo.pending}
+          creditBalance={ownerCreditBalance}
           title="Registrar Pago"
           subtitle={`${service.service} • ${patientName}`}
           items={[{ description: service.service, patientName, date: service.date }]}

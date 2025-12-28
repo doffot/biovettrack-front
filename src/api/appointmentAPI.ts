@@ -19,12 +19,18 @@ type GetAppointmentsListResponse = {
   appointments: Appointment[];
 };
 
+export interface AppointmentPaymentInfo {
+  hasPayments: boolean;
+  totalPaidUSD: number;
+  totalPaidBs: number;
+  invoiceIds: string[];
+}
+
 const GetAppointmentsListResponseSchema = z.object({
   success: z.boolean().optional(),
   appointments: z.array(appointmentSchema),
 });
 
-//  ELIMINAR CITA
 export async function deleteAppointment(appointmentId: string): Promise<void> {
   try {
     await api.delete(`/appointments/${appointmentId}`);
@@ -36,7 +42,6 @@ export async function deleteAppointment(appointmentId: string): Promise<void> {
   }
 }
 
-//  OBTENER CITAS POR PACIENTE
 export async function getAppointmentsByPatient(
   patientId: string
 ): Promise<Appointment[]> {
@@ -61,7 +66,6 @@ export async function getAppointmentsByPatient(
   }
 }
 
-//  OBTENER CITAS ACTIVAS POR PACIENTE
 export async function getActiveAppointmentsByPatient(
   patientId: string
 ): Promise<Appointment[]> {
@@ -80,7 +84,6 @@ export async function getActiveAppointmentsByPatient(
   }
 }
 
-//  CREAR CITA
 export async function createAppointment(
   formData: CreateAppointmentForm,
   patientId: string
@@ -105,7 +108,6 @@ export async function createAppointment(
   }
 }
 
-//  ACTUALIZAR ESTADO DE CITA
 export async function updateAppointmentStatus(
   appointmentId: string,
   formData: UpdateAppointmentStatusForm
@@ -132,7 +134,6 @@ export async function updateAppointmentStatus(
   }
 }
 
-//  OBTENER TODAS LAS CITAS DEL VETERINARIO
 export async function getAllAppointments(): Promise<Appointment[]> {
   try {
     const { data } = await api.get("/appointments");
@@ -142,14 +143,9 @@ export async function getAllAppointments(): Promise<Appointment[]> {
   }
 }
 
-//  OBTENER TODAS LAS CITAS ACTIVAS
-export async function getActiveAppointments(): Promise<
-  AppointmentWithPatient[]
-> {
+export async function getActiveAppointments(): Promise<AppointmentWithPatient[]> {
   try {
-    const { data } = await api.get<GetAppointmentsListResponse>(
-      "/appointments"
-    );
+    const { data } = await api.get<GetAppointmentsListResponse>("/appointments");
 
     const response = GetAppointmentsListResponseSchema.safeParse(data);
     if (!response.success) {
@@ -169,7 +165,6 @@ export async function getActiveAppointments(): Promise<
   }
 }
 
-//  OBTENER CITAS POR FECHA PARA VETERINARIO
 export async function getAppointmentsByDateForVeterinarian(
   date: string
 ): Promise<Appointment[]> {
@@ -183,7 +178,6 @@ export async function getAppointmentsByDateForVeterinarian(
   }
 }
 
-//  OBTENER CITA POR ID
 export async function getAppointmentById(id: string): Promise<Appointment> {
   try {
     const { data } = await api.get<{ appointment: Appointment }>(
@@ -204,7 +198,6 @@ export async function getAppointmentById(id: string): Promise<Appointment> {
   }
 }
 
-//  ACTUALIZAR CITA COMPLETA
 type UpdateAppointmentResponse = {
   msg: string;
   appointment: Appointment;
@@ -229,6 +222,46 @@ export async function updateAppointment(
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(error.response.data.msg || "Error al actualizar la cita");
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
+export async function checkAppointmentPayments(
+  appointmentId: string
+): Promise<AppointmentPaymentInfo> {
+  try {
+    const { data } = await api.get<AppointmentPaymentInfo>(
+      `/appointments/${appointmentId}/check-payments`
+    );
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(error.response.data.msg || "Error al verificar pagos");
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
+export async function cancelAppointment(
+  appointmentId: string,
+  shouldRefund: boolean
+): Promise<Appointment> {
+  try {
+    const { data } = await api.patch<{ msg: string; appointment: Appointment }>(
+      `/appointments/${appointmentId}/status`,
+      { status: "Cancelada", shouldRefund }
+    );
+
+    const response = appointmentSchema.safeParse(data.appointment);
+    if (!response.success) {
+      throw new Error("Datos de la cita inválidos");
+    }
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(error.response.data.msg || "Error al cancelar la cita");
     }
     throw new Error("Error de red o desconocido");
   }

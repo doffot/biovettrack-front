@@ -15,7 +15,6 @@ export const differentialCountSchema = z.object({
 export const labExamSchema = z.object({
   _id: z.string().optional(),
   vetId: z.string(),
-
   patientId: z.string().optional(),
 
   patientName: z.string().min(1, "El nombre del paciente es obligatorio"),
@@ -42,26 +41,31 @@ export const labExamSchema = z.object({
 
   ownerName: z.string().optional(),
   ownerPhone: z.string().optional(),
-  
+
   paymentMethod: z.string().optional(),
   paymentReference: z.string().optional(),
+  paymentMethodId: z.string().optional(),
+  exchangeRate: z.number().optional(),
+  paymentAmount: z.number().optional(),
+  paymentCurrency: z.string().optional(),
+  isPartialPayment: z.boolean().optional(),
+  creditAmountUsed: z.number().optional(),
 });
 
 export const labExamsListSchema = z.array(labExamSchema);
 
 export type LabExam = z.infer<typeof labExamSchema>;
 
-// 👇 Actualizado para incluir los nuevos campos
 export type LabExamFormData = Pick<
   LabExam,
-  | "patientId" 
+  | "patientId"
   | "patientName"
   | "species"
   | "breed"
   | "sex"
   | "age"
   | "weight"
-  | "cost" 
+  | "cost"
   | "date"
   | "hematocrit"
   | "whiteBloodCells"
@@ -72,10 +76,16 @@ export type LabExamFormData = Pick<
   | "hemotropico"
   | "observacion"
   | "treatingVet"
-  | "ownerName" 
+  | "ownerName"
   | "ownerPhone"
-  | "paymentMethod"        
-  | "paymentReference"     
+  | "paymentMethod"
+  | "paymentReference"
+  | "paymentMethodId"
+  | "exchangeRate"
+  | "paymentAmount"
+  | "paymentCurrency"
+  | "isPartialPayment"
+  | "creditAmountUsed"
 >;
 
 export type DifferentialCount = LabExamFormData["differentialCount"];
