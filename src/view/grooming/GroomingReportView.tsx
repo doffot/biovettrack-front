@@ -2,11 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import {  Scissors, DollarSign, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Scissors, DollarSign, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react';
 import { getAllGroomingServices } from '../../api/groomingAPI';
 import { extractId } from '../../utils/extractId';
-import { formatCurrency, getPaymentMethodInfo } from '../../utils/currencyUtils';
-import type { ServiceStatus } from '../../types';
 
 // Tarjeta de métrica reutilizable
 const MetricCard = ({ 
@@ -51,12 +49,11 @@ const formatTime = (dateString: string) => {
 };
 
 export default function GroomingReportView() {
-//   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'custom'>('today');
   const [customFrom, setCustomFrom] = useState<string>('');
   const [customTo, setCustomTo] = useState<string>('');
 
-  const {  data:services = [], isLoading } = useQuery({
+  const { data: services = [], isLoading } = useQuery({
     queryKey: ['groomingServices'],
     queryFn: getAllGroomingServices,
   });
@@ -106,23 +103,9 @@ export default function GroomingReportView() {
     });
   }, [services, dateRange, customFrom, customTo]);
 
-  // Estadísticas reales
+  // Estadísticas reales (sin paymentMethod ni amountPaid)
   const stats = useMemo(() => {
-    const totalsByCurrency: Record<string, { total: number; paid: number; count: number }> = {};
-    
-    filteredServices.forEach(service => {
-      const currency = getPaymentMethodInfo(service.paymentMethod).currency;
-      if (!totalsByCurrency[currency]) {
-        totalsByCurrency[currency] = { total: 0, paid: 0, count: 0 };
-      }
-      totalsByCurrency[currency].total += service.cost;
-      totalsByCurrency[currency].paid += service.amountPaid!;
-      totalsByCurrency[currency].count += 1;
-    });
-
     const totalServices = filteredServices.length;
-    const completed = filteredServices.filter(s => s.status === 'Completado').length;
-    const completionRate = totalServices ? Math.round((completed / totalServices) * 100) : 0;
 
     // Servicio más frecuente
     const serviceCount: Record<string, number> = {};
@@ -132,7 +115,7 @@ export default function GroomingReportView() {
     const mostFrequentService = Object.entries(serviceCount)
       .sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
-    return { totalsByCurrency, totalServices, completed, completionRate, mostFrequentService };
+    return { totalServices, mostFrequentService };
   }, [filteredServices]);
 
   if (isLoading) {
@@ -149,22 +132,21 @@ export default function GroomingReportView() {
   return (
     <div className="min-h-screen bg-vet-gradient px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
-     {/* Header */}
-<div className="flex items-center justify-between mb-6">
-  <div className="flex items-center gap-3">
-    <Link
-      to="/"
-      className="p-2 rounded-lg hover:bg-vet-light text-vet-primary transition-colors"
-      title="Volver a servicios"
-    >
-      <ArrowLeft className="w-5 h-5" />
-    </Link>
-    <div>
-      <h1 className="text-2xl font-bold text-vet-text">Reporte de Peluquería</h1>
-      <p className="text-vet-muted text-sm">Estadísticas y servicios filtrados por período</p>
-    </div>
-  </div>
-</div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/"
+            className="p-2 rounded-lg hover:bg-vet-light text-vet-primary transition-colors"
+            title="Volver a servicios"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-vet-text">Reporte de Peluquería</h1>
+            <p className="text-vet-muted text-sm">Estadísticas y servicios filtrados por período</p>
+          </div>
+        </div>
+      </div>
 
       {/* Filtros */}
       <div className="bg-white rounded-xl p-4 mb-6 border border-gray-200 shadow-sm">
@@ -217,14 +199,6 @@ export default function GroomingReportView() {
           color="text-vet-primary" 
         />
         <MetricCard 
-          title="Completados" 
-          value={`${stats.completionRate}%`} 
-          subtitle={`${stats.completed} de ${stats.totalServices}`}
-          icon={CheckCircle} 
-          color="text-green-600" 
-          bgColor="bg-green-50" 
-        />
-        <MetricCard 
           title="Servicio Más Frecuente" 
           value={stats.mostFrequentService} 
           icon={TrendingUp} 
@@ -232,43 +206,20 @@ export default function GroomingReportView() {
           bgColor="bg-purple-50" 
         />
         <MetricCard 
-          title="Total de Monedas" 
-          value={Object.keys(stats.totalsByCurrency).length} 
+          title="Ingresos Totales" 
+          value={filteredServices.reduce((sum, s) => sum + s.cost, 0).toFixed(2)} 
           icon={DollarSign} 
           color="text-orange-600" 
           bgColor="bg-orange-50" 
         />
+        <MetricCard 
+          title="Promedio por Servicio" 
+          value={stats.totalServices > 0 ? (filteredServices.reduce((sum, s) => sum + s.cost, 0) / stats.totalServices).toFixed(2) : "0.00"} 
+          icon={CheckCircle} 
+          color="text-green-600" 
+          bgColor="bg-green-50" 
+        />
       </div>
-
-      {/* Ingresos por moneda */}
-      {Object.keys(stats.totalsByCurrency).length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-vet-text mb-3">Ingresos por Moneda</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(stats.totalsByCurrency).map(([currency, data]) => (
-              <div key={currency} className="bg-white p-4 rounded-xl border border-gray-200">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-vet-muted">
-                      {currency === 'VES' || currency === 'Bs' ? 'Bolívares' : currency}
-                    </p>
-                    <p className="text-xl font-bold text-vet-primary mt-1">
-                      {formatCurrency(data.total, currency)}
-                    </p>
-                    <p className="text-xs text-vet-muted mt-1">
-                      Pagado: {formatCurrency(data.paid, currency)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-vet-primary">{data.count}</p>
-                    <p className="text-xs text-vet-muted">servicios</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Lista de Servicios */}
       <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
@@ -288,8 +239,7 @@ export default function GroomingReportView() {
                   <th className="text-left p-3 text-sm font-semibold text-vet-text">Mascota</th>
                   <th className="text-left p-3 text-sm font-semibold text-vet-text">Servicio</th>
                   <th className="text-left p-3 text-sm font-semibold text-vet-text">Fecha</th>
-                  <th className="text-left p-3 text-sm font-semibold text-vet-text">Estado</th>
-                  <th className="text-right p-3 text-sm font-semibold text-vet-text">Monto</th>
+                  <th className="text-right p-3 text-sm font-semibold text-vet-text">Costo</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -297,24 +247,7 @@ export default function GroomingReportView() {
                   const patientName = typeof service.patientId === 'string'
                     ? "Mascota"
                     : service.patientId?.name || "Mascota";
-                  const paymentInfo = getPaymentMethodInfo(service.paymentMethod);
                   const patientId = extractId(service.patientId);
-
-                  // Badge de estado
-                  const getStatusBadge = (status: ServiceStatus) => {
-                    const configs: Record<ServiceStatus, { bg: string; text: string }> = {
-                      'Completado': { bg: 'bg-green-100', text: 'text-green-700' },
-                      'Cancelado': { bg: 'bg-red-100', text: 'text-red-700' },
-                      'En progreso': { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-                      'Programado': { bg: 'bg-blue-100', text: 'text-blue-700' }
-                    };
-                    const config = configs[status] || configs['Programado'];
-                    return (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-                        {status}
-                      </span>
-                    );
-                  };
 
                   return (
                     <tr key={service._id} className="hover:bg-vet-light/20">
@@ -330,9 +263,8 @@ export default function GroomingReportView() {
                       <td className="p-3 text-sm">
                         {formatDate(service.date)} • {formatTime(service.date)}
                       </td>
-                      <td className="p-3">{getStatusBadge(service.status)}</td>
                       <td className="p-3 text-right font-medium">
-                        {formatCurrency(service.cost, paymentInfo.currency)}
+                        ${service.cost.toFixed(2)}
                       </td>
                     </tr>
                   );
