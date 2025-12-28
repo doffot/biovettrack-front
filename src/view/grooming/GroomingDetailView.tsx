@@ -23,7 +23,7 @@ import {
   getGroomingServiceById,
 } from "../../api/groomingAPI";
 import { getInvoices } from "../../api/invoiceAPI";
-import { createPayment } from "../../api/paymentAPI"; // ✅ NUEVO
+import { createPayment } from "../../api/paymentAPI";
 import { extractId } from "../../utils/extractId";
 import type { Invoice } from "../../types/invoice";
 
@@ -115,59 +115,51 @@ export default function GroomingDetailView() {
     },
   });
 
-  // ✅ CORREGIDO: Usa createPayment y nombres correctos de parámetros
- const handlePaymentConfirm = async (paymentData: {
-  paymentMethodId?: string;           // ✅ Opcional
-  reference?: string;
-  addAmountPaidUSD: number;
-  addAmountPaidBs: number;
-  exchangeRate: number;
-  isPartial: boolean;
-  creditAmountUsed?: number;          // ✅ Agregado
-}) => {
-  if (!invoice || !invoice._id) {
-    toast.error("No hay factura asociada");
-    return;
-  }
-
-  // Si no hay método de pago y no hay crédito, error
-  if (!paymentData.paymentMethodId && !paymentData.creditAmountUsed) {
-    toast.error("Debe seleccionar un método de pago");
-    return;
-  }
-
-  try {
-    const isPayingInBs = paymentData.addAmountPaidBs > 0;
-    const amount = isPayingInBs 
-      ? paymentData.addAmountPaidBs 
-      : paymentData.addAmountPaidUSD;
-    const currency = isPayingInBs ? "Bs" : "USD";
-
-    // Solo crear pago si hay monto a pagar
-    if (amount > 0 && paymentData.paymentMethodId) {
-      await createPayment({
-        invoiceId: invoice._id,
-        amount,
-        currency,
-        exchangeRate: paymentData.exchangeRate,
-        paymentMethod: paymentData.paymentMethodId,
-        reference: paymentData.reference,
-      });
+  const handlePaymentConfirm = async (paymentData: {
+    paymentMethodId?: string;
+    reference?: string;
+    addAmountPaidUSD: number;
+    addAmountPaidBs: number;
+    exchangeRate: number;
+    isPartial: boolean;
+    creditAmountUsed?: number;
+  }) => {
+    if (!invoice || !invoice._id) {
+      toast.error("No hay factura asociada");
+      return;
     }
 
-    // TODO: Si hay creditAmountUsed, manejar el crédito aquí
-    // if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
-    //   // Lógica para aplicar crédito
-    // }
+    if (!paymentData.paymentMethodId && !paymentData.creditAmountUsed) {
+      toast.error("Debe seleccionar un método de pago");
+      return;
+    }
 
-    toast.success(paymentData.isPartial ? "Abono registrado" : "Pago completado");
-    queryClient.invalidateQueries({ queryKey: ["invoices"] });
-    queryClient.invalidateQueries({ queryKey: ["payments"] });
-    setShowPaymentModal(false);
-  } catch {
-    toast.error("Error al procesar pago");
-  }
-};
+    try {
+      const isPayingInBs = paymentData.addAmountPaidBs > 0;
+      const amount = isPayingInBs 
+        ? paymentData.addAmountPaidBs 
+        : paymentData.addAmountPaidUSD;
+      const currency = isPayingInBs ? "Bs" : "USD";
+
+      if (amount > 0 && paymentData.paymentMethodId) {
+        await createPayment({
+          invoiceId: invoice._id,
+          amount,
+          currency,
+          exchangeRate: paymentData.exchangeRate,
+          paymentMethod: paymentData.paymentMethodId,
+          reference: paymentData.reference,
+        });
+      }
+
+      toast.success(paymentData.isPartial ? "Abono registrado" : "Pago completado");
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      setShowPaymentModal(false);
+    } catch {
+      toast.error("Error al procesar pago");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -241,33 +233,16 @@ export default function GroomingDetailView() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Encabezado del servicio */}
           <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-vet-primary/10 rounded-xl flex items-center justify-center">
-                  <Scissors className="w-6 h-6 text-vet-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    {service.service}
-                  </h1>
-                  <p className="text-sm text-gray-500">{patientName}</p>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-vet-primary/10 rounded-xl flex items-center justify-center">
+                <Scissors className="w-6 h-6 text-vet-primary" />
               </div>
-
-              {/* Status badge */}
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  service.status === "Completado"
-                    ? "bg-green-100 text-green-700"
-                    : service.status === "En progreso"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : service.status === "Cancelado"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-blue-100 text-blue-700"
-                }`}
-              >
-                {service.status}
-              </span>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {service.service}
+                </h1>
+                <p className="text-sm text-gray-500">{patientName}</p>
+              </div>
             </div>
           </div>
 
@@ -318,7 +293,7 @@ export default function GroomingDetailView() {
                 Estado de Pago
               </h3>
 
-              {/* Badge de estado de pago */}
+              {/* Badge de estado de pago - ✅ ESTO SÍ SE MANTIENE */}
               <span
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                   paymentInfo.status === "Pagado"
@@ -353,7 +328,6 @@ export default function GroomingDetailView() {
                   />
                 </div>
                 
-                {/* Mostrar desglose de pagos por moneda */}
                 <div className="flex justify-between text-xs mt-2">
                   {paymentInfo.amountPaidUSD > 0 && (
                     <span className="text-green-600">
@@ -382,7 +356,6 @@ export default function GroomingDetailView() {
                 className="group relative w-full py-3.5 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl shadow-lg shadow-vet-primary/25 hover:shadow-xl hover:shadow-vet-primary/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                
                 <span className="relative flex items-center justify-center gap-2">
                   <Sparkles className="w-5 h-5" />
                   Pagar ${paymentInfo.pending.toFixed(2)}

@@ -167,21 +167,15 @@ export function useDashboardData() {
   const todayStr = useMemo(() => getTodayDateString(), []);
 
   // ========== MÉTRICAS DE HOY ==========
+  // ✅ CORREGIDO: Se eliminó la condición de "status"
   const todayAppointments = useMemo(
-    () =>
-      appointments.filter(
-        (apt) => getDatePart(apt.date) === todayStr && apt.status === "Programada"
-      ),
+    () => appointments.filter((apt) => getDatePart(apt.date) === todayStr),
     [appointments, todayStr]
   );
 
+  // ✅ CORREGIDO: Se eliminó la condición de "status"
   const todayGrooming = useMemo(
-    () =>
-      groomingServices.filter(
-        (svc) =>
-          getDatePart(svc.date) === todayStr &&
-          (svc.status === "Programado" || svc.status === "En progreso")
-      ),
+    () => groomingServices.filter((svc) => getDatePart(svc.date) === todayStr),
     [groomingServices, todayStr]
   );
 

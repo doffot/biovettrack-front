@@ -8,6 +8,17 @@ import Portal from "../ui/Portal";
 import { toast } from "../Toast";
 import type { Invoice } from "../../types/invoice";
 
+
+interface PaymentData {
+  paymentMethodId?: string;
+  reference?: string;
+  addAmountPaidUSD: number;
+  addAmountPaidBs: number;
+  exchangeRate: number;
+  isPartial: boolean;
+  creditAmountUsed?: number; 
+}
+
 interface PendingPaymentsBannerProps {
   patientId: string;
 }
@@ -33,8 +44,8 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
       paymentData: {
         paymentMethodId: string;
         reference?: string;
-        amountPaidUSD: number;
-        amountPaidBs: number;
+        amountPaidUSD: number; 
+        amountPaidBs: number;  
         exchangeRate: number;
       };
     }) => {
@@ -82,26 +93,21 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
     setSelectedInvoice(null);
   };
 
-  const handlePaymentConfirm = (paymentData: {
-    paymentMethodId: string;
-    reference?: string;
-    amountPaidUSD: number;
-    amountPaidBs: number;
-    exchangeRate: number;
-    isPartial: boolean;
-  }) => {
+  
+  const handlePaymentConfirm = (paymentData: PaymentData) => {
     if (!selectedInvoice) {
       toast.error("No hay factura seleccionada");
       return;
     }
 
+   
     processPayment({
       invoice: selectedInvoice,
       paymentData: {
-        paymentMethodId: paymentData.paymentMethodId,
+        paymentMethodId: paymentData.paymentMethodId!,
         reference: paymentData.reference,
-        amountPaidUSD: paymentData.amountPaidUSD,
-        amountPaidBs: paymentData.amountPaidBs,
+        amountPaidUSD: paymentData.addAmountPaidUSD, // addAmountPaidUSD → amountPaidUSD
+        amountPaidBs: paymentData.addAmountPaidBs,   // addAmountPaidBs → amountPaidBs
         exchangeRate: paymentData.exchangeRate,
       },
     });
@@ -131,7 +137,7 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
               
               <div className="min-w-0">
                 <p className="font-bold text-amber-800 text-sm sm:text-base">
-                  {invoicesCount} factura{invoicesCount !== 1 ? "s" : ""} pendiente{invoicesCount !== 1 ? "s" : ""} de pago
+                  {invoicesCount} factura{invoicesCount !== 1 ? "s" : ""} pendiente{invoicesCount !== 1 ? "s" : ""}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <DollarSign className="w-4 h-4 text-amber-600" />
@@ -265,7 +271,7 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
         <PaymentModal
           isOpen={isPaymentModalOpen && !!selectedInvoice}
           onClose={handleClosePaymentModal}
-          onConfirm={handlePaymentConfirm}
+          onConfirm={handlePaymentConfirm} // ✅ Ahora los tipos coinciden perfectamente
           amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
           items={selectedInvoice?.items.map(item => ({
             id: item.resourceId.toString(),
@@ -274,6 +280,7 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
           title="Procesar Pago"
           subtitle={selectedInvoice ? `Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}` : ""}
           allowPartial={true}
+     
         />
       </Portal>
     </>

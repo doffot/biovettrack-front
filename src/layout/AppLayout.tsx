@@ -63,6 +63,55 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+// ✅ COMPONENTE DE LOADING INICIAL MEJORADO
+const InitialLoadingScreen = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center p-4">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 max-w-md w-full text-center border border-white/30">
+        {/* Icono animado */}
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-lg">
+            <Activity className="w-8 h-8 text-white animate-pulse" />
+          </div>
+        </div>
+
+        {/* Título principal */}
+        <h2 className="text-xl font-bold text-vet-text mb-3">Cargando tu clínica</h2>
+        
+        {/* Mensaje contextual */}
+        <p className="text-vet-muted mb-6 text-sm">
+          Estamos verificando tu sesión y preparando todos los datos para ti...
+        </p>
+
+        {/* Barra de progreso visual - usando tu animación existente */}
+        <div className="w-full bg-vet-light rounded-full h-2 mb-6 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-vet-primary to-vet-accent animate-gentle-pulse" />
+        </div>
+
+        {/* Mensajes de estado */}
+        <div className="text-left space-y-2 text-xs text-vet-muted">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-vet-primary animate-pulse"></div>
+            <span>Verificando credenciales</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-vet-muted"></div>
+            <span>Cargando pacientes y dueños</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-vet-muted"></div>
+            <span>Sincronizando citas y servicios</span>
+          </div>
+        </div>
+
+        <p className="text-[10px] text-vet-muted mt-4 opacity-70">
+          Esto puede tomar unos segundos. Gracias por tu paciencia.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const AppLayout: React.FC = () => {
   const [activeItem, setActiveItem] = useState("/");
   const { data, isError, isLoading } = useAuth();
@@ -80,15 +129,9 @@ const AppLayout: React.FC = () => {
     navigate("/auth/login");
   };
 
+  // ✅ USAMOS EL NUEVO COMPONENTE DE LOADING
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-vet-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-vet-text font-medium">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <InitialLoadingScreen />;
   }
 
   if (isError) {

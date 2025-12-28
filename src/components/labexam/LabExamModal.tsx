@@ -1,18 +1,17 @@
-import { X, Calendar, FlaskConical, Clock, FileText, CheckCircle2, XCircle, Loader2, Beaker, AlertCircle } from "lucide-react";
-import type { LabExam, LabExamStatus } from "../../types/labExam";
+import { X, Calendar, FlaskConical, FileText, Beaker, AlertCircle } from "lucide-react";
+import type { LabExam } from "../../types/labExam";
 
 interface LabExamModalProps {
   isOpen: boolean;
   onClose: () => void;
   exam: LabExam;
-  onStatusChange?: (status: LabExamStatus) => void;
+  // onStatusChange ya no es necesario ni posible
 }
 
 export default function LabExamModal({
   isOpen,
   onClose,
   exam,
-  onStatusChange,
 }: LabExamModalProps) {
   if (!isOpen) return null;
 
@@ -24,39 +23,6 @@ export default function LabExamModal({
       year: "numeric",
     });
   };
-
-  const getStatusConfig = (status?: LabExamStatus) => {
-    if (!status) return null;
-
-    switch (status) {
-      case "Completado":
-        return {
-          color: "bg-green-100 text-green-700",
-          icon: CheckCircle2,
-          label: "Completado",
-        };
-      case "Programado":
-        return {
-          color: "bg-blue-100 text-blue-700",
-          icon: Clock,
-          label: "Programado",
-        };
-      case "En proceso":
-        return {
-          color: "bg-amber-100 text-amber-700",
-          icon: Loader2,
-          label: "En proceso",
-        };
-      case "Cancelado":
-        return {
-          color: "bg-red-100 text-red-700",
-          icon: XCircle,
-          label: "Cancelado",
-        };
-    }
-  };
-
-  const statusConfig = getStatusConfig(exam.status);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
@@ -82,72 +48,6 @@ export default function LabExamModal({
             <X className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Status si está vinculado a cita */}
-        {exam.status && statusConfig && (
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Estado del examen</p>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-1 text-sm rounded-full font-medium flex items-center gap-1 ${statusConfig.color}`}
-                  >
-                    <statusConfig.icon className="w-3.5 h-3.5" />
-                    {statusConfig.label}
-                  </span>
-                  {exam.appointmentId && (
-                    <span className="text-xs text-gray-400">• Vinculado a cita</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Botones de acción para cambiar status */}
-              {exam.status === "Programado" && onStatusChange && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onStatusChange("En proceso")}
-                    className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-xs font-medium rounded-lg transition-colors"
-                  >
-                    En proceso
-                  </button>
-                  <button
-                    onClick={() => onStatusChange("Completado")}
-                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors"
-                  >
-                    Completar
-                  </button>
-                </div>
-              )}
-
-              {exam.status === "En proceso" && onStatusChange && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onStatusChange("Completado")}
-                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors"
-                  >
-                    Completar
-                  </button>
-                  <button
-                    onClick={() => onStatusChange("Cancelado")}
-                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              )}
-
-              {exam.status === "Completado" && onStatusChange && (
-                <button
-                  onClick={() => onStatusChange("Cancelado")}
-                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Contenido */}
         <div className="p-4 space-y-3">
@@ -220,7 +120,7 @@ export default function LabExamModal({
           {/* Veterinario */}
           {exam.treatingVet && (
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <Clock className="w-4 h-4 text-gray-400" />
+              <Calendar className="w-4 h-4 text-gray-400" /> {/* Reutilizamos Calendar o puedes usar otro icono */}
               <div>
                 <p className="text-xs text-gray-500">Veterinario tratante</p>
                 <p className="text-sm font-medium text-gray-900">{exam.treatingVet}</p>
