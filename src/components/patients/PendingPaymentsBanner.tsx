@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ChevronRight, DollarSign, CreditCard, X } from "lucide-react";
 import { getPatientDebtSummary, updateInvoice } from "../../api/invoiceAPI";
 import { PaymentModal } from "../payment/PaymentModal";
+import type { PaymentServiceItem, PaymentPatientInfo, PaymentOwnerInfo } from "../payment/PaymentModal";
 import Portal from "../ui/Portal";
 import { toast } from "../Toast";
 import type { Invoice } from "../../types/invoice";
-
+import type { Patient } from "../../types/patient";
+import type { Owner } from "../../types/owner";
 
 interface PaymentData {
   paymentMethodId?: string;
@@ -16,14 +18,20 @@ interface PaymentData {
   addAmountPaidBs: number;
   exchangeRate: number;
   isPartial: boolean;
-  creditAmountUsed?: number; 
+  creditAmountUsed?: number;
 }
 
 interface PendingPaymentsBannerProps {
   patientId: string;
+  patient?: Patient;  // ✅ NUEVO
+  owner?: Owner;      // ✅ NUEVO
 }
 
-export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBannerProps) {
+export default function PendingPaymentsBanner({ 
+  patientId, 
+  patient,  // ✅ NUEVO
+  owner     // ✅ NUEVO
+}: PendingPaymentsBannerProps) {
   const [showInvoiceList, setShowInvoiceList] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -44,8 +52,8 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
       paymentData: {
         paymentMethodId: string;
         reference?: string;
-        amountPaidUSD: number; 
-        amountPaidBs: number;  
+        amountPaidUSD: number;
+        amountPaidBs: number;
         exchangeRate: number;
       };
     }) => {
@@ -72,6 +80,41 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
     },
   });
 
+  // ==================== HELPERS PARA EL MODAL ====================
+
+  // Convertir items de invoice a PaymentServiceItem
+  const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
+    if (!invoice.items || invoice.items.length === 0) return [];
+    return invoice.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.cost,
+      total: item.cost * item.quantity,
+    }));
+  };
+
+  // Obtener info del paciente
+  const getPatientInfo = (): PaymentPatientInfo | undefined => {
+    if (patient) {
+      return {
+        name: patient.name,
+        photo: patient.photo,
+      };
+    }
+    return undefined;
+  };
+
+  // Obtener info del owner
+  const getOwnerInfo = (): PaymentOwnerInfo | undefined => {
+    if (owner) {
+      return {
+        name: owner.name,
+        phone: owner.contact,
+      };
+    }
+    return undefined;
+  };
+
   if (isLoading || !debtSummary || debtSummary.invoicesCount === 0) {
     return null;
   }
@@ -93,21 +136,19 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
     setSelectedInvoice(null);
   };
 
-  
   const handlePaymentConfirm = (paymentData: PaymentData) => {
     if (!selectedInvoice) {
       toast.error("No hay factura seleccionada");
       return;
     }
 
-   
     processPayment({
       invoice: selectedInvoice,
       paymentData: {
         paymentMethodId: paymentData.paymentMethodId!,
         reference: paymentData.reference,
-        amountPaidUSD: paymentData.addAmountPaidUSD, // addAmountPaidUSD → amountPaidUSD
-        amountPaidBs: paymentData.addAmountPaidBs,   // addAmountPaidBs → amountPaidBs
+        amountPaidUSD: paymentData.addAmountPaidUSD,
+        amountPaidBs: paymentData.addAmountPaidBs,
         exchangeRate: paymentData.exchangeRate,
       },
     });
@@ -123,18 +164,25 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
     }
   };
 
+  const getInvoiceDescription = (invoice: Invoice): string => {
+    if (!invoice.items || invoice.items.length === 0) return "Factura";
+    const descriptions = invoice.items.map((i) => i.description);
+    if (descriptions.length <= 2) return descriptions.join(", ");
+    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
+  };
+
   return (
     <>
       <div className="mb-4 animate-fade-in-up">
         <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-2xl p-4 shadow-soft">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-shimmer" />
-          
+
           <div className="relative flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex-shrink-0 p-2.5 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-md">
                 <AlertTriangle className="w-5 h-5 text-white" />
               </div>
-              
+
               <div className="min-w-0">
                 <p className="font-bold text-amber-800 text-sm sm:text-base">
                   {invoicesCount} factura{invoicesCount !== 1 ? "s" : ""} pendiente{invoicesCount !== 1 ? "s" : ""}
@@ -162,7 +210,7 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-200">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse"
               style={{ width: "60%" }}
             />
@@ -212,7 +260,7 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap gap-1.5 mb-2">
                             {invoice.items.map((item, idx) => (
-                              <span 
+                              <span
                                 key={idx}
                                 className="inline-flex items-center gap-1 text-xs bg-white text-gray-700 px-2 py-1 rounded-full border border-gray-200"
                               >
@@ -271,16 +319,15 @@ export default function PendingPaymentsBanner({ patientId }: PendingPaymentsBann
         <PaymentModal
           isOpen={isPaymentModalOpen && !!selectedInvoice}
           onClose={handleClosePaymentModal}
-          onConfirm={handlePaymentConfirm} // ✅ Ahora los tipos coinciden perfectamente
+          onConfirm={handlePaymentConfirm}
           amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
-          items={selectedInvoice?.items.map(item => ({
-            id: item.resourceId.toString(),
-            description: item.description,
-          })) || []}
+          creditBalance={owner?.creditBalance || 0}
           title="Procesar Pago"
-          subtitle={selectedInvoice ? `Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}` : ""}
+          subtitle={selectedInvoice ? getInvoiceDescription(selectedInvoice) : undefined}
+          services={selectedInvoice ? getInvoiceServices(selectedInvoice) : []}
+          patient={getPatientInfo()}
+          owner={getOwnerInfo()}
           allowPartial={true}
-     
         />
       </Portal>
     </>

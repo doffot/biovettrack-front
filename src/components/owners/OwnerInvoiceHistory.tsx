@@ -14,8 +14,11 @@ import {
   History,
 } from "lucide-react";
 import type { Invoice } from "../../types/invoice";
+import type { Patient } from "../../types/patient";
+import type { Owner } from "../../types/owner";
 import { getPatientName } from "../../types/invoice";
 import { PaymentModal } from "../payment/PaymentModal";
+import type { PaymentServiceItem, PaymentPatientInfo, PaymentOwnerInfo } from "../payment/PaymentModal";
 import { InvoicePayments } from "./InvoicePayments";
 
 export interface PaymentData {
@@ -27,6 +30,7 @@ export interface PaymentData {
   isPartial: boolean;
   creditAmountUsed?: number;
 }
+
 type FilterStatus = "all" | "pending" | "paid";
 
 interface OwnerInvoiceHistoryProps {
@@ -34,6 +38,8 @@ interface OwnerInvoiceHistoryProps {
   creditBalance?: number;
   isOpen: boolean;
   onClose: () => void;
+  owner?: Owner;           // ✅ NUEVO
+  patients?: Patient[];    // ✅ NUEVO
   onPayInvoice?: (invoiceId: string, paymentData: PaymentData) => Promise<void>;
   onPayAll?: (invoiceIds: string[], paymentData: PaymentData) => Promise<void>;
 }
@@ -43,10 +49,11 @@ export function OwnerInvoiceHistory({
   creditBalance = 0,
   isOpen,
   onClose,
+  owner,           // ✅ NUEVO
+  patients = [],   // ✅ NUEVO
   onPayInvoice,
   onPayAll,
 }: OwnerInvoiceHistoryProps) {
-  console.log("OwnerInvoiceHistory creditBalance:", creditBalance);  
   const queryClient = useQueryClient();
 
   const [filter, setFilter] = useState<FilterStatus>("all");
@@ -54,6 +61,57 @@ export function OwnerInvoiceHistory({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [payAllMode, setPayAllMode] = useState(false);
+
+  // ==================== HELPERS PARA EL MODAL ====================
+
+  // Convertir items de invoice a PaymentServiceItem
+  const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
+    if (!invoice.items || invoice.items.length === 0) return [];
+    return invoice.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.cost,
+      total: item.cost * item.quantity,
+    }));
+  };
+
+  // Obtener info del paciente de una factura
+  const getPatientInfo = (invoice: Invoice): PaymentPatientInfo | undefined => {
+    const patient = patients.find((p) => {
+      if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
+      return p._id === invoice.patientId?._id;
+    });
+
+    if (patient) {
+      return {
+        name: patient.name,
+        photo: patient.photo,
+      };
+    }
+
+    // Fallback al nombre del patientId poblado
+    if (typeof invoice.patientId === "object" && invoice.patientId) {
+      return { name: invoice.patientId.name };
+    }
+
+    return undefined;
+  };
+
+  // Obtener info del owner
+  const getOwnerInfo = (): PaymentOwnerInfo | undefined => {
+    if (!owner) return undefined;
+    return {
+      name: owner.name,
+      phone: owner.contact,
+    };
+  };
+
+  const getInvoiceDescription = (invoice: Invoice): string => {
+    if (!invoice.items || invoice.items.length === 0) return "Factura";
+    const descriptions = invoice.items.map((i) => i.description);
+    if (descriptions.length <= 2) return descriptions.join(", ");
+    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2} más`;
+  };
 
   if (!isOpen) return null;
 
@@ -178,12 +236,27 @@ export function OwnerInvoiceHistory({
     }
   };
 
-  const getInvoiceDescription = (invoice: Invoice): string => {
-    if (!invoice.items || invoice.items.length === 0) return "Factura";
-    const descriptions = invoice.items.map((i) => i.description);
-    if (descriptions.length <= 2) return descriptions.join(", ");
-    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2} más`;
-  };
+  // ==================== DATOS PARA EL MODAL ====================
+
+  const modalServices: PaymentServiceItem[] = payAllMode
+    ? pendingInvoices.flatMap((inv) => getInvoiceServices(inv))
+    : selectedInvoice
+      ? getInvoiceServices(selectedInvoice)
+      : [];
+
+  const modalPatient: PaymentPatientInfo | undefined = payAllMode
+    ? undefined
+    : selectedInvoice
+      ? getPatientInfo(selectedInvoice)
+      : undefined;
+
+  const modalOwner: PaymentOwnerInfo | undefined = getOwnerInfo();
+
+  const modalAmount = payAllMode
+    ? totalDebtUSD
+    : selectedInvoice
+      ? getPendingAmountUSD(selectedInvoice)
+      : 0;
 
   return (
     <>
@@ -431,45 +504,23 @@ export function OwnerInvoiceHistory({
         </div>
       </div>
 
-      {/* Modal de pago */}
+      {/* ✅ Modal de pago ACTUALIZADO con nuevos props */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={handleClosePaymentModal}
-        amountUSD={
-          payAllMode
-            ? totalDebtUSD
-            : selectedInvoice
-            ? getPendingAmountUSD(selectedInvoice)
-            : 0
-        }
+        amountUSD={modalAmount}
         creditBalance={creditBalance}
         title={payAllMode ? "Pagar Todas las Facturas" : "Pagar Factura"}
         subtitle={
           payAllMode
             ? `${pendingInvoices.length} factura${pendingInvoices.length > 1 ? "s" : ""}`
             : selectedInvoice
-            ? `${getPatientName(selectedInvoice)} - ${formatDate(selectedInvoice.date)}`
-            : ""
+              ? getInvoiceDescription(selectedInvoice)
+              : undefined
         }
-        items={
-          payAllMode
-            ? pendingInvoices.map((inv) => ({
-                id: inv._id || `temp-${Math.random()}`,
-                description: getInvoiceDescription(inv),
-                patientName: getPatientName(inv),
-                date: inv.date,
-              }))
-            : selectedInvoice
-            ? [
-                {
-                  id: selectedInvoice._id || `temp-${Math.random()}`,
-                  description: getInvoiceDescription(selectedInvoice),
-                  patientName: getPatientName(selectedInvoice),
-                  date: selectedInvoice.date,
-                },
-              ]
-            : []
-        }
+        services={modalServices}
+        patient={modalPatient}
+        owner={modalOwner}
         onConfirm={handlePaymentConfirm}
       />
     </>

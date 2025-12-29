@@ -379,25 +379,32 @@ export default function GroomingDetailView() {
         </div>
       </div>
 
-      {/* Modal de Pago */}
-      {showPaymentModal && invoice && (
-        <PaymentModal
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          amountUSD={paymentInfo.pending}
-          title="Procesar Pago"
-          subtitle={`${service.service} - ${patientName}`}
-          items={[
-            {
-              description: service.service,
-              patientName: patientName,
-              date: service.date,
-            },
-          ]}
-          allowPartial={true}
-          onConfirm={handlePaymentConfirm}
-        />
-      )}
+     {/* Modal de Pago */}
+{showPaymentModal && invoice && (
+  <PaymentModal
+    isOpen={showPaymentModal}
+    onClose={() => setShowPaymentModal(false)}
+    onConfirm={handlePaymentConfirm} // ✅ Esta función ya está bien
+    amountUSD={paymentInfo.pending}
+    // creditBalance: No lo tenemos aquí, así que no se pasa
+    title="Procesar Pago"
+    subtitle={`${service.service} - ${patientName}`}
+    // ✅ NUEVO: Usamos 'services' en lugar de 'items'
+    services={[
+      {
+        description: service.service,
+        quantity: 1,
+        unitPrice: service.cost,
+        total: service.cost,
+      },
+    ]}
+    // ✅ NUEVO: Pasamos la info del paciente
+    patient={{
+      name: patientName,
+    }}
+    allowPartial={true}
+  />
+)}
 
       {/* Modal de Eliminación */}
       <DeleteConfirmationModal
