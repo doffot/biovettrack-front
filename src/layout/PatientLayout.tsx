@@ -21,8 +21,8 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useParams, Link, useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { getPatientById, deletePatient } from "../api/patientAPI";
-import { useEffect, useState, useRef } from "react";
 import { getActiveAppointmentsByPatient } from "../api/appointmentAPI";
 import { getGroomingServicesByPatient } from "../api/groomingAPI";
 import { getPatientDebtSummary } from "../api/invoiceAPI";
@@ -72,9 +72,27 @@ export default function PatientLayout() {
     enabled: !!patientId,
   });
 
-  const hasActiveAppointments = (activeAppointments || []).length > 0;
-  const activeGroomingCount = (groomingServices || []).length;
-  const hasActiveGrooming = activeGroomingCount > 0;
+  // ✅ NUEVA: Función para obtener la fecha de hoy en formato YYYY-MM-DD
+  const getTodayDateString = () => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  };
+
+  // ✅ FILTRAR SERVICIOS DE PELUQUERÍA POR HOY
+  const todayDateString = getTodayDateString();
+
+  const todaysGroomingServices = useMemo(() => {
+    return (groomingServices || []).filter(service => {
+      const serviceDate = new Date(service.date);
+      const serviceDateString = `${serviceDate.getFullYear()}-${String(serviceDate.getMonth() + 1).padStart(2, '0')}-${String(serviceDate.getDate()).padStart(2, '0')}`;
+      return serviceDateString === todayDateString;
+    });
+  }, [groomingServices, todayDateString]);
+
+  // ✅ VARIABLES ACTUALIZADAS
+  const hasActiveAppointments = (activeAppointments || []).length > 0; // ✅ Todas las citas activas
+  const todaysGroomingCount = todaysGroomingServices.length;
+  const hasTodaysGrooming = todaysGroomingCount > 0; // ✅ Solo servicios de hoy
   const hasDebt = (debtSummary?.totalDebt || 0) > 0;
   const debtCount = debtSummary?.invoicesCount || 0;
 
@@ -118,7 +136,7 @@ export default function PatientLayout() {
   });
 
   const handleDeleteClick = () => {
-    if (hasActiveAppointments || hasActiveGrooming) {
+    if (hasActiveAppointments || (groomingServices || []).length > 0) {
       toast.error("No se puede eliminar: tiene citas o servicios activos");
       return;
     }
@@ -282,6 +300,14 @@ export default function PatientLayout() {
                   )}
                 </button>
 
+                {/* Tooltip Deuda */}
+                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
+                    <div className="font-mono font-bold text-center">${debtSummary?.totalDebt.toFixed(2)}</div>
+                    <div className="text-xs text-gray-400 text-center mt-1">Total pendiente</div>
+                  </div>
+                </div>
+
                 {/* Dropdown Deuda */}
                 {showDebtDropdown && hasDebt && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
@@ -303,7 +329,7 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador: Citas */}
+              {/* Indicador: Citas (TODAS activas) */}
               <div className="relative" ref={appointmentsRef}>
                 <button
                   onClick={(e) => {
@@ -324,6 +350,14 @@ export default function PatientLayout() {
                     </span>
                   )}
                 </button>
+
+                {/* Tooltip Citas */}
+                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
+                    <div className="font-mono font-bold text-center">{activeAppointments?.length || 0}</div>
+                    <div className="text-xs text-gray-400 text-center mt-1">Citas activas</div>
+                  </div>
+                </div>
 
                 {/* Dropdown Citas */}
                 {showAppointmentsDropdown && hasActiveAppointments && (
@@ -358,39 +392,47 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador: Peluquería */}
+              {/* Indicador: Peluquería (SOLO de hoy) */}
               <div className="relative" ref={groomingRef}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (hasActiveGrooming) {
+                    if (hasTodaysGrooming) {
                       setShowGroomingDropdown(!showGroomingDropdown);
                       setShowAppointmentsDropdown(false);
                       setShowDebtDropdown(false);
                     }
                   }}
                   className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
-                  title={hasActiveGrooming ? `${activeGroomingCount} servicio(s)` : "Sin servicios"}
+                  title={hasTodaysGrooming ? `${todaysGroomingCount} servicio(s) hoy` : "Sin servicios hoy"}
                 >
                   <Scissors className="w-5 h-5" />
-                  {hasActiveGrooming && (
+                  {hasTodaysGrooming && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
-                      {activeGroomingCount}
+                      {todaysGroomingCount}
                     </span>
                   )}
                 </button>
 
+                {/* Tooltip Peluquería */}
+                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
+                    <div className="font-mono font-bold text-center">{todaysGroomingCount}</div>
+                    <div className="text-xs text-gray-400 text-center mt-1">Servicios hoy</div>
+                  </div>
+                </div>
+
                 {/* Dropdown Peluquería */}
-                {showGroomingDropdown && hasActiveGrooming && (
+                {showGroomingDropdown && hasTodaysGrooming && (
                   <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
                     <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
-                      <p className="text-sm font-bold text-white">Servicios de Peluquería</p>
+                      <p className="text-sm font-bold text-white">Servicios de Hoy</p>
                       <p className="text-xs text-white/80">
-                        {activeGroomingCount} servicio{activeGroomingCount !== 1 ? "s" : ""}
+                        {todaysGroomingCount} servicio{todaysGroomingCount !== 1 ? "s" : ""}
                       </p>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
-                      {groomingServices?.map((service) => (
+                      {todaysGroomingServices.map((service) => (
                         <Link
                           key={service._id}
                           to={`/patients/${patient._id}/grooming-services/${service._id}`}

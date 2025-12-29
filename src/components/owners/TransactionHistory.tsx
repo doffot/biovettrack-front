@@ -1,6 +1,6 @@
 // src/components/owners/TransactionHistory.tsx
 import { useState } from "react";
-import {  useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   FileText,
   CreditCard,
@@ -16,8 +16,11 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Invoice } from "../../types/invoice";
+import type { Patient } from "../../types/patient";
+import type { Owner } from "../../types/owner";
 import { getPatientName } from "../../types/invoice";
 import { PaymentModal } from "../payment/PaymentModal";
+import type { PaymentServiceItem, PaymentPatientInfo, PaymentOwnerInfo } from "../payment/PaymentModal";
 import { InvoicePayments } from "./InvoicePayments";
 
 export interface PaymentData {
@@ -36,6 +39,8 @@ interface TransactionHistoryProps {
   invoices: Invoice[];
   creditBalance?: number;
   isLoading?: boolean;
+  owner?: Owner;  // ✅ NUEVO
+  patients?: Patient[];  // ✅ NUEVO
   onPayInvoice?: (invoiceId: string, paymentData: PaymentData) => Promise<void>;
   onPayAll?: (invoiceIds: string[], paymentData: PaymentData) => Promise<void>;
 }
@@ -44,6 +49,8 @@ export function TransactionHistory({
   invoices,
   creditBalance = 0,
   isLoading,
+  owner,  // ✅ NUEVO
+  patients = [],  // ✅ NUEVO
   onPayInvoice,
   onPayAll,
 }: TransactionHistoryProps) {
@@ -54,6 +61,50 @@ export function TransactionHistory({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [payAllMode, setPayAllMode] = useState(false);
+
+  // ==================== HELPERS PARA EL MODAL ====================
+
+  // Convertir items de invoice a PaymentServiceItem
+  const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
+    if (!invoice.items || invoice.items.length === 0) return [];
+    return invoice.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.cost,
+      total: item.cost * item.quantity,
+    }));
+  };
+
+  // Obtener info del paciente de una factura
+  const getPatientInfo = (invoice: Invoice): PaymentPatientInfo | undefined => {
+    const patient = patients.find((p) => {
+      if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
+      return p._id === invoice.patientId?._id;
+    });
+
+    if (patient) {
+      return {
+        name: patient.name,
+        photo: patient.photo,
+      };
+    }
+
+    // Fallback al nombre del patientId poblado
+    if (typeof invoice.patientId === "object" && invoice.patientId) {
+      return { name: invoice.patientId.name };
+    }
+
+    return undefined;
+  };
+
+  // Obtener info del owner
+  const getOwnerInfo = (): PaymentOwnerInfo | undefined => {
+    if (!owner) return undefined;
+    return {
+      name: owner.name,
+      phone: owner.contact,
+    };
+  };
 
   if (isLoading) {
     return (
@@ -82,7 +133,7 @@ export function TransactionHistory({
       return inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial";
     }
     if (filter === "invoices") {
-      return true; // Todas las facturas
+      return true;
     }
     if (filter === "payments") {
       return inv.paymentStatus === "Pagado" || inv.paymentStatus === "Parcial";
@@ -177,6 +228,28 @@ export function TransactionHistory({
     if (descriptions.length <= 2) return descriptions.join(", ");
     return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
   };
+
+  // ==================== DATOS PARA EL MODAL ====================
+
+  const modalServices: PaymentServiceItem[] = payAllMode
+    ? pendingInvoices.flatMap((inv) => getInvoiceServices(inv))
+    : selectedInvoice
+      ? getInvoiceServices(selectedInvoice)
+      : [];
+
+  const modalPatient: PaymentPatientInfo | undefined = payAllMode
+    ? undefined  // No mostrar paciente específico si son varias facturas
+    : selectedInvoice
+      ? getPatientInfo(selectedInvoice)
+      : undefined;
+
+  const modalOwner: PaymentOwnerInfo | undefined = getOwnerInfo();
+
+  const modalAmount = payAllMode
+    ? Math.max(0, totalDebtUSD)
+    : selectedInvoice
+      ? getPendingAmountUSD(selectedInvoice)
+      : 0;
 
   return (
     <>
@@ -349,7 +422,7 @@ export function TransactionHistory({
         </div>
       </div>
 
-      {/* Modal de pago */}
+      {/* ✅ Modal de pago ACTUALIZADO con nuevos props */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => {
@@ -357,33 +430,19 @@ export function TransactionHistory({
           setSelectedInvoice(null);
           setPayAllMode(false);
         }}
-        amountUSD={payAllMode ? Math.max(0, totalDebtUSD) : selectedInvoice ? getPendingAmountUSD(selectedInvoice) : 0}
+        amountUSD={modalAmount}
         creditBalance={creditBalance}
         title={payAllMode ? "Pagar Todas las Facturas" : "Pagar Factura"}
         subtitle={
           payAllMode
             ? `${pendingInvoices.length} factura${pendingInvoices.length > 1 ? "s" : ""}`
             : selectedInvoice
-            ? `${getPatientName(selectedInvoice)}`
-            : ""
+              ? getInvoiceDescription(selectedInvoice)
+              : undefined
         }
-        items={
-          payAllMode
-            ? pendingInvoices.map((inv) => ({
-                id: inv._id || "",
-                description: getInvoiceDescription(inv),
-                patientName: getPatientName(inv),
-                date: inv.date,
-              }))
-            : selectedInvoice
-            ? [{
-                id: selectedInvoice._id || "",
-                description: getInvoiceDescription(selectedInvoice),
-                patientName: getPatientName(selectedInvoice),
-                date: selectedInvoice.date,
-              }]
-            : []
-        }
+        services={modalServices}
+        patient={modalPatient}
+        owner={modalOwner}
         onConfirm={handlePaymentConfirm}
       />
     </>

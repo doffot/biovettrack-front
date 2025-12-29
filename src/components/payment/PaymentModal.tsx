@@ -1,16 +1,38 @@
 // src/components/payment/PaymentModal.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { X, CheckCircle2, DollarSign, ChevronDown, Wallet } from "lucide-react";
+import { 
+  X, 
+  CheckCircle2, 
+  Wallet, 
+  CreditCard,
+  TrendingDown,
+  Banknote,
+  Phone,
+  User,
+  PawPrint,
+  Receipt
+} from "lucide-react";
 import { getPaymentMethods } from "../../api/paymentAPI";
 import { getBCVRate } from "../../utils/exchangeRateService";
 import { toast } from "../Toast";
 
-export interface PaymentItem {
-  id?: string;
+// Interfaces
+export interface PaymentServiceItem {
   description: string;
-  patientName?: string;
-  date?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface PaymentPatientInfo {
+  name: string;
+  photo?: string | null;
+}
+
+export interface PaymentOwnerInfo {
+  name: string;
+  phone?: string;
 }
 
 interface PaymentModalProps {
@@ -27,7 +49,9 @@ interface PaymentModalProps {
   }) => void;
   amountUSD: number;
   creditBalance?: number;
-  items?: PaymentItem[];
+  services?: PaymentServiceItem[];
+  patient?: PaymentPatientInfo;
+  owner?: PaymentOwnerInfo;
   title?: string;
   subtitle?: string;
   allowPartial?: boolean;
@@ -39,38 +63,44 @@ export function PaymentModal({
   onConfirm,
   amountUSD,
   creditBalance = 0,
-  items = [],
+  services = [],
+  patient,
+  owner,
   title = "Procesar Pago",
-  subtitle,
   allowPartial = true,
 }: PaymentModalProps) {
+  // Estados
   const [selectedMethodId, setSelectedMethodId] = useState<string>("");
   const [reference, setReference] = useState("");
-  const [bcvRate, setBcvRate] = useState<number | null>(null);
-  const [useOfficialRate, setUseOfficialRate] = useState<boolean>(true);
-  const [manualRate, setManualRate] = useState<string>("");
-  const [isLoadingRate, setIsLoadingRate] = useState<boolean>(true);
-  const [rateError, setRateError] = useState<boolean>(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentType, setPaymentType] = useState<"full" | "partial">("full");
-  const [customAmountUSD, setCustomAmountUSD] = useState<string>("");
-  const [showRateOptions, setShowRateOptions] = useState(false);
-  
-  // Estado para crédito
   const [useCredit, setUseCredit] = useState(false);
-  const [creditToUse, setCreditToUse] = useState<string>("");
-
-  const { data: paymentMethods = [], isLoading } = useQuery({
+  const [creditAmount, setCreditAmount] = useState<string>("");
+  const [isPartialPayment, setIsPartialPayment] = useState(false);
+  const [customAmount, setCustomAmount] = useState<string>("");
+  const [bcvRate, setBcvRate] = useState<number | null>(null);
+  const [manualRate, setManualRate] = useState<string>("");
+  const [useManualRate, setUseManualRate] = useState(false);
+  const [isLoadingRate, setIsLoadingRate] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+console.log("📦 PaymentModal props:", {
+  isOpen,
+  amountUSD,
+  creditBalance,
+  services,
+  patient,
+  owner,
+  title,
+});
+  // Query métodos de pago
+  const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery({
     queryKey: ["paymentMethods"],
     queryFn: getPaymentMethods,
     enabled: isOpen,
   });
 
+  // Cargar tasa BCV
   useEffect(() => {
     if (isOpen) {
       setIsLoadingRate(true);
-      setRateError(false);
-      setBcvRate(null);
       getBCVRate()
         .then((rate) => {
           setBcvRate(rate);
@@ -79,74 +109,75 @@ export function PaymentModal({
         .catch(() => {
           setBcvRate(null);
           setIsLoadingRate(false);
-          setRateError(true);
-          setUseOfficialRate(false);
+          setUseManualRate(true);
         });
     }
   }, [isOpen]);
 
-  // Calcular crédito máximo aplicable
-  const maxCreditToUse = Math.min(creditBalance, amountUSD);
-  
-  // Crédito efectivo a usar
-  const effectiveCreditToUse = useCredit 
-    ? Math.min(parseFloat(creditToUse) || 0, maxCreditToUse)
-    : 0;
+  // Reset al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedMethodId("");
+      setReference("");
+      setUseCredit(false);
+      setCreditAmount("");
+      setIsPartialPayment(false);
+      setCustomAmount("");
+      setManualRate("");
+      setUseManualRate(false);
+      setIsProcessing(false);
+    }
+  }, [isOpen]);
 
-  // Monto restante después del crédito
-  const amountAfterCredit = Math.max(0, amountUSD - effectiveCreditToUse);
+  // Cálculos
+  const selectedMethod = useMemo(
+    () => paymentMethods.find((m) => m._id === selectedMethodId),
+    [paymentMethods, selectedMethodId]
+  );
 
-  const selectedMethod = paymentMethods.find(m => m._id === selectedMethodId);
   const isBsMethod = selectedMethod?.currency === "Bs" || selectedMethod?.currency === "VES";
+  const currentRate = useManualRate ? parseFloat(manualRate) || 0 : bcvRate || 0;
 
-  const currentRate: number = useOfficialRate ? (bcvRate ?? 0) : (parseFloat(manualRate) || 0);
-  
-  // Monto efectivo a pagar CON MÉTODO DE PAGO (no crédito)
-  // Si no hay método seleccionado, es 0
-  const effectiveAmountUSD = !selectedMethodId 
-    ? 0 
-    : paymentType === "full" 
-      ? amountAfterCredit 
-      : Math.min(parseFloat(customAmountUSD) || 0, amountAfterCredit);
-  
-  const totalBs = currentRate > 0 ? effectiveAmountUSD * currentRate : 0;
+  const maxCredit = Math.min(creditBalance, amountUSD);
+  const effectiveCredit = useCredit ? Math.min(parseFloat(creditAmount) || 0, maxCredit) : 0;
+  const remainingAfterCredit = Math.max(0, amountUSD - effectiveCredit);
 
-  // Si el crédito cubre todo, no necesita método de pago
-  const creditCoversAll = effectiveCreditToUse >= amountUSD;
-  
-  // Solo pagando con crédito (sin método de pago adicional)
-  const onlyPayingWithCredit = effectiveCreditToUse > 0 && !selectedMethodId;
+  const creditCoversAll = effectiveCredit >= amountUSD;
+
+  const paymentAmount = useMemo(() => {
+    if (creditCoversAll) return 0;
+    if (isPartialPayment) return Math.min(parseFloat(customAmount) || 0, remainingAfterCredit);
+    return remainingAfterCredit;
+  }, [creditCoversAll, isPartialPayment, customAmount, remainingAfterCredit]);
+
+  const totalBs = currentRate > 0 ? paymentAmount * currentRate : 0;
+
+  // Validación
+  const needsPaymentMethod = !creditCoversAll && paymentAmount > 0;
+  const needsRate = needsPaymentMethod && isBsMethod && currentRate <= 0;
+  const invalidPartialAmount =
+    isPartialPayment && (parseFloat(customAmount) <= 0 || parseFloat(customAmount) > remainingAfterCredit);
+
+  const canSubmit =
+    (effectiveCredit > 0 || paymentAmount > 0) &&
+    (!needsPaymentMethod || selectedMethodId) &&
+    !needsRate &&
+    !invalidPartialAmount &&
+    !isProcessing;
 
   const handleSubmit = async () => {
-    // Validar que hay algo que pagar
-    if (effectiveAmountUSD <= 0 && effectiveCreditToUse <= 0) {
-      toast.error("Debe especificar un monto a pagar");
-      return;
-    }
-
-    // Solo validar método de pago si hay monto a pagar con método
-    if (effectiveAmountUSD > 0 && !selectedMethodId) {
-      toast.error("Selecciona un método de pago");
-      return;
-    }
-
-    if (effectiveAmountUSD > 0 && isBsMethod && currentRate <= 0) {
-      toast.error("Ingresa una tasa de cambio válida");
-      return;
-    }
+    if (!canSubmit) return;
 
     setIsProcessing(true);
     try {
       let addAmountPaidUSD = 0;
       let addAmountPaidBs = 0;
 
-      if (effectiveAmountUSD > 0) {
+      if (paymentAmount > 0 && selectedMethodId) {
         if (isBsMethod) {
           addAmountPaidBs = parseFloat(totalBs.toFixed(2));
-          addAmountPaidUSD = 0;
         } else {
-          addAmountPaidUSD = parseFloat(effectiveAmountUSD.toFixed(2));
-          addAmountPaidBs = 0;
+          addAmountPaidUSD = parseFloat(paymentAmount.toFixed(2));
         }
       }
 
@@ -156,8 +187,8 @@ export function PaymentModal({
         addAmountPaidUSD,
         addAmountPaidBs,
         exchangeRate: currentRate || 1,
-        isPartial: !creditCoversAll && (onlyPayingWithCredit || paymentType === "partial"),
-        creditAmountUsed: effectiveCreditToUse > 0 ? effectiveCreditToUse : undefined,
+        isPartial: isPartialPayment || (useCredit && !creditCoversAll && !selectedMethodId),
+        creditAmountUsed: effectiveCredit > 0 ? effectiveCredit : undefined,
       });
       onClose();
     } catch (error) {
@@ -168,483 +199,443 @@ export function PaymentModal({
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedMethodId("");
-      setReference("");
-      setUseOfficialRate(true);
-      setManualRate("");
-      setRateError(false);
-      setBcvRate(null);
-      setIsProcessing(false);
-      setPaymentType("full");
-      setCustomAmountUSD("");
-      setShowRateOptions(false);
-      setUseCredit(false);
-      setCreditToUse("");
-    }
-  }, [isOpen]);
-
-  const hasPaymentToDo = effectiveCreditToUse > 0 || effectiveAmountUSD > 0;
-  const rateRequiredAndMissing = selectedMethodId && isBsMethod && currentRate <= 0;
-  const partialAmountInvalid = paymentType === "partial" && selectedMethodId && 
-    (parseFloat(customAmountUSD) <= 0 || parseFloat(customAmountUSD) > amountAfterCredit);
-
-  const isValid = 
-    hasPaymentToDo && 
-    !rateRequiredAndMissing &&
-    !partialAmountInvalid &&
-    !isProcessing;
-
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      
-      <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] flex items-end sm:items-center justify-center">
-        <div className="relative bg-white w-full sm:w-[600px] lg:w-[700px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh]">
-          
-          {/* Header */}
-          <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3 flex items-center justify-between flex-shrink-0">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-white truncate">{title}</h2>
-              {subtitle && <p className="text-white/80 text-xs truncate">{subtitle}</p>}
-            </div>
-            <button
-              onClick={onClose}
-              disabled={isProcessing}
-              className="p-1.5 hover:bg-white/20 rounded-lg transition-colors ml-2"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-          </div>
+  const activePaymentMethods = paymentMethods.filter((m) => m.isActive);
 
-          {/* Contenido */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            
-            {/* Sección de Crédito Disponible */}
-            {creditBalance > 0 && (
-              <div className={`p-4 rounded-xl border-2 transition-all ${
-                useCredit 
-                  ? "bg-blue-50 border-blue-300" 
-                  : "bg-gray-50 border-gray-200"
-              }`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Wallet className={`w-5 h-5 ${useCredit ? "text-blue-600" : "text-gray-500"}`} />
-                    <span className="font-medium text-gray-800">Crédito a favor</span>
-                  </div>
-                  <span className="text-lg font-bold text-blue-600">
-                    ${creditBalance.toFixed(2)}
-                  </span>
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col">
+        {/* Header con info del paciente/owner */}
+        <div className="bg-gradient-to-br from-vet-primary to-vet-secondary p-4 flex-shrink-0">
+          <button
+            onClick={onClose}
+            disabled={isProcessing}
+            className="absolute top-3 right-3 p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+
+          <div className="flex items-start gap-4 pr-8">
+            {/* Foto del paciente */}
+            <div className="flex-shrink-0">
+              {patient?.photo ? (
+                <img
+                  src={patient.photo}
+                  alt={patient.name}
+                  className="w-16 h-16 rounded-xl object-cover border-2 border-white/30 shadow-lg"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center border-2 border-white/30">
+                  <PawPrint className="w-8 h-8 text-white/80" />
                 </div>
-                
-                <div className="flex items-center justify-between">
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-white truncate">{title}</h2>
+
+              {/* Nombre del paciente */}
+              {patient && (
+                <p className="text-white/90 text-sm font-medium mt-0.5 flex items-center gap-1.5">
+                  <PawPrint className="w-3.5 h-3.5" />
+                  {patient.name}
+                </p>
+              )}
+
+              {/* Info del owner */}
+              {owner && (
+                <div className="flex items-center gap-3 mt-1 text-white/70 text-xs">
+                  <span className="flex items-center gap-1">
+                    <User className="w-3 h-3" />
+                    {owner.name}
+                  </span>
+                  {owner.phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      {owner.phone}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Total */}
+            <div className="text-right flex-shrink-0">
+              <p className="text-white/60 text-[10px] uppercase tracking-wide">Total</p>
+              <p className="text-2xl font-bold text-white">${amountUSD.toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido scrolleable */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Tabla de servicios */}
+          {services.length > 0 && (
+            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-200 flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-gray-500" />
+                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Detalle de servicios
+                </span>
+              </div>
+
+              <div className="divide-y divide-gray-100">
+                {/* Header */}
+                <div className="grid grid-cols-12 gap-2 px-3 py-1.5 text-[10px] font-medium text-gray-500 uppercase bg-gray-50/50">
+                  <div className="col-span-6">Servicio</div>
+                  <div className="col-span-3 text-right">Precio</div>
+                  <div className="col-span-3 text-right">Total</div>
+                </div>
+
+                {/* Filas */}
+                {services.map((item, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-2 px-3 py-2 text-xs hover:bg-gray-50">
+                    <div className="col-span-6 text-gray-700">
+                      {item.quantity > 1 && (
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-gray-200 text-[10px] font-medium text-gray-600 mr-1.5">
+                          {item.quantity}
+                        </span>
+                      )}
+                      <span className="truncate">{item.description}</span>
+                    </div>
+                    <div className="col-span-3 text-right text-gray-500">
+                      ${item.unitPrice.toFixed(2)}
+                    </div>
+                    <div className="col-span-3 text-right font-semibold text-gray-800">
+                      ${item.total.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Total */}
+                <div className="grid grid-cols-12 gap-2 px-3 py-2.5 bg-vet-primary/5">
+                  <div className="col-span-6 text-sm font-bold text-gray-800">Total</div>
+                  <div className="col-span-3"></div>
+                  <div className="col-span-3 text-right text-base font-bold text-vet-primary">
+                    ${amountUSD.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sección de Crédito */}
+          {creditBalance > 0 && (
+            <div
+              className={`rounded-xl border-2 p-3 transition-all ${
+                useCredit ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <label className="flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${useCredit ? "bg-emerald-500" : "bg-gray-200"}`}
+                  >
+                    <Wallet className={`w-4 h-4 ${useCredit ? "text-white" : "text-gray-500"}`} />
+                  </div>
+                  <div>
+                    <p className={`text-sm font-semibold ${useCredit ? "text-emerald-700" : "text-gray-700"}`}>
+                      Usar crédito a favor
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Disponible: <span className="font-medium text-emerald-600">${creditBalance.toFixed(2)}</span>
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={useCredit}
+                  onChange={(e) => {
+                    setUseCredit(e.target.checked);
+                    if (e.target.checked) {
+                      setCreditAmount(maxCredit.toFixed(2));
+                    } else {
+                      setCreditAmount("");
+                    }
+                  }}
+                  className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500"
+                />
+              </label>
+
+              {useCredit && (
+                <div className="mt-3 pt-3 border-t border-emerald-200 flex items-center gap-3">
+                  <span className="text-sm text-gray-600">Aplicar:</span>
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      max={maxCredit}
+                      value={creditAmount}
+                      onChange={(e) => setCreditAmount(e.target.value)}
+                      className="w-full pl-7 pr-3 py-2 border border-emerald-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setCreditAmount(maxCredit.toFixed(2))}
+                    className="px-3 py-2 text-xs font-medium text-emerald-700 bg-emerald-100 rounded-lg hover:bg-emerald-200"
+                  >
+                    Máx
+                  </button>
+                </div>
+              )}
+
+              {useCredit && effectiveCredit > 0 && (
+                <div className="mt-2 text-xs">
+                  {creditCoversAll ? (
+                    <p className="text-emerald-600 font-medium">✓ El crédito cubre el total</p>
+                  ) : (
+                    <p className="text-amber-600">
+                      Restante a pagar: <span className="font-semibold">${remainingAfterCredit.toFixed(2)}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Métodos de pago - Solo si hay monto a pagar */}
+          {!creditCoversAll && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700">Método de pago</p>
+                {allowPartial && (
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={useCredit}
+                      checked={isPartialPayment}
                       onChange={(e) => {
-                        const checked = e.target.checked;
-                        setUseCredit(checked);
-                        if (checked) {
-                          setCreditToUse(maxCreditToUse.toFixed(2));
-                        } else {
-                          setCreditToUse("");
-                        }
+                        setIsPartialPayment(e.target.checked);
+                        if (!e.target.checked) setCustomAmount("");
                       }}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
                     />
-                    <span className="text-sm text-gray-700">Usar crédito</span>
+                    <span className="text-xs text-gray-600">Pago parcial</span>
                   </label>
-                  
-                  {useCredit && (
+                )}
+              </div>
+
+              {/* Grid de métodos */}
+              {isLoadingMethods ? (
+                <div className="flex items-center justify-center py-6">
+                  <div className="w-5 h-5 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {activePaymentMethods.map((method) => {
+                    const isSelected = selectedMethodId === method._id;
+                    const isBs = method.currency === "Bs" || method.currency === "VES";
+
+                    return (
+                      <button
+                        key={method._id}
+                        onClick={() => setSelectedMethodId(isSelected ? "" : method._id)}
+                        className={`p-3 rounded-xl border-2 transition-all ${
+                          isSelected
+                            ? "border-vet-primary bg-vet-light"
+                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 mx-auto mb-1.5 rounded-lg flex items-center justify-center ${
+                            isSelected ? "bg-vet-primary" : "bg-gray-100"
+                          }`}
+                        >
+                          {isBs ? (
+                            <Banknote className={`w-4 h-4 ${isSelected ? "text-white" : "text-gray-500"}`} />
+                          ) : (
+                            <CreditCard className={`w-4 h-4 ${isSelected ? "text-white" : "text-gray-500"}`} />
+                          )}
+                        </div>
+                        <p className={`text-xs font-medium truncate ${isSelected ? "text-vet-primary" : "text-gray-700"}`}>
+                          {method.name}
+                        </p>
+                        <p className="text-[10px] text-gray-400">{isBs ? "Bolívares" : method.currency}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Monto parcial */}
+              {isPartialPayment && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingDown className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-700">Monto a abonar</span>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      max={remainingAfterCredit}
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      className={`w-full pl-7 pr-3 py-2.5 border rounded-lg text-lg font-semibold ${
+                        invalidPartialAmount
+                          ? "border-red-300 focus:ring-red-500"
+                          : "border-amber-300 focus:ring-amber-500"
+                      }`}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <p className="text-xs text-amber-600 mt-1">Máximo: ${remainingAfterCredit.toFixed(2)}</p>
+                </div>
+              )}
+
+              {/* Tasa de cambio para Bs */}
+              {selectedMethodId && isBsMethod && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-800">Equivalente en Bolívares</span>
+                    {isLoadingRate ? (
+                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <button
+                        onClick={() => setUseManualRate(!useManualRate)}
+                        className="text-[10px] text-blue-600 underline"
+                      >
+                        {useManualRate ? "Usar BCV" : "Tasa manual"}
+                      </button>
+                    )}
+                  </div>
+
+                  {useManualRate ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Usar:</span>
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                      <span className="text-xs text-gray-600">Tasa:</span>
+                      <div className="relative flex-1">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-xs">Bs.</span>
                         <input
                           type="number"
                           step="0.01"
-                          min="0.01"
-                          max={maxCreditToUse}
-                          value={creditToUse}
-                          onChange={(e) => setCreditToUse(e.target.value)}
-                          className="w-24 pl-6 pr-2 py-1.5 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white"
-                          placeholder={maxCreditToUse.toFixed(2)}
+                          value={manualRate}
+                          onChange={(e) => setManualRate(e.target.value)}
+                          className="w-full pl-8 pr-3 py-1.5 border border-blue-300 rounded-lg text-sm"
+                          placeholder="Ej: 45.50"
                         />
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {useCredit && effectiveCreditToUse > 0 && (
-                  <div className="mt-3 pt-3 border-t border-blue-200">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600">Restante a pagar:</span>
-                      <span className={`font-bold ${amountAfterCredit > 0 ? "text-amber-600" : "text-green-600"}`}>
-                        {amountAfterCredit > 0 ? `$${amountAfterCredit.toFixed(2)}` : "¡Cubierto!"}
-                      </span>
-                    </div>
-                    
-                    {amountAfterCredit > 0 && !selectedMethodId && (
-                      <p className="text-xs text-blue-600 bg-blue-100 rounded-lg px-2 py-1">
-                        💡 Puedes abonar solo el crédito o seleccionar un método de pago para el resto
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Opciones de pago adicional - Solo si hay monto restante */}
-            {(!creditCoversAll) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                {/* Columna Izquierda */}
-                <div className="space-y-4">
-                  
-                  {/* Tipo de Pago - Solo si hay método seleccionado */}
-                  {allowPartial && selectedMethodId && amountAfterCredit > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 mb-2">Tipo de pago</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setPaymentType("full")}
-                          className={`p-2.5 rounded-lg border-2 transition-all text-center ${
-                            paymentType === "full"
-                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                              : "border-gray-200 text-gray-600 hover:border-gray-300"
-                          }`}
-                        >
-                          <CheckCircle2 className={`w-4 h-4 mx-auto mb-1 ${paymentType === "full" ? "text-emerald-600" : "text-gray-400"}`} />
-                          <span className="text-xs font-semibold block">Total</span>
-                          <span className="text-[10px] text-gray-500">${amountAfterCredit.toFixed(2)}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPaymentType("partial")}
-                          className={`p-2.5 rounded-lg border-2 transition-all text-center ${
-                            paymentType === "partial"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-200 text-gray-600 hover:border-gray-300"
-                          }`}
-                        >
-                          <DollarSign className={`w-4 h-4 mx-auto mb-1 ${paymentType === "partial" ? "text-blue-600" : "text-gray-400"}`} />
-                          <span className="text-xs font-semibold block">Abono</span>
-                          <span className="text-[10px] text-gray-500">Parcial</span>
-                        </button>
-                      </div>
-
-                      {paymentType === "partial" && (
-                        <div className="mt-2">
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0.01"
-                              max={amountAfterCredit}
-                              value={customAmountUSD}
-                              onChange={(e) => setCustomAmountUSD(e.target.value)}
-                              className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                              placeholder={`Máx: ${amountAfterCredit.toFixed(2)}`}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Método de Pago - Opcional si ya hay crédito */}
-                  <div>
-                    <p className="text-xs font-medium text-gray-600 mb-2">
-                      Método de pago {!useCredit && "*"}
-                      {useCredit && amountAfterCredit > 0 && (
-                        <span className="text-gray-400 font-normal"> (opcional)</span>
-                      )}
+                  ) : (
+                    <p className="text-xs text-blue-600">
+                      Tasa BCV: <span className="font-semibold">Bs. {currentRate.toFixed(2)}</span>
                     </p>
-                    <select
-                      value={selectedMethodId}
-                      onChange={(e) => setSelectedMethodId(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-vet-primary"
-                      disabled={isLoading || isProcessing}
-                    >
-                      <option value="">
-                        {useCredit ? "Solo usar crédito..." : "Seleccionar..."}
-                      </option>
-                      {paymentMethods.filter((m) => m.isActive).map((m) => (
-                        <option key={m._id} value={m._id}>
-                          {m.name} ({m.currency === "VES" ? "Bs" : m.currency})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Referencia */}
-                  {selectedMethodId && (
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 mb-2">
-                        Referencia <span className="text-gray-400">(opcional)</span>
-                      </p>
-                      <input
-                        type="text"
-                        value={reference}
-                        onChange={(e) => setReference(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-vet-primary"
-                        placeholder="Nro. de referencia"
-                        disabled={isProcessing}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Columna Derecha */}
-                <div className="space-y-4">
-                  
-                  {/* Tasa de Cambio - Solo si es método en Bs */}
-                  {selectedMethodId && isBsMethod && (
-                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <button
-                        type="button"
-                        onClick={() => setShowRateOptions(!showRateOptions)}
-                        className="w-full flex items-center justify-between"
-                      >
-                        <span className="text-xs font-medium text-gray-600">Tasa de cambio</span>
-                        <div className="flex items-center gap-2">
-                          {isLoadingRate ? (
-                            <div className="w-3 h-3 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <span className="text-sm font-bold text-emerald-600">
-                              {currentRate > 0 ? `Bs. ${currentRate.toFixed(2)}` : "—"}
-                            </span>
-                          )}
-                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showRateOptions ? "rotate-180" : ""}`} />
-                        </div>
-                      </button>
-
-                      {showRateOptions && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">
-                              {useOfficialRate ? "🏛️ BCV" : "✏️ Manual"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => !rateError && setUseOfficialRate(!useOfficialRate)}
-                              className={`relative w-10 h-5 rounded-full transition-colors ${
-                                useOfficialRate ? "bg-emerald-500" : "bg-gray-300"
-                              }`}
-                            >
-                              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                                useOfficialRate ? "left-0.5" : "left-5"
-                              }`} />
-                            </button>
-                          </div>
-                          
-                          {!useOfficialRate && (
-                            <div className="relative">
-                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-xs">Bs.</span>
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={manualRate}
-                                onChange={(e) => setManualRate(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-sm"
-                                placeholder="Ej: 45.50"
-                              />
-                            </div>
-                          )}
-                          
-                          {rateError && (
-                            <p className="text-[10px] text-red-500">BCV no disponible</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   )}
 
-                  {/* Total a Pagar */}
-                  <div className={`rounded-lg p-4 border-2 ${
-                    creditCoversAll || onlyPayingWithCredit
-                      ? "bg-blue-50 border-blue-300"
-                      : paymentType === "full" 
-                        ? "bg-emerald-50 border-emerald-300" 
-                        : "bg-blue-50 border-blue-300"
-                  }`}>
-                    
-                    {/* Resumen si usa crédito */}
-                    {useCredit && effectiveCreditToUse > 0 && (
-                      <div className="mb-3 pb-3 border-b border-current/20">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Total factura:</span>
-                          <span className="font-medium">${amountUSD.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-blue-600">Crédito aplicado:</span>
-                          <span className="font-medium text-blue-600">-${effectiveCreditToUse.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    <p className={`text-xs font-medium mb-1 ${
-                      creditCoversAll || onlyPayingWithCredit
-                        ? "text-blue-600"
-                        : paymentType === "full" 
-                          ? "text-emerald-600" 
-                          : "text-blue-600"
-                    }`}>
-                      {creditCoversAll 
-                        ? "Pago total con crédito"
-                        : onlyPayingWithCredit
-                          ? "Abono con crédito"
-                          : paymentType === "full" 
-                            ? "Total a pagar" 
-                            : "Monto del abono"}
+                  {currentRate > 0 && paymentAmount > 0 && (
+                    <p className="text-xl font-bold text-blue-900 mt-2">
+                      Bs. {totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    
-                    {creditCoversAll ? (
-                      <div className="text-2xl font-bold text-green-700">
-                        $0.00
-                        <span className="block text-sm font-normal text-green-600 mt-1">
-                          ✓ Cubierto con crédito
-                        </span>
-                      </div>
-                    ) : onlyPayingWithCredit ? (
-                      <div className="text-2xl font-bold text-blue-700">
-                        ${effectiveCreditToUse.toFixed(2)}
-                        <span className="block text-sm font-normal text-amber-600 mt-1">
-                          Quedará pendiente: ${amountAfterCredit.toFixed(2)}
-                        </span>
-                      </div>
-                    ) : isBsMethod && selectedMethodId ? (
-                      <>
-                        <div className={`text-2xl font-bold ${
-                          paymentType === "full" ? "text-emerald-700" : "text-blue-700"
-                        }`}>
-                          {currentRate > 0 && effectiveAmountUSD > 0 ? (
-                            `Bs. ${totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                          ) : (
-                            <span className="text-base text-gray-400">Selecciona tasa</span>
-                          )}
-                        </div>
-                        <div className="mt-2 pt-2 border-t border-current/20 flex justify-between text-sm">
-                          <span className="text-gray-600">Equivale a:</span>
-                          <span className="font-semibold">${effectiveAmountUSD.toFixed(2)} USD</span>
-                        </div>
-                      </>
-                    ) : selectedMethodId ? (
-                      <>
-                        <div className={`text-2xl font-bold ${
-                          paymentType === "full" ? "text-emerald-700" : "text-blue-700"
-                        }`}>
-                          ${effectiveAmountUSD.toFixed(2)}
-                        </div>
-                        {currentRate > 0 && (
-                          <div className="mt-2 pt-2 border-t border-current/20 flex justify-between text-sm">
-                            <span className="text-gray-600">Referencia en Bs:</span>
-                            <span className="font-semibold">
-                              Bs. {totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-base text-gray-400">
-                        Selecciona un método de pago o usa crédito
-                      </div>
-                    )}
-                    
-                    {selectedMethodId && paymentType === "partial" && effectiveAmountUSD > 0 && effectiveAmountUSD <= amountAfterCredit && (
-                      <div className="mt-1 flex justify-between text-xs">
-                        <span className="text-gray-500">Restante después:</span>
-                        <span className="text-red-600 font-medium">${(amountAfterCredit - effectiveAmountUSD).toFixed(2)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Items */}
-                  {items.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <p className="text-[10px] font-medium text-gray-500 uppercase mb-2">Detalle</p>
-                      {items.slice(0, 2).map((item, idx) => (
-                        <p key={idx} className="text-xs text-gray-700 truncate">
-                          {item.description} {item.patientName && `• ${item.patientName}`}
-                        </p>
-                      ))}
-                      {items.length > 2 && (
-                        <p className="text-[10px] text-gray-400">+{items.length - 2} más</p>
-                      )}
-                    </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Mensaje cuando crédito cubre todo */}
-            {creditCoversAll && (
-              <div className="text-center py-4">
-                <div className="w-16 h-16 mx-auto mb-3 bg-green-100 rounded-full flex items-center justify-center">
-                  <Wallet className="w-8 h-8 text-green-600" />
-                </div>
-                <p className="text-lg font-semibold text-green-700">
-                  El crédito cubre el total
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Se descontarán ${effectiveCreditToUse.toFixed(2)} de tu crédito
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="flex gap-3 p-4 border-t border-gray-200 bg-white flex-shrink-0">
-            <button
-              onClick={onClose}
-              disabled={isProcessing}
-              className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!isValid}
-              className={`flex-1 py-2.5 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
-                !isValid
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : creditCoversAll
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : onlyPayingWithCredit
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : paymentType === "full"
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="hidden sm:inline">Procesando...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>
-                    {creditCoversAll 
-                      ? "Usar crédito" 
-                      : onlyPayingWithCredit
-                        ? "Abonar crédito"
-                        : paymentType === "full" 
-                          ? "Pagar" 
-                          : "Abonar"}
-                  </span>
-                </>
               )}
-            </button>
+
+              {/* Referencia */}
+              {selectedMethodId && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Referencia <span className="text-gray-400">(opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-vet-primary"
+                    placeholder="Nro. de confirmación o referencia"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Resumen del pago */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Resumen del pago</p>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total factura:</span>
+                <span className="font-medium">${amountUSD.toFixed(2)}</span>
+              </div>
+
+              {effectiveCredit > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Crédito aplicado:</span>
+                  <span className="font-medium">-${effectiveCredit.toFixed(2)}</span>
+                </div>
+              )}
+
+              {paymentAmount > 0 && selectedMethodId && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Pago {selectedMethod?.name}:</span>
+                  <span className="font-medium">
+                    {isBsMethod && currentRate > 0
+                      ? `Bs. ${totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2 })}`
+                      : `$${paymentAmount.toFixed(2)}`}
+                  </span>
+                </div>
+              )}
+
+              <div className="pt-2 mt-2 border-t border-gray-300 flex justify-between items-center">
+                <span className="font-semibold text-gray-800">Total a pagar:</span>
+                <span className="text-xl font-bold text-vet-primary">
+                  ${(effectiveCredit + paymentAmount).toFixed(2)}
+                </span>
+              </div>
+
+              {isPartialPayment && paymentAmount > 0 && (
+                <div className="flex justify-between text-amber-600 text-xs">
+                  <span>Quedará pendiente:</span>
+                  <span className="font-medium">
+                    ${(amountUSD - effectiveCredit - paymentAmount).toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 flex gap-3 flex-shrink-0 bg-white">
+          <button
+            onClick={onClose}
+            disabled={isProcessing}
+            className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+              canSubmit
+                ? "bg-vet-primary hover:bg-vet-secondary text-white"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {isProcessing ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-5 h-5" />
+                {creditCoversAll
+                  ? "Usar crédito"
+                  : isPartialPayment
+                    ? "Abonar"
+                    : "Pagar"}
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

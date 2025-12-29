@@ -11,13 +11,15 @@ import { getPatientsByOwner } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
 import PatientListView from "./PatientListOwnerView";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
-import { getOwnerId, getPatientName } from "../../types/invoice";
+import { getOwnerId} from "../../types/invoice";
 import { OwnerAccountHeader } from "../../components/owners/OwnerAccountHeader";
 import { TransactionHistory } from "../../components/owners/TransactionHistory";
 import { PaymentModal } from "../../components/payment/PaymentModal";
+import type { PaymentServiceItem, PaymentPatientInfo } from "../../components/payment/PaymentModal";
 import type { Owner } from "../../types/owner";
 import type { Invoice } from "../../types/invoice";
 import type { GroomingService } from "../../types/grooming";
+import type { Patient } from "../../types/patient";
 
 interface PaymentData {
   paymentMethodId?: string;
@@ -40,6 +42,8 @@ export default function OwnerDetailView() {
 
   const { ownerId } = useParams<{ ownerId: string }>();
 
+  // ==================== QUERIES ====================
+
   const { data: owner, isLoading } = useQuery<Owner>({
     queryKey: ["owner", ownerId],
     queryFn: () => getOwnersById(ownerId!),
@@ -52,7 +56,7 @@ export default function OwnerDetailView() {
     enabled: !!ownerId,
   });
 
-  const { data: patientsData = [] } = useQuery({
+  const { data: patientsData = [] } = useQuery<Patient[]>({
     queryKey: ["patients", { ownerId }],
     queryFn: () => getPatientsByOwner(ownerId!),
     enabled: !!ownerId,
@@ -86,6 +90,8 @@ export default function OwnerDetailView() {
     return serviceDate.getTime() === today.getTime();
   });
 
+  // ==================== MUTATIONS ====================
+
   const { mutate: removeOwner, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteOwners(ownerId!),
     onError: (error: Error) => {
@@ -113,6 +119,8 @@ export default function OwnerDetailView() {
     },
   });
 
+  // ==================== DATOS CALCULADOS ====================
+
   const allInvoices = invoicesData?.invoices || [];
   const invoices = allInvoices.filter((inv) => getOwnerId(inv) === ownerId);
 
@@ -130,6 +138,57 @@ export default function OwnerDetailView() {
   const pendingInvoices = invoices.filter(
     (inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial"
   );
+
+  // ==================== HELPERS PARA EL MODAL ====================
+
+  // Convertir items de invoice a PaymentServiceItem
+  const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
+    return invoice.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.cost,
+      total: item.cost * item.quantity,
+    }));
+  };
+
+  // Obtener info del paciente de una factura
+  const getPatientInfo = (invoice: Invoice): PaymentPatientInfo | undefined => {
+    // Buscar el paciente en la lista de pacientes del owner
+    const patient = patientsData.find((p) => {
+      if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
+      return p._id === invoice.patientId?._id;
+    });
+
+    if (patient) {
+      return {
+        name: patient.name,
+        photo: patient.photo,
+      };
+    }
+
+    // Fallback al nombre del patientId poblado
+    if (typeof invoice.patientId === "object" && invoice.patientId) {
+      return { name: invoice.patientId.name };
+    }
+
+    return undefined;
+  };
+
+  // Descripción de factura para mostrar
+  const getInvoiceDescription = (invoice: Invoice): string => {
+    if (!invoice.items || invoice.items.length === 0) return "Factura";
+    const descriptions = invoice.items.map((i) => i.description);
+    if (descriptions.length <= 2) return descriptions.join(", ");
+    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
+  };
+
+  // Monto pendiente de la factura seleccionada
+  const getSelectedInvoicePending = (): number => {
+    if (!selectedInvoice) return 0;
+    return selectedInvoice.total - (selectedInvoice.amountPaid || 0);
+  };
+
+  // ==================== HANDLERS DE PAGO ====================
 
   const handlePayInvoice = async (invoiceId: string, paymentData: PaymentData) => {
     const invoice = invoices.find((inv) => inv._id === invoiceId);
@@ -183,7 +242,10 @@ export default function OwnerDetailView() {
       let successCount = 0;
       const exchangeRate = paymentData.exchangeRate || 1;
       const isPayingInBs = paymentData.addAmountPaidBs > 0;
-      const onlyCredit = paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0 && !paymentData.paymentMethodId;
+      const onlyCredit =
+        paymentData.creditAmountUsed &&
+        paymentData.creditAmountUsed > 0 &&
+        !paymentData.paymentMethodId;
 
       for (const id of invoiceIds) {
         const invoice = invoices.find((inv) => inv._id === id);
@@ -193,7 +255,8 @@ export default function OwnerDetailView() {
         const currentPaidBs = invoice.amountPaidBs || 0;
         const invoiceRate = invoice.exchangeRate || exchangeRate;
         const currentPaidTotal = currentPaidUSD + currentPaidBs / invoiceRate;
-        const invoiceTotalUSD = invoice.currency === "Bs" ? invoice.total / invoiceRate : invoice.total;
+        const invoiceTotalUSD =
+          invoice.currency === "Bs" ? invoice.total / invoiceRate : invoice.total;
         const pendingUSD = Math.max(0, invoiceTotalUSD - currentPaidTotal);
 
         if (pendingUSD <= 0.01) continue;
@@ -231,7 +294,9 @@ export default function OwnerDetailView() {
       }
 
       if (successCount > 0) {
-        toast.success(`${successCount} factura${successCount > 1 ? "s" : ""} pagada${successCount > 1 ? "s" : ""}`);
+        toast.success(
+          `${successCount} factura${successCount > 1 ? "s" : ""} pagada${successCount > 1 ? "s" : ""}`
+        );
       }
       setShowPayAllModal(false);
     } catch {
@@ -251,21 +316,22 @@ export default function OwnerDetailView() {
   };
 
   const handleOpenSinglePay = (invoice: Invoice) => {
+     console.log("🧾 Invoice seleccionada:", invoice);
+  console.log("🐾 Pacientes disponibles:", patientsData);
+  console.log("👤 Owner:", owner);
+
+   const services = getInvoiceServices(invoice);
+  const patientInfo = getPatientInfo(invoice);
+  
+  console.log("📋 Services calculados:", services);
+  console.log("🐕 Patient info:", patientInfo);
+
+
     setSelectedInvoice(invoice);
     setShowSinglePayModal(true);
   };
 
-  const getInvoiceDescription = (invoice: Invoice): string => {
-    if (!invoice.items || invoice.items.length === 0) return "Factura";
-    const descriptions = invoice.items.map((i) => i.description);
-    if (descriptions.length <= 2) return descriptions.join(", ");
-    return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
-  };
-
-  const getSelectedInvoicePending = (): number => {
-    if (!selectedInvoice) return 0;
-    return selectedInvoice.total - (selectedInvoice.amountPaid || 0);
-  };
+  // ==================== LOADING STATE ====================
 
   if (isLoading) {
     return (
@@ -283,7 +349,9 @@ export default function OwnerDetailView() {
             <PawPrint className="w-8 h-8 text-gray-400" />
           </div>
           <h2 className="text-lg font-bold text-gray-900 mb-2">Propietario no encontrado</h2>
-          <p className="text-gray-500 text-sm mb-4">El propietario que buscas no existe o fue eliminado.</p>
+          <p className="text-gray-500 text-sm mb-4">
+            El propietario que buscas no existe o fue eliminado.
+          </p>
           <Link
             to="/owners"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-vet-primary text-white text-sm font-medium hover:bg-vet-secondary transition-colors"
@@ -295,6 +363,8 @@ export default function OwnerDetailView() {
       </div>
     );
   }
+
+  // ==================== RENDER ====================
 
   return (
     <>
@@ -341,8 +411,18 @@ export default function OwnerDetailView() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
               </svg>
               Transacciones
             </button>
@@ -374,14 +454,18 @@ export default function OwnerDetailView() {
           </div>
 
           {/* Transacciones */}
-          <div className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}>
-            <TransactionHistory
-              invoices={invoices}
-              creditBalance={owner.creditBalance || 0}
-              isLoading={isLoadingInvoices}
-              onPayInvoice={handlePayInvoice}
-              onPayAll={handlePayAll}
-            />
+          <div
+            className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}
+          >
+           <TransactionHistory
+  invoices={invoices}
+  creditBalance={owner.creditBalance || 0}
+  isLoading={isLoadingInvoices}
+  owner={owner}              // ✅ AGREGA ESTO
+  patients={patientsData}    // ✅ AGREGA ESTO
+  onPayInvoice={handlePayInvoice}
+  onPayAll={handlePayAll}
+/>
           </div>
         </div>
       </div>
@@ -403,12 +487,11 @@ export default function OwnerDetailView() {
         creditBalance={owner.creditBalance || 0}
         title="Pagar Todas las Facturas"
         subtitle={`${pendingInvoices.length} factura${pendingInvoices.length > 1 ? "s" : ""} pendiente${pendingInvoices.length > 1 ? "s" : ""}`}
-        items={pendingInvoices.map((inv) => ({
-          id: inv._id || "",
-          description: getInvoiceDescription(inv),
-          patientName: getPatientName(inv),
-          date: inv.date,
-        }))}
+        services={pendingInvoices.flatMap((inv) => getInvoiceServices(inv))}
+        owner={{
+          name: owner.name,
+          phone: owner.contact,
+        }}
         onConfirm={handlePayAllFromModal}
       />
 
@@ -422,13 +505,13 @@ export default function OwnerDetailView() {
         amountUSD={getSelectedInvoicePending()}
         creditBalance={owner.creditBalance || 0}
         title="Pagar Factura"
-        subtitle={selectedInvoice ? getInvoiceDescription(selectedInvoice) : ""}
-        items={selectedInvoice ? [{
-          id: selectedInvoice._id || "",
-          description: getInvoiceDescription(selectedInvoice),
-          patientName: getPatientName(selectedInvoice),
-          date: selectedInvoice.date,
-        }] : []}
+        subtitle={selectedInvoice ? getInvoiceDescription(selectedInvoice) : undefined}
+        services={selectedInvoice ? getInvoiceServices(selectedInvoice) : []}
+        patient={selectedInvoice ? getPatientInfo(selectedInvoice) : undefined}
+        owner={{
+          name: owner.name,
+          phone: owner.contact,
+        }}
         onConfirm={handleSinglePayFromModal}
       />
     </>

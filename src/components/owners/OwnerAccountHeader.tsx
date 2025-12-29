@@ -376,6 +376,7 @@ export function OwnerAccountHeader({
                           <button
                             key={invoice._id}
                             onClick={() => {
+                                console.log("🔴 CLICK en factura:", invoice);
                               setShowInvoicesDropdown(false);
                               onPayInvoice(invoice);
                             }}
