@@ -326,22 +326,33 @@ export default function PendingPaymentsIndicator({ patientId }: PendingPaymentsI
       </div>
 
       {/* Modal de Pago */}
-      <Portal>
-        <PaymentModal
-          isOpen={isPaymentModalOpen && !!selectedInvoice}
-          onClose={handleClosePaymentModal}
-          onConfirm={handlePaymentConfirm}
-          amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
-          creditBalance={ownerCreditBalance}
-          items={selectedInvoice?.items.map(item => ({
-            id: item.resourceId.toString(),
-            description: item.description,
-          })) || []}
-          title="Procesar Pago"
-          subtitle={selectedInvoice ? `Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}` : ""}
-          allowPartial={true}
-        />
-      </Portal>
+<Portal>
+  <PaymentModal
+    isOpen={isPaymentModalOpen && !!selectedInvoice}
+    onClose={handleClosePaymentModal}
+    onConfirm={handlePaymentConfirm}
+    amountUSD={selectedInvoice ? getInvoiceRemainingAmount(selectedInvoice) : 0}
+    creditBalance={ownerCreditBalance}
+    // ✅ NUEVO: Usamos 'services' en lugar de 'items'
+    services={
+      selectedInvoice?.items.map(item => ({
+        description: item.description,
+        quantity: item.quantity || 1,
+        unitPrice: item.cost,
+        total: item.cost * (item.quantity || 1),
+      })) || []
+    }
+    // ✅ NUEVO: Pasamos la info del paciente si existe
+    patient={
+      patient 
+        ? { name: patient.name, photo: patient.photo } 
+        : undefined
+    }
+    title="Procesar Pago"
+    subtitle={selectedInvoice ? `Factura del ${new Date(selectedInvoice.date).toLocaleDateString("es-ES")}` : ""}
+    allowPartial={true}
+  />
+</Portal>
     </>
   );
 }

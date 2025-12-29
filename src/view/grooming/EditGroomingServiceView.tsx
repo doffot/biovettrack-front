@@ -461,19 +461,32 @@ export default function EditGroomingServiceView() {
         </section>
       </main>
 
-      {showPaymentModal && invoice && (
-        <PaymentModal
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          amountUSD={paymentInfo.pending}
-          creditBalance={ownerCreditBalance}
-          title="Registrar Pago"
-          subtitle={`${service.service} • ${patientName}`}
-          items={[{ description: service.service, patientName, date: service.date }]}
-          allowPartial={true}
-          onConfirm={handlePaymentConfirm}
-        />
-      )}
+     {showPaymentModal && invoice && (
+  <PaymentModal
+    isOpen={showPaymentModal}
+    onClose={() => setShowPaymentModal(false)}
+    onConfirm={handlePaymentConfirm}
+    amountUSD={paymentInfo.pending}
+    creditBalance={ownerCreditBalance}
+    title="Registrar Pago"
+    subtitle={`${service.service} • ${patientName}`}
+    // ✅ NUEVO: Usamos 'services' en lugar de 'items'
+    services={[
+      {
+        description: service.service,
+        quantity: 1,
+        unitPrice: service.cost,
+        total: service.cost,
+      },
+    ]}
+    // ✅ NUEVO: Pasamos la info del paciente
+    patient={{
+      name: patientName,
+      // photo: patient?.photo || undefined // Opcional, si quieres mostrar la foto
+    }}
+    allowPartial={true}
+  />
+)}
     </div>
   );
 }
