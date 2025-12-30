@@ -1,10 +1,11 @@
-// src/views/invoices/hooks/useInvoiceReport.ts
+// src/hooks/useInvoiceReport.ts
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { FilterState } from "../types/reportTypes";
+import type { FilterState, ReportStats } from "../types/reportTypes";
 import {
   filterInvoices,
   calculateStats,
+  calculatePendingByCurrency,
   getDefaultFilters,
   countActiveFilters,
   getPeriodLabel,
@@ -41,9 +42,23 @@ export function useInvoiceReport() {
     [allInvoices, filters]
   );
 
-  const stats = useMemo(
+  const baseStats = useMemo(
     () => calculateStats(filteredInvoices, paymentMethods),
     [filteredInvoices, paymentMethods]
+  );
+
+  const pendingByCurrency = useMemo(
+    () => calculatePendingByCurrency(filteredInvoices),
+    [filteredInvoices]
+  );
+
+  const stats: ReportStats = useMemo(
+    () => ({
+      ...baseStats,
+      pendienteUSD: pendingByCurrency.pendienteUSD,
+      pendienteBs: pendingByCurrency.pendienteBs,
+    }),
+    [baseStats, pendingByCurrency]
   );
 
   const periodLabel = getPeriodLabel(filters.dateRange);
@@ -60,25 +75,18 @@ export function useInvoiceReport() {
     : "Veterinario";
 
   return {
-    // Data
     invoices: filteredInvoices,
     stats,
     paymentMethods,
-    
-    // Filters
     filters,
     showFilters,
     setShowFilters,
     updateFilter,
     resetFilters,
     activeFiltersCount,
-    
-    // UI State
     isLoading,
     isFetching,
     refetch,
-    
-    // Labels
     periodLabel,
     vetName,
   };

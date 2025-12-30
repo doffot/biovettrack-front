@@ -67,7 +67,7 @@ export const getFilterDates = (filters: FilterState): { startDate: Date; endDate
       startDate = new Date(now);
       startDate.setHours(0, 0, 0, 0);
       break;
-    case "week":
+    case "week": {
       const day = now.getDay() || 7;
       startDate = new Date(now);
       startDate.setDate(now.getDate() - day + 1);
@@ -76,6 +76,7 @@ export const getFilterDates = (filters: FilterState): { startDate: Date; endDate
       endDate.setDate(startDate.getDate() + 6);
       endDate.setHours(23, 59, 59, 999);
       break;
+    }
     case "month":
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -87,11 +88,11 @@ export const getFilterDates = (filters: FilterState): { startDate: Date; endDate
       endDate.setHours(23, 59, 59, 999);
       break;
     case "custom":
-      startDate = filters.customFrom 
-        ? new Date(filters.customFrom + "T00:00:00") 
+      startDate = filters.customFrom
+        ? new Date(filters.customFrom + "T00:00:00")
         : new Date(now.getFullYear(), now.getMonth(), 1);
-      endDate = filters.customTo 
-        ? new Date(filters.customTo + "T23:59:59") 
+      endDate = filters.customTo
+        ? new Date(filters.customTo + "T23:59:59")
         : new Date();
       break;
     case "all":
@@ -130,14 +131,14 @@ export const filterInvoices = (invoices: Invoice[], filters: FilterState): Invoi
 };
 
 export const calculateStats = (
-  invoices: Invoice[], 
+  invoices: Invoice[],
   paymentMethods: PaymentMethod[]
-): ReportStats => {
-  const byStatus: Record<InvoiceStatus, number> = { 
-    Pagado: 0, 
-    Pendiente: 0, 
-    Parcial: 0, 
-    Cancelado: 0 
+): Omit<ReportStats, "pendienteUSD" | "pendienteBs"> => {
+  const byStatus: Record<InvoiceStatus, number> = {
+    Pagado: 0,
+    Pendiente: 0,
+    Parcial: 0,
+    Cancelado: 0,
   };
   const byItemType: Record<string, { count: number; total: number }> = {};
   const byPaymentMethod: Record<string, { count: number; totalUSD: number; totalBs: number }> = {};
@@ -156,7 +157,7 @@ export const calculateStats = (
     totalCobradoBs += paidBs;
     totalFacturado += invoice.total || 0;
 
-    const totalPaidInUSD = paidUSD + (paidBs / exchangeRate);
+    const totalPaidInUSD = paidUSD + paidBs / exchangeRate;
     const pending = (invoice.total || 0) - totalPaidInUSD;
     if (pending > 0) totalPendienteUSD += pending;
 
@@ -170,9 +171,10 @@ export const calculateStats = (
     });
 
     if (invoice.paymentMethod) {
-      const methodName = typeof invoice.paymentMethod === "string"
-        ? paymentMethods.find(m => m._id === invoice.paymentMethod)?.name || "Otro"
-        : invoice.paymentMethod?.name || "Otro";
+      const methodName =
+        typeof invoice.paymentMethod === "string"
+          ? paymentMethods.find((m) => m._id === invoice.paymentMethod)?.name || "Otro"
+          : invoice.paymentMethod?.name || "Otro";
       if (!byPaymentMethod[methodName]) {
         byPaymentMethod[methodName] = { count: 0, totalUSD: 0, totalBs: 0 };
       }
@@ -216,4 +218,42 @@ export const countActiveFilters = (filters: FilterState): number => {
     filters.paymentCurrency !== "all",
     filters.itemType !== "",
   ].filter(Boolean).length;
+};
+
+/**
+ * Calcula los pendientes separados por moneda.
+ * Función complementaria que no modifica calculateStats.
+ */
+export const calculatePendingByCurrency = (
+  invoices: Invoice[]
+): { pendienteUSD: number; pendienteBs: number } => {
+  let pendienteUSD = 0;
+  let pendienteBs = 0;
+
+  invoices.forEach((invoice) => {
+    if (invoice.paymentStatus === "Pagado" || invoice.paymentStatus === "Cancelado") {
+      return;
+    }
+
+    const total = invoice.total || 0;
+    const paidUSD = invoice.amountPaidUSD || 0;
+    const paidBs = invoice.amountPaidBs || 0;
+    const exchangeRate = invoice.exchangeRate || 1;
+
+    if (invoice.currency === "USD") {
+      const paidBsInUSD = paidBs / exchangeRate;
+      const pending = total - paidUSD - paidBsInUSD;
+      if (pending > 0) {
+        pendienteUSD += pending;
+      }
+    } else {
+      const paidUSDInBs = paidUSD * exchangeRate;
+      const pending = total - paidBs - paidUSDInBs;
+      if (pending > 0) {
+        pendienteBs += pending;
+      }
+    }
+  });
+
+  return { pendienteUSD, pendienteBs };
 };

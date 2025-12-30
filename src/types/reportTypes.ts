@@ -18,18 +18,31 @@ export interface FilterState {
 }
 
 export interface ReportStats {
+  // Cobrado
   totalCobradoUSD: number;
   totalCobradoBs: number;
+  
+  // Pendiente (legacy - mantener para no romper código existente)
   totalPendienteUSD: number;
+  
+  // Pendiente separado por moneda (NUEVO)
+  pendienteUSD: number;
+  pendienteBs: number;
+  
+  // Totales
   totalFacturado: number;
-  byStatus: Record<InvoiceStatus, number>;
-  byItemType: Record<string, { count: number; total: number }>;
-  byPaymentMethod: Record<string, { count: number; totalUSD: number; totalBs: number }>;
   totalInvoices: number;
+  
+  // Por estado
+  byStatus: Record<InvoiceStatus, number>;
   paidCount: number;
   pendingCount: number;
   partialCount: number;
   canceledCount: number;
+  
+  // Por tipo/método
+  byItemType: Record<string, { count: number; total: number }>;
+  byPaymentMethod: Record<string, { count: number; totalUSD: number; totalBs: number }>;
 }
 
 export interface ReportData {

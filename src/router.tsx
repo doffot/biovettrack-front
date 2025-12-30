@@ -62,7 +62,7 @@ import ConsultationListView from "./view/consultations/ConsultationListView";
 import CreateConsultationView from "./view/consultations/CreateConsultationView";
 import EditOwnerView from "./view/owner/EditOwnerView";
 
-// Recipes 👈 NUEVO
+// Recipes 
 import RecipeListView from "./view/recipes/RecipeListView";
 import CreateRecipeView from "./view/recipes/CreateRecipeView";
 
@@ -71,6 +71,7 @@ import InvoiceReportView from "./view/invoices/InvoiceReportView";
 import AppointmentsView from "./view/appointment/AppointmentsView";
 import SelectPatientForAppointment from "./components/appointments/SelectPatientForAppointment";
 import AllConsultationsView from "./view/consultations/AllConsultationsView";
+import InvoiceDetailView from "./view/invoices/InvoiceDetailView";
 
 export default function Router() {
   return (
@@ -145,7 +146,7 @@ export default function Router() {
                 <Route path="create" element={<CreateConsultationView />} />
               </Route>
 
-              {/* Recetas 👈 NUEVO */}
+              {/* Recetas  */}
               <Route path="recipes">
                 <Route index element={<RecipeListView />} />
                 <Route path="create" element={<CreateRecipeView />} />
@@ -185,6 +186,7 @@ export default function Router() {
           {/* REPORTES DE FACTURACIÓN */}
           {/* ==================== */}
           <Route path="/invoices/report" element={<InvoiceReportView />} />
+           <Route path="/invoices/:id" element={<InvoiceDetailView />} /> 
 
           {/* ==================== */}
           {/* RUTAS DE PAYMENT */}

@@ -290,7 +290,8 @@ export default function OwnerListView() {
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-vet-text">Propietarios</h1>
+              {/* propietarios */}
+              <h1 className="text-2xl  text-vet-text font-yellowtail">Propietarios</h1>
               <p className="text-sm text-vet-muted">
                 {sortedOwners.length} de {owners.length} cliente{owners.length !== 1 ? "s" : ""}
               </p>

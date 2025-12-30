@@ -1,188 +1,428 @@
-// src/views/invoices/components/ReportInvoicesTable.tsx
+// src/components/invoices/ReportInvoicesTable.tsx
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Eye, Scissors, Stethoscope, Syringe, FlaskConical, Package } from "lucide-react";
+import { Download, ChevronLeft, ChevronRight, ChevronDown, Eye } from "lucide-react";
 import type { Invoice, InvoiceStatus } from "../../types/invoice";
-import { formatCurrency, formatDate, getItemTypeLabel, getPaymentType } from "../../utils/reportUtils";
+import type { FilterState, DateRangeType, StatusFilter, PaymentCurrencyFilter } from "../../types/reportTypes";
+import { formatCurrency, formatDate, getItemTypeLabel } from "../../utils/reportUtils";
+import { exportToCSV } from "../../utils/exportUtils";
 
 interface ReportInvoicesTableProps {
   invoices: Invoice[];
+  filters: FilterState;
+  onUpdateFilter: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  onResetFilters: () => void;
 }
 
-const getIcon = (type: string): React.ElementType => {
-  const icons: Record<string, React.ElementType> = {
-    grooming: Scissors,
-    consulta: Stethoscope,
-    vacuna: Syringe,
-    labExam: FlaskConical,
-    producto: Package,
-  };
-  return icons[type] || FileText;
-};
+const PAGE_SIZE = 8;
 
 function StatusBadge({ status }: { status: InvoiceStatus }) {
-  const config: Record<InvoiceStatus, { bg: string; text: string; dot: string }> = {
-    Pagado: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-    Pendiente: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-    Parcial: { bg: "bg-vet-light", text: "text-vet-primary", dot: "bg-vet-primary" },
-    Cancelado: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-400" },
-  };
-  const { bg, text, dot } = config[status] || config.Pendiente;
+  const isPaid = status === "Pagado";
+  const isPending = status === "Pendiente" || status === "Parcial";
+  const isCanceled = status === "Cancelado";
+
+  let bgColor = "bg-gray-500";
+  let label: string = status;
+
+  if (isPaid) {
+    bgColor = "bg-emerald-600";
+  } else if (isPending) {
+    bgColor = "bg-red-600";
+    label = "Debe";
+  } else if (isCanceled) {
+    bgColor = "bg-gray-600";
+  }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${bg} ${text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-      {status}
-    </span>
-  );
-}
-
-function PaymentBadge({ type }: { type: "usd" | "bs" | "mixed" | "none" }) {
-  const config = {
-    usd: { bg: "bg-emerald-50", text: "text-emerald-700", label: "USD" },
-    bs: { bg: "bg-vet-light", text: "text-vet-primary", label: "Bs" },
-    mixed: { bg: "bg-purple-50", text: "text-purple-700", label: "Mixto" },
-    none: { bg: "bg-vet-light/50", text: "text-vet-muted", label: "—" },
-  };
-  const { bg, text, label } = config[type];
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${bg} ${text}`}>
+    <span className={`inline-block px-2.5 py-1 text-xs font-semibold text-white rounded-md ${bgColor}`}>
       {label}
     </span>
   );
 }
 
-export function ReportInvoicesTable({ invoices }: ReportInvoicesTableProps) {
+export function ReportInvoicesTable({
+  invoices,
+  filters,
+  onUpdateFilter,
+  onResetFilters,
+}: ReportInvoicesTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
+  const currentInvoices = invoices.slice(startIndex, endIndex);
+
+  const allCurrentSelected = currentInvoices.length > 0 && 
+    currentInvoices.every((inv) => inv._id && selectedIds.has(inv._id));
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+    setCurrentPage(1);
+    onUpdateFilter(key, value);
+  };
+
+  const toggleSelectAll = () => {
+    const newSelected = new Set(selectedIds);
+    if (allCurrentSelected) {
+      currentInvoices.forEach((inv) => {
+        if (inv._id) newSelected.delete(inv._id);
+      });
+    } else {
+      currentInvoices.forEach((inv) => {
+        if (inv._id) newSelected.add(inv._id);
+      });
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleExportCSV = () => {
+    const toExport = selectedIds.size > 0
+      ? invoices.filter((inv) => inv._id && selectedIds.has(inv._id))
+      : invoices;
+    exportToCSV(toExport, "reporte-facturas");
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const selectClasses = `
+    appearance-none bg-white border border-gray-200 rounded-md
+    px-3 py-1.5 pr-8 text-sm text-gray-700
+    focus:outline-none focus:ring-1 focus:ring-[#0A7EA4] focus:border-[#0A7EA4]
+    cursor-pointer
+  `;
+
+  const getOwnerInfo = (invoice: Invoice): { name: string; phone: string } => {
+    const name = invoice.ownerName ||
+      (typeof invoice.ownerId === "object" && invoice.ownerId?.name) ||
+      "—";
+    const phone = invoice.ownerPhone ||
+      (typeof invoice.ownerId === "object" && invoice.ownerId?.contact) ||
+      "";
+    return { name, phone };
+  };
+
+  const getPatientName = (invoice: Invoice): string => {
+    if (!invoice.patientId) return "";
+    if (typeof invoice.patientId === "object" && invoice.patientId?.name) {
+      return invoice.patientId.name;
+    }
+    return "";
+  };
+
+  const getMainService = (invoice: Invoice): string => {
+    if (!invoice.items || invoice.items.length === 0) return "—";
+    return getItemTypeLabel(invoice.items[0].type);
+  };
+
   return (
-    <div className="bg-white rounded-2xl border-2 border-vet-light overflow-hidden shadow-soft">
-      <div className="px-5 py-4 border-b border-vet-light bg-vet-light/30 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-vet-primary" />
-          <h3 className="text-sm font-bold text-vet-text">Facturas</h3>
-        </div>
-        <span className="text-xs text-vet-muted font-medium">{invoices.length} resultados</span>
-      </div>
-
-      {invoices.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-vet-light flex items-center justify-center">
-            <FileText className="w-8 h-8 text-vet-muted" />
+    <div className="bg-white border border-gray-200 rounded-md overflow-hidden">
+      {/* Toolbar */}
+      <div className="px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Período */}
+          <div className="relative">
+            <select
+              value={filters.dateRange}
+              onChange={(e) => handleFilterChange("dateRange", e.target.value as DateRangeType)}
+              className={selectClasses}
+            >
+              <option value="today">Hoy</option>
+              <option value="week">Semana</option>
+              <option value="month">Mes</option>
+              <option value="year">Año</option>
+              <option value="all">Todo</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
-          <p className="text-vet-text font-semibold">No hay facturas</p>
-          <p className="text-vet-muted text-sm mt-1">Ajusta los filtros para ver resultados</p>
+
+          {/* Estado */}
+          <div className="relative">
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange("status", e.target.value as StatusFilter)}
+              className={selectClasses}
+            >
+              <option value="all">Todos los estados</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Parcial">Parcial</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+
+          {/* Tipo de pago */}
+          <div className="relative">
+            <select
+              value={filters.paymentCurrency}
+              onChange={(e) => handleFilterChange("paymentCurrency", e.target.value as PaymentCurrencyFilter)}
+              className={selectClasses}
+            >
+              <option value="all">Todos los pagos</option>
+              <option value="usd">USD</option>
+              <option value="bs">Bolívares</option>
+              <option value="mixed">Mixto</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+
+          {/* Servicio */}
+          <div className="relative">
+            <select
+              value={filters.itemType}
+              onChange={(e) => handleFilterChange("itemType", e.target.value)}
+              className={selectClasses}
+            >
+              <option value="">Todos los servicios</option>
+              <option value="consulta">Consulta</option>
+              <option value="grooming">Peluquería</option>
+              <option value="vacuna">Vacuna</option>
+              <option value="labExam">Laboratorio</option>
+              <option value="producto">Producto</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+
+          {/* Limpiar */}
+          <button
+            onClick={() => {
+              setCurrentPage(1);
+              onResetFilters();
+            }}
+            className="text-sm text-gray-500 hover:text-gray-700 px-2 py-1.5"
+          >
+            Limpiar
+          </button>
         </div>
-      ) : (
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-vet-light/50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide">
-                  Fecha
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide">
-                  Cliente
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide hidden md:table-cell">
-                  Servicios
-                </th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide">
-                  Estado
-                </th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide hidden sm:table-cell">
-                  Pago
-                </th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide">
-                  Total
-                </th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide hidden lg:table-cell">
-                  USD
-                </th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-vet-muted uppercase tracking-wide hidden lg:table-cell">
-                  Bs
-                </th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-vet-light">
-              {invoices.slice(0, 50).map((invoice) => {
-                const ownerName =
-                  invoice.ownerName ||
-                  (typeof invoice.ownerId === "object" ? invoice.ownerId?.name : "") ||
-                  "—";
-                const paidUSD = invoice.amountPaidUSD || 0;
-                const paidBs = invoice.amountPaidBs || 0;
-                const paymentType = getPaymentType(invoice);
 
-                return (
-                  <tr key={invoice._id} className="hover:bg-vet-light/30 transition-colors">
-                    <td className="px-5 py-4 text-sm text-vet-muted">{formatDate(invoice.date)}</td>
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-vet-text truncate max-w-[150px]">
-                        {ownerName}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 hidden md:table-cell">
-                      <div className="flex items-center gap-1.5">
-                        {invoice.items?.slice(0, 2).map((item, i) => {
-                          const Icon = getIcon(item.type);
-                          return (
-                            <div 
-                              key={i} 
-                              className="p-1.5 rounded-lg bg-vet-light"
-                              title={getItemTypeLabel(item.type)}
-                            >
-                              <Icon className="w-3.5 h-3.5 text-vet-primary" />
-                            </div>
-                          );
-                        })}
-                        {(invoice.items?.length || 0) > 2 && (
-                          <span className="text-xs text-vet-muted font-medium">
-                            +{(invoice.items?.length || 0) - 2}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <StatusBadge status={invoice.paymentStatus} />
-                    </td>
-                    <td className="px-5 py-4 text-center hidden sm:table-cell">
-                      <PaymentBadge type={paymentType} />
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span className="text-sm font-bold text-vet-text">
-                        {formatCurrency(invoice.total || 0, invoice.currency)}
-                      </span>
-                    </td>
-                    <td className={`px-5 py-4 text-right hidden lg:table-cell text-sm font-semibold ${
-                      paidUSD > 0 ? "text-emerald-600" : "text-vet-muted/40"
-                    }`}>
-                      {paidUSD > 0 ? formatCurrency(paidUSD, "USD") : "—"}
-                    </td>
-                    <td className={`px-5 py-4 text-right hidden lg:table-cell text-sm font-semibold ${
-                      paidBs > 0 ? "text-vet-primary" : "text-vet-muted/40"
-                    }`}>
-                      {paidBs > 0 ? formatCurrency(paidBs, "Bs") : "—"}
-                    </td>
-                    <td className="px-5 py-4">
-                      <Link
-                        to={`/invoices/${invoice._id}`}
-                        className="p-2 rounded-xl hover:bg-vet-light text-vet-muted hover:text-vet-primary transition-colors inline-flex"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {invoices.length > 50 && (
-            <div className="px-5 py-4 bg-vet-light/30 text-center text-sm text-vet-muted border-t border-vet-light">
-              Mostrando <span className="font-semibold text-vet-primary">50</span> de <span className="font-semibold text-vet-primary">{invoices.length}</span> facturas
+        {/* Export + Selection info */}
+        <div className="flex items-center gap-3">
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                {selectedIds.size} seleccionada{selectedIds.size > 1 ? "s" : ""}
+              </span>
+              <button
+                onClick={clearSelection}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Deseleccionar
+              </button>
             </div>
           )}
+          <button
+            onClick={handleExportCSV}
+            disabled={invoices.length === 0}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" />
+            {selectedIds.size > 0 ? `Exportar (${selectedIds.size})` : "Exportar CSV"}
+          </button>
         </div>
+      </div>
+
+      {/* Table */}
+      {invoices.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="text-gray-500">No hay facturas para mostrar</p>
+          <p className="text-sm text-gray-400 mt-1">Ajusta los filtros o el período</p>
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="w-12 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={allCurrentSelected}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-[#0A7EA4] focus:ring-[#0A7EA4] cursor-pointer"
+                    />
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cliente
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Servicio
+                  </th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    USD
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    Bs
+                  </th>
+                  <th className="w-12 px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentInvoices.map((invoice) => {
+                  const { name, phone } = getOwnerInfo(invoice);
+                  const patientName = getPatientName(invoice);
+                  const mainService = getMainService(invoice);
+                  const paidUSD = invoice.amountPaidUSD || 0;
+                  const paidBs = invoice.amountPaidBs || 0;
+                  const isSelected = invoice._id ? selectedIds.has(invoice._id) : false;
+
+                  return (
+                    <tr
+                      key={invoice._id}
+                      className={`
+                        border-b border-gray-200 hover:bg-gray-50/80 transition-colors
+                        ${isSelected ? "bg-[#0A7EA4]/5" : ""}
+                      `}
+                    >
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => invoice._id && toggleSelect(invoice._id)}
+                          className="w-4 h-4 rounded border-gray-300 text-[#0A7EA4] focus:ring-[#0A7EA4] cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {formatDate(invoice.date)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                            {name}
+                          </p>
+                          {phone && (
+                            <p className="text-xs text-gray-500 mt-0.5">{phone}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <div>
+                          <p className="text-sm text-gray-900">{mainService}</p>
+                          {patientName && (
+                            <p className="text-xs text-gray-500 mt-0.5">{patientName}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <StatusBadge status={invoice.paymentStatus} />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                          {formatCurrency(invoice.total || 0, invoice.currency)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right hidden sm:table-cell">
+                        <span className={`text-sm tabular-nums ${paidUSD > 0 ? "text-emerald-600 font-medium" : "text-gray-300"}`}>
+                          {paidUSD > 0 ? formatCurrency(paidUSD, "USD") : "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right hidden sm:table-cell">
+                        <span className={`text-sm tabular-nums ${paidBs > 0 ? "text-[#0A7EA4] font-medium" : "text-gray-300"}`}>
+                          {paidBs > 0 ? formatCurrency(paidBs, "Bs") : "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/invoices/${invoice._id}`}
+                          className="p-1.5 inline-flex text-gray-400 hover:text-[#0A7EA4] transition-colors rounded-md hover:bg-gray-100"
+                          title="Ver factura"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                {startIndex + 1}–{Math.min(endIndex, invoices.length)} de {invoices.length}
+              </p>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      if (totalPages <= 5) return true;
+                      if (page === 1 || page === totalPages) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
+                      return false;
+                    })
+                    .map((page, index, arr) => {
+                      const prevPage = arr[index - 1];
+                      const showEllipsis = prevPage && page - prevPage > 1;
+
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsis && (
+                            <span className="px-2 text-gray-400">...</span>
+                          )}
+                          <button
+                            onClick={() => goToPage(page)}
+                            className={`
+                              w-8 h-8 text-sm font-medium rounded-md transition-colors
+                              ${currentPage === page
+                                ? "bg-[#0A7EA4] text-white"
+                                : "text-gray-600 hover:bg-gray-100"
+                              }
+                            `}
+                          >
+                            {page}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

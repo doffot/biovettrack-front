@@ -1,22 +1,17 @@
 // src/views/invoices/InvoiceReportView.tsx
-
-import { ReportFilters } from "../../components/invoices/ReportFilters";
 import { ReportHeader } from "../../components/invoices/ReportHeader";
-import { ReportIncomeCards } from "../../components/invoices/ReportIncomeCards";
+import { ReportSummary } from "../../components/invoices/ReportSummary";
+import { ReportMetrics } from "../../components/invoices/ReportMetrics";
+import { ReportBreakdown } from "../../components/invoices/ReportBreakdown";
 import { ReportInvoicesTable } from "../../components/invoices/ReportInvoicesTable";
-import { ReportPaymentMethods } from "../../components/invoices/ReportPaymentMethods";
-import { ReportServiceTags } from "../../components/invoices/ReportServiceTags";
-import { ReportStats } from "../../components/invoices/ReportStats";
-import { printReport } from "../../hooks/reportPrint";
 import { useInvoiceReport } from "../../hooks/useInvoiceReport";
-
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-vet-gradient">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
       <div className="text-center">
-        <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-light border-t-vet-primary rounded-full animate-spin" />
-        <p className="text-vet-text font-medium">Cargando reporte...</p>
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-gray-200 border-t-[#0A7EA4] rounded-full animate-spin" />
+        <p className="text-sm text-gray-500">Cargando reporte...</p>
       </div>
     </div>
   );
@@ -27,65 +22,52 @@ export default function InvoiceReportView() {
     invoices,
     stats,
     filters,
-    showFilters,
-    setShowFilters,
     updateFilter,
     resetFilters,
-    activeFiltersCount,
     isLoading,
     isFetching,
     refetch,
     periodLabel,
-    vetName,
   } = useInvoiceReport();
-
-  const handlePrint = () => {
-    printReport({
-      invoices,
-      stats,
-      filters,
-      vetName,
-    });
-  };
 
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-vet-gradient">
+    <div className="min-h-screen bg-[#FAFAFA]">
       <ReportHeader
         periodLabel={periodLabel}
-        invoiceCount={invoices.length}
         isFetching={isFetching}
-        showFilters={showFilters}
-        activeFiltersCount={activeFiltersCount}
         onRefetch={refetch}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        onPrint={handlePrint}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {showFilters && (
-          <ReportFilters
-            filters={filters}
-            onUpdateFilter={updateFilter}
-            onReset={resetFilters}
-          />
-        )}
-
-        <ReportStats stats={stats} />
-
-        <ReportIncomeCards
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <ReportSummary
           totalCobradoUSD={stats.totalCobradoUSD}
           totalCobradoBs={stats.totalCobradoBs}
-          totalPendienteUSD={stats.totalPendienteUSD}
+          pendienteUSD={stats.pendienteUSD}
+          pendienteBs={stats.pendienteBs}
+          totalFacturado={stats.totalFacturado}
         />
 
-        <ReportServiceTags byItemType={stats.byItemType} />
+        <ReportMetrics
+          total={stats.totalInvoices}
+          paid={stats.paidCount}
+          pending={stats.pendingCount}
+          partial={stats.partialCount}
+        />
 
-        <ReportPaymentMethods byPaymentMethod={stats.byPaymentMethod} />
+        <ReportBreakdown
+          byService={stats.byItemType}
+          byPaymentMethod={stats.byPaymentMethod}
+        />
 
-        <ReportInvoicesTable invoices={invoices} />
-      </div>
+        <ReportInvoicesTable
+          invoices={invoices}
+          filters={filters}
+          onUpdateFilter={updateFilter}
+          onResetFilters={resetFilters}
+        />
+      </main>
     </div>
   );
 }

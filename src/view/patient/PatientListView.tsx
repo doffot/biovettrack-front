@@ -113,7 +113,7 @@ export default function PatientListView() {
                   <PawPrint className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-vet-text font-montserrat">
+                  <h1 className="text-xl font-bold font-yellowtail text-vet-text ">
                     Pacientes
                   </h1>
                   <p className="text-xs text-vet-muted hidden sm:block">
