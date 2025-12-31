@@ -86,12 +86,12 @@ const getFilterDates = (dateRange: GroomingDateRange): { startDate: Date; endDat
   return { startDate, endDate };
 };
 
-const getDatePart = (date: string): string => {
-  if (date.includes("T")) {
-    return date.split("T")[0];
-  }
-  return date;
-};
+// const getDatePart = (date: string): string => {
+//   if (date.includes("T")) {
+//     return date.split("T")[0];
+//   }
+//   return date;
+// };
 
 export function GroomingReportTable({ services }: GroomingReportTableProps) {
   const [currentPage, setCurrentPage] = useState(1);

@@ -39,16 +39,16 @@ function LoadingSpinner() {
   );
 }
 
-const getPeriodLabel = (dateRange: GroomingDateRange): string => {
-  const labels: Record<GroomingDateRange, string> = {
-    today: "Hoy",
-    week: "Esta semana",
-    month: "Este mes",
-    year: "Este año",
-    all: "Todo",
-  };
-  return labels[dateRange] || "";
-};
+// const getPeriodLabel = (dateRange: GroomingDateRange): string => {
+//   const labels: Record<GroomingDateRange, string> = {
+//     today: "Hoy",
+//     week: "Esta semana",
+//     month: "Este mes",
+//     year: "Este año",
+//     all: "Todo",
+//   };
+//   return labels[dateRange] || "";
+// };
 
 export default function GroomingReportView() {
   const {
