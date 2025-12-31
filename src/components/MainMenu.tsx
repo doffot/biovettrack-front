@@ -3,13 +3,15 @@ import React from "react";
 import {
   User,
   PawPrint,
-  BarChart3,
   Scissors,
   CreditCard,
   ChevronRight,
   Activity,
-  Home,
   Users,
+  FileText,
+  Calendar,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMedia } from "../hooks/useMedia";
@@ -26,6 +28,13 @@ interface MenuItem {
   gradientTo: string;
 }
 
+interface MenuSection {
+  id: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: MenuItem[];
+}
+
 const MainMenu: React.FC = () => {
   const isDesktop = useMedia("(min-width: 1024px)");
 
@@ -33,94 +42,133 @@ const MainMenu: React.FC = () => {
     return null;
   }
 
-  const menuItems: MenuItem[] = [
+  const menuSections: MenuSection[] = [
     {
-      id: "home",
-      title: "Inicio",
-      subtitle: "Panel principal",
-      icon: Home,
-      to: "/",
-      color: "text-vet-primary",
-      bgColor: "bg-vet-light",
-      gradientFrom: "from-vet-primary",
-      gradientTo: "to-vet-secondary",
-    },
-    {
-      id: "owners",
-      title: "Dueño",
-      subtitle: "Gestionar propietarios",
+      id: "main",
+      title: "Gestión Principal",
       icon: User,
-      to: "/owners",
-      color: "text-sky-600",
-      bgColor: "bg-sky-50",
-      gradientFrom: "from-sky-500",
-      gradientTo: "to-sky-600",
+      items: [
+        {
+          id: "owners",
+          title: "Dueño",
+          subtitle: "Gestionar propietarios",
+          icon: User,
+          to: "/owners",
+          color: "text-sky-600",
+          bgColor: "bg-sky-50",
+          gradientFrom: "from-sky-500",
+          gradientTo: "to-sky-600",
+        },
+        {
+          id: "patients",
+          title: "Mascota",
+          subtitle: "Expedientes médicos",
+          icon: PawPrint,
+          to: "/patients",
+          color: "text-pink-600",
+          bgColor: "bg-pink-50",
+          gradientFrom: "from-pink-500",
+          gradientTo: "to-pink-600",
+        },
+        {
+          id: "appointments",
+          title: "Citas",
+          subtitle: "Gestionar turnos médicos",
+          icon: Calendar,
+          to: "/appointments",
+          color: "text-amber-600",
+          bgColor: "bg-amber-50",
+          gradientFrom: "from-amber-500",
+          gradientTo: "to-amber-600",
+        },
+      ],
     },
     {
-      id: "patients",
-      title: "Mascota",
-      subtitle: "Expedientes médicos",
-      icon: PawPrint,
-      to: "/patients",
-      color: "text-pink-600",
-      bgColor: "bg-pink-50",
-      gradientFrom: "from-pink-500",
-      gradientTo: "to-pink-600",
-    },
-    {
-      id: "lab-exams",
-      title: "Crear Hemograma",
-      subtitle: "Laboratorio clínico",
+      id: "services",
+      title: "Servicios",
       icon: Activity,
-      to: "/lab-exams",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      gradientFrom: "from-purple-500",
-      gradientTo: "to-purple-600",
-    },
-    {
-      id: "grooming",
-      title: "Peluquería",
-      subtitle: "Servicios de estética",
-      icon: Scissors,
-      to: "/grooming-services",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      gradientFrom: "from-emerald-500",
-      gradientTo: "to-emerald-600",
+      items: [
+        {
+          id: "lab-exams",
+          title: "Crear Hemograma",
+          subtitle: "Laboratorio clínico",
+          icon: Activity,
+          to: "/lab-exams",
+          color: "text-purple-600",
+          bgColor: "bg-purple-50",
+          gradientFrom: "from-purple-500",
+          gradientTo: "to-purple-600",
+        },
+        {
+          id: "grooming-services",
+          title: "Peluquería",
+          subtitle: "Servicios de estética",
+          icon: Scissors,
+          to: "/grooming-services",
+          color: "text-emerald-600",
+          bgColor: "bg-emerald-50",
+          gradientFrom: "from-emerald-500",
+          gradientTo: "to-emerald-600",
+        },
+      ],
     },
     {
       id: "reports",
       title: "Reportes",
-      subtitle: "Análisis y estadísticas",
       icon: BarChart3,
-      to: "/grooming/report",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
-      gradientFrom: "from-indigo-500",
-      gradientTo: "to-indigo-600",
+      items: [
+        {
+          id: "report-grooming",
+          title: "Peluquería",
+          subtitle: "Estadísticas de servicios",
+          icon: Scissors,
+          to: "/grooming/report",
+          color: "text-indigo-600",
+          bgColor: "bg-indigo-50",
+          gradientFrom: "from-indigo-500",
+          gradientTo: "to-indigo-600",
+        },
+        {
+          id: "report-invoices",
+          title: "Facturación",
+          subtitle: "Resúmenes de ingresos",
+          icon: FileText,
+          to: "/invoices/report",
+          color: "text-blue-600",
+          bgColor: "bg-blue-50",
+          gradientFrom: "from-blue-500",
+          gradientTo: "to-blue-600",
+        },
+      ],
     },
     {
-      id: "payment-methods",
-      title: "Métodos de Pago",
-      subtitle: "Configurar pagos",
-      icon: CreditCard,
-      to: "/payment-methods",
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-      gradientFrom: "from-amber-500",
-      gradientTo: "to-amber-600",
-    },
-    {
-      id: "staff",
-      title: "Staff",
-      subtitle: "Gestionar personal",
-      icon: Users,
-      to: "/staff",
-      color: "text-teal-600",
-      bgColor: "bg-teal-50",
-      gradientFrom: "from-teal-500",
-      gradientTo: "to-teal-600",
+      id: "config",
+      title: "Configuración",
+      icon: Settings,
+      items: [
+        {
+          id: "payment-methods",
+          title: "Métodos de Pago",
+          subtitle: "Configurar formas de pago",
+          icon: CreditCard,
+          to: "/payment-methods",
+          color: "text-green-600",
+          bgColor: "bg-green-50",
+          gradientFrom: "from-green-500",
+          gradientTo: "to-green-600",
+        },
+        {
+          id: "staff",
+          title: "Staff",
+          subtitle: "Gestionar personal médico",
+          icon: Users,
+          to: "/staff",
+          color: "text-teal-600",
+          bgColor: "bg-teal-50",
+          gradientFrom: "from-teal-500",
+          gradientTo: "to-teal-600",
+        },
+      ],
     },
   ];
 
@@ -135,6 +183,7 @@ const MainMenu: React.FC = () => {
           overflow-hidden group
         "
       >
+        {/* Fondo con gradiente en hover */}
         <div
           className={`
             absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
@@ -142,6 +191,7 @@ const MainMenu: React.FC = () => {
           `}
         />
 
+        {/* Efecto blur decorativo */}
         <div
           className={`
             absolute -top-8 -right-8 w-24 h-24 ${item.bgColor}
@@ -206,29 +256,53 @@ const MainMenu: React.FC = () => {
     );
   };
 
+  const renderSection = (section: MenuSection) => {
+    const SectionIcon = section.icon;
+
+    return (
+      <div key={section.id} className="space-y-3">
+        {/* Título de sección */}
+        <div className="flex items-center gap-2 px-1">
+          <div className="p-1.5 bg-vet-light rounded-lg">
+            <SectionIcon className="w-4 h-4 text-vet-primary" />
+          </div>
+          <h2 className="text-sm font-semibold text-vet-text font-montserrat">
+            {section.title}
+          </h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-vet-light to-transparent ml-2" />
+        </div>
+
+        {/* Cards de la sección */}
+        <div className="space-y-2.5">
+          {section.items.map((item) => (
+            <Link key={item.id} to={item.to} className="block">
+              {renderCard(item)}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-vet-light/30 via-white to-vet-light/20">
+    <div className="flex flex-col h-full bg-gradient-to-b from-vet-light/30 via-white to-vet-light/20 pt-3">
       {/* Header decorativo */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-vet-primary/5 to-vet-accent/5" />
-        <div className="relative px-6 pt-6 pb-4">
-          <h2 className="text-2xl font-bold text-vet-text font-montserrat mb-1">
+        <div className="relative px-6 pt-4 pb-4">
+          <h1 className="text-2xl font-bold text-vet-text font-montserrat mb-1">
             Panel Principal
-          </h2>
+          </h1>
           <p className="text-sm text-vet-muted font-inter">
             Accede rápidamente a todas las funciones
           </p>
         </div>
       </div>
 
-      {/* Contenido principal */}
+      {/* Contenido principal con scroll */}
       <div className="flex-1 overflow-y-auto px-4 pt-2 pb-28 scrollbar-thin">
-        <div className="max-w-md mx-auto space-y-3 pb-4">
-          {menuItems.map((item) => (
-            <Link key={item.id} to={item.to} className="block">
-              {renderCard(item)}
-            </Link>
-          ))}
+        <div className="max-w-md mx-auto space-y-6 pb-4">
+          {menuSections.map((section) => renderSection(section))}
         </div>
       </div>
     </div>

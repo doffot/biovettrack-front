@@ -11,19 +11,18 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import type { CurrencyAmounts, RevenueChartItem } from "../../hooks/useDashboardData";
-
+import type { RevenueAmounts, RevenueChartItem } from "../../hooks/useDashboardData";
 
 interface RevenueChartProps {
   data: RevenueChartItem[];
-  weekRevenue: CurrencyAmounts;
-  monthRevenue: CurrencyAmounts;
+  weekRevenue: RevenueAmounts;
+  monthRevenue: RevenueAmounts;
 }
 
-type CurrencyFilter = "USD" | "Bs" | "both";
+type CurrencyFilter = "total" | "USD" | "Bs";
 
 export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartProps) {
-  const [currencyFilter, setCurrencyFilter] = useState<CurrencyFilter>("both");
+  const [currencyFilter, setCurrencyFilter] = useState<CurrencyFilter>("total");
 
   const formatUSD = (amount: number) => `$${amount.toFixed(2)}`;
   const formatBs = (amount: number) =>
@@ -45,14 +44,14 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
           {/* Filtro de moneda */}
           <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
             <button
-              onClick={() => setCurrencyFilter("both")}
+              onClick={() => setCurrencyFilter("total")}
               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                currencyFilter === "both"
+                currencyFilter === "total"
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Ambas
+              Total USD
             </button>
             <button
               onClick={() => setCurrencyFilter("USD")}
@@ -82,18 +81,18 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
           <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
             <span className="text-gray-500">Semana:</span>
             <div className="flex flex-col">
-              <span className="font-bold text-gray-900">{formatUSD(weekRevenue.USD)}</span>
-              <span className="font-semibold text-gray-600 text-xs">
-                {formatBs(weekRevenue.Bs)}
+              <span className="font-bold text-gray-900">{formatUSD(weekRevenue.totalUSD)}</span>
+              <span className="text-[10px] text-gray-500">
+                {formatUSD(weekRevenue.USD)} + {formatBs(weekRevenue.Bs)}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
             <span className="text-gray-500">Mes:</span>
             <div className="flex flex-col">
-              <span className="font-bold text-gray-900">{formatUSD(monthRevenue.USD)}</span>
-              <span className="font-semibold text-gray-600 text-xs">
-                {formatBs(monthRevenue.Bs)}
+              <span className="font-bold text-gray-900">{formatUSD(monthRevenue.totalUSD)}</span>
+              <span className="text-[10px] text-gray-500">
+                {formatUSD(monthRevenue.USD)} + {formatBs(monthRevenue.Bs)}
               </span>
             </div>
           </div>
@@ -108,6 +107,7 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
             <YAxis tick={{ fontSize: 12 }} />
             <Tooltip
               formatter={(value: number, name: string) => {
+                if (name === "totalUSD") return [formatUSD(value), "Total USD"];
                 if (name === "USD") return [formatUSD(value), "Dólares"];
                 if (name === "Bs") return [formatBs(value), "Bolívares"];
                 return [value, name];
@@ -117,13 +117,31 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
                 border: "1px solid #e5e7eb",
               }}
             />
-            {currencyFilter === "both" && <Legend />}
+            {currencyFilter !== "total" && <Legend />}
 
-            {(currencyFilter === "both" || currencyFilter === "USD") && (
-              <Bar dataKey="USD" fill="#10b981" radius={[4, 4, 0, 0]} name="USD" />
+            {currencyFilter === "total" && (
+              <Bar 
+                dataKey="totalUSD" 
+                fill="#0A7EA4" 
+                radius={[4, 4, 0, 0]} 
+                name="Total USD" 
+              />
             )}
-            {(currencyFilter === "both" || currencyFilter === "Bs") && (
-              <Bar dataKey="Bs" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Bs" />
+            {currencyFilter === "USD" && (
+              <Bar 
+                dataKey="USD" 
+                fill="#10b981" 
+                radius={[4, 4, 0, 0]} 
+                name="USD" 
+              />
+            )}
+            {currencyFilter === "Bs" && (
+              <Bar 
+                dataKey="Bs" 
+                fill="#3b82f6" 
+                radius={[4, 4, 0, 0]} 
+                name="Bs" 
+              />
             )}
           </BarChart>
         </ResponsiveContainer>

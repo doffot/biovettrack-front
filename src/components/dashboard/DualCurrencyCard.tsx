@@ -1,15 +1,20 @@
 // src/views/dashboard/components/DualCurrencyCard.tsx
 import type { LucideIcon } from "lucide-react";
 import type { CurrencyAmounts } from "../../constants/dashboardConstants";
+import type { RevenueAmounts } from "../../hooks/useDashboardData";
 
 interface DualCurrencyCardProps {
   title: string;
-  amounts: CurrencyAmounts;
+  amounts: CurrencyAmounts | RevenueAmounts;
   subtitle?: string;
   icon: LucideIcon;
   color: string;
   bgColor: string;
   onClick?: () => void;
+}
+
+function isRevenueAmounts(amounts: CurrencyAmounts | RevenueAmounts): amounts is RevenueAmounts {
+  return "totalUSD" in amounts;
 }
 
 export function DualCurrencyCard({
@@ -29,6 +34,8 @@ export function DualCurrencyCard({
     })}`;
 
   const isClickable = !!onClick;
+  const hasTotal = isRevenueAmounts(amounts);
+  const hasBs = amounts.Bs > 0;
 
   return (
     <div
@@ -56,17 +63,35 @@ export function DualCurrencyCard({
             {title}
           </p>
 
-          {/* USD */}
-          <p className={`text-lg font-bold ${color} mt-0.5`}>
-            {formatUSD(amounts.USD)}
-          </p>
+          {/* Total en USD (si tiene) */}
+          {hasTotal ? (
+            <>
+              <p className={`text-xl font-bold ${color} mt-0.5`}>
+                {formatUSD(amounts.totalUSD)}
+              </p>
+              <div className="text-[10px] text-vet-muted mt-0.5 space-y-0.5">
+                <p>{formatUSD(amounts.USD)} USD</p>
+                {hasBs && (
+                  <p>
+                    {formatUSD(amounts.bsInUSD)} ({formatBs(amounts.Bs)})
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* USD */}
+              <p className={`text-lg font-bold ${color} mt-0.5`}>
+                {formatUSD(amounts.USD)}
+              </p>
+              {/* Bolívares */}
+              <p className="text-xs font-semibold text-vet-muted">
+                {formatBs(amounts.Bs)}
+              </p>
+            </>
+          )}
 
-          {/* Bolívares */}
-          <p className="text-xs font-semibold text-vet-muted">
-            {formatBs(amounts.Bs)}
-          </p>
-
-          {/* Subtitle con indicador de clickeable */}
+          {/* Subtitle */}
           {subtitle && (
             <p className="text-[10px] text-vet-muted mt-0.5 flex items-center gap-1">
               {subtitle}

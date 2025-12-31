@@ -6,18 +6,18 @@ import {
 } from "lucide-react";
 import { DualCurrencyCard } from "./DualCurrencyCard";
 import type { CurrencyAmounts } from "../../constants/dashboardConstants";
+import type { RevenueAmounts } from "../../hooks/useDashboardData";
 
 interface MetricsGridProps {
   todayAppointments: number;
   todayConsultations: number;
   todayGrooming: number;
-  todayRevenue: CurrencyAmounts;
+  todayRevenue: RevenueAmounts;
   totalPatients: number;
   totalOwners: number;
   pendingDebt: CurrencyAmounts;
   pendingInvoicesCount: number;
-  monthRevenue: CurrencyAmounts;
-  // Nuevo callback
+  monthRevenue: RevenueAmounts;
   onPendingDebtClick?: () => void;
 }
 

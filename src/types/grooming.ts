@@ -11,6 +11,7 @@ const OwnerFieldSchema = z.union([
   z.object({
     _id: z.string(),
     name: z.string(),
+    contact: z.string().optional(),
   }),
 ]).nullable().optional();
 
@@ -106,6 +107,7 @@ export type GroomingServicePopulated = Omit<GroomingService, "groomer" | "patien
     owner?: {
       _id: string;
       name: string;
+      contact?: string;
     };
   };
 };

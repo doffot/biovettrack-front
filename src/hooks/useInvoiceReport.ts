@@ -6,6 +6,7 @@ import {
   filterInvoices,
   calculateStats,
   calculatePendingByCurrency,
+  calculateBsToUSDEquivalent,
   getDefaultFilters,
   countActiveFilters,
   getPeriodLabel,
@@ -52,13 +53,23 @@ export function useInvoiceReport() {
     [filteredInvoices]
   );
 
+  const cobradoBsEnUSD = useMemo(
+    () => calculateBsToUSDEquivalent(filteredInvoices),
+    [filteredInvoices]
+  );
+
+  // Total general: USD cash + USD equivalente de Bs
+  const totalCobradoGeneral = baseStats.totalCobradoUSD + cobradoBsEnUSD;
+
   const stats: ReportStats = useMemo(
     () => ({
       ...baseStats,
       pendienteUSD: pendingByCurrency.pendienteUSD,
       pendienteBs: pendingByCurrency.pendienteBs,
+      cobradoBsEnUSD,
+      totalCobradoGeneral,
     }),
-    [baseStats, pendingByCurrency]
+    [baseStats, pendingByCurrency, cobradoBsEnUSD, totalCobradoGeneral]
   );
 
   const periodLabel = getPeriodLabel(filters.dateRange);

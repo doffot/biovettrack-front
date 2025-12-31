@@ -33,7 +33,7 @@ export default function InvoiceReportView() {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] pt-3 lg:pt-0">
       <ReportHeader
         periodLabel={periodLabel}
         isFetching={isFetching}
@@ -44,6 +44,8 @@ export default function InvoiceReportView() {
         <ReportSummary
           totalCobradoUSD={stats.totalCobradoUSD}
           totalCobradoBs={stats.totalCobradoBs}
+          cobradoBsEnUSD={stats.cobradoBsEnUSD}
+          totalCobradoGeneral={stats.totalCobradoGeneral}
           pendienteUSD={stats.pendienteUSD}
           pendienteBs={stats.pendienteBs}
           totalFacturado={stats.totalFacturado}

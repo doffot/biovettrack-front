@@ -92,13 +92,13 @@ export default function PatientListView() {
   }
 
   return (
-    <div className="min-h-screen bg-vet-gradient">
+    <div className="min-h-screen bg-vet-gradient pt-3 lg:pt-0">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-vet-light/50 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <Link
                 to="/"
                 className="p-2 rounded-xl bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all duration-200 group"
@@ -108,12 +108,12 @@ export default function PatientListView() {
 
               <div className="hidden sm:block h-8 w-px bg-vet-light" />
 
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">
-                  <PawPrint className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 sm:p-2.5 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">
+                  <PawPrint className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold font-yellowtail text-vet-text ">
+                  <h1 className="text-lg sm:text-xl font-bold font-yellowtail text-vet-text">
                     Pacientes
                   </h1>
                   <p className="text-xs text-vet-muted hidden sm:block">
@@ -128,7 +128,7 @@ export default function PatientListView() {
               to="/owners"
               className="
                 inline-flex items-center gap-2 
-                px-4 py-2.5 rounded-xl 
+                px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl 
                 bg-gradient-to-r from-vet-primary to-vet-secondary 
                 text-white font-semibold text-sm
                 shadow-soft hover:shadow-card

@@ -35,10 +35,10 @@ export default function CreateOwnerView() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: createOwner,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Propietario registrado correctamente");
       queryClient.invalidateQueries({ queryKey: ["owners"] });
-      navigate("/owners");
+       navigate(`/owners/${data.owner._id}`);
     },
     onError: (error: Error) => {
       toast.error(error.message);

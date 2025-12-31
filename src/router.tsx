@@ -14,6 +14,7 @@ import NewPasswordView from "./view/auth/NewPasswordView";
 
 // Vistas principales
 import HomeView from "./view/home/HomeView";
+import NotificationsView from "./view/notifications/NotificationsView";
 
 // Owners
 import OwnerListView from "./view/owner/OwnerListView";
@@ -90,6 +91,11 @@ export default function Router() {
         {/* Rutas Protegidas (App) */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomeView />} index />
+          
+          {/* ==================== */}
+          {/* NOTIFICACIONES */}
+          {/* ==================== */}
+          <Route path="/notifications" element={<NotificationsView />} />
 
           {/* ==================== */}
           {/* CITAS (RUTA GLOBAL) */}

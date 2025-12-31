@@ -1,279 +1,206 @@
 // src/views/grooming/GroomingReportView.tsx
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { Scissors, DollarSign, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react';
-import { getAllGroomingServices } from '../../api/groomingAPI';
-import { extractId } from '../../utils/extractId';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { getAllGroomingServices } from "../../api/groomingAPI";
+import { getInvoices } from "../../api/invoiceAPI";
+import type { Invoice } from "../../types/invoice";
+import type { GroomingService } from "../../types/grooming";
+import { GroomingReportSummary } from "./GroomingSummary";
+import { GroomingReportMetrics } from "../../components/grooming/GroomingReportMetrics";
+import { GroomingReportTable } from "../../components/grooming/GroomingReportTable";
 
-// Tarjeta de métrica reutilizable
-const MetricCard = ({ 
-  title, 
-  value, 
-  subtitle, 
-  icon: Icon, 
-  color = "text-vet-primary", 
-  bgColor = "bg-vet-light/30" 
-}: { 
-  title: string; 
-  value: string | number; 
-  subtitle?: string; 
-  icon: React.ElementType; 
-  color?: string; 
-  bgColor?: string; 
-}) => (
-  <div className={`${bgColor} rounded-xl p-4 border border-gray-200`}>
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-xs text-vet-muted uppercase tracking-wide">{title}</p>
-        <p className={`text-2xl font-bold ${color} mt-1`}>{value}</p>
-        {subtitle && <p className="text-xs text-vet-muted mt-1">{subtitle}</p>}
-      </div>
-      <div className={`p-2 ${color.replace('text-', 'bg-')} bg-opacity-10 rounded-lg`}>
-        <Icon className="w-5 h-5" />
+interface PaymentInfo {
+  paymentStatus: string;
+  amountPaidUSD: number;
+  amountPaidBs: number;
+  exchangeRate: number;
+  isPaid: boolean;
+}
+
+export interface EnrichedGroomingService extends GroomingService {
+  paymentInfo: PaymentInfo;
+  ownerName: string;
+  ownerPhone: string;
+  patientName: string;
+}
+
+export type GroomingDateRange = "today" | "week" | "month" | "year" | "all";
+
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+      <div className="text-center">
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-gray-200 border-t-[#0A7EA4] rounded-full animate-spin" />
+        <p className="text-sm text-gray-500">Cargando reporte...</p>
       </div>
     </div>
-  </div>
-);
+  );
+}
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
-};
-
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString('es-ES', {
-    hour: '2-digit', minute: '2-digit'
-  });
+const getPeriodLabel = (dateRange: GroomingDateRange): string => {
+  const labels: Record<GroomingDateRange, string> = {
+    today: "Hoy",
+    week: "Esta semana",
+    month: "Este mes",
+    year: "Este año",
+    all: "Todo",
+  };
+  return labels[dateRange] || "";
 };
 
 export default function GroomingReportView() {
-  const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'custom'>('today');
-  const [customFrom, setCustomFrom] = useState<string>('');
-  const [customTo, setCustomTo] = useState<string>('');
-
-  const { data: services = [], isLoading } = useQuery({
-    queryKey: ['groomingServices'],
+  const {
+    data: services = [],
+    isLoading: isLoadingServices,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["groomingServices"],
     queryFn: getAllGroomingServices,
+    retry: 2,
   });
 
-  // Obtener fechas para filtros
-  const getFilterDates = () => {
-    const now = new Date();
-    let startDate: Date, endDate: Date;
+  const { data: invoicesData, isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ["invoices", "groomingReport"],
+    queryFn: () => getInvoices({ limit: 10000 }),
+  });
 
-    if (dateRange === 'today') {
-      startDate = new Date(now);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(now);
-      endDate.setHours(23, 59, 59, 999);
-    } else if (dateRange === 'week') {
-      // Lunes de esta semana
-      const day = now.getDay() || 7;
-      startDate = new Date(now);
-      startDate.setDate(now.getDate() - day + 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 6);
-      endDate.setHours(23, 59, 59, 999);
-    } else if (dateRange === 'month') {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      endDate.setHours(23, 59, 59, 999);
-    } else {
-      // Personalizado
-      startDate = customFrom ? new Date(customFrom) : new Date(now);
-      endDate = customTo ? new Date(customTo) : new Date(now);
-      if (customFrom) startDate.setHours(0, 0, 0, 0);
-      if (customTo) endDate.setHours(23, 59, 59, 999);
-    }
+  const invoices = (invoicesData?.invoices || []) as Invoice[];
+  const isLoading = isLoadingServices || isLoadingInvoices;
 
-    return { startDate, endDate };
+  // Encontrar factura para un servicio
+  const findInvoiceForService = (serviceId: string): Invoice | undefined => {
+    return invoices.find((invoice) =>
+      invoice.items?.some(
+        (item) => item.type === "grooming" && item.resourceId === serviceId
+      )
+    );
   };
 
-  const filteredServices = useMemo(() => {
-    if (!services || services.length === 0) return [];
+  // Obtener info de pago
+  const getPaymentInfo = (service: GroomingService): PaymentInfo => {
+    const invoice = findInvoiceForService(service._id!);
 
-    const { startDate, endDate } = getFilterDates();
+    if (!invoice) {
+      return {
+        paymentStatus: "Sin facturar",
+        amountPaidUSD: 0,
+        amountPaidBs: 0,
+        exchangeRate: 1,
+        isPaid: false,
+      };
+    }
 
-    return services.filter(service => {
-      const serviceDate = new Date(service.date);
-      return serviceDate >= startDate && serviceDate <= endDate;
+    return {
+      paymentStatus: invoice.paymentStatus,
+      amountPaidUSD: invoice.amountPaidUSD || 0,
+      amountPaidBs: invoice.amountPaidBs || 0,
+      exchangeRate: invoice.exchangeRate || 1,
+      isPaid: invoice.paymentStatus === "Pagado",
+    };
+  };
+
+  // Extraer datos del paciente y owner
+  const getPatientData = (
+    patientId: GroomingService["patientId"]
+  ): { patientName: string; ownerName: string; ownerPhone: string } => {
+    if (!patientId || typeof patientId === "string") {
+      return { patientName: "—", ownerName: "—", ownerPhone: "" };
+    }
+
+    const patientName = patientId.name || "—";
+    let ownerName = "—";
+    let ownerPhone = "";
+
+    if (patientId.owner) {
+      if (typeof patientId.owner === "string") {
+        ownerName = "Propietario";
+      } else if (patientId.owner !== null) {
+        ownerName = patientId.owner.name || "—";
+        ownerPhone = patientId.owner.contact || "";
+      }
+    }
+
+    return { patientName, ownerName, ownerPhone };
+  };
+
+  // Enriquecer servicios
+  const enrichedServices: EnrichedGroomingService[] = useMemo(() => {
+    return services.map((service: GroomingService) => {
+      const paymentInfo = getPaymentInfo(service);
+      const { patientName, ownerName, ownerPhone } = getPatientData(service.patientId);
+
+      return {
+        ...service,
+        paymentInfo,
+        patientName,
+        ownerName,
+        ownerPhone,
+      };
     });
-  }, [services, dateRange, customFrom, customTo]);
+  }, [services, invoices]);
 
-  // Estadísticas reales (sin paymentMethod ni amountPaid)
-  const stats = useMemo(() => {
-    const totalServices = filteredServices.length;
+  if (isLoading) return <LoadingSpinner />;
 
-    // Servicio más frecuente
-    const serviceCount: Record<string, number> = {};
-    filteredServices.forEach(s => {
-      serviceCount[s.service] = (serviceCount[s.service] || 0) + 1;
-    });
-    const mostFrequentService = Object.entries(serviceCount)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
-
-    return { totalServices, mostFrequentService };
-  }, [filteredServices]);
-
-  if (isLoading) {
+  if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-vet-gradient px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-vet-text font-medium">Cargando reporte de peluquería...</p>
+          <p className="text-gray-500 mb-4">Error al cargar el reporte</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-[#0A7EA4] text-white rounded-md hover:bg-[#085F7A]"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-vet-gradient px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            className="p-2 rounded-lg hover:bg-vet-light text-vet-primary transition-colors"
-            title="Volver a servicios"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-vet-text">Reporte de Peluquería</h1>
-            <p className="text-vet-muted text-sm">Estadísticas y servicios filtrados por período</p>
-          </div>
-        </div>
-      </div>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                className="p-1.5 -ml-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div>
+                <h1 className="text-base font-semibold text-gray-900">
+                  Reporte de Peluquería
+                </h1>
+                <p className="text-xs text-gray-500">
+                  {enrichedServices.length} servicios
+                </p>
+              </div>
+            </div>
 
-      {/* Filtros */}
-      <div className="bg-white rounded-xl p-4 mb-6 border border-gray-200 shadow-sm">
-        <div className="flex flex-wrap gap-4 items-end">
-          <div>
-            <label className="block text-sm font-medium text-vet-text mb-1">Período</label>
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vet-primary focus:border-vet-primary"
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50"
             >
-              <option value="today">Hoy</option>
-              <option value="week">Esta semana</option>
-              <option value="month">Este mes</option>
-              <option value="custom">Personalizado</option>
-            </select>
+              <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
+            </button>
           </div>
-
-          {dateRange === 'custom' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-vet-text mb-1">Desde</label>
-                <input
-                  type="date"
-                  value={customFrom}
-                  onChange={(e) => setCustomFrom(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-vet-text mb-1">Hasta</label>
-                <input
-                  type="date"
-                  value={customTo}
-                  onChange={(e) => setCustomTo(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-            </>
-          )}
         </div>
-      </div>
+      </header>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        <MetricCard 
-          title="Total Servicios" 
-          value={stats.totalServices} 
-          icon={Scissors} 
-          color="text-vet-primary" 
-        />
-        <MetricCard 
-          title="Servicio Más Frecuente" 
-          value={stats.mostFrequentService} 
-          icon={TrendingUp} 
-          color="text-purple-600" 
-          bgColor="bg-purple-50" 
-        />
-        <MetricCard 
-          title="Ingresos Totales" 
-          value={filteredServices.reduce((sum, s) => sum + s.cost, 0).toFixed(2)} 
-          icon={DollarSign} 
-          color="text-orange-600" 
-          bgColor="bg-orange-50" 
-        />
-        <MetricCard 
-          title="Promedio por Servicio" 
-          value={stats.totalServices > 0 ? (filteredServices.reduce((sum, s) => sum + s.cost, 0) / stats.totalServices).toFixed(2) : "0.00"} 
-          icon={CheckCircle} 
-          color="text-green-600" 
-          bgColor="bg-green-50" 
-        />
-      </div>
-
-      {/* Lista de Servicios */}
-      <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-vet-text">
-            Servicios ({filteredServices.length})
-          </h2>
-        </div>
-
-        {filteredServices.length === 0 ? (
-          <p className="text-vet-muted text-center py-8">No se encontraron servicios en este período.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left p-3 text-sm font-semibold text-vet-text">Mascota</th>
-                  <th className="text-left p-3 text-sm font-semibold text-vet-text">Servicio</th>
-                  <th className="text-left p-3 text-sm font-semibold text-vet-text">Fecha</th>
-                  <th className="text-right p-3 text-sm font-semibold text-vet-text">Costo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredServices.map((service) => {
-                  const patientName = typeof service.patientId === 'string'
-                    ? "Mascota"
-                    : service.patientId?.name || "Mascota";
-                  const patientId = extractId(service.patientId);
-
-                  return (
-                    <tr key={service._id} className="hover:bg-vet-light/20">
-                      <td className="p-3">
-                        <Link 
-                          to={`/patients/${patientId}/grooming-services/${service._id}`}
-                          className="font-medium text-vet-primary hover:underline"
-                        >
-                          {patientName}
-                        </Link>
-                      </td>
-                      <td className="p-3 text-sm">{service.service}</td>
-                      <td className="p-3 text-sm">
-                        {formatDate(service.date)} • {formatTime(service.date)}
-                      </td>
-                      <td className="p-3 text-right font-medium">
-                        ${service.cost.toFixed(2)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Content */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <GroomingReportSummary services={enrichedServices} />
+        <GroomingReportMetrics services={enrichedServices} />
+        <GroomingReportTable services={enrichedServices} />
+      </main>
     </div>
   );
 }

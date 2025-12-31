@@ -133,7 +133,7 @@ export const filterInvoices = (invoices: Invoice[], filters: FilterState): Invoi
 export const calculateStats = (
   invoices: Invoice[],
   paymentMethods: PaymentMethod[]
-): Omit<ReportStats, "pendienteUSD" | "pendienteBs"> => {
+): Omit<ReportStats, "pendienteUSD" | "pendienteBs" | "cobradoBsEnUSD" | "totalCobradoGeneral"> => {
   const byStatus: Record<InvoiceStatus, number> = {
     Pagado: 0,
     Pendiente: 0,
@@ -256,4 +256,23 @@ export const calculatePendingByCurrency = (
   });
 
   return { pendienteUSD, pendienteBs };
+};
+
+/**
+ * Calcula el equivalente en USD de los pagos recibidos en Bs.
+ * Usa la tasa de cambio de cada factura para convertir.
+ */
+export const calculateBsToUSDEquivalent = (invoices: Invoice[]): number => {
+  let totalUSDEquivalent = 0;
+
+  invoices.forEach((invoice) => {
+    const paidBs = invoice.amountPaidBs || 0;
+    const exchangeRate = invoice.exchangeRate || 1;
+
+    if (paidBs > 0 && exchangeRate > 0) {
+      totalUSDEquivalent += paidBs / exchangeRate;
+    }
+  });
+
+  return totalUSDEquivalent;
 };

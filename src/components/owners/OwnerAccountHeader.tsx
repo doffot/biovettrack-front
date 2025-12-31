@@ -19,6 +19,7 @@ import {
   FileText,
   Scissors,
   ChevronRight,
+  MoreVertical,
 } from "lucide-react";
 import type { Owner } from "../../types/owner";
 import type { Patient } from "../../types/patient";
@@ -76,11 +77,13 @@ export function OwnerAccountHeader({
   const [showAppointmentsDropdown, setShowAppointmentsDropdown] = useState(false);
   const [showGroomingDropdown, setShowGroomingDropdown] = useState(false);
   const [showInvoicesDropdown, setShowInvoicesDropdown] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
 
   const petsRef = useRef<HTMLDivElement>(null);
   const appointmentsRef = useRef<HTMLDivElement>(null);
   const groomingRef = useRef<HTMLDivElement>(null);
   const invoicesRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   const hasPets = patients.length > 0;
   const hasAppointments = appointments.length > 0;
@@ -101,6 +104,9 @@ export function OwnerAccountHeader({
       if (invoicesRef.current && !invoicesRef.current.contains(event.target as Node)) {
         setShowInvoicesDropdown(false);
       }
+      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
+        setShowActionsMenu(false);
+      }
     };
 
     document.addEventListener("click", handleClickOutside);
@@ -112,6 +118,7 @@ export function OwnerAccountHeader({
     setShowAppointmentsDropdown(false);
     setShowGroomingDropdown(false);
     setShowInvoicesDropdown(false);
+    setShowActionsMenu(false);
   };
 
   const getInitials = (name: string): string => {
@@ -165,21 +172,27 @@ export function OwnerAccountHeader({
   };
 
   return (
-    <div>
+    <div className="mt-3 lg:mt-0">
       {/* Barra superior */}
       <div className="bg-vet-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium hidden sm:inline">Propietarios</span>
-            </button>
+            {/* Lado izquierdo: Botón volver + título en móvil/tablet */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="text-sm font-medium hidden lg:inline">Propietarios</span>
+              </button>
+              
+              {/* Título en móvil y tablet */}
+              <span className="text-white font-medium text-sm lg:hidden">Propietario</span>
+            </div>
 
-            {/* Indicadores + Acciones */}
-            <div className="flex items-center gap-2">
+            {/* Lado derecho: Indicadores + Acciones */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Indicador: Mascotas */}
               <div className="relative" ref={petsRef}>
                 <button
@@ -188,15 +201,15 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasPets) setShowPetsDropdown(true);
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
                 >
-                  <PawPrint className="w-5 h-5" />
+                  <PawPrint className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasPets && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {patients.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
                     Mascotas
                   </span>
                 </button>
@@ -242,15 +255,15 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasAppointments) setShowAppointmentsDropdown(true);
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
                 >
-                  <Calendar className="w-5 h-5" />
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasAppointments && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {appointments.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
                     Citas
                   </span>
                 </button>
@@ -294,15 +307,15 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasGrooming) setShowGroomingDropdown(true);
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
                 >
-                  <Scissors className="w-5 h-5" />
+                  <Scissors className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasGrooming && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {groomingServices.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
                     Servicios Hoy
                   </span>
                 </button>
@@ -346,15 +359,15 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasInvoices) setShowInvoicesDropdown(true);
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasInvoices && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-vet-secondary shadow-sm">
                       {pendingInvoices.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
                     Facturas
                   </span>
                 </button>
@@ -376,7 +389,7 @@ export function OwnerAccountHeader({
                           <button
                             key={invoice._id}
                             onClick={() => {
-                                console.log("🔴 CLICK en factura:", invoice);
+                              console.log("🔴 CLICK en factura:", invoice);
                               setShowInvoicesDropdown(false);
                               onPayInvoice(invoice);
                             }}
@@ -428,23 +441,64 @@ export function OwnerAccountHeader({
               </div>
 
               {/* Separador */}
-              <div className="w-px h-6 bg-white/20 mx-1" />
+              <div className="w-px h-6 bg-white/20 mx-0.5 sm:mx-1" />
 
-              {/* Acciones */}
-              <button
-                onClick={onEdit}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-vet-accent transition-colors duration-200"
-                title="Editar"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                onClick={onDelete}
-                className="p-2 rounded-lg hover:bg-red-500/20 text-white/80 hover:text-red-300 transition-colors duration-200"
-                title="Eliminar"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {/* Acciones - Desktop (solo lg+) */}
+              <div className="hidden lg:flex items-center gap-1">
+                <button
+                  onClick={onEdit}
+                  className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-vet-accent transition-colors duration-200"
+                  title="Editar"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="p-2 rounded-lg hover:bg-red-500/20 text-white/80 hover:text-red-300 transition-colors duration-200"
+                  title="Eliminar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Acciones - Mobile y Tablet (menú desplegable) */}
+              <div className="relative lg:hidden" ref={actionsRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    setShowActionsMenu(true);
+                  }}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+
+                {showActionsMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                    <button
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        onEdit();
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        onDelete();
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

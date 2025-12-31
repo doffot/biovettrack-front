@@ -21,6 +21,8 @@ export interface ReportStats {
   // Cobrado
   totalCobradoUSD: number;
   totalCobradoBs: number;
+  cobradoBsEnUSD: number;
+  totalCobradoGeneral: number;
   
   // Pendiente (legacy - mantener para no romper código existente)
   totalPendienteUSD: number;

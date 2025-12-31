@@ -16,11 +16,13 @@ import {
   Lock,
   FileText,
   Calendar,
+  X,
 } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useAuth } from "../hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNotificationCount } from "../hooks/useNotificationCount";
 
 // Tipos para menú con submenús
 interface SubMenuItem {
@@ -42,7 +44,7 @@ const menuItems: MenuItem[] = [
   { to: "/", label: "Inicio", icon: HomeIcon },
   { to: "/owners", label: "Dueño", icon: User },
   { to: "/patients", label: "Mascota", icon: PawPrint },
-  { to: "/appointments", label: "Citas", icon: Calendar }, 
+  { to: "/appointments", label: "Citas", icon: Calendar },
   { to: "/lab-exams", label: "Crear Hemograma", icon: Activity },
   { to: "/grooming-services", label: "Peluquería", icon: Scissors },
   {
@@ -63,50 +65,90 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-// ✅ COMPONENTE DE LOADING INICIAL MEJORADO
+// ✅ COMPONENTE DE LOADING INICIAL
 const InitialLoadingScreen = () => {
+  const messages = [
+    "Cargando configuración inicial...",
+    "Conectando con el servidor...",
+    "Cargando datos del servidor...",
+    "Preparando tu entorno...",
+    "Casi listo...",
+  ];
+
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center p-4">
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 max-w-md w-full text-center border border-white/30">
-        {/* Icono animado */}
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-lg">
-            <Activity className="w-8 h-8 text-white animate-pulse" />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-vet-primary to-vet-secondary flex flex-col items-center justify-center p-4">
+      <div className="w-12 h-12 border-4 border-vet-light border-t-vet-secondary rounded-full animate-spin mb-6"></div>
+      <p className="text-white/90 text-center text-sm font-medium">
+        {messages[currentMessageIndex]}
+      </p>
+    </div>
+  );
+};
+
+// ✅ MODAL DE CONFIRMACIÓN DE LOGOUT
+const LogoutConfirmModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}> = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-scale-in">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-900">Cerrar Sesión</h3>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
         </div>
 
-        {/* Título principal */}
-        <h2 className="text-xl font-bold text-vet-text mb-3">Cargando tu clínica</h2>
-        
-        {/* Mensaje contextual */}
-        <p className="text-vet-muted mb-6 text-sm">
-          Estamos verificando tu sesión y preparando todos los datos para ti...
-        </p>
-
-        {/* Barra de progreso visual - usando tu animación existente */}
-        <div className="w-full bg-vet-light rounded-full h-2 mb-6 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-vet-primary to-vet-accent animate-gentle-pulse" />
+        {/* Contenido */}
+        <div className="p-6 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+            <LogOut className="w-8 h-8 text-red-500" />
+          </div>
+          <p className="text-gray-600 text-sm">
+            ¿Estás seguro que deseas cerrar sesión?
+          </p>
         </div>
 
-        {/* Mensajes de estado */}
-        <div className="text-left space-y-2 text-xs text-vet-muted">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-vet-primary animate-pulse"></div>
-            <span>Verificando credenciales</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-vet-muted"></div>
-            <span>Cargando pacientes y dueños</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-vet-muted"></div>
-            <span>Sincronizando citas y servicios</span>
-          </div>
+        {/* Botones */}
+        <div className="flex gap-3 px-4 pb-4">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium text-sm transition-colors"
+          >
+            Sí, salir
+          </button>
         </div>
-
-        <p className="text-[10px] text-vet-muted mt-4 opacity-70">
-          Esto puede tomar unos segundos. Gracias por tu paciencia.
-        </p>
       </div>
     </div>
   );
@@ -129,7 +171,6 @@ const AppLayout: React.FC = () => {
     navigate("/auth/login");
   };
 
-  // ✅ USAMOS EL NUEVO COMPONENTE DE LOADING
   if (isLoading) {
     return <InitialLoadingScreen />;
   }
@@ -145,9 +186,7 @@ const AppLayout: React.FC = () => {
       <HeaderDesktop />
       <HeaderMobile />
       <Footer logout={logout} />
-
       <SidebarDesktop activeItem={activeItem} setActiveItem={setActiveItem} />
-
       <main className="pt-14 pb-20 lg:pt-16 lg:pb-0 lg:pl-64 relative min-h-screen bg-vet-gradient">
         <Outlet />
       </main>
@@ -155,7 +194,7 @@ const AppLayout: React.FC = () => {
   );
 };
 
-// Header Desktop - Simplificado sin Dr./Dra.
+// ✅ HeaderDesktop
 const HeaderDesktop: React.FC = () => {
   const { data } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -179,11 +218,12 @@ const HeaderDesktop: React.FC = () => {
     navigate("/auth/login");
   };
 
-  const displayName = data?.name && data?.lastName
-    ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
-    : data?.name
-    ? data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()
-    : "Usuario";
+  const displayName =
+    data?.name && data?.lastName
+      ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
+      : data?.name
+        ? data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()
+        : "Usuario";
 
   return (
     <header className="hidden lg:flex fixed top-0 left-64 right-0 z-40 h-16 items-center justify-end px-6 bg-white border-b border-vet-light shadow-soft">
@@ -195,12 +235,10 @@ const HeaderDesktop: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-soft">
             <User className="w-5 h-5 text-white" />
           </div>
-
           <div className="flex flex-col items-start">
             <span className="text-xs text-vet-muted font-medium">Bienvenido/a</span>
             <span className="text-sm font-bold text-vet-text">{displayName}</span>
           </div>
-
           <div
             className={`w-2 h-2 border-r-2 border-b-2 border-vet-muted transition-transform duration-200 ${
               isOpen ? "rotate-[-135deg]" : "rotate-45"
@@ -251,7 +289,7 @@ const HeaderDesktop: React.FC = () => {
   );
 };
 
-// Sidebar Desktop
+// ✅ SidebarDesktop
 const SidebarDesktop: React.FC<{
   activeItem: string;
   setActiveItem: (to: string) => void;
@@ -420,20 +458,12 @@ const SidebarDesktop: React.FC<{
   );
 };
 
-// Header Mobile - Simplificado sin Dr./Dra.
+// ✅ HeaderMobile
 const HeaderMobile: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { data } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const toggleSubmenu = (label: string) => {
-    setExpandedMenus((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
-    );
-  };
 
   const logout = () => {
     localStorage.removeItem("AUTH_TOKEN_LABVET");
@@ -441,11 +471,12 @@ const HeaderMobile: React.FC = () => {
     navigate("/auth/login");
   };
 
-  const displayName = data?.name && data?.lastName
-    ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
-    : data?.name
-    ? data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()
-    : "Usuario";
+  const displayName =
+    data?.name && data?.lastName
+      ? `${data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()} ${data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1).toLowerCase()}`
+      : data?.name
+        ? data.name.charAt(0).toUpperCase() + data.name.slice(1).toLowerCase()
+        : "Usuario";
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-vet-primary to-vet-secondary shadow-soft">
@@ -471,8 +502,12 @@ const HeaderMobile: React.FC = () => {
 
           {showDropdown && (
             <>
-              <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setShowDropdown(false)} />
+              <div
+                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+                onClick={() => setShowDropdown(false)}
+              />
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-card overflow-hidden animate-scale-in z-50">
+                {/* Header del usuario */}
                 <div className="px-4 py-3 bg-gradient-to-r from-vet-light/30 to-transparent border-b border-vet-light">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center">
@@ -485,127 +520,10 @@ const HeaderMobile: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Reportes Submenu */}
-                <div className="border-b border-vet-light">
-                  <button
-                    onClick={() => toggleSubmenu("reportes")}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 transition-colors text-left"
-                  >
-                    <div className="p-2 bg-vet-light rounded-lg">
-                      <BarChart3 className="w-4 h-4 text-vet-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-vet-text flex-1">Reportes</span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-vet-muted transition-transform duration-300 ${
-                        expandedMenus.includes("reportes") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  <div
-                    className={`
-                      overflow-hidden transition-all duration-300 ease-in-out bg-vet-light/30
-                      ${expandedMenus.includes("reportes") ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
-                    `}
-                  >
-                    <div className="py-2 px-2 space-y-1">
-                      <Link
-                        to="/grooming/report"
-                        onClick={() => setShowDropdown(false)}
-                        className={`
-                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
-                          ${
-                            location.pathname === "/grooming/report"
-                              ? "bg-vet-primary text-white"
-                              : "text-vet-text hover:bg-vet-light"
-                          }
-                        `}
-                      >
-                        <Scissors className="w-4 h-4" />
-                        <span className="text-sm">Peluquería</span>
-                      </Link>
-
-                      <Link
-                        to="/invoices/report"
-                        onClick={() => setShowDropdown(false)}
-                        className={`
-                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
-                          ${
-                            location.pathname === "/invoices/report"
-                              ? "bg-vet-primary text-white"
-                              : "text-vet-text hover:bg-vet-light"
-                          }
-                        `}
-                      >
-                        <FileText className="w-4 h-4" />
-                        <span className="text-sm">Facturación</span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Configuraciones Submenu */}
-                <div className="border-b border-vet-light">
-                  <button
-                    onClick={() => toggleSubmenu("config")}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 transition-colors text-left"
-                  >
-                    <div className="p-2 bg-vet-light rounded-lg">
-                      <Settings className="w-4 h-4 text-vet-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-vet-text flex-1">Configuraciones</span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-vet-muted transition-transform duration-300 ${
-                        expandedMenus.includes("config") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  <div
-                    className={`
-                      overflow-hidden transition-all duration-300 ease-in-out bg-vet-light/30
-                      ${expandedMenus.includes("config") ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
-                    `}
-                  >
-                    <div className="py-2 px-2 space-y-1">
-                      <Link
-                        to="/payment-methods"
-                        onClick={() => setShowDropdown(false)}
-                        className={`
-                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
-                          ${
-                            location.pathname === "/payment-methods"
-                              ? "bg-vet-primary text-white"
-                              : "text-vet-text hover:bg-vet-light"
-                          }
-                        `}
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        <span className="text-sm">Métodos de Pago</span>
-                      </Link>
-
-                      <Link
-                        to="/staff"
-                        onClick={() => setShowDropdown(false)}
-                        className={`
-                          flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all
-                          ${
-                            location.pathname === "/staff"
-                              ? "bg-vet-primary text-white"
-                              : "text-vet-text hover:bg-vet-light"
-                          }
-                        `}
-                      >
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">Staff</span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
+                {/* Mi Perfil */}
                 <button
                   onClick={() => setShowDropdown(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 active:bg-vet-light transition-colors text-left border-b border-vet-light"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 active:bg-vet-light transition-colors text-left"
                 >
                   <div className="p-2 bg-vet-light rounded-lg">
                     <User className="w-4 h-4 text-vet-primary" />
@@ -613,12 +531,13 @@ const HeaderMobile: React.FC = () => {
                   <span className="text-sm font-medium text-vet-text">Mi Perfil</span>
                 </button>
 
+                {/* Cerrar Sesión */}
                 <button
                   onClick={() => {
                     logout();
                     setShowDropdown(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 active:bg-red-100 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 active:bg-red-100 transition-colors text-left border-t border-vet-light"
                 >
                   <div className="p-2 bg-red-50 rounded-lg">
                     <LogOut className="w-4 h-4 text-red-500" />
@@ -634,52 +553,103 @@ const HeaderMobile: React.FC = () => {
   );
 };
 
+// ✅ Footer con badge de notificaciones
 const Footer: React.FC<{ logout: () => void }> = ({ logout }) => {
-  const [activeTab, setActiveTab] = useState("home");
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { total: notificationCount, urgent: urgentCount } = useNotificationCount();
 
   const tabs = [
-    { id: "home", icon: HomeIcon, label: "Inicio", action: () => navigate("/") },
-    { id: "notif", icon: Bell, label: "Notif", action: () => navigate("/notifications") },
-    { id: "logout", icon: LogOut, label: "Salir", action: logout },
+    { id: "home", icon: HomeIcon, label: "Inicio", path: "/" },
+    { id: "notif", icon: Bell, label: "Notificaciones", path: "/notifications" },
+    { id: "logout", icon: LogOut, label: "Salir", path: null },
   ];
 
-  return (
-    <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-vet-light shadow-soft">
-      <div className="flex items-center justify-around py-2">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+  const isActive = (path: string | null) => {
+    if (path === null) return false;
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
 
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                tab.action();
-                setActiveTab(tab.id);
-              }}
-              className={`flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "text-vet-primary"
-                  : "text-vet-muted hover:text-vet-primary"
-              }`}
-            >
-              <div className={`p-2 rounded-lg transition-all ${
-                isActive ? "bg-vet-light" : "bg-transparent"
-              }`}>
-                <Icon className={`w-5 h-5 transition-transform ${
-                  isActive ? "scale-110" : ""
-                }`} />
-              </div>
-              <span className="text-xs font-medium">{tab.label}</span>
-              {isActive && (
-                <div className="w-1 h-1 rounded-full bg-vet-primary mt-0.5" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </footer>
+  const handleTabClick = (tab: (typeof tabs)[0]) => {
+    if (tab.path) {
+      navigate(tab.path);
+    } else if (tab.id === "logout") {
+      setShowLogoutModal(true);
+    }
+  };
+
+  return (
+    <>
+      {/* Modal de confirmación de logout */}
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={() => {
+          setShowLogoutModal(false);
+          logout();
+        }}
+      />
+
+      {/* Footer fijo */}
+      <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-vet-light shadow-soft">
+        <div className="flex items-center justify-around py-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const active = isActive(tab.path);
+            const isLogout = tab.id === "logout";
+            const isNotif = tab.id === "notif";
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabClick(tab)}
+                className={`relative flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all duration-200 ${
+                  isLogout
+                    ? "text-red-500 hover:text-red-600"
+                    : active
+                      ? "text-vet-primary"
+                      : "text-vet-muted hover:text-vet-primary"
+                }`}
+              >
+                <div
+                  className={`relative p-2 rounded-lg transition-all ${
+                    isLogout
+                      ? "bg-red-50"
+                      : active
+                        ? "bg-vet-light"
+                        : "bg-transparent"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 transition-transform ${active ? "scale-110" : ""}`} />
+                  
+                  {/* Badge de notificaciones */}
+                  {isNotif && notificationCount > 0 && (
+                    <span
+                      className={`
+                        absolute -top-1 -right-1 flex items-center justify-center
+                        min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white
+                        rounded-full border-2 border-white shadow-sm
+                        ${urgentCount > 0 ? "bg-red-500 animate-pulse" : "bg-vet-primary"}
+                      `}
+                    >
+                      {notificationCount > 99 ? "99+" : notificationCount}
+                    </span>
+                  )}
+                </div>
+                <span className={`text-xs font-medium ${isLogout ? "text-red-500" : ""}`}>
+                  {tab.label}
+                </span>
+                {active && !isLogout && (
+                  <div className="w-1 h-1 rounded-full bg-vet-primary mt-0.5" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </footer>
+    </>
   );
 };
 

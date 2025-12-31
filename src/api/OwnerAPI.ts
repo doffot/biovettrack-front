@@ -3,9 +3,14 @@ import { AxiosError } from "axios";
 import { ownersListSchema, type Owner, type OwnerFormData } from "../types";
 import api from "../lib/axios";
 
-export async function createOwner(formData: OwnerFormData) {
+type CreateOwnerResponse = {
+  msg: string;
+  owner: Owner;
+};
+
+export async function createOwner(formData: OwnerFormData): Promise<CreateOwnerResponse> {
   try {
-    const { data } = await api.post("/owners", formData);
+    const { data } = await api.post<CreateOwnerResponse>("/owners", formData);
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
@@ -14,7 +19,6 @@ export async function createOwner(formData: OwnerFormData) {
     throw new Error("Error de red o desconocido");
   }
 }
-
 export async function getOwners() {
   try {
     const { data } = await api.get("/owners");

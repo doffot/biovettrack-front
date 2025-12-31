@@ -75,24 +75,24 @@ export default function PatientLayout() {
   // ✅ NUEVA: Función para obtener la fecha de hoy en formato YYYY-MM-DD
   const getTodayDateString = () => {
     const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
   // ✅ FILTRAR SERVICIOS DE PELUQUERÍA POR HOY
   const todayDateString = getTodayDateString();
 
   const todaysGroomingServices = useMemo(() => {
-    return (groomingServices || []).filter(service => {
+    return (groomingServices || []).filter((service) => {
       const serviceDate = new Date(service.date);
-      const serviceDateString = `${serviceDate.getFullYear()}-${String(serviceDate.getMonth() + 1).padStart(2, '0')}-${String(serviceDate.getDate()).padStart(2, '0')}`;
+      const serviceDateString = `${serviceDate.getFullYear()}-${String(serviceDate.getMonth() + 1).padStart(2, "0")}-${String(serviceDate.getDate()).padStart(2, "0")}`;
       return serviceDateString === todayDateString;
     });
   }, [groomingServices, todayDateString]);
 
   // ✅ VARIABLES ACTUALIZADAS
-  const hasActiveAppointments = (activeAppointments || []).length > 0; // ✅ Todas las citas activas
+  const hasActiveAppointments = (activeAppointments || []).length > 0;
   const todaysGroomingCount = todaysGroomingServices.length;
-  const hasTodaysGrooming = todaysGroomingCount > 0; // ✅ Solo servicios de hoy
+  const hasTodaysGrooming = todaysGroomingCount > 0;
   const hasDebt = (debtSummary?.totalDebt || 0) > 0;
   const debtCount = debtSummary?.invoicesCount || 0;
 
@@ -247,37 +247,38 @@ export default function PatientLayout() {
 
   return (
     <>
-      {/* Header */}
-      <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-40 bg-vet-secondary">
+      {/* Header - Agregado mt-3 lg:mt-0 para separar del header principal */}
+      <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-40 bg-vet-secondary mt-3 lg:mt-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
             {/* Botón volver + Info */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
+                className="flex-shrink-0 flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span className="text-sm font-medium hidden sm:inline">Volver</span>
+                <span className="text-sm font-medium hidden lg:inline">Volver</span>
               </button>
 
-              <div className="hidden sm:block w-px h-6 bg-white/20" />
+              <div className="hidden sm:block w-px h-6 bg-white/20 flex-shrink-0" />
 
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-1.5 bg-white/10 rounded-lg flex-shrink-0">
                   <PawPrint className="w-4 h-4 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-sm font-bold text-white leading-tight">
+                <div className="min-w-0">
+                  <h1 className="text-sm font-bold text-white leading-tight truncate">
                     {getActiveSectionName()}
                   </h1>
-                  <p className="text-xs text-white/60">{patient.name}</p>
+                  {/* Nombre de mascota solo en tablet y desktop */}
+                  <p className="text-xs text-white/60 truncate hidden sm:block">{patient.name}</p>
                 </div>
               </div>
             </div>
 
             {/* Indicadores + Acciones */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {/* Indicador: Deuda */}
               <div className="relative" ref={debtRef}>
                 <button
@@ -289,24 +290,16 @@ export default function PatientLayout() {
                       setShowGroomingDropdown(false);
                     }
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
                   title={hasDebt ? `$${debtSummary?.totalDebt.toFixed(2)} pendiente` : "Sin deudas"}
                 >
-                  <DollarSign className="w-5 h-5" />
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasDebt && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {debtCount}
                     </span>
                   )}
                 </button>
-
-                {/* Tooltip Deuda */}
-                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
-                    <div className="font-mono font-bold text-center">${debtSummary?.totalDebt.toFixed(2)}</div>
-                    <div className="text-xs text-gray-400 text-center mt-1">Total pendiente</div>
-                  </div>
-                </div>
 
                 {/* Dropdown Deuda */}
                 {showDebtDropdown && hasDebt && (
@@ -340,24 +333,16 @@ export default function PatientLayout() {
                       setShowDebtDropdown(false);
                     }
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
                   title={hasActiveAppointments ? `${activeAppointments?.length} cita(s)` : "Sin citas"}
                 >
-                  <Calendar className="w-5 h-5" />
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasActiveAppointments && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {activeAppointments?.length || 0}
                     </span>
                   )}
                 </button>
-
-                {/* Tooltip Citas */}
-                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
-                    <div className="font-mono font-bold text-center">{activeAppointments?.length || 0}</div>
-                    <div className="text-xs text-gray-400 text-center mt-1">Citas activas</div>
-                  </div>
-                </div>
 
                 {/* Dropdown Citas */}
                 {showAppointmentsDropdown && hasActiveAppointments && (
@@ -403,24 +388,16 @@ export default function PatientLayout() {
                       setShowDebtDropdown(false);
                     }
                   }}
-                  className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
                   title={hasTodaysGrooming ? `${todaysGroomingCount} servicio(s) hoy` : "Sin servicios hoy"}
                 >
-                  <Scissors className="w-5 h-5" />
+                  <Scissors className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasTodaysGrooming && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
                       {todaysGroomingCount}
                     </span>
                   )}
                 </button>
-
-                {/* Tooltip Peluquería */}
-                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
-                    <div className="font-mono font-bold text-center">{todaysGroomingCount}</div>
-                    <div className="text-xs text-gray-400 text-center mt-1">Servicios hoy</div>
-                  </div>
-                </div>
 
                 {/* Dropdown Peluquería */}
                 {showGroomingDropdown && hasTodaysGrooming && (
@@ -454,8 +431,8 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Reloj */}
-              <div className="relative group hidden sm:block">
+              {/* Reloj - Solo en desktop */}
+              <div className="relative group hidden lg:block">
                 <button className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200">
                   <Clock className="w-5 h-5" />
                 </button>
@@ -468,7 +445,7 @@ export default function PatientLayout() {
               </div>
 
               {/* Separador */}
-              <div className="w-px h-6 bg-white/20 mx-1" />
+              <div className="w-px h-6 bg-white/20 mx-0.5 sm:mx-1" />
 
               {/* Acciones */}
               <Link
@@ -491,12 +468,13 @@ export default function PatientLayout() {
         </div>
       </div>
 
-      <div className="pt-14 mt-10 lg:pt-16 px-4 lg:px-6">
+      {/* Contenido - Ajustado el pt para compensar el mt del header */}
+      <div className="pt-14 mt-14 lg:mt-10 lg:pt-16 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Sidebar */}
             <aside className="w-full lg:w-80 flex-shrink-0">
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden sticky top-32">
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden sticky top-36 lg:top-32">
                 {/* Header con foto y datos principales */}
                 <div className="relative">
                   {/* Fondo decorativo */}

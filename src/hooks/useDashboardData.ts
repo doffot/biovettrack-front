@@ -48,6 +48,13 @@ export interface RevenueChartItem {
   day: string;
   USD: number;
   Bs: number;
+  totalUSD: number;
+}
+
+// Tipo extendido con total en USD
+export interface RevenueAmounts extends CurrencyAmounts {
+  totalUSD: number;
+  bsInUSD: number;
 }
 
 // Re-exportar para uso en componentes
@@ -55,15 +62,32 @@ export type { CurrencyAmounts };
 
 /**
  * Calcula ingresos por moneda de un array de facturas
+ * Incluye el total en USD (USD + Bs convertido)
  */
-function calculateRevenue(invoices: Invoice[]): CurrencyAmounts {
-  return invoices.reduce(
-    (acc, inv) => ({
-      USD: acc.USD + (inv.amountPaidUSD || 0),
-      Bs: acc.Bs + (inv.amountPaidBs || 0),
-    }),
-    { ...EMPTY_CURRENCY }
-  );
+function calculateRevenue(invoices: Invoice[]): RevenueAmounts {
+  let totalUSD = 0;
+  let totalBs = 0;
+  let bsInUSD = 0;
+
+  invoices.forEach((inv) => {
+    const paidUSD = inv.amountPaidUSD || 0;
+    const paidBs = inv.amountPaidBs || 0;
+    const exchangeRate = inv.exchangeRate || 1;
+
+    totalUSD += paidUSD;
+    totalBs += paidBs;
+
+    if (paidBs > 0 && exchangeRate > 0) {
+      bsInUSD += paidBs / exchangeRate;
+    }
+  });
+
+  return {
+    USD: totalUSD,
+    Bs: totalBs,
+    bsInUSD,
+    totalUSD: totalUSD + bsInUSD,
+  };
 }
 
 /**
@@ -126,7 +150,7 @@ export function useDashboardData() {
 
   const invoicesQuery = useQuery({
     queryKey: ["dashboard", "invoices"],
-    queryFn: () => getInvoices({}),
+     queryFn: () => getInvoices({ limit: 10000 }),
     ...QUERY_CONFIG,
   });
 
@@ -167,13 +191,11 @@ export function useDashboardData() {
   const todayStr = useMemo(() => getTodayDateString(), []);
 
   // ========== MÉTRICAS DE HOY ==========
-  // ✅ CORREGIDO: Se eliminó la condición de "status"
   const todayAppointments = useMemo(
     () => appointments.filter((apt) => getDatePart(apt.date) === todayStr),
     [appointments, todayStr]
   );
 
-  // ✅ CORREGIDO: Se eliminó la condición de "status"
   const todayGrooming = useMemo(
     () => groomingServices.filter((svc) => getDatePart(svc.date) === todayStr),
     [groomingServices, todayStr]
@@ -184,7 +206,7 @@ export function useDashboardData() {
     [consultations, todayStr]
   );
 
-  // ========== INGRESOS (Multi-moneda) ==========
+  // ========== INGRESOS (Multi-moneda con total) ==========
   const todayInvoices = useMemo(
     () => invoices.filter((inv) => getDatePart(inv.date) === todayStr),
     [invoices, todayStr]
@@ -199,10 +221,11 @@ export function useDashboardData() {
 
   const weekRevenue = useMemo(() => calculateRevenue(weekInvoices), [weekInvoices]);
 
-  const monthInvoices = useMemo(() => {
-    const monthAgo = getDaysAgoString(30);
-    return invoices.filter((inv) => getDatePart(inv.date) >= monthAgo);
-  }, [invoices]);
+const monthInvoices = useMemo(() => {
+  const now = new Date();
+  const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  return invoices.filter((inv) => getDatePart(inv.date) >= firstDayOfMonth);
+}, [invoices]);
 
   const monthRevenue = useMemo(() => calculateRevenue(monthInvoices), [monthInvoices]);
 
@@ -279,6 +302,7 @@ export function useDashboardData() {
         day: formatShortDay(date),
         USD: dayRevenue.USD,
         Bs: dayRevenue.Bs,
+        totalUSD: dayRevenue.totalUSD,
       });
     }
     return data;
@@ -329,7 +353,7 @@ export function useDashboardData() {
     // Deudas
     pendingDebt,
     pendingInvoicesCount,
-    pendingInvoices, 
+    pendingInvoices,
 
     // Alertas
     upcomingVaccinations,
