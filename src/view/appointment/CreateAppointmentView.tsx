@@ -3,15 +3,21 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Save, ArrowLeft, CalendarPlus } from "lucide-react";
 import { toast } from "../../components/Toast";
 import { useAuth } from "../../hooks/useAuth";
-import type { CreateAppointmentForm } from "../../types/appointment";
+import type { CreateAppointmentForm, AppointmentType } from "../../types/appointment";
 import {
   createAppointment,
   getAppointmentsByDateForVeterinarian,
 } from "../../api/appointmentAPI";
-import AppointmentTimeSelector from "../../components/appointments/AppointmentTimeSelector";
-import AppointmentForm from "../../components/appointments/AppointmentForm";
+import { getStaffList } from "../../api/staffAPI";
+import {
+  StaffSelector,
+  CategorySelector,
+  DateTimeSelector,
+  AppointmentDetails,
+} from "../../components/appointments/create";
 import PrepaymentModal from "../../components/appointments/PrepaymentModal";
 
 type PendingAppointmentData = {
@@ -19,7 +25,14 @@ type PendingAppointmentData = {
   dateWithTime: Date;
 };
 
-// Helper para formatear fecha local sin conversión a UTC
+type FormErrors = {
+  type?: string;
+  date?: string;
+  time?: string;
+  reason?: string;
+  staff?: string;
+};
+
 const formatLocalDateTime = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -36,18 +49,27 @@ export default function CreateAppointmentView() {
   const { data: user } = useAuth();
 
   const [mounted, setMounted] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<AppointmentType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [reason, setReason] = useState("");
+  const [observations, setObservations] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  // Estado para el modal de prepago
   const [showPrepaymentModal, setShowPrepaymentModal] = useState(false);
   const [pendingAppointment, setPendingAppointment] = useState<PendingAppointmentData | null>(null);
 
-  // Formatear fecha para query sin problemas de zona horaria
   const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
 
+  const { data: staffList = [], isLoading: isLoadingStaff } = useQuery({
+    queryKey: ["staff"],
+    queryFn: getStaffList,
+    enabled: mounted,
+  });
+
   const { data: vetAppointmentsOnDate = [] } = useQuery({
-    queryKey: ["vetAppointments", selectedDateStr],
+    queryKey: ["vetAppointments", selectedDateStr, selectedStaffId],
     queryFn: () => getAppointmentsByDateForVeterinarian(selectedDateStr),
     enabled: !!user && mounted,
   });
@@ -66,19 +88,13 @@ export default function CreateAppointmentView() {
         toast.success("✅ Cita creada con éxito");
       }
 
-      // Limpiar estados
-      setSelectedTime("");
-      setSelectedDate(new Date());
-      setPendingAppointment(null);
-      setShowPrepaymentModal(false);
+      resetForm();
 
-      // Invalidar queries
       queryClient.invalidateQueries({ queryKey: ["activeAppointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
       queryClient.invalidateQueries({ queryKey: ["vetAppointments"] });
 
-      // Redirigir al detalle del paciente
       navigate(`/patients/${patientId}`);
     },
     onError: (error: Error) => {
@@ -89,15 +105,52 @@ export default function CreateAppointmentView() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (user?._id) {
+      setSelectedStaffId(user._id);
+    }
+  }, [user]);
 
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
+  const resetForm = () => {
+    setSelectedTime("");
+    setSelectedDate(new Date());
+    setSelectedType(null);
+    setReason("");
+    setObservations("");
+    setPendingAppointment(null);
+    setShowPrepaymentModal(false);
+    setErrors({});
   };
 
-  const handleSubmitForm = (data: CreateAppointmentForm) => {
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!selectedStaffId) {
+      newErrors.staff = "Selecciona quién atenderá la cita";
+    }
+
+    if (!selectedType) {
+      newErrors.type = "Selecciona el tipo de cita";
+    }
+
     if (!selectedTime) {
-      toast.error("Selecciona una fecha y hora válida");
+      newErrors.time = "Selecciona una hora";
+    }
+
+    if (!reason.trim()) {
+      newErrors.reason = "El motivo es requerido";
+    } else if (reason.length < 2) {
+      newErrors.reason = "Mínimo 2 caracteres";
+    } else if (reason.length > 200) {
+      newErrors.reason = "Máximo 200 caracteres";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) {
+      toast.error("Por favor completa todos los campos requeridos");
       return;
     }
 
@@ -105,11 +158,15 @@ export default function CreateAppointmentView() {
     const dateWithTime = new Date(selectedDate);
     dateWithTime.setHours(hours, minutes, 0, 0);
 
-    // Guardar datos pendientes y mostrar modal
-    setPendingAppointment({
-      formData: data,
-      dateWithTime,
-    });
+    const formData: CreateAppointmentForm = {
+      type: selectedType!,
+      date: "",
+      reason: reason.trim(),
+      observations: observations.trim() || undefined,
+      assignedTo: selectedStaffId || undefined,
+    };
+
+    setPendingAppointment({ formData, dateWithTime });
     setShowPrepaymentModal(true);
   };
 
@@ -144,14 +201,15 @@ export default function CreateAppointmentView() {
 
   if (!patientId) {
     return (
-      <div className="mt-10 lg:mt-0">
+      <div className="p-6">
         <button
           onClick={() => navigate(-1)}
-          className="text-vet-primary hover:text-vet-accent"
+          className="flex items-center gap-2 text-vet-muted hover:text-vet-text transition-colors"
         >
-          ← Volver
+          <ArrowLeft className="w-4 h-4" />
+          Volver
         </button>
-        <p className="text-vet-danger mt-2">ID de paciente no válido</p>
+        <p className="text-vet-danger mt-4">ID de paciente no válido</p>
       </div>
     );
   }
@@ -160,31 +218,111 @@ export default function CreateAppointmentView() {
     <>
       <div
         className={`
-          -mx-4 lg:-mx-0 
+          max-w-4xl mx-auto px-4 py-6
           ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} 
           transition-all duration-500
         `}
       >
-        <h3 className="capitalize bg-vet-primary mb-2 rounded-t-md text-center p-2 font-montserrat text-white font-semibold">
-          Crear Cita
-        </h3>
-
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 lg:px-0">
-          <div className="space-y-6">
-            <AppointmentTimeSelector
-              selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
-              onTimeSelect={handleTimeSelect}
-              disabledHoursData={vetAppointmentsOnDate}
-              initialTime={selectedTime}
-            />
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg hover:bg-vet-light text-vet-muted transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-vet-text flex items-center gap-2 font-montserrat">
+                <CalendarPlus className="w-6 h-6 text-vet-primary" />
+                Nueva Cita
+              </h1>
+              <p className="text-sm text-vet-muted">
+                Completa los datos para agendar la cita
+              </p>
+            </div>
           </div>
+        </div>
 
-          <div>
-            <AppointmentForm
-              onSubmit={handleSubmitForm}
-              isSubmitting={isPending}
-            />
+        {/* Formulario */}
+        <div className="space-y-4">
+          {/* 1. Selector de Staff/Veterinario */}
+          <StaffSelector
+            staffList={staffList}
+            selectedStaffId={selectedStaffId}
+            onSelect={setSelectedStaffId}
+            currentVetId={user?._id}
+            currentVetName={user?.name}
+            currentVetLastName={user?.lastName}
+            isLoading={isLoadingStaff}
+          />
+          {errors.staff && (
+            <p className="text-sm text-vet-danger font-medium -mt-2 ml-1">
+              ⚠️ {errors.staff}
+            </p>
+          )}
+
+          {/* 2. Selector de Categoría/Tipo */}
+          <CategorySelector
+            selectedType={selectedType}
+            onSelect={setSelectedType}
+          />
+          {errors.type && (
+            <p className="text-sm text-vet-danger font-medium -mt-2 ml-1">
+              ⚠️ {errors.type}
+            </p>
+          )}
+
+          {/* 3. Selector de Fecha y Hora */}
+          <DateTimeSelector
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            onDateChange={setSelectedDate}
+            onTimeSelect={setSelectedTime}
+            disabledHoursData={vetAppointmentsOnDate}
+          />
+          {errors.time && (
+            <p className="text-sm text-vet-danger font-medium -mt-2 ml-1">
+              ⚠️ {errors.time}
+            </p>
+          )}
+
+          {/* 4. Motivo y Observaciones */}
+          <AppointmentDetails
+            reason={reason}
+            observations={observations}
+            onReasonChange={setReason}
+            onObservationsChange={setObservations}
+            errors={{ reason: errors.reason }}
+          />
+
+          {/* Botones de acción */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 sm:flex-none px-6 py-3 rounded-xl border-2 border-vet-light text-vet-text font-semibold hover:bg-vet-light transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="flex-1 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-soft hover:shadow-card"
+            >
+              {isPending ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  Agendar Cita
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -195,7 +333,7 @@ export default function CreateAppointmentView() {
         onClose={handleCloseModal}
         onConfirm={handleConfirmWithPrepayment}
         onSkip={handleSkipPrepayment}
-        appointmentType={pendingAppointment?.formData.type || ""}
+        appointmentType={selectedType || ""}
         isLoading={isPending}
       />
     </>

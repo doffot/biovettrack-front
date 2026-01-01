@@ -258,13 +258,6 @@ export default function GroomingServicesView() {
       
       <div className="h-32 lg:h-28"></div>
 
-      <Link 
-        to="/patients" 
-        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
-      >
-        <Plus className="w-5 h-5" />
-      </Link>
-
       <div className="px-4 mt-10 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
         <ServiceStatsCards 
           filteredServices={filteredServices} 
@@ -369,7 +362,7 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
   return (
     <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-100 shadow-sm">
       <div className="px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between gap-6 mb-4">
+        <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <Link 
               to="/" 
@@ -379,12 +372,12 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-vet-primary/10 rounded-lg">
+                <div className="hidden sm:block p-2 bg-vet-primary/10 rounded-lg">
                   <Scissors className="w-5 h-5 text-vet-primary" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Servicios de Peluquería</h1>
-                  <p className="text-sm text-gray-500">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">Peluquería</h1>
+                  <p className="text-xs sm:text-sm text-gray-500">
                     {totalsCount} servicios hoy
                   </p>
                 </div>
@@ -392,10 +385,18 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
             </div>
           </div>
 
-          <div className="hidden sm:block flex-shrink-0">
+          <div className="flex-shrink-0">
+            {/* Versión móvil - solo icono */}
             <Link 
               to="/patients" 
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-sm hover:shadow-md"
+              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white transition-all shadow-sm hover:shadow-md"
+            >
+              <Plus className="w-5 h-5" />
+            </Link>
+            {/* Versión desktop - icono + texto */}
+            <Link 
+              to="/patients" 
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-sm hover:shadow-md"
             >
               <Plus className="w-4 h-4" />
               <span>Nuevo Servicio</span>

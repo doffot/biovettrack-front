@@ -7,26 +7,34 @@ import {
   deleteAppointment, 
   updateAppointmentStatus,
 } from "../../api/appointmentAPI";
+import { getPatientById } from "../../api/patientAPI";
 import { useState, useEffect } from "react";
 import { toast } from "../../components/Toast";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { 
-  Calendar, 
-  Clock, 
-  FileText,
   Edit, 
   Trash2,
   ArrowLeft,
-  XCircle,
-  ClipboardList,
-  MessageSquareText,
   Scissors,
   Plus,
   AlertTriangle,
-  DollarSign,
+  Calendar,
+  Phone,
+  User,
+  PawPrint,
 } from "lucide-react";
 import type { AppointmentStatus } from "../../types/appointment";
 import StatusDropdown from "../../components/appointments/StatusDropdown";
+
+// Tipo para owner poblado
+type PopulatedOwner = {
+  _id: string;
+  name: string;
+  lastName?: string;
+  contact?: string;
+  email?: string;
+  address?: string;
+};
 
 export default function AppointmentDetailsView() {
   const { appointmentId, patientId } = useParams<{ appointmentId: string; patientId: string }>();
@@ -42,10 +50,16 @@ export default function AppointmentDetailsView() {
     enabled: !!appointmentId,
   });
 
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: () => getPatientById(patientId!),
+    enabled: !!patientId,
+  });
+
   const { mutate: deleteAppointmentMutate, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteAppointment(appointmentId!),
     onSuccess: () => {
-      toast.success("✅ Cita eliminada con éxito");
+      toast.success("Cita eliminada con éxito");
       queryClient.invalidateQueries({ queryKey: ["activeAppointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
       navigate(`/patients/${patientId}`);
@@ -60,7 +74,7 @@ export default function AppointmentDetailsView() {
       return updateAppointmentStatus(appointmentId!, { status, shouldRefund });
     },
     onSuccess: () => {
-      toast.success("Estado actualizado con éxito");
+      toast.success("Estado actualizado");
       queryClient.invalidateQueries({ queryKey: ["appointment", appointmentId] });
       queryClient.invalidateQueries({ queryKey: ["activeAppointments", patientId] });
       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
@@ -84,12 +98,10 @@ export default function AppointmentDetailsView() {
   };
 
   const handleStatusUpdate = (status: AppointmentStatus) => {
-    // Si es cancelación y hay prepago, mostrar modal
     if (status === "Cancelada" && appointment?.prepaidAmount && appointment.prepaidAmount > 0) {
       setShowCancelModal(true);
       return;
     }
-    // Si no hay prepago, cancelar directamente
     updateStatusMutate({ status });
   };
 
@@ -100,47 +112,22 @@ export default function AppointmentDetailsView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-vet-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">Cargando detalles...</p>
-        </div>
+        <div className="w-8 h-8 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (error) {
+  if (error || !appointment) {
     return (
-      <div className="text-center py-20">
-        <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-          <XCircle className="w-8 h-8 text-red-500" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar la cita</h2>
-        <p className="text-gray-500 mb-6">{(error as Error).message}</p>
+      <div className="text-center py-16">
+        <p className="text-vet-muted mb-4">
+          {error ? "Error al cargar la cita" : "Cita no encontrada"}
+        </p>
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+          className="text-vet-primary hover:underline text-sm font-medium"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
-        </button>
-      </div>
-    );
-  }
-
-  if (!appointment) {
-    return (
-      <div className="text-center py-20">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-          <FileText className="w-8 h-8 text-gray-400" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Cita no encontrada</h2>
-        <p className="text-gray-500 mb-6">La cita que buscas no existe o fue eliminada</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
+          ← Volver
         </button>
       </div>
     );
@@ -149,37 +136,77 @@ export default function AppointmentDetailsView() {
   const appointmentDate = new Date(appointment.date);
   const formattedDate = appointmentDate.toLocaleDateString('es-ES', {
     weekday: 'long',
-    year: 'numeric',
+    day: 'numeric',
     month: 'long',
-    day: 'numeric'
+    year: 'numeric'
   });
   const formattedTime = appointmentDate.toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit'
   });
 
-  const statusColors: Record<string, { bg: string; border: string }> = {
-    'Programada': { bg: 'bg-blue-50', border: 'border-blue-200' },
-    'Completada': { bg: 'bg-emerald-50', border: 'border-emerald-200' },
-    'Cancelada': { bg: 'bg-red-50', border: 'border-red-200' },
-    'No asistió': { bg: 'bg-amber-50', border: 'border-amber-200' },
-  };
-
-  const currentStatusColors = statusColors[appointment.status] || statusColors['Programada'];
-
   const canCreateService = appointment.type === "Peluquería" && 
                           (appointment.status === "Programada" || appointment.status === "Completada");
 
+  // Obtener datos del owner
+  const owner = patient?.owner && typeof patient.owner === "object" 
+    ? (patient.owner as PopulatedOwner) 
+    : null;
+  const ownerName = owner ? `${owner.name} ${owner.lastName || ""}`.trim() : null;
+  const ownerPhone = owner?.contact || null;
+  const ownerId = owner?._id || (typeof patient?.owner === "string" ? patient.owner : null);
+
   return (
-    <div className={`max-w-4xl mx-auto transition-all duration-500 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+    <div className={`max-w-2xl mx-auto transition-all duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
       
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => navigate(`/patients/${patientId}`)}
+          className="text-vet-muted hover:text-vet-text transition-colors text-sm font-medium flex items-center gap-1.5"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver
+        </button>
         
-        <div className={`px-6 py-4 ${currentStatusColors.bg} border-b ${currentStatusColors.border}`}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigate(`/patients/${patientId}/appointments/${appointmentId}/edit`)}
+            className="p-2 rounded-lg hover:bg-vet-light text-vet-muted hover:text-vet-primary transition-colors"
+            title="Editar"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            disabled={isDeleting}
+            className="p-2 rounded-lg hover:bg-red-50 text-vet-muted hover:text-red-500 transition-colors disabled:opacity-50"
+            title="Eliminar"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Card principal */}
+      <div className="bg-white rounded-2xl border border-vet-light shadow-soft overflow-hidden">
+        
+        {/* Header de la card */}
+        <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-6 py-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">Estado de la cita</p>
-              <p className="text-lg font-semibold text-gray-800">Gestionar Estado</p>
+              <p className="text-white/70 text-xs font-medium uppercase tracking-wider">Cita</p>
+              <h1 className="text-white font-bold text-lg">{appointment.type}</h1>
+            </div>
+          </div>
+          
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-white font-semibold capitalize">{formattedDate}</p>
+              <p className="text-white/80 text-sm">{formattedTime}</p>
             </div>
             
             <StatusDropdown
@@ -190,193 +217,204 @@ export default function AppointmentDetailsView() {
           </div>
         </div>
 
-        <div className="p-6">
-          
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8 pb-6 border-b border-gray-100">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-14 h-14 rounded-xl bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-7 h-7 text-vet-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-0.5">Fecha programada</p>
-                <p className="text-lg font-semibold text-gray-800 capitalize">{formattedDate}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 sm:border-l sm:pl-6 border-gray-100">
-              <div className="w-14 h-14 rounded-xl bg-vet-accent/10 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-7 h-7 text-vet-accent" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-0.5">Hora</p>
-                <p className="text-lg font-semibold text-gray-800">{formattedTime}</p>
-              </div>
-            </div>
-          </div>
+        {/* Contenido */}
+        <div className="p-6 space-y-6">
 
-          {/* Mostrar prepago si existe */}
-          {appointment.prepaidAmount && appointment.prepaidAmount > 0 && (
-            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-emerald-600" />
+          {/* Paciente y Propietario */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Paciente */}
+            <Link 
+              to={`/patients/${patientId}`}
+              className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-vet-light/50 hover:bg-vet-light transition-colors group"
+            >
+              {patient?.photo ? (
+                <img 
+                  src={patient.photo} 
+                  alt={patient.name} 
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-vet-light flex items-center justify-center">
+                  <PawPrint className="w-5 h-5 text-vet-primary" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-emerald-800">Prepago registrado</p>
-                  <p className="text-lg font-bold text-emerald-600">${appointment.prepaidAmount.toFixed(2)}</p>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-vet-muted uppercase tracking-wider">Paciente</p>
+                <p className="font-semibold text-vet-text truncate group-hover:text-vet-primary transition-colors">
+                  {patient?.name || "—"}
+                </p>
+                <p className="text-xs text-vet-muted">{patient?.species} · {patient?.breed}</p>
+              </div>
+            </Link>
+
+            {/* Propietario */}
+            {ownerName && (
+              <div className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-vet-light/50">
+                <div className="w-12 h-12 rounded-xl bg-vet-light flex items-center justify-center">
+                  <User className="w-5 h-5 text-vet-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-vet-muted uppercase tracking-wider">Propietario</p>
+                  {ownerId ? (
+                    <Link 
+                      to={`/owners/${ownerId}`}
+                      className="font-semibold text-vet-text truncate hover:text-vet-primary transition-colors block"
+                    >
+                      {ownerName}
+                    </Link>
+                  ) : (
+                    <p className="font-semibold text-vet-text truncate">{ownerName}</p>
+                  )}
+                  {ownerPhone && (
+                    <a 
+                      href={`tel:${ownerPhone}`}
+                      className="text-xs text-vet-primary hover:text-vet-secondary flex items-center gap-1 mt-0.5"
+                    >
+                      <Phone className="w-3 h-3" />
+                      {ownerPhone}
+                    </a>
+                  )}
                 </div>
               </div>
+            )}
+          </div>
+          
+          {/* Prepago */}
+          {appointment.prepaidAmount && appointment.prepaidAmount > 0 && (
+            <div className="flex items-center justify-between py-3 px-4 bg-emerald-50 rounded-xl">
+              <span className="text-sm font-medium text-emerald-700">Anticipo</span>
+              <span className="font-bold text-emerald-600">
+                ${appointment.prepaidAmount.toFixed(2)}
+              </span>
             </div>
           )}
 
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <ClipboardList className="w-5 h-5 text-vet-primary" />
-              <h3 className="font-semibold text-gray-800">Tipo de Cita</h3>
-            </div>
-            <div className="inline-flex items-center px-4 py-2 rounded-lg bg-vet-primary/10 text-vet-primary font-medium">
-              {appointment.type}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-5 h-5 text-vet-primary" />
-              <h3 className="font-semibold text-gray-800">Motivo de la Consulta</h3>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                {appointment.reason || (
-                  <span className="text-gray-400 italic">Sin motivo especificado</span>
-                )}
-              </p>
-            </div>
-          </div>
-
+          {/* Motivo */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <MessageSquareText className="w-5 h-5 text-vet-primary" />
-              <h3 className="font-semibold text-gray-800">Observaciones</h3>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                {appointment.observations || (
-                  <span className="text-gray-400 italic">Sin observaciones adicionales</span>
-                )}
-              </p>
-            </div>
+            <h3 className="text-xs font-semibold text-vet-muted uppercase tracking-wider mb-2">
+              Motivo de la cita
+            </h3>
+            <p className="text-vet-text leading-relaxed">
+              {appointment.reason || (
+                <span className="text-vet-muted italic">Sin especificar</span>
+              )}
+            </p>
           </div>
 
+          {/* Observaciones */}
+          {appointment.observations && (
+            <div>
+              <h3 className="text-xs font-semibold text-vet-muted uppercase tracking-wider mb-2">
+                Observaciones
+              </h3>
+              <p className="text-vet-text leading-relaxed whitespace-pre-wrap">
+                {appointment.observations}
+              </p>
+            </div>
+          )}
+
+          {/* Crear servicio de peluquería */}
           {canCreateService && (
-            <div className="mt-6 pt-6 border-t border-gray-100">
+            <div className="pt-4 border-t border-vet-light">
               <Link
                 to={`/patients/${patientId}/grooming-services/create?appointmentId=${appointmentId}`}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-200 shadow-lg shadow-blue-500/25"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-vet-light hover:bg-vet-accent hover:text-white text-vet-primary text-sm font-medium transition-all"
               >
-                <Scissors className="w-5 h-5" />
-                <Plus className="w-4 h-4" />
-                Crear Servicio de Peluquería
+                <Scissors className="w-4 h-4" />
+                <Plus className="w-3 h-3 -ml-1" />
+                Crear servicio de peluquería
               </Link>
-              <p className="text-xs text-gray-500 mt-2">
-                Este servicio se vinculará automáticamente a la cita
-              </p>
             </div>
           )}
         </div>
-      </div>
 
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <button
-          onClick={() => navigate(`/patients/${patientId}`)}
-          className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors order-2 sm:order-1"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Volver al Paciente
-        </button>
-        
-        <div className="flex gap-3 order-1 sm:order-2">
-          <button
-            onClick={() => navigate(`/patients/${patientId}/appointments/${appointmentId}/edit`)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-vet-primary hover:bg-vet-primary/90 text-white font-medium transition-colors shadow-lg shadow-vet-primary/25"
-          >
-            <Edit className="w-5 h-5" />
-            Editar Cita
-          </button>
-          
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            disabled={isDeleting}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white border-2 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600 font-medium transition-colors disabled:opacity-50"
-          >
-            <Trash2 className="w-5 h-5" />
-            <span className="hidden sm:inline">{isDeleting ? 'Eliminando...' : 'Eliminar'}</span>
-          </button>
+        {/* Footer */}
+        <div className="px-6 py-4 bg-sky-soft border-t border-vet-light">
+          <div className="flex items-center justify-between text-xs text-vet-muted">
+            <span>
+              Creada el {new Date(appointment.createdAt).toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </span>
+            {appointment.updatedAt !== appointment.createdAt && (
+              <span>
+                Editada el {new Date(appointment.updatedAt).toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Modal de eliminación */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
-        petName={`la cita del ${formattedDate} a las ${formattedTime}`}
+        petName={`la cita del ${formattedDate}`}
         isDeleting={isDeleting}
       />
 
       {/* Modal de cancelación con prepago */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Cita con prepago</h3>
-                <p className="text-sm text-gray-500">Esta cita tiene un prepago registrado</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden">
+            
+            {/* Header del modal */}
+            <div className="bg-amber-50 px-6 py-4 border-b border-amber-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-vet-text">Cancelar cita</h3>
+                  <p className="text-sm text-vet-muted">
+                    Anticipo de ${appointment?.prepaidAmount?.toFixed(2)}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-5 h-5 text-green-600" />
-                <span className="font-semibold text-gray-800">Monto prepagado:</span>
-              </div>
-              <p className="text-2xl font-bold text-green-600">
-                ${appointment?.prepaidAmount?.toFixed(2)}
+            {/* Contenido del modal */}
+            <div className="p-6">
+              <p className="text-sm text-vet-muted mb-6">
+                ¿Qué deseas hacer con el anticipo al cancelar esta cita?
               </p>
-            </div>
 
-            <p className="text-sm text-gray-600 mb-6">
-              ¿Qué deseas hacer con el prepago al cancelar esta cita?
-            </p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleCancelWithRefund(true)}
+                  disabled={isUpdatingStatus}
+                  className="w-full py-3 px-4 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {isUpdatingStatus ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "Reembolsar anticipo"
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => handleCancelWithRefund(false)}
+                  disabled={isUpdatingStatus}
+                  className="w-full py-3 px-4 rounded-xl bg-vet-light hover:bg-gray-200 text-vet-text font-medium transition-colors disabled:opacity-50"
+                >
+                  Mantener como crédito
+                </button>
 
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => handleCancelWithRefund(true)}
-                disabled={isUpdatingStatus}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors disabled:opacity-50"
-              >
-                {isUpdatingStatus ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  "Reembolsar y cancelar"
-                )}
-              </button>
-              
-              <button
-                onClick={() => handleCancelWithRefund(false)}
-                disabled={isUpdatingStatus}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors disabled:opacity-50"
-              >
-                Mantener como crédito
-              </button>
-
-              <button
-                onClick={() => setShowCancelModal(false)}
-                disabled={isUpdatingStatus}
-                className="w-full px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                No cancelar
-              </button>
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={isUpdatingStatus}
+                  className="w-full py-2 text-sm text-vet-muted hover:text-vet-text transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>

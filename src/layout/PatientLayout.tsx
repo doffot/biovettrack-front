@@ -72,13 +72,11 @@ export default function PatientLayout() {
     enabled: !!patientId,
   });
 
-  // ✅ NUEVA: Función para obtener la fecha de hoy en formato YYYY-MM-DD
   const getTodayDateString = () => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
-  // ✅ FILTRAR SERVICIOS DE PELUQUERÍA POR HOY
   const todayDateString = getTodayDateString();
 
   const todaysGroomingServices = useMemo(() => {
@@ -89,7 +87,6 @@ export default function PatientLayout() {
     });
   }, [groomingServices, todayDateString]);
 
-  // ✅ VARIABLES ACTUALIZADAS
   const hasActiveAppointments = (activeAppointments || []).length > 0;
   const todaysGroomingCount = todaysGroomingServices.length;
   const hasTodaysGrooming = todaysGroomingCount > 0;
@@ -247,7 +244,7 @@ export default function PatientLayout() {
 
   return (
     <>
-      {/* Header - Agregado mt-3 lg:mt-0 para separar del header principal */}
+      {/* Header - Solo navegación e indicadores */}
       <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-40 bg-vet-secondary mt-3 lg:mt-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
@@ -271,13 +268,12 @@ export default function PatientLayout() {
                   <h1 className="text-sm font-bold text-white leading-tight truncate">
                     {getActiveSectionName()}
                   </h1>
-                  {/* Nombre de mascota solo en tablet y desktop */}
                   <p className="text-xs text-white/60 truncate hidden sm:block">{patient.name}</p>
                 </div>
               </div>
             </div>
 
-            {/* Indicadores + Acciones */}
+            {/* Indicadores */}
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {/* Indicador: Deuda */}
               <div className="relative" ref={debtRef}>
@@ -322,7 +318,7 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador: Citas (TODAS activas) */}
+              {/* Indicador: Citas */}
               <div className="relative" ref={appointmentsRef}>
                 <button
                   onClick={(e) => {
@@ -377,7 +373,7 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador: Peluquería (SOLO de hoy) */}
+              {/* Indicador: Peluquería */}
               <div className="relative" ref={groomingRef}>
                 <button
                   onClick={(e) => {
@@ -443,32 +439,12 @@ export default function PatientLayout() {
                   </div>
                 </div>
               </div>
-
-              {/* Separador */}
-              <div className="w-px h-6 bg-white/20 mx-0.5 sm:mx-1" />
-
-              {/* Acciones */}
-              <Link
-                to={`/patients/${patientId}/edit`}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-vet-accent transition-colors duration-200"
-                title="Editar"
-              >
-                <Edit className="w-4 h-4" />
-              </Link>
-              <button
-                onClick={handleDeleteClick}
-                disabled={isDeleting}
-                className="p-2 rounded-lg hover:bg-red-500/20 text-white/80 hover:text-red-300 transition-colors duration-200 disabled:opacity-50"
-                title="Eliminar"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contenido - Ajustado el pt para compensar el mt del header */}
+      {/* Contenido */}
       <div className="pt-14 mt-14 lg:mt-10 lg:pt-16 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-6">
@@ -554,6 +530,25 @@ export default function PatientLayout() {
                       <p className="text-xs text-vet-muted">Color</p>
                       <p className="text-sm font-semibold text-vet-text truncate max-w-[60px]">{patient.color || "—"}</p>
                     </div>
+                  </div>
+
+                  {/* ✅ BOTONES DE EDITAR Y ELIMINAR - MOVIDOS AQUÍ */}
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <Link
+                      to={`/patients/${patientId}/edit`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-primary transition-all duration-200 text-sm font-medium"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </Link>
+                    <button
+                      onClick={handleDeleteClick}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all duration-200 text-sm font-medium disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </button>
                   </div>
                 </div>
 

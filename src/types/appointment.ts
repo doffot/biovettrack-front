@@ -104,6 +104,7 @@ export type CreateAppointmentForm = {
   reason: string;
   observations?: string;
   prepaidAmount?: number;
+  assignedTo?: string;
 };
 
 export type UpdateAppointmentForm = {
