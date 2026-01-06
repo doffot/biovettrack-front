@@ -1,4 +1,3 @@
-// src/types/auth.ts
 import { z } from "zod";
 
 const estadosVenezuela = [
@@ -25,10 +24,13 @@ const estadosVenezuela = [
   "Trujillo",
   "Vargas",
   "Yaracuy",
-  "Zulia"
+  "Zulia",
 ] as const;
 
-/** auth $ veterinary */
+export type EstadoVenezuela = (typeof estadosVenezuela)[number];
+export { estadosVenezuela };
+
+/** auth & veterinary */
 const authSchema = z.object({
   name: z.string(),
   lastName: z.string(),
@@ -43,25 +45,81 @@ const authSchema = z.object({
   msds: z.string().optional(),
   somevepa: z.string().optional(),
   confirmed: z.boolean(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  token: z.string()
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  token: z.string(),
 });
 
 type Auth = z.infer<typeof authSchema>;
+
+// Formularios existentes
 export type UserLoginForm = Pick<Auth, "email" | "password">;
-export type UserRegistrationForm = Pick<Auth, "name" | "lastName" | "email" | "password" | "confirmPassword" | "whatsapp" | "ci" | "cmv" | "estado" | "runsai" | "msds" | "somevepa">;
+export type UserRegistrationForm = Pick<
+  Auth,
+  | "name"
+  | "lastName"
+  | "email"
+  | "password"
+  | "confirmPassword"
+  | "whatsapp"
+  | "ci"
+  | "cmv"
+  | "estado"
+  | "runsai"
+  | "msds"
+  | "somevepa"
+>;
 export type RequestConfirmationCodeForm = Pick<Auth, "email">;
 export type ForgotPasswordForm = Pick<Auth, "email">;
 export type NewPasswordForm = Pick<Auth, "password" | "confirmPassword">;
 export type confirmToken = Pick<Auth, "token">;
 
-// Users
-export const userSchema = authSchema.pick({
-  name: true,
-  lastName: true,
-  email: true,
-}).extend({
-  _id: z.string(),
-});
+// =====================================================
+// ✅ USUARIOS Y PERFIL
+// =====================================================
+
+// User básico (para el header/sidebar)
+export const userSchema = authSchema
+  .pick({
+    name: true,
+    lastName: true,
+    email: true,
+  })
+  .extend({
+    _id: z.string(),
+  });
+
 export type User = z.infer<typeof userSchema>;
+
+// Perfil completo del veterinario
+export const userProfileSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  whatsapp: z.string(),
+  ci: z.string(),
+  cmv: z.string(),
+  estado: z.enum(estadosVenezuela),
+  runsai: z.string().nullable().optional(),
+  msds: z.string().nullable().optional(),
+  somevepa: z.string().nullable().optional(),
+  confirmed: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type UserProfile = z.infer<typeof userProfileSchema>;
+
+// Formulario para actualizar perfil (solo campos editables)
+export type UpdateProfileForm = Pick<
+  UserProfile,
+  "name" | "lastName" | "whatsapp" | "estado" | "runsai" | "msds" | "somevepa"
+>;
+
+// Formulario para cambiar contraseña
+export interface ChangePasswordForm {
+  currentPassword: string;
+  password: string;
+  confirmPassword: string;
+}

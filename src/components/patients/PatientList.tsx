@@ -19,7 +19,7 @@ export default function PatientList({
   owners,
   currentPage,
   onPageChange,
-  itemsPerPage = 6,
+  itemsPerPage = 8,
   onClearFilters,
   hasAnyPatients,
 }: PatientListProps) {
@@ -29,98 +29,69 @@ export default function PatientList({
 
   if (patients.length === 0) {
     return (
-      <PatientEmptyState 
-        hasPatients={hasAnyPatients} 
+      <PatientEmptyState
+        hasPatients={hasAnyPatients}
         onClearFilters={hasAnyPatients ? onClearFilters : undefined}
       />
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Patient Cards */}
-      <div className="space-y-3">
-        {currentPatients.map((patient, index) => (
+      <div className="space-y-2">
+        {currentPatients.map((patient) => (
           <PatientCard
             key={patient._id}
             patient={patient}
             owners={owners}
-            index={index}
           />
         ))}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pt-4 border-t border-vet-light/50">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Info */}
-            <p className="text-sm text-vet-muted order-2 sm:order-1">
-              Mostrando{" "}
-              <span className="font-semibold text-vet-text">{startIndex + 1}</span>
-              {" - "}
-              <span className="font-semibold text-vet-text">
-                {Math.min(startIndex + itemsPerPage, patients.length)}
-              </span>
-              {" de "}
-              <span className="font-semibold text-vet-text">{patients.length}</span>
-              {" pacientes"}
-            </p>
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+          <p className="text-sm text-vet-muted">
+            {startIndex + 1}-{Math.min(startIndex + itemsPerPage, patients.length)} de {patients.length}
+          </p>
 
-            {/* Controls */}
-            <div className="flex items-center gap-2 order-1 sm:order-2">
-              <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`
-                  p-2.5 rounded-xl transition-all duration-200
-                  ${currentPage === 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary hover:shadow-soft"
-                  }
-                `}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-              <div className="flex items-center gap-1">
-                {generatePageNumbers(currentPage, totalPages).map((page, idx) => (
-                  page === "..." ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-vet-muted">
-                      ...
-                    </span>
-                  ) : (
-                    <button
-                      key={page}
-                      onClick={() => onPageChange(page as number)}
-                      className={`
-                        w-10 h-10 rounded-xl text-sm font-medium transition-all duration-200
-                        ${currentPage === page
-                          ? "bg-gradient-to-r from-vet-primary to-vet-secondary text-white shadow-soft"
-                          : "bg-white border border-vet-light text-vet-text hover:border-vet-primary hover:text-vet-primary"
-                        }
-                      `}
-                    >
-                      {page}
-                    </button>
-                  )
-                ))}
-              </div>
+            {generatePageNumbers(currentPage, totalPages).map((page, idx) =>
+              page === "..." ? (
+                <span key={`ellipsis-${idx}`} className="px-2 text-vet-muted text-sm">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page as number)}
+                  className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === page
+                      ? "bg-vet-primary text-white"
+                      : "hover:bg-gray-100 text-vet-text"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
 
-              <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`
-                  p-2.5 rounded-xl transition-all duration-200
-                  ${currentPage === totalPages
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary hover:shadow-soft"
-                  }
-                `}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
@@ -128,21 +99,18 @@ export default function PatientList({
   );
 }
 
-// Helper function to generate page numbers with ellipsis
 function generatePageNumbers(current: number, total: number): (number | string)[] {
   if (total <= 5) {
     return Array.from({ length: total }, (_, i) => i + 1);
   }
 
-  const pages: (number | string)[] = [];
-
   if (current <= 3) {
-    pages.push(1, 2, 3, 4, "...", total);
-  } else if (current >= total - 2) {
-    pages.push(1, "...", total - 3, total - 2, total - 1, total);
-  } else {
-    pages.push(1, "...", current - 1, current, current + 1, "...", total);
+    return [1, 2, 3, 4, "...", total];
   }
-
-  return pages;
+  
+  if (current >= total - 2) {
+    return [1, "...", total - 3, total - 2, total - 1, total];
+  }
+  
+  return [1, "...", current - 1, current, current + 1, "...", total];
 }

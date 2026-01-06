@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Download, ChevronLeft, ChevronRight, ChevronDown, Eye } from "lucide-react";
 import type { Invoice, InvoiceStatus } from "../../types/invoice";
-import type { FilterState, DateRangeType, StatusFilter, PaymentCurrencyFilter } from "../../types/reportTypes";
+import type { FilterState,  StatusFilter, PaymentCurrencyFilter } from "../../types/reportTypes";
 import { formatCurrency, formatDate, getItemTypeLabel } from "../../utils/reportUtils";
 import { exportToCSV } from "../../utils/exportUtils";
+import { DateRangeSelector } from "./DateRangeSelector"; // <-- Nuevo import
 
 interface ReportInvoicesTableProps {
   invoices: Invoice[];
@@ -136,21 +137,19 @@ export function ReportInvoicesTable({
       {/* Toolbar */}
       <div className="px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Período */}
-          <div className="relative">
-            <select
-              value={filters.dateRange}
-              onChange={(e) => handleFilterChange("dateRange", e.target.value as DateRangeType)}
-              className={selectClasses}
-            >
-              <option value="today">Hoy</option>
-              <option value="week">Semana</option>
-              <option value="month">Mes</option>
-              <option value="year">Año</option>
-              <option value="all">Todo</option>
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
+          
+          {/* Reemplazo del select de período por DateRangeSelector */}
+          <DateRangeSelector
+            dateRange={filters.dateRange}
+            customFrom={filters.customFrom}
+            customTo={filters.customTo}
+            onDateRangeChange={(value) => {
+              setCurrentPage(1);
+              onUpdateFilter("dateRange", value);
+            }}
+            onCustomFromChange={(value) => onUpdateFilter("customFrom", value)}
+            onCustomToChange={(value) => onUpdateFilter("customTo", value)}
+          />
 
           {/* Estado */}
           <div className="relative">

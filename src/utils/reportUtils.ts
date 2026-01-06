@@ -44,15 +44,54 @@ export const getItemTypeLabel = (type: string): string => {
   return labels[type] || type;
 };
 
-export const getPeriodLabel = (dateRange: FilterState["dateRange"]): string => {
+// ✅ FUNCIÓN ACTUALIZADA
+export const getPeriodLabel = (
+  dateRange: FilterState["dateRange"],
+  customFrom?: string,
+  customTo?: string
+): string => {
+  if (dateRange === "custom" && customFrom) {
+    const from = new Date(customFrom + "T00:00:00");
+    
+    if (customTo && customFrom !== customTo) {
+      const to = new Date(customTo + "T00:00:00");
+      
+      // Verificar si es un mes completo
+      if (from.getDate() === 1) {
+        const lastDayOfMonth = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+        if (to.getTime() === lastDayOfMonth.getTime()) {
+          return from.toLocaleDateString("es-VE", { month: "long", year: "numeric" });
+        }
+      }
+      
+      // Rango de fechas
+      const formatDate = (d: Date) =>
+        d.toLocaleDateString("es-VE", { day: "2-digit", month: "short" });
+      
+      // Si es mismo año, no repetir
+      if (from.getFullYear() === to.getFullYear()) {
+        return `${formatDate(from)} - ${formatDate(to)}, ${from.getFullYear()}`;
+      }
+      
+      return `${formatDate(from)} ${from.getFullYear()} - ${formatDate(to)} ${to.getFullYear()}`;
+    }
+    
+    // Fecha única
+    return from.toLocaleDateString("es-VE", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
   const labels: Record<string, string> = {
     today: "Hoy",
     week: "Esta semana",
     month: "Este mes",
     year: "Este año",
-    all: "Todo",
-    custom: "Personalizado",
+    all: "Todo el historial",
   };
+  
   return labels[dateRange] || "";
 };
 

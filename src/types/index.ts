@@ -16,3 +16,4 @@ export * from './labExam';
 // Grooming
 export * from './grooming';
 
+export * from "./menu";

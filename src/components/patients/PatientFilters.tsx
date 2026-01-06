@@ -1,11 +1,15 @@
 // src/components/patients/PatientFilters.tsx
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { Search, X } from "lucide-react";
+import type { Owner } from "../../types";
 
 interface PatientFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   speciesFilter: string;
   onSpeciesChange: (value: string) => void;
+  ownerFilter: string;
+  onOwnerChange: (value: string) => void;
+  owners: Owner[];
 }
 
 export default function PatientFilters({
@@ -13,108 +17,73 @@ export default function PatientFilters({
   onSearchChange,
   speciesFilter,
   onSpeciesChange,
+  ownerFilter,
+  onOwnerChange,
+  owners,
 }: PatientFiltersProps) {
-  const hasActiveFilters = searchTerm || speciesFilter !== "all";
+  const hasActiveFilters = searchTerm || speciesFilter !== "all" || ownerFilter !== "all";
 
   const clearAllFilters = () => {
     onSearchChange("");
     onSpeciesChange("all");
+    onOwnerChange("all");
   };
 
   return (
-    <div className="space-y-3">
-      {/* Main filters row */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search Input */}
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted transition-colors group-focus-within:text-vet-primary" />
-          <input
-            type="text"
-            placeholder="Buscar paciente, raza, propietario..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="
-              w-full pl-11 pr-10 py-3 
-              bg-white border border-vet-light rounded-xl 
-              text-sm text-vet-text placeholder:text-vet-muted 
-              focus:outline-none focus:border-vet-primary focus:ring-4 focus:ring-vet-primary/10 
-              transition-all duration-200
-            "
-          />
-          {searchTerm && (
-            <button
-              onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-vet-light transition-colors"
-            >
-              <X className="w-4 h-4 text-vet-muted hover:text-vet-text" />
-            </button>
-          )}
-        </div>
-
-        {/* Species Filter */}
-        <div className="relative">
-          <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted pointer-events-none" />
-          <select
-            value={speciesFilter}
-            onChange={(e) => onSpeciesChange(e.target.value)}
-            className="
-              w-full sm:w-48 pl-10 pr-4 py-3 
-              bg-white border border-vet-light rounded-xl 
-              text-sm text-vet-text 
-              focus:outline-none focus:border-vet-primary focus:ring-4 focus:ring-vet-primary/10 
-              transition-all duration-200
-              appearance-none cursor-pointer
-            "
+    <div className="flex flex-col sm:flex-row gap-3">
+      {/* Search */}
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+        <input
+          type="text"
+          placeholder="Buscar paciente, raza..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => onSearchChange("")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
           >
-            <option value="all">Todas las especies</option>
-            <option value="canino">🐕 Caninos</option>
-            <option value="felino">🐱 Felinos</option>
-          </select>
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg className="w-4 h-4 text-vet-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
+            <X className="w-4 h-4 text-vet-muted" />
+          </button>
+        )}
       </div>
 
-      {/* Active filters */}
-      {hasActiveFilters && (
-        <div className="flex items-center gap-2 flex-wrap animate-fade-in-up">
-          <span className="text-xs text-vet-muted font-medium">Filtros activos:</span>
-          
-          {searchTerm && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary/10 text-vet-primary rounded-full text-xs font-medium">
-              <Search className="w-3 h-3" />
-              "{searchTerm}"
-              <button
-                onClick={() => onSearchChange("")}
-                className="ml-1 hover:bg-vet-primary/20 rounded-full p-0.5 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          
-          {speciesFilter !== "all" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary/10 text-vet-primary rounded-full text-xs font-medium capitalize">
-              {speciesFilter === "canino" ? "🐕" : "🐱"} {speciesFilter}
-              <button
-                onClick={() => onSpeciesChange("all")}
-                className="ml-1 hover:bg-vet-primary/20 rounded-full p-0.5 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
+      {/* Species Filter */}
+      <select
+        value={speciesFilter}
+        onChange={(e) => onSpeciesChange(e.target.value)}
+        className="w-full sm:w-40 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+      >
+        <option value="all">Todas las especies</option>
+        <option value="canino">Canino</option>
+        <option value="felino">Felino</option>
+      </select>
 
-          <button
-            onClick={clearAllFilters}
-            className="text-xs text-vet-muted hover:text-vet-primary transition-colors ml-2 underline underline-offset-2"
-          >
-            Limpiar todo
-          </button>
-        </div>
+      {/* Owner Filter */}
+      <select
+        value={ownerFilter}
+        onChange={(e) => onOwnerChange(e.target.value)}
+        className="w-full sm:w-48 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+      >
+        <option value="all">Todos los propietarios</option>
+        {owners.map((owner) => (
+          <option key={owner._id} value={owner._id}>
+            {owner.name}
+          </option>
+        ))}
+      </select>
+
+      {/* Clear filters */}
+      {hasActiveFilters && (
+        <button
+          onClick={clearAllFilters}
+          className="px-3 py-2.5 text-sm text-vet-muted hover:text-vet-primary transition-colors"
+        >
+          Limpiar
+        </button>
       )}
     </div>
   );

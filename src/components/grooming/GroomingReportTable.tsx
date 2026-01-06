@@ -9,11 +9,19 @@ import {
   Eye,
   Scissors,
 } from "lucide-react";
+import { DateRangeSelector } from "../invoices/DateRangeSelector";
 import { exportGroomingToCSV } from "../../utils/groomingExportUtils";
-import type { EnrichedGroomingService, GroomingDateRange } from "../../view/grooming/GroomingReportView";
+import type { DateRangeType } from "../../types/reportTypes";
+import type { EnrichedGroomingService } from "../../view/grooming/GroomingReportView";
 
 interface GroomingReportTableProps {
   services: EnrichedGroomingService[];
+}
+
+interface DateFilters {
+  dateRange: DateRangeType;
+  customFrom: string;
+  customTo: string;
 }
 
 type StatusFilter = "all" | "Pagado" | "Pendiente" | "Parcial" | "Sin facturar";
@@ -44,13 +52,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-const getFilterDates = (dateRange: GroomingDateRange): { startDate: Date; endDate: Date } => {
+const getFilterDates = (filters: DateFilters): { startDate: Date; endDate: Date } => {
   const now = new Date();
   let startDate: Date;
   let endDate = new Date(now);
   endDate.setHours(23, 59, 59, 999);
 
-  switch (dateRange) {
+  switch (filters.dateRange) {
     case "today":
       startDate = new Date(now);
       startDate.setHours(0, 0, 0, 0);
@@ -75,6 +83,14 @@ const getFilterDates = (dateRange: GroomingDateRange): { startDate: Date; endDat
       endDate = new Date(now.getFullYear(), 11, 31);
       endDate.setHours(23, 59, 59, 999);
       break;
+    case "custom":
+      startDate = filters.customFrom
+        ? new Date(filters.customFrom + "T00:00:00")
+        : new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = filters.customTo
+        ? new Date(filters.customTo + "T23:59:59")
+        : new Date();
+      break;
     case "all":
       startDate = new Date(2020, 0, 1);
       endDate = new Date(2100, 11, 31);
@@ -86,23 +102,20 @@ const getFilterDates = (dateRange: GroomingDateRange): { startDate: Date; endDat
   return { startDate, endDate };
 };
 
-// const getDatePart = (date: string): string => {
-//   if (date.includes("T")) {
-//     return date.split("T")[0];
-//   }
-//   return date;
-// };
-
 export function GroomingReportTable({ services }: GroomingReportTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [dateRange, setDateRange] = useState<GroomingDateRange>("month");
+  const [dateFilters, setDateFilters] = useState<DateFilters>({
+    dateRange: "month",
+    customFrom: "",
+    customTo: "",
+  });
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("");
 
   // Filtrar servicios
   const filteredServices = useMemo(() => {
-    const { startDate, endDate } = getFilterDates(dateRange);
+    const { startDate, endDate } = getFilterDates(dateFilters);
 
     return services.filter((service) => {
       const serviceDate = new Date(service.date);
@@ -118,7 +131,7 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
 
       return true;
     });
-  }, [services, dateRange, statusFilter, serviceTypeFilter]);
+  }, [services, dateFilters, statusFilter, serviceTypeFilter]);
 
   const totalPages = Math.ceil(filteredServices.length / PAGE_SIZE);
   const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -131,10 +144,6 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
-
-  const handleFilterChange = () => {
-    setCurrentPage(1);
   };
 
   const toggleSelectAll = () => {
@@ -174,10 +183,30 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
   };
 
   const resetFilters = () => {
-    setDateRange("month");
+    setDateFilters({
+      dateRange: "month",
+      customFrom: "",
+      customTo: "",
+    });
     setStatusFilter("all");
     setServiceTypeFilter("");
     setCurrentPage(1);
+  };
+
+  const handleDateRangeChange = (dateRange: DateRangeType) => {
+    setCurrentPage(1);
+    setDateFilters((prev) => ({ ...prev, dateRange }));
+    if (dateRange !== "custom") {
+      setDateFilters((prev) => ({ ...prev, customFrom: "", customTo: "" }));
+    }
+  };
+
+  const handleCustomFromChange = (customFrom: string) => {
+    setDateFilters((prev) => ({ ...prev, customFrom }));
+  };
+
+  const handleCustomToChange = (customTo: string) => {
+    setDateFilters((prev) => ({ ...prev, customTo }));
   };
 
   const formatDate = (dateString: string): string => {
@@ -219,24 +248,15 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
       {/* Toolbar */}
       <div className="px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Período */}
-          <div className="relative">
-            <select
-              value={dateRange}
-              onChange={(e) => {
-                setDateRange(e.target.value as GroomingDateRange);
-                handleFilterChange();
-              }}
-              className={selectClasses}
-            >
-              <option value="today">Hoy</option>
-              <option value="week">Semana</option>
-              <option value="month">Mes</option>
-              <option value="year">Año</option>
-              <option value="all">Todo</option>
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
+          {/* Selector de fechas */}
+          <DateRangeSelector
+            dateRange={dateFilters.dateRange}
+            customFrom={dateFilters.customFrom}
+            customTo={dateFilters.customTo}
+            onDateRangeChange={handleDateRangeChange}
+            onCustomFromChange={handleCustomFromChange}
+            onCustomToChange={handleCustomToChange}
+          />
 
           {/* Estado */}
           <div className="relative">
@@ -244,7 +264,7 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as StatusFilter);
-                handleFilterChange();
+                setCurrentPage(1);
               }}
               className={selectClasses}
             >
@@ -263,7 +283,7 @@ export function GroomingReportTable({ services }: GroomingReportTableProps) {
               value={serviceTypeFilter}
               onChange={(e) => {
                 setServiceTypeFilter(e.target.value as ServiceTypeFilter);
-                handleFilterChange();
+                setCurrentPage(1);
               }}
               className={selectClasses}
             >

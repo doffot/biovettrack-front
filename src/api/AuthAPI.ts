@@ -1,12 +1,16 @@
 import { isAxiosError } from "axios";
 import {
   userSchema,
+  userProfileSchema,
   type confirmToken,
   type ForgotPasswordForm,
   type NewPasswordForm,
   type RequestConfirmationCodeForm,
   type UserLoginForm,
   type UserRegistrationForm,
+  type UserProfile,
+  type UpdateProfileForm,
+  type ChangePasswordForm,
 } from "../types";
 import api from "../lib/axios";
 
@@ -19,8 +23,10 @@ export async function createAccount(formData: UserRegistrationForm) {
     if (isAxiosError(error) && error.response) {
       throw new Error(error.response.data.error || "Error al crear la cuenta");
     }
+    throw error;
   }
 }
+
 export async function confirmAccount(formData: confirmToken) {
   try {
     const url = "/auth/confirm-account";
@@ -28,8 +34,11 @@ export async function confirmAccount(formData: confirmToken) {
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(
+        error.response.data.error || "Error al confirmar la cuenta"
+      );
     }
+    throw error;
   }
 }
 
@@ -42,8 +51,11 @@ export async function requestConfirmationCode(
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(
+        error.response.data.error || "Error al solicitar nuevo código"
+      );
     }
+    throw error;
   }
 }
 
@@ -55,8 +67,9 @@ export async function login(formData: UserLoginForm) {
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(error.response.data.error || "Error al iniciar sesión");
     }
+    throw error;
   }
 }
 
@@ -67,8 +80,11 @@ export async function forgotPassword(formData: ForgotPasswordForm) {
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(
+        error.response.data.error || "Error al solicitar recuperación"
+      );
     }
+    throw error;
   }
 }
 
@@ -79,8 +95,9 @@ export async function validateToken(formData: confirmToken) {
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(error.response.data.error || "Error al validar token");
     }
+    throw error;
   }
 }
 
@@ -97,8 +114,11 @@ export async function updatePasswordWithToken({
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(
+        error.response.data.error || "Error al actualizar contraseña"
+      );
     }
+    throw error;
   }
 }
 
@@ -111,7 +131,71 @@ export async function getUser() {
     }
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || "Error al crear la cuenta");
+      throw new Error(error.response.data.error || "Error al obtener usuario");
     }
+    throw error;
+  }
+}
+
+// =====================================================
+// ✅ NUEVAS FUNCIONES PARA PERFIL
+// =====================================================
+
+/**
+ * Obtener perfil completo del veterinario
+ */
+export async function getProfile(): Promise<UserProfile> {
+  try {
+    const { data } = await api.get("/auth/profile");
+    const response = userProfileSchema.safeParse(data);
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error("Error al procesar datos del perfil");
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Error al obtener perfil");
+    }
+    throw error;
+  }
+}
+
+/**
+ * Actualizar datos del perfil
+ */
+export async function updateProfile(
+  formData: UpdateProfileForm
+): Promise<UserProfile> {
+  try {
+    const { data } = await api.put("/auth/profile", formData);
+    const response = userProfileSchema.safeParse(data);
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error("Error al procesar datos del perfil");
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(
+        error.response.data.error || "Error al actualizar perfil"
+      );
+    }
+    throw error;
+  }
+}
+
+/**
+ * Cambiar contraseña
+ */
+export async function changePassword(formData: ChangePasswordForm): Promise<string> {
+  try {
+    const { data } = await api.post("/auth/change-password", formData);
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(
+        error.response.data.error || "Error al cambiar contraseña"
+      );
+    }
+    throw error;
   }
 }

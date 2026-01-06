@@ -1,187 +1,355 @@
 // src/views/patients/PatientListView.tsx
-import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { PawPrint, Plus, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Search, X, Download, PawPrint } from "lucide-react";
 
-import { getPatients } from "../../api/patientAPI";
+import { getPatients, deletePatient } from "../../api/patientAPI";
 import { getOwners } from "../../api/OwnerAPI";
 import { extractId } from "../../utils/extractId";
+import { toast } from "../../components/Toast";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import type { Patient, Owner } from "../../types";
+import PatientTable from "../../components/patients/PatientTable";
+import PatientMobileList from "../../components/patients/PatientMobileList";
+import Pagination from "../../components/owners/Pagination";
 
-import PatientStats from "../../components/patients/PatientStats";
-import PatientFilters from "../../components/patients/PatientFilters";
-import PatientList from "../../components/patients/PatientList";
+const ITEMS_PER_PAGE = 8;
+
+export interface PatientWithOwner extends Patient {
+  ownerName: string;
+}
 
 export default function PatientListView() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState("all");
+  const [ownerFilter, setOwnerFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [mounted, setMounted] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
-  const { data: patients = [], isLoading: isLoadingPatients } = useQuery({
+  const { data: patients = [], isLoading: isLoadingPatients } = useQuery<Patient[]>({
     queryKey: ["patients"],
     queryFn: getPatients,
   });
 
-  const { data: owners = [], isLoading: isLoadingOwners } = useQuery({
+  const { data: owners = [], isLoading: isLoadingOwners } = useQuery<Owner[]>({
     queryKey: ["owners"],
     queryFn: getOwners,
   });
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Reset page when filters change
-  useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, speciesFilter]);
+    setSelectedIds(new Set());
+  }, [searchTerm, speciesFilter, ownerFilter]);
 
-  // Filter patients
-  const filteredPatients = useMemo(() => {
-    return patients.filter((patient: Patient) => {
-      const getOwnerName = (): string => {
-        if (!patient.owner) return "";
-        if (typeof patient.owner !== "string" && "name" in patient.owner) {
-          return patient.owner.name;
-        }
-        const ownerId = extractId(patient.owner);
-        const owner = owners.find((o: Owner) => o._id === ownerId);
-        return owner?.name || "";
-      };
+  // Helpers
+  const getOwnerId = (patient: Patient): string => {
+    if (!patient.owner) return "";
+    if (typeof patient.owner !== "string" && "_id" in patient.owner) {
+      return patient.owner._id;
+    }
+    return extractId(patient.owner) || "";
+  };
 
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch =
-        !searchTerm ||
-        patient.name.toLowerCase().includes(searchLower) ||
-        patient.species.toLowerCase().includes(searchLower) ||
-        patient.breed?.toLowerCase().includes(searchLower) ||
-        patient.color?.toLowerCase().includes(searchLower) ||
-        patient.identification?.toLowerCase().includes(searchLower) ||
-        getOwnerName().toLowerCase().includes(searchLower);
+  const getOwnerName = (patient: Patient): string => {
+    if (!patient.owner) return "Sin propietario";
+    if (typeof patient.owner !== "string" && "name" in patient.owner) {
+      return patient.owner.name;
+    }
+    const ownerId = extractId(patient.owner);
+    const owner = owners.find((o) => o._id === ownerId);
+    return owner?.name || "Sin propietario";
+  };
 
-      const matchesSpecies =
-        speciesFilter === "all" ||
-        patient.species.toLowerCase() === speciesFilter.toLowerCase();
+  // Filter & enrich patients
+  const filteredPatients = useMemo((): PatientWithOwner[] => {
+    return patients
+      .map((patient) => ({
+        ...patient,
+        ownerName: getOwnerName(patient),
+      }))
+      .filter((patient) => {
+        const searchLower = searchTerm.toLowerCase();
 
-      return matchesSearch && matchesSpecies;
-    });
-  }, [patients, owners, searchTerm, speciesFilter]);
+        const matchesSearch =
+          !searchTerm ||
+          patient.name.toLowerCase().includes(searchLower) ||
+          patient.species.toLowerCase().includes(searchLower) ||
+          patient.breed?.toLowerCase().includes(searchLower) ||
+          patient.ownerName.toLowerCase().includes(searchLower);
+
+        const matchesSpecies =
+          speciesFilter === "all" ||
+          patient.species.toLowerCase() === speciesFilter.toLowerCase();
+
+        const matchesOwner =
+          ownerFilter === "all" || getOwnerId(patient) === ownerFilter;
+
+        return matchesSearch && matchesSpecies && matchesOwner;
+      });
+  }, [patients, owners, searchTerm, speciesFilter, ownerFilter]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);
+  const paginatedPatients = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPatients.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredPatients, currentPage]);
+
+  // Mutation
+  const { mutate: removePatient, isPending: isDeleting } = useMutation({
+    mutationFn: (id: string) => deletePatient(id),
+    onSuccess: () => {
+      toast.success("Paciente eliminado");
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      setShowDeleteModal(false);
+      setPatientToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(paginatedPatients.map((p) => p._id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    const newSet = new Set(selectedIds);
+    checked ? newSet.add(id) : newSet.delete(id);
+    setSelectedIds(newSet);
+  };
+
+  const handleExportCSV = () => {
+    const toExport =
+      selectedIds.size > 0
+        ? filteredPatients.filter((p) => selectedIds.has(p._id))
+        : filteredPatients;
+
+    const headers = ["Nombre", "Especie", "Raza", "Sexo", "Propietario"];
+    const rows = toExport.map((p) => [
+      p.name,
+      p.species,
+      p.breed || "",
+      p.sex,
+      p.ownerName,
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `pacientes_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    toast.success(`${toExport.length} registros exportados`);
+  };
+
+  const handleDelete = (patient: Patient) => {
+    setPatientToDelete(patient);
+    setShowDeleteModal(true);
+  };
 
   const clearFilters = () => {
     setSearchTerm("");
     setSpeciesFilter("all");
+    setOwnerFilter("all");
   };
 
   const isLoading = isLoadingPatients || isLoadingOwners;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-vet-gradient flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="relative">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-vet-light border-t-vet-primary rounded-full animate-spin" />
-            <PawPrint className="w-6 h-6 text-vet-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-          </div>
-          <p className="text-vet-text font-medium font-montserrat">Cargando pacientes...</p>
-          <p className="text-vet-muted text-sm mt-1">Por favor espere</p>
+          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-vet-muted text-sm">Cargando...</p>
         </div>
       </div>
     );
   }
 
+  const allPageSelected =
+    paginatedPatients.length > 0 && paginatedPatients.every((p) => selectedIds.has(p._id));
+  const hasFilters = !!searchTerm || speciesFilter !== "all" || ownerFilter !== "all";
+
   return (
-    <div className="min-h-screen bg-vet-gradient pt-3 lg:pt-0">
+    <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-vet-light/50 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Link
-                to="/"
-                className="p-2 rounded-xl bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all duration-200 group"
-              >
-                <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
-              </Link>
-
-              <div className="hidden sm:block h-8 w-px bg-vet-light" />
-
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">
-                  <PawPrint className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg sm:text-xl font-bold font-yellowtail text-vet-text">
-                    Pacientes
-                  </h1>
-                  <p className="text-xs text-vet-muted hidden sm:block">
-                    {patients.length} registrado{patients.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right */}
-            <Link
-              to="/owners"
-              className="
-                inline-flex items-center gap-2 
-                px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl 
-                bg-gradient-to-r from-vet-primary to-vet-secondary 
-                text-white font-semibold text-sm
-                shadow-soft hover:shadow-card
-                transition-all duration-200
-                hover:scale-105
-                group
-              "
-            >
-              <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
-              <span className="hidden sm:inline">Nuevo Paciente</span>
-            </Link>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-vet-text">Pacientes</h1>
+          <p className="text-sm text-vet-muted">
+            {patients.length} registrado{patients.length !== 1 ? "s" : ""}
+          </p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Stats */}
-        <PatientStats patients={patients} isVisible={mounted} />
-
-        {/* Filters & List Container */}
-        <div
-          className={`
-            bg-white rounded-2xl shadow-soft border border-vet-light/50 
-            overflow-hidden
-            transition-all duration-500 delay-200
-            ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-          `}
+        <Link
+          to="/owners"
+          className="inline-flex items-center justify-center px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
         >
-          {/* Filters */}
-          <div className="p-4 sm:p-5 border-b border-vet-light/50 bg-gradient-to-r from-vet-light/20 to-transparent">
-            <PatientFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              speciesFilter={speciesFilter}
-              onSpeciesChange={setSpeciesFilter}
+          Nuevo Paciente
+        </Link>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+          <input
+            type="text"
+            placeholder="Buscar paciente, raza, propietario..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
+            >
+              <X className="w-4 h-4 text-vet-muted" />
+            </button>
+          )}
+        </div>
+
+        <select
+          value={speciesFilter}
+          onChange={(e) => setSpeciesFilter(e.target.value)}
+          className="w-full sm:w-40 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+        >
+          <option value="all">Todas las especies</option>
+          <option value="canino">Canino</option>
+          <option value="felino">Felino</option>
+        </select>
+
+        <select
+          value={ownerFilter}
+          onChange={(e) => setOwnerFilter(e.target.value)}
+          className="w-full sm:w-48 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+        >
+          <option value="all">Todos los propietarios</option>
+          {owners.map((owner) => (
+            <option key={owner._id} value={owner._id}>
+              {owner.name}
+            </option>
+          ))}
+        </select>
+
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="px-3 py-2.5 text-sm text-vet-muted hover:text-vet-primary transition-colors"
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      {/* Content */}
+      {filteredPatients.length > 0 ? (
+        <>
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <p className="text-sm text-vet-muted">
+              {selectedIds.size > 0
+                ? `${selectedIds.size} seleccionado${selectedIds.size !== 1 ? "s" : ""}`
+                : `${filteredPatients.length} resultado${filteredPatients.length !== 1 ? "s" : ""}`}
+            </p>
+            <button
+              onClick={handleExportCSV}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-vet-text hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Exportar {selectedIds.size > 0 ? `(${selectedIds.size})` : "todos"}
+            </button>
+          </div>
+
+          {/* Table Desktop */}
+          <div className="hidden lg:block">
+            <PatientTable
+              patients={paginatedPatients}
+              selectedIds={selectedIds}
+              allSelected={allPageSelected}
+              onSelectAll={handleSelectAll}
+              onSelectOne={handleSelectOne}
+              onNavigate={(id) => navigate(`/patients/${id}`)}
+              onDelete={handleDelete}
             />
           </div>
 
-          {/* List */}
-          <div className="p-4 sm:p-5">
-            <PatientList
-              patients={filteredPatients}
-              owners={owners}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              itemsPerPage={6}
-              onClearFilters={clearFilters}
-              hasAnyPatients={patients.length > 0}
+          {/* Mobile List */}
+          <div className="lg:hidden">
+            <PatientMobileList
+              patients={paginatedPatients}
+              selectedIds={selectedIds}
+              onSelectOne={handleSelectOne}
+              onNavigate={(id) => navigate(`/patients/${id}`)}
+              onDelete={handleDelete}
             />
           </div>
-        </div>
-      </main>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </>
+      ) : (
+        <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
+      )}
+
+      {/* Delete Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPatientToDelete(null);
+        }}
+        onConfirm={() => patientToDelete?._id && removePatient(patientToDelete._id)}
+        petName={patientToDelete?.name || ""}
+        isDeleting={isDeleting}
+      />
+    </div>
+  );
+}
+
+function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
+  return (
+    <div className="text-center py-16">
+      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
+        <PawPrint className="w-8 h-8 text-gray-400" />
+      </div>
+      <h3 className="text-lg font-medium text-vet-text mb-1">
+        {hasFilters ? "Sin resultados" : "Sin pacientes"}
+      </h3>
+      <p className="text-sm text-vet-muted mb-4">
+        {hasFilters ? "No hay pacientes con esos criterios" : "Registra tu primer paciente"}
+      </p>
+      {hasFilters ? (
+        <button onClick={onClear} className="text-sm text-vet-primary hover:underline">
+          Limpiar filtros
+        </button>
+      ) : (
+        <Link
+          to="/owners"
+          className="inline-flex px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
+        >
+          Registrar Paciente
+        </Link>
+      )}
     </div>
   );
 }
