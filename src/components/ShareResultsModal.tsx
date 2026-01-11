@@ -1,7 +1,8 @@
 // src/components/ShareResultsModal.tsx
 import { Printer, CheckCircle2, Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "../api/AuthAPI";
 import html2pdf from "html2pdf.js";
 import { toast } from "./Toast";
 import type { LabExam } from "../types";
@@ -54,7 +55,13 @@ export default function ShareResultsModal({
 }: ShareResultsModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { data: authUser } = useAuth();
+
+  // ✅ Obtener perfil completo del veterinario
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+  });
 
   if (!isOpen) return null;
 
@@ -66,9 +73,31 @@ export default function ShareResultsModal({
     year: "numeric",
   });
 
+  // ✅ Usar datos del perfil
   const getVetFullName = (): string => {
-    if (!authUser) return "Médico Veterinario";
-    return `Dr(a). ${authUser.name || ""} ${authUser.lastName || ""}`.trim();
+    if (!profile) return "Médico Veterinario";
+    return `Dr(a). ${profile.name || ""} ${profile.lastName || ""}`.trim();
+  };
+
+  // ✅ Construir credenciales dinámicamente
+  const getCredentials = (): string => {
+    if (!profile) return "";
+    
+    const credentials: string[] = [];
+    
+    if (profile.ci) credentials.push(`C.I: ${profile.ci}`);
+    if (profile.cmv) credentials.push(`CMV: ${profile.cmv}`);
+    if (profile.runsai) credentials.push(`INSAI: ${profile.runsai}`);
+    if (profile.msds) credentials.push(`MSDS: ${profile.msds}`);
+    if (profile.somevepa) credentials.push(`SOMEVEPA: ${profile.somevepa}`);
+    
+    return credentials.join(" | ");
+  };
+
+  // ✅ Obtener estado/ubicación
+  const getLocation = (): string => {
+    if (!profile?.estado) return "";
+    return profile.estado;
   };
 
   const wbcDisplay = examData.whiteBloodCells.toLocaleString("es-ES");
@@ -378,11 +407,47 @@ export default function ShareResultsModal({
             </div>
           )}
 
-          {/* Footer */}
-          <div style={{ paddingTop: "10px", borderTop: "1px solid #E0F4F8", textAlign: "center", color: "#5A7C88", fontSize: "9px", marginTop: "10px" }}>
-            <p style={{ fontWeight: 700, color: "#0A7EA4", fontSize: "11px", margin: "0 0 3px 0" }}>{getVetFullName()}</p>
-            <p style={{ margin: "2px 0" }}>C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642</p>
-            <p style={{ fontStyle: "italic", margin: "4px 0 0 0", fontSize: "8px" }}>Para cualquier consulta sobre estos resultados, no dude en contactarnos.</p>
+          {/* ✅ Footer Dinámico con Datos del Perfil */}
+          <div style={{ 
+            paddingTop: "10px", 
+            borderTop: "1px solid #E0F4F8", 
+            textAlign: "center", 
+            color: "#5A7C88", 
+            fontSize: "9px", 
+            marginTop: "10px" 
+          }}>
+            {/* Nombre del veterinario */}
+            <p style={{ 
+              fontWeight: 700, 
+              color: "#0A7EA4", 
+              fontSize: "11px", 
+              margin: "0 0 3px 0" 
+            }}>
+              {getVetFullName()}
+            </p>
+            
+            {/* Credenciales dinámicas */}
+            {getCredentials() && (
+              <p style={{ margin: "2px 0" }}>
+                {getCredentials()}
+              </p>
+            )}
+            
+            {/* Ubicación (Estado) */}
+            {getLocation() && (
+              <p style={{ margin: "2px 0", fontStyle: "italic" }}>
+                {getLocation()}, Venezuela
+              </p>
+            )}
+            
+            {/* Mensaje de contacto */}
+            <p style={{ 
+              fontStyle: "italic", 
+              margin: "4px 0 0 0", 
+              fontSize: "8px" 
+            }}>
+              Para cualquier consulta sobre estos resultados, no dude en contactarnos.
+            </p>
           </div>
         </div>
       </div>

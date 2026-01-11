@@ -11,8 +11,9 @@ export const vaccinationSchema = z.object({
   laboratory: z.string().optional(),
   batchNumber: z.string().optional(),
   expirationDate: z.string().optional(),
-nextVaccinationDate: z.string().optional(),
+  nextVaccinationDate: z.string().optional(),
   observations: z.string().optional(),
+  productId: z.string().optional(), // 👈 NUEVO
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -31,4 +32,6 @@ export type VaccinationFormData = Pick<
   | "expirationDate"
   | "nextVaccinationDate"
   | "observations"
->;
+> & {
+  productId?: string; // 👈 NUEVO (opcional)
+};

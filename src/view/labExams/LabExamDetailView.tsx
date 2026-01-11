@@ -10,6 +10,8 @@ import {
   AlertCircle,
   Check,
   FlaskConical,
+  Pencil,
+  User,
 } from "lucide-react";
 
 export default function LabExamDetailView() {
@@ -70,6 +72,9 @@ export default function LabExamDetailView() {
 
   const backUrl = patientId ? `/patients/${patientId}/lab-exams` : "/lab-exams";
 
+  // Verificar si es paciente referido (no tiene patientId)
+  const isReferredPatient = exam && !exam.patientId;
+
   // Loading
   if (isLoading) {
     return (
@@ -123,17 +128,42 @@ export default function LabExamDetailView() {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </Link>
             <div>
-              <h1 className="text-sm font-semibold text-gray-900">Hemograma</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-semibold text-gray-900">Hemograma</h1>
+                {/* Badge de paciente referido */}
+                {isReferredPatient && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-medium rounded">
+                    <User className="w-2.5 h-2.5" />
+                    Referido
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-500">{formatDate(exam.date)}</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowShareModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Imprimir
-          </button>
+          
+          {/* Botones de acción */}
+          <div className="flex items-center gap-2">
+            {/* Botón Editar - Solo para pacientes referidos */}
+            {isReferredPatient && (
+              <Link
+                to={`/lab-exams/${examId}/edit`}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Editar</span>
+              </Link>
+            )}
+            
+            {/* Botón Imprimir */}
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Imprimir</span>
+            </button>
+          </div>
         </div>
       </header>
 

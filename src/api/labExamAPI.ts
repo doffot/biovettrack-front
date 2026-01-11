@@ -95,8 +95,12 @@ export async function updateLabExam(
   try {
     const { data } = await api.put(`/lab-exams/${id}`, formData);
 
-    const result = labExamSchema.safeParse(data);
+    // ✅ Extraer el labExam de la respuesta
+    const examData = data.labExam || data;
+    
+    const result = labExamSchema.safeParse(examData);
     if (!result.success) {
+      console.error("Zod validation error:", result.error);
       throw new Error("Datos del examen inválidos recibidos del servidor.");
     }
     return result.data;

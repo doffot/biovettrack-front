@@ -32,7 +32,6 @@ export async function createDeworming(
   }
 }
 
-// Obtener todas las desparasitaciones del veterinario
 export async function getAllDewormings(): Promise<Deworming[]> {
   try {
     const { data } = await api.get<ListResponse>("/dewormings");
@@ -51,7 +50,6 @@ export async function getAllDewormings(): Promise<Deworming[]> {
     throw new Error("Error de red o desconocido");
   }
 }
-
 
 export async function getDewormingsByPatient(
   patientId: string
