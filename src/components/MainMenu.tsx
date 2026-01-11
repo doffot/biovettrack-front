@@ -12,6 +12,8 @@ import {
   Calendar,
   BarChart3,
   Settings,
+  ShoppingCart,
+  Package,      
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMedia } from "../hooks/useMedia";
@@ -50,7 +52,7 @@ const MainMenu: React.FC = () => {
       items: [
         {
           id: "owners",
-          title: "Dueño",
+          title: "Dueños",
           subtitle: "Gestionar propietarios",
           icon: User,
           to: "/owners",
@@ -61,7 +63,7 @@ const MainMenu: React.FC = () => {
         },
         {
           id: "patients",
-          title: "Mascota",
+          title: "Mascotas",
           subtitle: "Expedientes médicos",
           icon: PawPrint,
           to: "/patients",
@@ -90,8 +92,8 @@ const MainMenu: React.FC = () => {
       items: [
         {
           id: "lab-exams",
-          title: "Crear Hemograma",
-          subtitle: "Laboratorio clínico",
+          title: "Laboratorio", 
+          subtitle: "Gestionar exámenes clínicos",
           icon: Activity,
           to: "/lab-exams",
           color: "text-purple-600",
@@ -109,6 +111,36 @@ const MainMenu: React.FC = () => {
           bgColor: "bg-emerald-50",
           gradientFrom: "from-emerald-500",
           gradientTo: "to-emerald-600",
+        },
+        //  Ventas 
+        {
+          id: "sales",
+          title: "Registrar Venta",
+          subtitle: "Productos y servicios",
+          icon: ShoppingCart,
+          to: "/sales",
+          color: "text-green-600",
+          bgColor: "bg-green-50",
+          gradientFrom: "from-green-500",
+          gradientTo: "to-green-600",
+        },
+      ],
+    },
+    {
+      id: "inventory",
+      title: "Inventario",
+      icon: Package,
+      items: [
+        {
+          id: "products",
+          title: "Productos",
+          subtitle: "Catálogo e inventario",
+          icon: Package,
+          to: "/products",
+          color: "text-orange-600",
+          bgColor: "bg-orange-50",
+          gradientFrom: "from-orange-500",
+          gradientTo: "to-orange-600",
         },
       ],
     },
@@ -183,15 +215,12 @@ const MainMenu: React.FC = () => {
           overflow-hidden group
         "
       >
-        {/* Fondo con gradiente en hover */}
         <div
           className={`
             absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
             opacity-0 group-hover:opacity-5 transition-opacity duration-300
           `}
         />
-
-        {/* Efecto blur decorativo */}
         <div
           className={`
             absolute -top-8 -right-8 w-24 h-24 ${item.bgColor}
@@ -199,10 +228,7 @@ const MainMenu: React.FC = () => {
             group-hover:scale-150 transition-transform duration-500
           `}
         />
-
-        {/* Contenido */}
         <div className="relative flex items-center gap-4">
-          {/* Icono con gradiente */}
           <div className="relative">
             <div
               className={`
@@ -221,8 +247,6 @@ const MainMenu: React.FC = () => {
               <Icon className={`w-7 h-7 ${item.color}`} />
             </div>
           </div>
-
-          {/* Texto */}
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-vet-text text-base mb-0.5 font-montserrat">
               {item.title}
@@ -231,8 +255,6 @@ const MainMenu: React.FC = () => {
               {item.subtitle}
             </p>
           </div>
-
-          {/* Flecha */}
           <div className="flex-shrink-0">
             <ChevronRight
               className="
@@ -243,8 +265,6 @@ const MainMenu: React.FC = () => {
             />
           </div>
         </div>
-
-        {/* Indicador de activación en hover */}
         <div
           className={`
             absolute bottom-0 left-0 right-0 h-1 
@@ -261,7 +281,6 @@ const MainMenu: React.FC = () => {
 
     return (
       <div key={section.id} className="space-y-3">
-        {/* Título de sección */}
         <div className="flex items-center gap-2 px-1">
           <div className="p-1.5 bg-vet-light rounded-lg">
             <SectionIcon className="w-4 h-4 text-vet-primary" />
@@ -271,8 +290,6 @@ const MainMenu: React.FC = () => {
           </h2>
           <div className="flex-1 h-px bg-gradient-to-r from-vet-light to-transparent ml-2" />
         </div>
-
-        {/* Cards de la sección */}
         <div className="space-y-2.5">
           {section.items.map((item) => (
             <Link key={item.id} to={item.to} className="block">
@@ -286,7 +303,6 @@ const MainMenu: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-vet-light/30 via-white to-vet-light/20 pt-3">
-      {/* Header decorativo */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-vet-primary/5 to-vet-accent/5" />
         <div className="relative px-6 pt-4 pb-4">
@@ -298,8 +314,6 @@ const MainMenu: React.FC = () => {
           </p>
         </div>
       </div>
-
-      {/* Contenido principal con scroll */}
       <div className="flex-1 overflow-y-auto px-4 pt-2 pb-28 scrollbar-thin">
         <div className="max-w-md mx-auto space-y-6 pb-4">
           {menuSections.map((section) => renderSection(section))}

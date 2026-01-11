@@ -1,10 +1,8 @@
-// src/router/Router.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import AuthLayout from "./layout/AuthLayout";
 
-// Vista Pública
-import LandingView from "./view/public/LandingView";
+// Vista Pública (Landing) - CON PROTECCIÓN
 
 // Vistas de Auth
 import LoginView from "./view/auth/LoginView";
@@ -88,29 +86,28 @@ import StaffListView from "./view/staff/StaffListView";
 import CreateStaffView from "./view/staff/CreateStaffView";
 import EditStaffView from "./view/staff/EditStaffView";
 
-// Products & Inventory
+// PRODUCTS & INVENTORY
 import ProductListView from "./view/products/ProductListView";
 import CreateProductView from "./view/products/CreateProductView";
 import EditProductView from "./view/products/EditProductView";
 
-// Purchases (Compras)
+// PURCHASES (COMPRAS)
 import PurchaseListView from "./view/purchases/PurchaseListView";
 import CreatePurchaseView from "./view/purchases/CreatePurchaseView";
 import InventoryStockView from "./view/inventory/InventoryStockView";
 import InventoryMovementsView from "./view/inventory/InventoryMovementsView";
 import InventoryLowStockView from "./view/inventory/InventoryLowStockView";
-
-// Sales
 import CreateSaleView from "./view/sales/CreateSaleView";
+import ProtectedLanding from "./components/ProtectedLanding";
 
 export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
         {/* ========================================== */}
-        {/* LANDING PAGE PÚBLICA */}
+        {/* LANDING PAGE PÚBLICA - CON PROTECCIÓN */}
         {/* ========================================== */}
-        <Route path="/" element={<LandingView />} />
+        <Route path="/" element={<ProtectedLanding />} index />
 
         {/* ========================================== */}
         {/* RUTAS PÚBLICAS (AUTH) */}
@@ -127,38 +124,30 @@ export default function Router() {
         {/* ========================================== */}
         {/* RUTAS PROTEGIDAS (APP) */}
         {/* ========================================== */}
-        <Route path="/app" element={<AppLayout />}>
-          {/* HOME / DASHBOARD */}
-          <Route index element={<HomeView />} />
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<HomeView />} index />
 
           {/* PERFIL Y NOTIFICACIONES */}
-          <Route path="profile" element={<ProfileView />} />
-          <Route path="notifications" element={<NotificationsView />} />
+          <Route path="/profile" element={<ProfileView />} />
+          <Route path="/notifications" element={<NotificationsView />} />
 
-          {/* ==================== */}
           {/* CITAS GLOBALES */}
-          {/* ==================== */}
-          <Route path="appointments">
+          <Route path="/appointments">
             <Route index element={<AppointmentsView />} />
             <Route path="select-patient" element={<SelectPatientForAppointment />} />
           </Route>
 
-          {/* CONSULTAS GLOBALES */}
-          <Route path="consultations" element={<AllConsultationsView />} />
+          <Route path="/consultations" element={<AllConsultationsView />} />
 
-          {/* ==================== */}
           {/* EXÁMENES DE LABORATORIO */}
-          {/* ==================== */}
-          <Route path="lab-exams">
+          <Route path="/lab-exams">
             <Route index element={<LabExamListView />} />
             <Route path="create" element={<CreateLabExamView />} />
             <Route path=":id" element={<LabExamDetailView />} />
           </Route>
 
-          {/* ==================== */}
-          {/* PROPIETARIOS (OWNERS) */}
-          {/* ==================== */}
-          <Route path="owners">
+          {/* OWNERS */}
+          <Route path="/owners">
             <Route index element={<OwnerListView />} />
             <Route path="new" element={<CreateOwnerView />} />
             <Route path=":ownerId">
@@ -168,51 +157,42 @@ export default function Router() {
             </Route>
           </Route>
 
-          {/* ==================== */}
-          {/* PACIENTES (PATIENTS) */}
-          {/* ==================== */}
-          <Route path="patients">
+          {/* PATIENTS */}
+          <Route path="/patients">
             <Route index element={<PatientListView />} />
             <Route path=":patientId" element={<PatientLayout />}>
               <Route index element={<PatientDataView />} />
               <Route path="edit" element={<EditPatientView />} />
 
-              {/* Estudios Médicos */}
               <Route path="studies">
                 <Route index element={<MedicalStudyListView />} />
                 <Route path="create" element={<CreateMedicalStudyView />} />
               </Route>
 
-              {/* Vacunaciones */}
               <Route path="vaccinations">
                 <Route index element={<VaccinationListView />} />
                 <Route path="create" element={<CreateVaccinationView />} />
               </Route>
 
-              {/* Desparasitaciones */}
               <Route path="dewormings">
                 <Route index element={<DewormingListView />} />
                 <Route path="create" element={<CreateDewormingView />} />
               </Route>
 
-              {/* Consultas */}
               <Route path="consultations">
                 <Route index element={<ConsultationListView />} />
                 <Route path="create" element={<CreateConsultationView />} />
               </Route>
 
-              {/* Recetas */}
               <Route path="recipes">
                 <Route index element={<RecipeListView />} />
                 <Route path="create" element={<CreateRecipeView />} />
               </Route>
 
-              {/* Citas del Paciente */}
               <Route path="appointments/create" element={<CreateAppointmentView />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailsView />} />
               <Route path="appointments/:appointmentId/edit" element={<EditAppointmentView />} />
 
-              {/* Exámenes de Laboratorio del Paciente */}
               <Route path="lab-exams">
                 <Route index element={<PatientLabExamListView />} />
                 <Route path="create" element={<CreateLabExamView />} />
@@ -220,7 +200,6 @@ export default function Router() {
                 <Route path=":labExamId" element={<LabExamDetailView />} />
               </Route>
 
-              {/* Servicios de Peluquería del Paciente */}
               <Route path="grooming-services">
                 <Route index element={<GroomingServiceListView />} />
                 <Route path="create" element={<CreateGroomingServiceView />} />
@@ -232,64 +211,46 @@ export default function Router() {
             </Route>
           </Route>
 
-          {/* ==================== */}
-          {/* PRODUCTOS */}
-          {/* ==================== */}
-          <Route path="products">
+          {/* INVENTARIO */}
+          <Route path="/products">
             <Route index element={<ProductListView />} />
             <Route path="new" element={<CreateProductView />} />
             <Route path=":productId/edit" element={<EditProductView />} />
           </Route>
 
-          {/* ==================== */}
           {/* VENTAS */}
-          {/* ==================== */}
-          <Route path="sales" element={<CreateSaleView />} />
+          <Route path="/sales" element={<CreateSaleView />} />
 
-          {/* ==================== */}
           {/* COMPRAS */}
-          {/* ==================== */}
-          <Route path="purchases">
+          <Route path="/purchases">
             <Route index element={<PurchaseListView />} />
             <Route path="create" element={<CreatePurchaseView />} />
           </Route>
 
-          {/* ==================== */}
-          {/* INVENTARIO */}
-          {/* ==================== */}
-          <Route path="inventory">
-            <Route path="stock" element={<InventoryStockView />} />
-            <Route path="movements" element={<InventoryMovementsView />} />
-            <Route path="low-stock" element={<InventoryLowStockView />} />
-          </Route>
+          {/* RUTAS DE INVENTARIO */}
+          <Route path="/inventory/stock" element={<InventoryStockView />} />
+          <Route path="/inventory/movements" element={<InventoryMovementsView />} />
+          <Route path="/inventory/low-stock" element={<InventoryLowStockView />} />
 
-          {/* ==================== */}
           {/* REPORTES */}
-          {/* ==================== */}
-          <Route path="grooming/report" element={<GroomingReportView />} />
-          <Route path="invoices">
-            <Route path="report" element={<InvoiceReportView />} />
-            <Route path=":id" element={<InvoiceDetailView />} />
-          </Route>
+          <Route path="/grooming/report" element={<GroomingReportView />} />
+          <Route path="/invoices/report" element={<InvoiceReportView />} />
+          <Route path="/invoices/:id" element={<InvoiceDetailView />} />
 
-          {/* ==================== */}
           {/* CONFIGURACIONES */}
-          {/* ==================== */}
-          <Route path="payment-methods">
+          <Route path="/payment-methods">
             <Route index element={<PaymentMethodsView />} />
             <Route path="new" element={<CreatePaymentMethodView />} />
           </Route>
 
-          <Route path="staff">
+          <Route path="/staff">
             <Route index element={<StaffListView />} />
             <Route path="new" element={<CreateStaffView />} />
             <Route path=":staffId/edit" element={<EditStaffView />} />
           </Route>
 
-          {/* ==================== */}
           {/* RUTAS INDEPENDIENTES */}
-          {/* ==================== */}
-          <Route path="grooming-services" element={<GroomingServicesView />} />
+          <Route path="/grooming-services" element={<GroomingServicesView />} />
         </Route>
 
         {/* ========================================== */}
@@ -298,21 +259,12 @@ export default function Router() {
         <Route
           path="*"
           element={
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center">
               <div className="text-center">
-                <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Página no encontrada
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  La página que buscas no existe.
-                </p>
-                <a
-                  href="/"
-                  className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition"
-                >
-                  Volver al inicio
-                </a>
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                  404 - Página no encontrada
+                </h1>
+                <p className="text-gray-600">La página que buscas no existe.</p>
               </div>
             </div>
           }

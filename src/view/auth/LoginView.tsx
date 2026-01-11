@@ -30,7 +30,7 @@ export default function LoginView() {
     },
     onSuccess: () => {
       toast.success("Bienvenido a BioVetTrack, tu panel clínico está listo.");
-      navigate("/");
+      navigate("/dashboard");
     },
   });
 
