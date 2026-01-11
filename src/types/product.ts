@@ -17,6 +17,11 @@ export const productSchema = z.object({
   doseUnit: z.string().min(1, "La unidad de dosis es obligatoria").max(10, "Máximo 10 caracteres"),
   dosesPerUnit: z.number().min(1, "Debe haber al menos 1 dosis por unidad"),
   
+  // Stock
+  stockUnits: z.number().min(0, "El stock no puede ser negativo").optional(),
+  stockDoses: z.number().min(0, "El stock de dosis no puede ser negativo").optional(),
+  minStock: z.number().min(0, "El stock mínimo no puede ser negativo").optional(),
+  
   // Comportamiento
   divisible: z.boolean().optional(),
   
@@ -32,7 +37,7 @@ export const productsListSchema = z.array(productSchema);
 
 export type Product = z.infer<typeof productSchema>;
 
-// FormData para crear/actualizar (solo metadatos, campos numéricos opcionales)
+// FormData para crear/actualizar
 export type ProductFormData = Pick<
   Product,
   | "name"
@@ -42,6 +47,9 @@ export type ProductFormData = Pick<
   | "doseUnit"
   | "divisible"
   | "active"
+  | "stockUnits"
+  | "stockDoses"
+  | "minStock"
 > & {
   salePrice?: number;
   salePricePerDose?: number;
