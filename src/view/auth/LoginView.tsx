@@ -29,7 +29,7 @@ export default function LoginView() {
       toast.error(error.message);
     },
     onSuccess: () => {
-      toast.success("Bienvenido a BioVetTrack, tu panel clínico está listo.");
+      toast.success('Acceso concedido', 'Panel clínico de BioVetTrack listo para operar.');
       navigate("/dashboard");
     },
   });

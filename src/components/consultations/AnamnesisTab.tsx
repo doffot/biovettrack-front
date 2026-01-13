@@ -443,29 +443,19 @@ export default function AnamnesisTab({
 
       {/* HISTORIAL MÉDICO */}
       <Section title="Historial médico">
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <TextInput
-              label="¿Enfermedades previas?"
-              name="previousIllnesses"
-              value={formData.previousIllnesses || ""}
-              onChange={handleChange}
-              placeholder="Alergias, diabetes, epilepsia..."
-              maxLength={300}
-            />
-            <TextInput
-              label="¿Cirugías anteriores?"
-              name="previousSurgeries"
-              value={formData.previousSurgeries || ""}
-              onChange={handleChange}
-              placeholder="Descripción..."
-              maxLength={300}
-            />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <TextInput
-            label="¿Reacciones adversas a medicamentos o vacunas?"
-            name="adverseReactions"
-            value={formData.adverseReactions || ""}
+            label="¿Enfermedades previas?"
+            name="previousIllnesses"
+            value={formData.previousIllnesses || ""}
+            onChange={handleChange}
+            placeholder="Alergias, diabetes, epilepsia..."
+            maxLength={300}
+          />
+          <TextInput
+            label="¿Cirugías anteriores?"
+            name="previousSurgeries"
+            value={formData.previousSurgeries || ""}
             onChange={handleChange}
             placeholder="Descripción..."
             maxLength={300}
@@ -473,15 +463,16 @@ export default function AnamnesisTab({
         </div>
       </Section>
 
-      {/* OBSERVACIONES */}
-      <Section>
+      {/* ✅ OBSERVACIONES GENERALES - Usando adverseReactions */}
+      <Section title="Observaciones generales">
         <TextArea
-          label="Observaciones"
-          name="lastHeatOrBirth"
-          value={formData.lastHeatOrBirth || ""}
+          label="Alergias, reacciones adversas y observaciones adicionales"
+          name="adverseReactions"
+          value={formData.adverseReactions || ""}
           onChange={handleChange}
-          placeholder="Información general"
+          placeholder="Reacciones a medicamentos/vacunas, alergias conocidas, comportamiento reproductivo, antecedentes relevantes..."
           rows={3}
+          maxLength={300}
         />
       </Section>
     </div>

@@ -2,15 +2,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { PawPrint, ArrowLeft, Plus } from "lucide-react";
+import { PawPrint, ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 import { getOwnersById, deleteOwners, getOwnerAppointments, getOwnerGroomingServices } from "../../api/OwnerAPI";
 import { getInvoices } from "../../api/invoiceAPI";
 import { createPayment } from "../../api/paymentAPI";
 import { getPatientsByOwner } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
+import { showPaymentToast, showPaymentErrorToast } from "../../utils/paymentToasts";
 import PatientListView from "./PatientListOwnerView";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { getOwnerId} from "../../types/invoice";
 import { OwnerAccountHeader } from "../../components/owners/OwnerAccountHeader";
 import { TransactionHistory } from "../../components/owners/TransactionHistory";
@@ -20,6 +20,7 @@ import type { Owner } from "../../types/owner";
 import type { Invoice } from "../../types/invoice";
 import type { GroomingService } from "../../types/grooming";
 import type { Patient } from "../../types/patient";
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 
 interface PaymentData {
   paymentMethodId?: string;
@@ -95,11 +96,11 @@ export default function OwnerDetailView() {
   const { mutate: removeOwner, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteOwners(ownerId!),
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error("Error al eliminar", error.message);
       setShowDeleteModal(false);
     },
     onSuccess: (data) => {
-      toast.success(data.msg);
+      toast.success("Propietario eliminado", data.msg);
       queryClient.invalidateQueries({ queryKey: ["owners"] });
       setShowDeleteModal(false);
       navigate("/owners");
@@ -115,7 +116,7 @@ export default function OwnerDetailView() {
       queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Error al procesar el pago");
+      showPaymentErrorToast(error.message || "Error al procesar el pago");
     },
   });
 
@@ -224,12 +225,21 @@ export default function OwnerDetailView() {
       }
 
       if (!payload.amount && !payload.creditAmountUsed) {
-        toast.error("Debe especificar un monto o usar crédito");
+        toast.error("Error", "Debe especificar un monto o usar crédito");
         return;
       }
 
       await createPaymentMutation(payload);
-      toast.success(paymentData.isPartial ? "Abono registrado" : "Pago procesado");
+
+      // Toast personalizado
+      showPaymentToast({
+        amountPaid: amount,
+        currency,
+        isPartial: paymentData.isPartial,
+        creditUsed: paymentData.creditAmountUsed,
+        invoiceDescription: getInvoiceDescription(invoice),
+      });
+
       setShowSinglePayModal(false);
       setSelectedInvoice(null);
     } catch {
@@ -240,6 +250,8 @@ export default function OwnerDetailView() {
   const handlePayAll = async (invoiceIds: string[], paymentData: PaymentData) => {
     try {
       let successCount = 0;
+      let totalPaidUSD = 0;
+      let totalPaidBs = 0;
       const exchangeRate = paymentData.exchangeRate || 1;
       const isPayingInBs = paymentData.addAmountPaidBs > 0;
       const onlyCredit =
@@ -287,6 +299,12 @@ export default function OwnerDetailView() {
           if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
             payload.creditAmountUsed = paymentData.creditAmountUsed;
           }
+
+          if (isPayingInBs) {
+            totalPaidBs += amount;
+          } else {
+            totalPaidUSD += amount;
+          }
         }
 
         await createPaymentMutation(payload);
@@ -294,9 +312,16 @@ export default function OwnerDetailView() {
       }
 
       if (successCount > 0) {
-        toast.success(
-          `${successCount} factura${successCount > 1 ? "s" : ""} pagada${successCount > 1 ? "s" : ""}`
-        );
+        const amount = isPayingInBs ? totalPaidBs : totalPaidUSD;
+        const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+
+        showPaymentToast({
+          amountPaid: amount,
+          currency,
+          isPartial: false,
+          creditUsed: paymentData.creditAmountUsed,
+          invoiceCount: successCount,
+        });
       }
       setShowPayAllModal(false);
     } catch {
@@ -316,16 +341,15 @@ export default function OwnerDetailView() {
   };
 
   const handleOpenSinglePay = (invoice: Invoice) => {
-     console.log("🧾 Invoice seleccionada:", invoice);
-  console.log("🐾 Pacientes disponibles:", patientsData);
-  console.log("👤 Owner:", owner);
+    console.log("🧾 Invoice seleccionada:", invoice);
+    console.log("🐾 Pacientes disponibles:", patientsData);
+    console.log("👤 Owner:", owner);
 
-   const services = getInvoiceServices(invoice);
-  const patientInfo = getPatientInfo(invoice);
-  
-  console.log("📋 Services calculados:", services);
-  console.log("🐕 Patient info:", patientInfo);
-
+    const services = getInvoiceServices(invoice);
+    const patientInfo = getPatientInfo(invoice);
+    
+    console.log("📋 Services calculados:", services);
+    console.log("🐕 Patient info:", patientInfo);
 
     setSelectedInvoice(invoice);
     setShowSinglePayModal(true);
@@ -457,26 +481,41 @@ export default function OwnerDetailView() {
           <div
             className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}
           >
-           <TransactionHistory
-  invoices={invoices}
-  creditBalance={owner.creditBalance || 0}
-  isLoading={isLoadingInvoices}
-  owner={owner}              // ✅ AGREGA ESTO
-  patients={patientsData}    // ✅ AGREGA ESTO
-  onPayInvoice={handlePayInvoice}
-  onPayAll={handlePayAll}
-/>
+            <TransactionHistory
+              invoices={invoices}
+              creditBalance={owner.creditBalance || 0}
+              isLoading={isLoadingInvoices}
+              owner={owner}
+              patients={patientsData}
+              onPayInvoice={handlePayInvoice}
+              onPayAll={handlePayAll}
+            />
           </div>
         </div>
       </div>
 
       {/* Modal de eliminación */}
-      <DeleteConfirmationModal
+      <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={() => removeOwner()}
-        petName={owner.name}
-        isDeleting={isDeleting}
+        title="Confirmar eliminación"
+        message={
+          <>
+            <p className="text-vet-text mb-2 font-inter">
+              ¿Estás seguro de que deseas eliminar a{" "}
+              <span className="font-bold text-vet-primary">{owner.name}</span>?
+            </p>
+            <p className="text-vet-muted text-sm font-inter">
+              Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a este propietario.
+            </p>
+          </>
+        }
+        confirmText="Eliminar"
+        confirmIcon={Trash2}
+        variant="danger"
+        isLoading={isDeleting}
+        loadingText="Eliminando..."
       />
 
       {/* Modal de Pagar Todo */}

@@ -9,6 +9,7 @@ import { ProductSearch } from "../../components/sales/ProductSearch";
 import { CartPanel } from "../../components/sales/CartPanel";
 import { PaymentModal } from "../../components/payment/PaymentModal";
 import { toast } from "../../components/Toast";
+import { showPaymentToast, showPaymentErrorToast } from "../../utils/paymentToasts";
 import type { CartItem, SaleFormData } from "../../types/sale";
 import type { ProductWithInventory } from "../../types/inventory";
 
@@ -30,29 +31,33 @@ export default function CreateSaleView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [discountTotal, setDiscountTotal] = useState(0);
   
-  // ✅ NUEVO: Tab activo para móvil (productos o carrito)
   const [mobileTab, setMobileTab] = useState<"products" | "cart">("products");
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createSale,
-    onSuccess: (response) => {
-      toast.success(
-        `Venta registrada${response.changeAmount > 0 ? `. Cambio: $${response.changeAmount.toFixed(2)}` : ""}`
-      );
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["products", "with-inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
-      if (client?.id) {
-        queryClient.invalidateQueries({ queryKey: ["owner", client.id] });
-        queryClient.invalidateQueries({ queryKey: ["owners"] });
-      }
-      navigate("/sales");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
+  mutationFn: createSale,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["sales"] });
+    queryClient.invalidateQueries({ queryKey: ["products", "with-inventory"] });
+    queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    queryClient.invalidateQueries({ queryKey: ["payments"] });
+    if (client?.id) {
+      queryClient.invalidateQueries({ queryKey: ["owner", client.id] });
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+    }
+    
+    // Limpiar estado antes de navegar
+    setCart([]);
+    setClient(null);
+    setDiscountTotal(0);
+    setSearchTerm("");
+    
+    // Navegar al inicio
+    navigate("/");
+  },
+  onError: (error: Error) => {
+    showPaymentErrorToast(error.message);
+  },
+});
 
   const cartTotals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
@@ -80,7 +85,7 @@ export default function CreateSaleView() {
     const availableStock = getAvailableStock(product, isFullUnit);
 
     if (availableStock <= 0) {
-      toast.error(`Sin stock de "${product.name}"`);
+      toast.error("Sin stock disponible", `No hay stock de "${product.name}"`);
       return;
     }
 
@@ -92,7 +97,7 @@ export default function CreateSaleView() {
       if (existingIndex >= 0) {
         const existing = prev[existingIndex];
         if (existing.quantity >= availableStock) {
-          toast.error(`Stock máximo: ${availableStock}`);
+          toast.error("Stock máximo alcanzado", `Stock máximo: ${availableStock}`);
           return prev;
         }
 
@@ -128,10 +133,6 @@ export default function CreateSaleView() {
         },
       ];
     });
-    
-    // ✅ NUEVO: Feedback visual - mostrar carrito en móvil si se agrega producto
-    // (opcional: descomentar si quieres que cambie automáticamente al carrito)
-    // setMobileTab("cart");
   }, [getAvailableStock]);
 
   const handleUpdateQuantity = useCallback((index: number, newQuantity: number) => {
@@ -145,7 +146,7 @@ export default function CreateSaleView() {
       }
 
       if (newQuantity > item.availableStock) {
-        toast.error(`Stock máximo: ${item.availableStock}`);
+        toast.error("Stock insuficiente", `Stock máximo: ${item.availableStock}`);
         return prev;
       }
 
@@ -205,13 +206,32 @@ export default function CreateSaleView() {
         ...(client && { ownerId: client.id }),
       };
 
+      // Toast personalizado
+      const isPayingInBs = paymentData.addAmountPaidBs > 0;
+      const amount = isPayingInBs ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD;
+      const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+
+      // Descripción de la venta
+      const itemCount = cart.length;
+      const itemDescription = itemCount === 1 
+        ? cart[0].productName 
+        : `${itemCount} producto${itemCount > 1 ? "s" : ""}`;
+
+      showPaymentToast({
+        amountPaid: amount,
+        currency,
+        isPartial: paymentData.isPartial,
+        creditUsed: paymentData.creditAmountUsed,
+        invoiceDescription: itemDescription,
+      });
+
       mutate(formData);
       setShowPaymentModal(false);
     },
     [cart, discountTotal, client, mutate]
   );
 
-  // ✅ Calcular total de items en carrito
+  // Calcular total de items en carrito
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -230,7 +250,7 @@ export default function CreateSaleView() {
             <h1 className="text-base font-bold text-white">Punto de Venta</h1>
           </div>
           
-          {/* ✅ Badge del carrito en header (solo móvil) */}
+          {/* Badge del carrito en header (solo móvil) */}
           <div className="md:hidden">
             {cartItemCount > 0 && (
               <span className="px-2 py-0.5 bg-white text-vet-primary text-xs font-bold rounded-full">
@@ -240,7 +260,7 @@ export default function CreateSaleView() {
           </div>
         </header>
 
-        {/* ✅ NUEVO: Tabs para móvil */}
+        {/* Tabs para móvil */}
         <div className="md:hidden flex border-b border-gray-200 flex-shrink-0">
           <button
             onClick={() => setMobileTab("products")}
@@ -308,7 +328,7 @@ export default function CreateSaleView() {
           </div>
         </main>
 
-        {/* ✅ NUEVO: Botón flotante para ir al carrito en móvil (cuando hay items) */}
+        {/* Botón flotante para ir al carrito en móvil (cuando hay items) */}
         {mobileTab === "products" && cartItemCount > 0 && (
           <div className="md:hidden absolute bottom-24 right-4">
             <button

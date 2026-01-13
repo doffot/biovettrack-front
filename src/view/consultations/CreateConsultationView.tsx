@@ -1,12 +1,12 @@
 // src/views/consultations/CreateConsultationView.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, ClipboardList, Stethoscope, FileText, Check } from "lucide-react";
 import { getPatientById } from "../../api/patientAPI";
-import { createConsultation } from "../../api/consultationAPI";
+import { createConsultation, saveDraft, getDraft } from "../../api/consultationAPI";
 import { toast } from "../../components/Toast";
-import type { ConsultationFormData } from "../../types/consultation";
+import type { ConsultationFormData, Consultation } from "../../types/consultation";
 import AnamnesisTab from "../../components/consultations/AnamnesisTab";
 import PhysicalExamTab from "../../components/consultations/PhysicalExamTab";
 import DiagnosisTab from "../../components/consultations/DiagnosisTab";
@@ -18,11 +18,10 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const initialFormData: ConsultationFormData = {
   consultationDate: new Date().toISOString().split("T")[0],
-
-  // Anamnesis
   reasonForVisit: "",
   symptomOnset: "",
   symptomEvolution: "",
@@ -50,8 +49,6 @@ const initialFormData: ConsultationFormData = {
   lethargyOrWeakness: null,
   currentTreatment: "",
   medications: "",
-
-  // Vacunas perro
   parvovirusVaccine: "",
   parvovirusVaccineDate: "",
   quintupleSextupleVaccine: "",
@@ -59,30 +56,22 @@ const initialFormData: ConsultationFormData = {
   rabiesVaccineDogs: "",
   rabiesVaccineDateDogs: "",
   dewormingDogs: "",
-
-  // Vacunas gato
   tripleQuintupleFelineVaccine: "",
   tripleQuintupleFelineVaccineDate: "",
   rabiesVaccineCats: "",
   rabiesVaccineDateCats: "",
   dewormingCats: "",
-
-  // Historial
   previousIllnesses: "",
   previousSurgeries: "",
   adverseReactions: "",
   lastHeatOrBirth: "",
   mounts: "",
-
-  // Examen físico
   temperature: "",
   lymphNodes: "",
   heartRate: "",
   respiratoryRate: "",
   capillaryRefillTime: "",
   weight: "",
-
-  // Sistemas
   integumentarySystem: "",
   cardiovascularSystem: "",
   ocularSystem: "",
@@ -90,16 +79,88 @@ const initialFormData: ConsultationFormData = {
   nervousSystem: "",
   musculoskeletalSystem: "",
   gastrointestinalSystem: "",
-
-  // Diagnóstico
   presumptiveDiagnosis: "",
   definitiveDiagnosis: "",
   requestedTests: "",
   treatmentPlan: "",
-
-  // Costo
   cost: "",
 };
+
+// ✅ Función helper para convertir Draft a FormData
+function draftToFormData(draft: Consultation): ConsultationFormData {
+  return {
+    consultationDate: draft.consultationDate?.split("T")[0] || new Date().toISOString().split("T")[0],
+    
+    reasonForVisit: draft.reasonForVisit || "",
+    symptomOnset: draft.symptomOnset || "",
+    symptomEvolution: draft.symptomEvolution || "",
+    isNeutered: draft.isNeutered ?? null,
+    cohabitantAnimals: draft.cohabitantAnimals || "",
+    contactWithStrays: draft.contactWithStrays || "",
+    feeding: draft.feeding || "",
+    appetite: draft.appetite || "",
+    vomiting: draft.vomiting || "",
+    bowelMovementFrequency: draft.bowelMovementFrequency || "",
+    stoolConsistency: draft.stoolConsistency || "",
+    bloodOrParasitesInStool: draft.bloodOrParasitesInStool || "",
+    normalUrination: draft.normalUrination || "",
+    urineFrequencyAndAmount: draft.urineFrequencyAndAmount || "",
+    urineColor: draft.urineColor || "",
+    painOrDifficultyUrinating: draft.painOrDifficultyUrinating || "",
+    cough: draft.cough || "",
+    sneezing: draft.sneezing || "",
+    breathingDifficulty: draft.breathingDifficulty ?? null,
+    itchingOrExcessiveLicking: draft.itchingOrExcessiveLicking ?? null,
+    hairLossOrSkinLesions: draft.hairLossOrSkinLesions || "",
+    eyeDischarge: draft.eyeDischarge || "",
+    earIssues: draft.earIssues || "",
+    feverSigns: draft.feverSigns ?? null,
+    lethargyOrWeakness: draft.lethargyOrWeakness ?? null,
+    currentTreatment: draft.currentTreatment || "",
+    medications: draft.medications || "",
+    
+    parvovirusVaccine: draft.parvovirusVaccine || "",
+    parvovirusVaccineDate: draft.parvovirusVaccineDate?.split("T")[0] || "",
+    quintupleSextupleVaccine: draft.quintupleSextupleVaccine || "",
+    quintupleSextupleVaccineDate: draft.quintupleSextupleVaccineDate?.split("T")[0] || "",
+    rabiesVaccineDogs: draft.rabiesVaccineDogs || "",
+    rabiesVaccineDateDogs: draft.rabiesVaccineDateDogs?.split("T")[0] || "",
+    dewormingDogs: draft.dewormingDogs || "",
+    
+    tripleQuintupleFelineVaccine: draft.tripleQuintupleFelineVaccine || "",
+    tripleQuintupleFelineVaccineDate: draft.tripleQuintupleFelineVaccineDate?.split("T")[0] || "",
+    rabiesVaccineCats: draft.rabiesVaccineCats || "",
+    rabiesVaccineDateCats: draft.rabiesVaccineDateCats?.split("T")[0] || "",
+    dewormingCats: draft.dewormingCats || "",
+    
+    previousIllnesses: draft.previousIllnesses || "",
+    previousSurgeries: draft.previousSurgeries || "",
+    adverseReactions: draft.adverseReactions || "",
+    lastHeatOrBirth: draft.lastHeatOrBirth || "",
+    mounts: draft.mounts || "",
+    
+    temperature: draft.temperature !== undefined && draft.temperature !== null ? draft.temperature : "",
+    lymphNodes: draft.lymphNodes || "",
+    heartRate: draft.heartRate !== undefined && draft.heartRate !== null ? draft.heartRate : "",
+    respiratoryRate: draft.respiratoryRate !== undefined && draft.respiratoryRate !== null ? draft.respiratoryRate : "",
+    capillaryRefillTime: draft.capillaryRefillTime || "",
+    weight: draft.weight !== undefined && draft.weight !== null ? draft.weight : "",
+    
+    integumentarySystem: draft.integumentarySystem || "",
+    cardiovascularSystem: draft.cardiovascularSystem || "",
+    ocularSystem: draft.ocularSystem || "",
+    respiratorySystem: draft.respiratorySystem || "",
+    nervousSystem: draft.nervousSystem || "",
+    musculoskeletalSystem: draft.musculoskeletalSystem || "",
+    gastrointestinalSystem: draft.gastrointestinalSystem || "",
+    
+    presumptiveDiagnosis: draft.presumptiveDiagnosis || "",
+    definitiveDiagnosis: draft.definitiveDiagnosis || "",
+    requestedTests: draft.requestedTests || "",
+    treatmentPlan: draft.treatmentPlan || "",
+    cost: draft.cost !== undefined && draft.cost !== null ? draft.cost : "",
+  };
+}
 
 export default function CreateConsultationView() {
   const { patientId } = useParams<{ patientId: string }>();
@@ -108,6 +169,8 @@ export default function CreateConsultationView() {
 
   const [activeTab, setActiveTab] = useState<TabId>("anamnesis");
   const [formData, setFormData] = useState<ConsultationFormData>(initialFormData);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [draftId, setDraftId] = useState<string | null>(null);
 
   // Obtener datos del paciente
   const { data: patient } = useQuery({
@@ -116,13 +179,54 @@ export default function CreateConsultationView() {
     enabled: !!patientId,
   });
 
+  // ✅ Cargar borrador al montar
+  useEffect(() => {
+    if (!patientId) return;
+
+    getDraft(patientId).then((draft) => {
+      if (draft) {
+        console.log("📄 Borrador encontrado, cargando...");
+        setDraftId(draft._id);
+        setFormData(draftToFormData(draft));
+        toast.success("Borrador cargado");
+      }
+    });
+  }, [patientId]);
+
+  // ✅ Guardar borrador automático
+  const { mutate: saveDraftMutation } = useMutation({
+    mutationFn: (data: Partial<ConsultationFormData>) => saveDraft(patientId!, data),
+    onMutate: () => {
+      setSaveStatus("saving");
+    },
+    onSuccess: (data) => {
+      setSaveStatus("saved");
+      if (!draftId) {
+        setDraftId(data._id);
+      }
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    },
+    onError: () => {
+      setSaveStatus("error");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    },
+  });
+
+  // ✅ Auto-guardar cuando cambia de tab
+  const handleTabChange = (newTab: TabId) => {
+    saveDraftMutation(formData);
+    setActiveTab(newTab);
+  };
+
+  // ✅ Finalizar consulta
   const { mutate, isPending } = useMutation({
     mutationFn: (data: ConsultationFormData) => createConsultation(patientId!, data),
     onSuccess: () => {
       toast.success("Consulta registrada correctamente");
       queryClient.invalidateQueries({ queryKey: ["consultations", patientId] });
-       queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
-    queryClient.invalidateQueries({ queryKey: ["activeAppointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["activeAppointments"] });
+      navigate(-1);
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -177,7 +281,6 @@ export default function CreateConsultationView() {
 
   const isFormValid = isAnamnesisValid() && isPhysicalExamValid() && isDiagnosisValid();
 
-  // Función helper para limpiar valores vacíos
   const cleanValue = <T,>(value: T): T | undefined => {
     if (value === "" || value === null) return undefined;
     return value;
@@ -205,8 +308,6 @@ export default function CreateConsultationView() {
 
     const dataToSend: ConsultationFormData = {
       consultationDate: formData.consultationDate,
-
-      // Anamnesis - obligatorios
       reasonForVisit: formData.reasonForVisit,
       symptomOnset: formData.symptomOnset,
       symptomEvolution: formData.symptomEvolution as "empeorado" | "mejorado" | "estable",
@@ -216,8 +317,6 @@ export default function CreateConsultationView() {
       itchingOrExcessiveLicking: formData.itchingOrExcessiveLicking as boolean,
       feverSigns: formData.feverSigns as boolean,
       lethargyOrWeakness: formData.lethargyOrWeakness as boolean,
-
-      // Anamnesis - opcionales
       cohabitantAnimals: cleanValue(formData.cohabitantAnimals),
       contactWithStrays: cleanValue(formData.contactWithStrays),
       feeding: cleanValue(formData.feeding),
@@ -241,8 +340,6 @@ export default function CreateConsultationView() {
       earIssues: cleanValue(formData.earIssues),
       currentTreatment: cleanValue(formData.currentTreatment),
       medications: cleanValue(formData.medications),
-
-      // Vacunas perro
       parvovirusVaccine: cleanValue(formData.parvovirusVaccine),
       parvovirusVaccineDate: cleanValue(formData.parvovirusVaccineDate),
       quintupleSextupleVaccine: cleanValue(formData.quintupleSextupleVaccine),
@@ -250,32 +347,22 @@ export default function CreateConsultationView() {
       rabiesVaccineDogs: cleanValue(formData.rabiesVaccineDogs),
       rabiesVaccineDateDogs: cleanValue(formData.rabiesVaccineDateDogs),
       dewormingDogs: cleanValue(formData.dewormingDogs),
-
-      // Vacunas gato
       tripleQuintupleFelineVaccine: cleanValue(formData.tripleQuintupleFelineVaccine),
       tripleQuintupleFelineVaccineDate: cleanValue(formData.tripleQuintupleFelineVaccineDate),
       rabiesVaccineCats: cleanValue(formData.rabiesVaccineCats),
       rabiesVaccineDateCats: cleanValue(formData.rabiesVaccineDateCats),
       dewormingCats: cleanValue(formData.dewormingCats),
-
-      // Historial
       previousIllnesses: cleanValue(formData.previousIllnesses),
       previousSurgeries: cleanValue(formData.previousSurgeries),
       adverseReactions: cleanValue(formData.adverseReactions),
       lastHeatOrBirth: cleanValue(formData.lastHeatOrBirth),
       mounts: cleanValue(formData.mounts),
-
-      // Examen físico - obligatorios
       temperature: Number(formData.temperature),
       heartRate: Number(formData.heartRate),
       respiratoryRate: Number(formData.respiratoryRate),
       weight: Number(formData.weight),
-
-      // Examen físico - opcionales
       lymphNodes: cleanValue(formData.lymphNodes),
       capillaryRefillTime: cleanValue(formData.capillaryRefillTime),
-
-      // Sistemas
       integumentarySystem: cleanValue(formData.integumentarySystem),
       cardiovascularSystem: cleanValue(formData.cardiovascularSystem),
       ocularSystem: cleanValue(formData.ocularSystem),
@@ -283,14 +370,10 @@ export default function CreateConsultationView() {
       nervousSystem: cleanValue(formData.nervousSystem),
       musculoskeletalSystem: cleanValue(formData.musculoskeletalSystem),
       gastrointestinalSystem: cleanValue(formData.gastrointestinalSystem),
-
-      // Diagnóstico - obligatorios
       presumptiveDiagnosis: formData.presumptiveDiagnosis,
       definitiveDiagnosis: formData.definitiveDiagnosis,
       treatmentPlan: formData.treatmentPlan,
       cost: Number(formData.cost),
-
-      // Diagnóstico - opcional
       requestedTests: cleanValue(formData.requestedTests),
     };
 
@@ -313,14 +396,14 @@ export default function CreateConsultationView() {
   const goToPreviousTab = () => {
     const currentIndex = TABS.findIndex((t) => t.id === activeTab);
     if (currentIndex > 0) {
-      setActiveTab(TABS[currentIndex - 1].id);
+      handleTabChange(TABS[currentIndex - 1].id);
     }
   };
 
   const goToNextTab = () => {
     const currentIndex = TABS.findIndex((t) => t.id === activeTab);
     if (currentIndex < TABS.length - 1) {
-      setActiveTab(TABS[currentIndex + 1].id);
+      handleTabChange(TABS[currentIndex + 1].id);
     }
   };
 
@@ -339,7 +422,27 @@ export default function CreateConsultationView() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Nueva Consulta</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-gray-900">Nueva Consulta</h1>
+              {/* ✅ Indicador de guardado */}
+              {saveStatus === "saving" && (
+                <span className="flex items-center gap-1 text-xs text-gray-500">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Guardando...
+                </span>
+              )}
+              {saveStatus === "saved" && (
+                <span className="flex items-center gap-1 text-xs text-green-600">
+                  <Check className="w-3 h-3" />
+                  Guardado
+                </span>
+              )}
+              {saveStatus === "error" && (
+                <span className="flex items-center gap-1 text-xs text-red-600">
+                  Error al guardar
+                </span>
+              )}
+            </div>
             {patient && (
               <p className="text-sm text-gray-500">
                 {patient.name} • {patient.species}
@@ -367,7 +470,7 @@ export default function CreateConsultationView() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? "bg-white text-vet-primary shadow-sm"
@@ -433,7 +536,7 @@ export default function CreateConsultationView() {
               </>
             ) : (
               <>
-                Guardar Consulta
+                Finalizar Consulta
                 <Check className="w-4 h-4" />
               </>
             )}

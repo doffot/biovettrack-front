@@ -8,7 +8,53 @@ import {
   type ConsultationFormData,
 } from "../types/consultation";
 
-// Crear consulta
+// ✅ NUEVO: Guardar borrador
+export async function saveDraft(
+  patientId: string,
+  formData: Partial<ConsultationFormData>
+): Promise<Consultation> {
+  try {
+    const { data } = await api.post(`/consultations/draft/${patientId}`, formData);
+    
+    const response = consultationSchema.safeParse(data.consultation);
+    if (response.success) {
+      return response.data;
+    }
+
+    console.error("❌ Error validación Zod:", response.error);
+    throw new Error("Datos de borrador inválidos");
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(error.response.data.msg || "Error al guardar borrador");
+    }
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Error de red o desconocido");
+  }
+}
+
+// ✅ NUEVO: Obtener borrador
+export async function getDraft(patientId: string): Promise<Consultation | null> {
+  try {
+    const { data } = await api.get(`/consultations/draft/${patientId}`);
+    
+    const response = consultationSchema.safeParse(data.consultation);
+    if (response.success) {
+      return response.data;
+    }
+
+    return null;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      return null;
+    }
+    console.error("Error al obtener borrador:", error);
+    return null;
+  }
+}
+
+// Crear consulta (finalizar borrador)
 export async function createConsultation(
   patientId: string,
   formData: ConsultationFormData
@@ -40,7 +86,6 @@ export async function getAllConsultations(): Promise<Consultation[]> {
   try {
     const { data } = await api.get("/consultations");
 
-    // Normalizar: extraer IDs si vienen como objetos poblados
     const normalizedConsultations = data.consultations.map((c: any) => ({
       ...c,
       patientId:
@@ -68,7 +113,7 @@ export async function getAllConsultations(): Promise<Consultation[]> {
     throw new Error("Error de red o desconocido");
   }
 }
-// Obtener consultas por paciente
+
 export async function getConsultationsByPatient(
   patientId: string
 ): Promise<Consultation[]> {
@@ -95,7 +140,6 @@ export async function getConsultationsByPatient(
   }
 }
 
-// Obtener consulta por ID
 export async function getConsultationById(id: string): Promise<Consultation> {
   try {
     const { data } = await api.get(`/consultations/${id}`);
@@ -119,7 +163,6 @@ export async function getConsultationById(id: string): Promise<Consultation> {
   }
 }
 
-// Actualizar consulta
 export async function updateConsultation(
   id: string,
   formData: Partial<ConsultationFormData>
@@ -152,7 +195,6 @@ export async function updateConsultation(
   }
 }
 
-// Eliminar consulta
 export async function deleteConsultation(id: string): Promise<void> {
   try {
     await api.delete(`/consultations/${id}`);

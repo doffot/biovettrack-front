@@ -92,15 +92,16 @@ export default function AllConsultationsView() {
       });
     }
 
-    // Filtro por búsqueda
+    // ✅ Filtro por búsqueda - CORREGIDO
     if (searchTerm) {
+      const search = searchTerm.toLowerCase();
       filtered = filtered.filter(c => {
         const patientInfo = getPatientInfo(c.patientId);
         return (
-          c.presumptiveDiagnosis.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          c.reasonForVisit.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patientInfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patientInfo.owner.toLowerCase().includes(searchTerm.toLowerCase())
+          (c.presumptiveDiagnosis?.toLowerCase() ?? "").includes(search) ||
+          (c.reasonForVisit?.toLowerCase() ?? "").includes(search) ||
+          patientInfo.name.toLowerCase().includes(search) ||
+          patientInfo.owner.toLowerCase().includes(search)
         );
       });
     }
@@ -126,10 +127,10 @@ export default function AllConsultationsView() {
     });
   };
 
-  // Estadísticas
+  // ✅ Estadísticas - CORREGIDO
   const stats = useMemo(() => {
     const total = filteredConsultations.length;
-    const totalRevenue = filteredConsultations.reduce((sum, c) => sum + c.cost, 0);
+    const totalRevenue = filteredConsultations.reduce((sum, c) => sum + (c.cost ?? 0), 0);
     const avgCost = total > 0 ? totalRevenue / total : 0;
     
     // Consultas de hoy
@@ -342,17 +343,17 @@ export default function AllConsultationsView() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm text-vet-text truncate max-w-[150px]">
-                          {consultation.reasonForVisit}
+                          {consultation.reasonForVisit ?? "Sin especificar"}
                         </p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm font-medium text-emerald-600 truncate max-w-[150px]">
-                          {consultation.presumptiveDiagnosis}
+                          {consultation.presumptiveDiagnosis ?? "Sin diagnóstico"}
                         </p>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className="text-sm font-semibold text-green-600">
-                          ${consultation.cost.toFixed(2)}
+                          ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}
                         </span>
                       </td>
                       <td className="px-4 py-3">

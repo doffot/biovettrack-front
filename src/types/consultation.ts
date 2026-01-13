@@ -1,25 +1,25 @@
 // src/types/consultation.ts
 import { z } from "zod";
 
-// Schema para validación
 export const consultationSchema = z.object({
   _id: z.string(),
   patientId: z.string(),
   veterinarianId: z.string(),
   consultationDate: z.string(),
+  isDraft: z.boolean().optional(),
   
-  // Anamnesis
-  reasonForVisit: z.string(),
-  symptomOnset: z.string(),
-  symptomEvolution: z.enum(["empeorado", "mejorado", "estable"]),
-  isNeutered: z.boolean(),
+  // Anamnesis - Opcionales
+  reasonForVisit: z.string().optional(),
+  symptomOnset: z.string().optional(),
+  symptomEvolution: z.enum(["empeorado", "mejorado", "estable"]).optional(),
+  isNeutered: z.boolean().optional(),
   cohabitantAnimals: z.string().optional(),
   contactWithStrays: z.string().optional(),
   feeding: z.string().optional(),
-  appetite: z.enum(["Normal", "Mucho", "Poco", "Nada"]),
+  appetite: z.enum(["Normal", "Mucho", "Poco", "Nada"]).optional(),
   vomiting: z.string().optional(),
   bowelMovementFrequency: z.string().optional(),
-  stoolConsistency: z.enum(["normal", "dura", "pastosa", "líquida"]).optional(), // ✅ Agregado 'normal'
+  stoolConsistency: z.enum(["normal", "dura", "pastosa", "líquida"]).optional(),
   bloodOrParasitesInStool: z.string().optional(),
   normalUrination: z.string().optional(),
   urineFrequencyAndAmount: z.string().optional(),
@@ -27,30 +27,30 @@ export const consultationSchema = z.object({
   painOrDifficultyUrinating: z.string().optional(),
   cough: z.string().optional(),
   sneezing: z.string().optional(),
-  breathingDifficulty: z.boolean(),
-  itchingOrExcessiveLicking: z.boolean(),
+  breathingDifficulty: z.boolean().optional(),
+  itchingOrExcessiveLicking: z.boolean().optional(),
   hairLossOrSkinLesions: z.string().optional(),
   eyeDischarge: z.string().optional(),
   earIssues: z.string().optional(),
-  feverSigns: z.boolean(),
-  lethargyOrWeakness: z.boolean(),
+  feverSigns: z.boolean().optional(),
+  lethargyOrWeakness: z.boolean().optional(),
   currentTreatment: z.string().optional(),
   medications: z.string().optional(),
   
-  // Vacunas perro
+  // ✅ Vacunas perro - Aceptar null
   parvovirusVaccine: z.string().optional(),
-  parvovirusVaccineDate: z.string().optional(),
+  parvovirusVaccineDate: z.string().nullable().optional(),
   quintupleSextupleVaccine: z.string().optional(),
-  quintupleSextupleVaccineDate: z.string().optional(),
+  quintupleSextupleVaccineDate: z.string().nullable().optional(),
   rabiesVaccineDogs: z.string().optional(),
-  rabiesVaccineDateDogs: z.string().optional(),
+  rabiesVaccineDateDogs: z.string().nullable().optional(),
   dewormingDogs: z.string().optional(),
   
-  // Vacunas gato
+  // ✅ Vacunas gato - Aceptar null
   tripleQuintupleFelineVaccine: z.string().optional(),
-  tripleQuintupleFelineVaccineDate: z.string().optional(),
+  tripleQuintupleFelineVaccineDate: z.string().nullable().optional(),
   rabiesVaccineCats: z.string().optional(),
-  rabiesVaccineDateCats: z.string().optional(),
+  rabiesVaccineDateCats: z.string().nullable().optional(),
   dewormingCats: z.string().optional(),
   
   // Historial
@@ -60,13 +60,13 @@ export const consultationSchema = z.object({
   lastHeatOrBirth: z.string().optional(),
   mounts: z.string().optional(),
   
-  // Examen físico
-  temperature: z.number(),
+  // ✅ Examen físico - Aceptar null
+  temperature: z.number().nullable().optional(),
   lymphNodes: z.string().optional(),
-  heartRate: z.number(),
-  respiratoryRate: z.number(),
+  heartRate: z.number().nullable().optional(),
+  respiratoryRate: z.number().nullable().optional(),
   capillaryRefillTime: z.string().optional(),
-  weight: z.number(),
+  weight: z.number().nullable().optional(),
   
   // Sistemas
   integumentarySystem: z.string().optional(),
@@ -77,14 +77,14 @@ export const consultationSchema = z.object({
   musculoskeletalSystem: z.string().optional(),
   gastrointestinalSystem: z.string().optional(),
   
-  // Diagnóstico y tratamiento
-  presumptiveDiagnosis: z.string(),
-  definitiveDiagnosis: z.string(),
+  // Diagnóstico - Opcionales
+  presumptiveDiagnosis: z.string().optional(),
+  definitiveDiagnosis: z.string().optional(),
   requestedTests: z.string().optional(),
-  treatmentPlan: z.string(),
+  treatmentPlan: z.string().optional(),
   
-  // Costo
-  cost: z.number(),
+  // ✅ Costo - Aceptar null
+  cost: z.number().nullable().optional(),
   
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -97,7 +97,6 @@ export type Consultation = z.infer<typeof consultationSchema>;
 export type ConsultationFormData = {
   consultationDate: string;
   
-  // Anamnesis
   reasonForVisit: string;
   symptomOnset: string;
   symptomEvolution: "empeorado" | "mejorado" | "estable" | "";
@@ -126,7 +125,6 @@ export type ConsultationFormData = {
   currentTreatment?: string;
   medications?: string;
   
-  // Vacunas perro
   parvovirusVaccine?: string;
   parvovirusVaccineDate?: string;
   quintupleSextupleVaccine?: string;
@@ -135,21 +133,18 @@ export type ConsultationFormData = {
   rabiesVaccineDateDogs?: string;
   dewormingDogs?: string;
   
-  // Vacunas gato
   tripleQuintupleFelineVaccine?: string;
   tripleQuintupleFelineVaccineDate?: string;
   rabiesVaccineCats?: string;
   rabiesVaccineDateCats?: string;
   dewormingCats?: string;
   
-  // Historial
   previousIllnesses?: string;
   previousSurgeries?: string;
   adverseReactions?: string;
   lastHeatOrBirth?: string;
   mounts?: string;
   
-  // Examen físico
   temperature: number | "";
   lymphNodes?: string;
   heartRate: number | "";
@@ -157,7 +152,6 @@ export type ConsultationFormData = {
   capillaryRefillTime?: string;
   weight: number | "";
   
-  // Sistemas
   integumentarySystem?: string;
   cardiovascularSystem?: string;
   ocularSystem?: string;
@@ -166,12 +160,10 @@ export type ConsultationFormData = {
   musculoskeletalSystem?: string;
   gastrointestinalSystem?: string;
   
-  // Diagnóstico y tratamiento
   presumptiveDiagnosis: string;
   definitiveDiagnosis: string;
   requestedTests?: string;
   treatmentPlan: string;
   
-  // Costo
   cost: number | "";
 };

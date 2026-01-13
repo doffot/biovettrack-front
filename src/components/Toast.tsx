@@ -80,7 +80,7 @@ export const toast = {
   }
 };
 
-// Componente individual de Toast
+// Componente individual de Toast (MODIFICADO CON NUEVOS ESTILOS)
 const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({ toast, onRemove }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -112,75 +112,54 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
         return {
           iconBg: 'bg-green-500',
           iconColor: 'text-white',
-          textColor: 'text-white',
-          messageColor: 'text-gray-300',
-          icon: CheckCircle
+          titleColor: 'text-[#10b981]', // Verde brillante
+          messageColor: 'text-gray-400',
+          icon: CheckCircle,
+          bgColor: 'rgba(16, 50, 45, 0.95)', // Fondo verde oscuro
+          borderColor: 'rgba(16, 185, 129, 0.3)'
         };
       case 'error':
         return {
           iconBg: 'bg-red-500',
           iconColor: 'text-white',
-          textColor: 'text-white',
-          messageColor: 'text-gray-300',
-          icon: AlertCircle
+          titleColor: 'text-[#ef4444]', // Rojo brillante
+          messageColor: 'text-gray-400',
+          icon: AlertCircle,
+          bgColor: 'rgba(50, 20, 30, 0.95)', // Fondo rojo oscuro
+          borderColor: 'rgba(239, 68, 68, 0.3)'
         };
       case 'warning':
         return {
           iconBg: 'bg-yellow-500',
           iconColor: 'text-white',
-          textColor: 'text-white',
-          messageColor: 'text-gray-300',
-          icon: AlertTriangle
+          titleColor: 'text-[#f59e0b]', // Amarillo brillante
+          messageColor: 'text-gray-400',
+          icon: AlertTriangle,
+          bgColor: 'rgba(50, 40, 20, 0.95)', // Fondo amarillo oscuro
+          borderColor: 'rgba(245, 158, 11, 0.3)'
         };
       case 'info':
         return {
           iconBg: 'bg-blue-500',
           iconColor: 'text-white',
-          textColor: 'text-white',
-          messageColor: 'text-gray-300',
-          icon: Info
+          titleColor: 'text-[#3b82f6]', // Azul brillante
+          messageColor: 'text-gray-400',
+          icon: Info,
+          bgColor: 'rgba(20, 30, 50, 0.95)', // Fondo azul oscuro
+          borderColor: 'rgba(59, 130, 246, 0.3)'
         };
       default:
         return {
           iconBg: 'bg-gray-500',
           iconColor: 'text-white',
-          textColor: 'text-white',
-          messageColor: 'text-gray-300',
-          icon: Info
+          titleColor: 'text-gray-300',
+          messageColor: 'text-gray-400',
+          icon: Info,
+          bgColor: 'rgba(30, 30, 40, 0.95)',
+          borderColor: 'rgba(107, 114, 128, 0.3)'
         };
     }
   };
-
-const getBackgroundGradient = () => {
-  switch (toast.type) {
-    case 'success':
-      return {
-        background:
-          'linear-gradient(90deg, rgba(34, 197, 94, 0.45) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
-      };
-    case 'error':
-      return {
-        background:
-          'linear-gradient(90deg, rgba(239, 68, 68, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
-      };
-    case 'warning':
-      return {
-        background:
-          'linear-gradient(90deg, rgba(245, 158, 11, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
-      };
-    case 'info':
-      return {
-        background:
-          'linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
-      };
-    default:
-      return {
-        background:
-          'linear-gradient(90deg, rgba(107, 114, 128, 0.25) 0%, rgba(55, 65, 81, 1) 50%, rgba(55, 65, 81, 1) 100%)'
-      };
-  }
-};
-
 
   const styles = getToastStyles();
   const IconComponent = styles.icon;
@@ -197,25 +176,24 @@ const getBackgroundGradient = () => {
       `}
     >
       <div 
-        className="rounded-lg shadow-2xl min-w-80 max-w-md relative overflow-hidden"
-        style={getBackgroundGradient()}
+        className="rounded-lg shadow-xl max-w-xs min-w-[280px] relative overflow-hidden"
+        style={{
+          backgroundColor: styles.bgColor,
+          borderWidth: '1px',
+          borderColor: styles.borderColor
+        }}
       >        
         <div className="flex items-start gap-3 p-4">
-          <div className={`
-            ${styles.iconBg} ${styles.iconColor}
-            flex-shrink-0 w-8 h-8 rounded-full 
-            flex items-center justify-center
-            shadow-lg
-          `}>
-            <IconComponent size={18} />
+          <div className={`${styles.iconBg} ${styles.iconColor} flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md`}>
+            <IconComponent size={16} />
           </div>
           
-          <div className="flex-1 min-w-0 pr-2">
-            <h4 className={`font-semibold ${styles.textColor} text-sm leading-5 mb-1`}>
+          <div className="flex-1 min-w-0 pr-1">
+            <h4 className={`font-semibold ${styles.titleColor} text-sm leading-5 mb-0.5`}>
               {toast.title}
             </h4>
             {toast.message && (
-              <p className={`${styles.messageColor} text-xs leading-4`}>
+              <p className={`${styles.messageColor} text-xs leading-4 opacity-90`}>
                 {toast.message}
               </p>
             )}
@@ -223,10 +201,10 @@ const getBackgroundGradient = () => {
           
           <button
             onClick={handleRemove}
-            className="flex-shrink-0 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700"
+            className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-1 rounded-full hover:bg-gray-800/50"
             aria-label="Cerrar notificación"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         </div>
       </div>
@@ -254,7 +232,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addToast = useCallback((toastData: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
     const toast: Toast = { id, ...toastData };
-    
     setToasts(prev => [...prev, toast]);
   }, []);
 
@@ -286,4 +263,3 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     </ToastContext.Provider>
   );
 };
-

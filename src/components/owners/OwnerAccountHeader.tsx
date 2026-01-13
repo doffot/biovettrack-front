@@ -1,5 +1,6 @@
 // src/components/owners/OwnerAccountHeader.tsx
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -20,6 +21,7 @@ import {
   Scissors,
   ChevronRight,
   MoreVertical,
+  ChevronDown,
 } from "lucide-react";
 import type { Owner } from "../../types/owner";
 import type { Patient } from "../../types/patient";
@@ -78,12 +80,16 @@ export function OwnerAccountHeader({
   const [showGroomingDropdown, setShowGroomingDropdown] = useState(false);
   const [showInvoicesDropdown, setShowInvoicesDropdown] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const petsRef = useRef<HTMLDivElement>(null);
   const appointmentsRef = useRef<HTMLDivElement>(null);
   const groomingRef = useRef<HTMLDivElement>(null);
   const invoicesRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const paymentRef = useRef<HTMLDivElement>(null);
+  const paymentButtonRef = useRef<HTMLButtonElement>(null);
 
   const hasPets = patients.length > 0;
   const hasAppointments = appointments.length > 0;
@@ -107,11 +113,25 @@ export function OwnerAccountHeader({
       if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
         setShowActionsMenu(false);
       }
+      if (paymentRef.current && !paymentRef.current.contains(event.target as Node)) {
+        setShowPaymentDropdown(false);
+      }
     };
 
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (showPaymentDropdown && paymentButtonRef.current) {
+      const rect = paymentButtonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [showPaymentDropdown]);
 
   const closeAllDropdowns = () => {
     setShowPetsDropdown(false);
@@ -119,6 +139,7 @@ export function OwnerAccountHeader({
     setShowGroomingDropdown(false);
     setShowInvoicesDropdown(false);
     setShowActionsMenu(false);
+    setShowPaymentDropdown(false);
   };
 
   const getInitials = (name: string): string => {
@@ -169,6 +190,96 @@ export function OwnerAccountHeader({
     if (!service.patientId) return "";
     if (typeof service.patientId === "string") return service.patientId;
     return service.patientId._id || "";
+  };
+
+  // Componente del dropdown con portal
+  const PaymentDropdown = () => {
+    if (!showPaymentDropdown) return null;
+
+    const dropdownContent = (
+      <div
+        className="fixed z-[9999] animate-fade-in"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          left: `${dropdownPosition.left}px`,
+          width: `${Math.max(dropdownPosition.width, 320)}px`,
+        }}
+      >
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-vet-primary to-vet-accent px-4 py-3">
+            <p className="text-sm font-bold text-white">Opciones de Pago</p>
+            <p className="text-xs text-white/80">Selecciona una factura o paga todo</p>
+          </div>
+
+          <div className="max-h-64 overflow-y-auto">
+            {pendingInvoices.map((invoice) => {
+              const pending = getInvoicePending(invoice);
+              const isParcial = invoice.paymentStatus === "Parcial";
+
+              return (
+                <button
+                  key={invoice._id}
+                  onClick={() => {
+                    setShowPaymentDropdown(false);
+                    onPayInvoice(invoice);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isParcial ? "bg-blue-100" : "bg-amber-100"}`}>
+                      <FileText className={`w-5 h-5 ${isParcial ? "text-blue-600" : "text-amber-600"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">
+                        {getInvoiceDescription(invoice)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatDateShort(invoice.date)}
+                        {isParcial && (
+                          <span className="ml-2 text-blue-600 font-medium">Parcial</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-bold ${isParcial ? "text-blue-600" : "text-amber-600"}`}>
+                        ${pending.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="border-t-2 border-gray-200" />
+
+          {pendingInvoices.length > 1 && onOpenPayAll && (
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-vet-light">
+              <button
+                onClick={() => {
+                  setShowPaymentDropdown(false);
+                  onOpenPayAll();
+                }}
+                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm leading-tight">Pagar Todo</p>
+                    <p className="text-xs opacity-90">{pendingInvoices.length} facturas</p>
+                  </div>
+                </div>
+                <p className="text-lg font-bold">${totalPending.toFixed(2)}</p>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+
+    return createPortal(dropdownContent, document.body);
   };
 
   return (
@@ -621,14 +732,20 @@ export function OwnerAccountHeader({
                 )}
               </div>
 
-              {totalPending > 0 && onOpenPayAll && (
-                <div className="col-span-2 lg:col-span-1 flex items-center">
+              {totalPending > 0 && (
+                <div className="col-span-2 lg:col-span-1 flex items-center" ref={paymentRef}>
                   <button
-                    onClick={onOpenPayAll}
+                    ref={paymentButtonRef}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeAllDropdowns();
+                      setShowPaymentDropdown(true);
+                    }}
                     className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-vet-primary to-vet-accent hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
                     <CreditCard className="w-5 h-5" />
-                    <span>Pagar Todo</span>
+                    <span>Pagar</span>
+                    <ChevronDown className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -636,6 +753,9 @@ export function OwnerAccountHeader({
           )}
         </div>
       </div>
+
+      {/* Dropdown de pagos con portal */}
+      <PaymentDropdown />
     </div>
   );
 }

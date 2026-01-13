@@ -54,7 +54,7 @@ export default function EditOwnerView() {
     mutationFn: (data: OwnerFormData) =>
       updateOwners({ formData: data, ownerId: ownerId! }),
     onSuccess: () => {
-      toast.success("Propietario actualizado correctamente");
+      toast.success('¡Listo!', 'La información del cliente ha sido actualizada.');
       queryClient.invalidateQueries({ queryKey: ["owners"] });
       queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
       navigate(`/owners/${ownerId}`);

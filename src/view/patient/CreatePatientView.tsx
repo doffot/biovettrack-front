@@ -87,7 +87,7 @@ export default function CreatePatientView() {
       toast.error(error.message || "Error al registrar mascota");
     },
     onSuccess: () => {
-      toast.success("Mascota registrada con éxito");
+      toast.success('Registro completado', 'La mascota ha sido añadida al sistema.');
       queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
       queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
       navigate(`/owners/${ownerId}`);
