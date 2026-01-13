@@ -12,14 +12,28 @@ export const consultationSchema = z.object({
   reasonForVisit: z.string().optional(),
   symptomOnset: z.string().optional(),
   symptomEvolution: z.enum(["empeorado", "mejorado", "estable"]).optional(),
-  isNeutered: z.boolean().optional(),
+  isNeutered: z.boolean().nullable().optional(),
   cohabitantAnimals: z.string().optional(),
   contactWithStrays: z.string().optional(),
   feeding: z.string().optional(),
-  appetite: z.enum(["Normal", "Mucho", "Poco", "Nada"]).optional(),
+  
+  // ✅ appetite - Acepta enum O string vacío O null
+  appetite: z.union([
+    z.enum(["Normal", "Mucho", "Poco", "Nada"]),
+    z.literal(""),
+    z.null()
+  ]).optional(),
+  
   vomiting: z.string().optional(),
   bowelMovementFrequency: z.string().optional(),
-  stoolConsistency: z.enum(["normal", "dura", "pastosa", "líquida"]).optional(),
+  
+  // ✅ stoolConsistency - Acepta enum O string vacío O null
+  stoolConsistency: z.union([
+    z.enum(["normal", "dura", "pastosa", "líquida"]),
+    z.literal(""),
+    z.null()
+  ]).optional(),
+  
   bloodOrParasitesInStool: z.string().optional(),
   normalUrination: z.string().optional(),
   urineFrequencyAndAmount: z.string().optional(),
@@ -27,17 +41,22 @@ export const consultationSchema = z.object({
   painOrDifficultyUrinating: z.string().optional(),
   cough: z.string().optional(),
   sneezing: z.string().optional(),
-  breathingDifficulty: z.boolean().optional(),
-  itchingOrExcessiveLicking: z.boolean().optional(),
+  
+  // ✅ Campos boolean - Aceptar null también
+  breathingDifficulty: z.boolean().nullable().optional(),
+  itchingOrExcessiveLicking: z.boolean().nullable().optional(),
+  
   hairLossOrSkinLesions: z.string().optional(),
   eyeDischarge: z.string().optional(),
   earIssues: z.string().optional(),
-  feverSigns: z.boolean().optional(),
-  lethargyOrWeakness: z.boolean().optional(),
+  
+  feverSigns: z.boolean().nullable().optional(),
+  lethargyOrWeakness: z.boolean().nullable().optional(),
+  
   currentTreatment: z.string().optional(),
   medications: z.string().optional(),
   
-  // ✅ Vacunas perro - Aceptar null
+  // Vacunas perro - Aceptar null
   parvovirusVaccine: z.string().optional(),
   parvovirusVaccineDate: z.string().nullable().optional(),
   quintupleSextupleVaccine: z.string().optional(),
@@ -46,7 +65,7 @@ export const consultationSchema = z.object({
   rabiesVaccineDateDogs: z.string().nullable().optional(),
   dewormingDogs: z.string().optional(),
   
-  // ✅ Vacunas gato - Aceptar null
+  // Vacunas gato - Aceptar null
   tripleQuintupleFelineVaccine: z.string().optional(),
   tripleQuintupleFelineVaccineDate: z.string().nullable().optional(),
   rabiesVaccineCats: z.string().optional(),
@@ -60,7 +79,7 @@ export const consultationSchema = z.object({
   lastHeatOrBirth: z.string().optional(),
   mounts: z.string().optional(),
   
-  // ✅ Examen físico - Aceptar null
+  // Examen físico - Aceptar null
   temperature: z.number().nullable().optional(),
   lymphNodes: z.string().optional(),
   heartRate: z.number().nullable().optional(),
@@ -83,7 +102,7 @@ export const consultationSchema = z.object({
   requestedTests: z.string().optional(),
   treatmentPlan: z.string().optional(),
   
-  // ✅ Costo - Aceptar null
+  // Costo - Aceptar null
   cost: z.number().nullable().optional(),
   
   createdAt: z.string(),
