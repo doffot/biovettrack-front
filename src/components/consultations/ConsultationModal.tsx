@@ -327,7 +327,7 @@ export default function ConsultationModal({
           <div>
             <p className="text-xs text-gray-500">Costo de consulta</p>
             <p className="text-xl font-bold text-gray-900">
-              ${consultation.cost.toFixed(2)}
+              ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}
             </p>
           </div>
           <button

@@ -198,7 +198,7 @@ function ConsultationItem({ consultation, patientInfo, onClick }: ConsultationIt
       <div className="flex items-center gap-2">
         <div className="text-right">
           <p className="text-xs font-semibold text-emerald-600">
-            ${consultation.cost.toFixed(0)}
+            ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}git
           </p>
           <p className="text-xs text-vet-muted">
             {formatTime(consultation.consultationDate)}
