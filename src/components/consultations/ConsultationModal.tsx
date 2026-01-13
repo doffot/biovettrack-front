@@ -43,7 +43,7 @@ export default function ConsultationModal({
     value,
   }: {
     label: string;
-    value?: string | number | boolean;
+    value?: string | number | boolean | null;
   }) => {
     if (value === undefined || value === null || value === "") return null;
     const displayValue =
@@ -58,7 +58,6 @@ export default function ConsultationModal({
     );
   };
 
-  // Campo de texto largo (para tratamiento, diagnósticos)
   const TextField = ({
     label,
     value,
@@ -101,33 +100,33 @@ export default function ConsultationModal({
 
         {/* Content */}
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* Signos vitales  */}
+          {/* Signos vitales */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div className="bg-red-50 rounded-xl p-3 text-center">
               <Thermometer className="w-5 h-5 text-red-500 mx-auto mb-1" />
               <p className="text-lg font-bold text-gray-900">
-                {consultation.temperature}°C
+                {consultation.temperature ?? "-"}°C
               </p>
               <p className="text-xs text-gray-500">Temperatura</p>
             </div>
             <div className="bg-pink-50 rounded-xl p-3 text-center">
               <Heart className="w-5 h-5 text-pink-500 mx-auto mb-1" />
               <p className="text-lg font-bold text-gray-900">
-                {consultation.heartRate} lpm
+                {consultation.heartRate ?? "-"} lpm
               </p>
               <p className="text-xs text-gray-500">Frec. Cardíaca</p>
             </div>
             <div className="bg-blue-50 rounded-xl p-3 text-center">
               <Wind className="w-5 h-5 text-blue-500 mx-auto mb-1" />
               <p className="text-lg font-bold text-gray-900">
-                {consultation.respiratoryRate} rpm
+                {consultation.respiratoryRate ?? "-"} rpm
               </p>
               <p className="text-xs text-gray-500">Frec. Respiratoria</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3 text-center">
               <Scale className="w-5 h-5 text-green-500 mx-auto mb-1" />
               <p className="text-lg font-bold text-gray-900">
-                {consultation.weight} kg
+                {consultation.weight ?? "-"} kg
               </p>
               <p className="text-xs text-gray-500">Peso</p>
             </div>
@@ -157,13 +156,15 @@ export default function ConsultationModal({
           </Section>
 
           {/* Tratamiento - SECCIÓN DESTACADA */}
-          <Section title="Plan de tratamiento">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-              <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                {consultation.treatmentPlan}
-              </p>
-            </div>
-          </Section>
+          {consultation.treatmentPlan && (
+            <Section title="Plan de tratamiento">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                  {consultation.treatmentPlan}
+                </p>
+              </div>
+            </Section>
+          )}
 
           {/* Medicamentos actuales (si hay) */}
           {(consultation.currentTreatment || consultation.medications) && (
@@ -312,14 +313,14 @@ export default function ConsultationModal({
           )}
 
           {/* Observaciones */}
-{consultation.lastHeatOrBirth && (
-  <Section title="Observaciones">
-    <TextField
-      label="Observaciones generales"
-      value={consultation.lastHeatOrBirth}
-    />
-  </Section>
-)}
+          {consultation.lastHeatOrBirth && (
+            <Section title="Observaciones">
+              <TextField
+                label="Observaciones generales"
+                value={consultation.lastHeatOrBirth}
+              />
+            </Section>
+          )}
         </div>
 
         {/* Footer */}
@@ -327,7 +328,7 @@ export default function ConsultationModal({
           <div>
             <p className="text-xs text-gray-500">Costo de consulta</p>
             <p className="text-xl font-bold text-gray-900">
-              ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}
+              ${consultation.cost != null ? consultation.cost.toFixed(2) : "0.00"}
             </p>
           </div>
           <button
