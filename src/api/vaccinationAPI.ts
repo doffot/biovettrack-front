@@ -21,7 +21,7 @@ type GetVaccinationResponse = {
   vaccination: Vaccination;
 };
 
-// ✅ Helper function para normalizar productId
+//  Helper function para normalizar productId
 const normalizeProductId = (productId: any): string | undefined => {
   if (!productId) return undefined;
   if (typeof productId === "string") return productId;
@@ -29,11 +29,12 @@ const normalizeProductId = (productId: any): string | undefined => {
   return undefined;
 };
 
-// ✅ Helper function para normalizar IDs poblados
-const normalizeId = (id: any): string => {
+//  ACTUALIZADO: Helper function para normalizar IDs poblados (acepta null)
+const normalizeId = (id: any): string | undefined => {
+  if (!id) return undefined;
   if (typeof id === "string") return id;
   if (typeof id === "object" && id?._id) return id._id;
-  return id;
+  return undefined;
 };
 
 // Crear vacuna
@@ -47,7 +48,6 @@ export async function createVaccination(
       data
     );
 
-    // ✅ Normalizar productId
     const normalized = {
       ...response.vaccination,
       productId: normalizeProductId(response.vaccination.productId),
@@ -67,12 +67,12 @@ export async function createVaccination(
   }
 }
 
-// Obtener todas las vacunas del veterinario
+// ACTUALIZADO: Obtener todas las vacunas del veterinario
 export async function getAllVaccinations(): Promise<Vaccination[]> {
   try {
     const { data } = await api.get<GetVaccinationsResponse>("/vaccinations");
 
-    // ✅ Normalizar todos los IDs poblados
+    //  Normalizar todos los IDs poblados
     const normalized = data.vaccinations.map((v: any) => ({
       ...v,
       productId: normalizeProductId(v.productId),
@@ -83,6 +83,7 @@ export async function getAllVaccinations(): Promise<Vaccination[]> {
     const parsed = vaccinationsListSchema.safeParse(normalized);
     if (!parsed.success) {
       console.error("❌ Zod error:", parsed.error.issues);
+      console.error("❌ Datos problemáticos:", normalized);
       throw new Error("Datos de vacunas inválidos");
     }
     return parsed.data;
@@ -103,7 +104,6 @@ export async function getVaccinationsByPatient(
       `/vaccinations/patient/${patientId}`
     );
 
-    // ✅ Normalizar productId antes de validar
     const normalized = data.vaccinations.map((v: any) => ({
       ...v,
       productId: normalizeProductId(v.productId),
@@ -130,7 +130,6 @@ export async function getVaccinationById(id: string): Promise<Vaccination> {
       `/vaccinations/${id}`
     );
 
-    // ✅ Normalizar productId
     const normalized = {
       ...data.vaccination,
       productId: normalizeProductId(data.vaccination.productId),
@@ -161,7 +160,6 @@ export async function updateVaccination(
       vaccination: Vaccination;
     }>(`/vaccinations/${id}`, data);
 
-    //  Normalizar productId
     const normalized = {
       ...response.vaccination,
       productId: normalizeProductId(response.vaccination.productId),

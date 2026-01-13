@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const vaccinationSchema = z.object({
   _id: z.string().optional(),
-  patientId: z.string(),
+  patientId: z.string().nullable().optional(), 
   veterinarianId: z.string().optional(),
   vaccinationDate: z.string(),
   vaccineType: z.string().min(1, "El tipo de vacuna es obligatorio"),
@@ -13,7 +13,7 @@ export const vaccinationSchema = z.object({
   expirationDate: z.string().optional(),
   nextVaccinationDate: z.string().optional(),
   observations: z.string().optional(),
-  productId: z.string().optional(), // 👈 NUEVO
+  productId: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

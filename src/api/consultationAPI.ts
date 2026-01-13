@@ -21,7 +21,6 @@ export async function saveDraft(
       return response.data;
     }
 
-    console.error("❌ Error validación Zod:", response.error);
     throw new Error("Datos de borrador inválidos");
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
@@ -34,11 +33,10 @@ export async function saveDraft(
   }
 }
 
-// ✅ NUEVO: Obtener borrador
+//  NUEVO: Obtener borrador
 export async function getDraft(patientId: string): Promise<Consultation | null> {
   try {
     const { data } = await api.get(`/consultations/draft/${patientId}`);
-    
     const response = consultationSchema.safeParse(data.consultation);
     if (response.success) {
       return response.data;
@@ -46,10 +44,12 @@ export async function getDraft(patientId: string): Promise<Consultation | null> 
 
     return null;
   } catch (error) {
+    //  Si es 404, significa que NO HAY borrador (esto es NORMAL)
     if (error instanceof AxiosError && error.response?.status === 404) {
       return null;
     }
-    console.error("Error al obtener borrador:", error);
+    
+  
     return null;
   }
 }

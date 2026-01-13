@@ -11,13 +11,20 @@ export const consultationSchema = z.object({
   // Anamnesis - Opcionales
   reasonForVisit: z.string().optional(),
   symptomOnset: z.string().optional(),
-  symptomEvolution: z.enum(["empeorado", "mejorado", "estable"]).optional(),
+  
+  // ✅ ACTUALIZAR: symptomEvolution - Acepta enum O string vacío O null
+  symptomEvolution: z.union([
+    z.enum(["empeorado", "mejorado", "estable"]),
+    z.literal(""),
+    z.null()
+  ]).optional(),
+  
   isNeutered: z.boolean().nullable().optional(),
   cohabitantAnimals: z.string().optional(),
   contactWithStrays: z.string().optional(),
   feeding: z.string().optional(),
   
-  // ✅ appetite - Acepta enum O string vacío O null
+  // appetite - Acepta enum O string vacío O null
   appetite: z.union([
     z.enum(["Normal", "Mucho", "Poco", "Nada"]),
     z.literal(""),
@@ -27,7 +34,7 @@ export const consultationSchema = z.object({
   vomiting: z.string().optional(),
   bowelMovementFrequency: z.string().optional(),
   
-  // ✅ stoolConsistency - Acepta enum O string vacío O null
+  // stoolConsistency - Acepta enum O string vacío O null
   stoolConsistency: z.union([
     z.enum(["normal", "dura", "pastosa", "líquida"]),
     z.literal(""),
@@ -42,7 +49,7 @@ export const consultationSchema = z.object({
   cough: z.string().optional(),
   sneezing: z.string().optional(),
   
-  // ✅ Campos boolean - Aceptar null también
+  // Campos boolean - Aceptar null también
   breathingDifficulty: z.boolean().nullable().optional(),
   itchingOrExcessiveLicking: z.boolean().nullable().optional(),
   
