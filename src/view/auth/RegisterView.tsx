@@ -47,17 +47,16 @@ export default function RegisterView() {
   const selectedEstado = watch('estado');
 
   const { mutate, isPending } = useMutation({
-  mutationFn: createAccount,
-  onError: (error: any) => {
-    // Extraer el mensaje del backend
-    toast.error('Registro fallido', error.message); 
-  },
-  onSuccess: (data) => {
-    toast.success('¡Cuenta creada!', data || 'Revisa tu email para confirmar.');
-    reset();
-    navigate('/auth/confirm-account');
-  }
-});
+    mutationFn: createAccount,
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSuccess: (data) => {
+      toast.success(data || "Registro exitoso");
+      reset();
+      navigate('/auth/confirm-account')
+    }
+  });
 
   const handleRegister = (formData: any) => {
     const dataToSend: UserRegistrationForm = {
@@ -83,19 +82,19 @@ export default function RegisterView() {
       <div className="absolute inset-0 bg-slate-900/90"></div>
 
       {/* Iniciar Sesión - Esquina superior derecha */}
-      <div className="absolute top-8 right-8 z-20">
+      <div className="absolute top-4 right-4 md:top-8 md:right-8 z-20">
         <Link
           to="/auth/login"
-          className="text-white font-semibold px-6 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all shadow-lg"
+          className="text-white text-sm md:text-base font-semibold px-4 py-2 md:px-6 md:py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all shadow-lg"
         >
           Iniciar Sesión
         </Link>
       </div>
 
-      {/* Contenedor principal con dos columnas */}
-      <div className="absolute inset-0 flex z-10">
-        {/* Columna izquierda - Título grande */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      {/* Contenedor principal */}
+      <div className="absolute inset-0 flex flex-col lg:flex-row z-10 overflow-y-auto">
+        {/* Columna izquierda - Título grande (oculto en mobile) */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
           <div className="max-w-xl">
             <h1 className="text-7xl lg:text-8xl font-black text-white leading-tight mb-6 drop-shadow-2xl">
               BioVetTrack
@@ -129,38 +128,48 @@ export default function RegisterView() {
         </div>
 
         {/* Columna derecha - Formulario */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 md:p-8">
           <div className="w-full max-w-md">
             {/* Logo SVG centrado - más espacio arriba */}
-            <div className="flex justify-center mb-4 mt-4">
+            <div className="flex justify-center mb-3 md:mb-4 mt-4">
               <img
                 src="/logo_main.svg"
                 alt="BioVetTrack Logo"
-                className="h-24 w-auto drop-shadow-2xl"
+                className="h-16 md:h-24 w-auto drop-shadow-2xl"
               />
             </div>
 
+            {/* Título mobile */}
+            <div className="lg:hidden mb-4 text-center">
+              <h1 className="text-2xl font-black text-white mb-1 drop-shadow-lg">
+                BioVetTrack
+              </h1>
+              <p className="text-base font-bold text-vet-accent drop-shadow-lg">
+                Únete a nuestra red
+              </p>
+            </div>
+
             {/* Título del formulario - más compacto */}
-            <div className="mb-4 text-center">
-              <h2 className="text-xl font-bold text-white mb-1">Crear Cuenta</h2>
+            <div className="mb-3 md:mb-4 text-center">
+              <h2 className="text-lg md:text-xl font-bold text-white mb-1">Crear Cuenta</h2>
               <p className="text-white/80 text-xs">
                 Completa tus datos profesionales
               </p>
             </div>
 
             {/* Formulario - espaciado reducido */}
-            <form onSubmit={handleSubmit(handleRegister)} className="space-y-2.5">
+            <form onSubmit={handleSubmit(handleRegister)} className="space-y-2 md:space-y-2.5">
               {/* Nombre y Apellido */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <div className="relative">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <User className="h-4 w-4 text-white/70" />
+                      <User className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                     </div>
                     <input
                       type="text"
                       placeholder="Nombre"
-                      className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -177,7 +186,7 @@ export default function RegisterView() {
                     />
                   </div>
                   {errors.name && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.name.message as string}
                     </p>
                   )}
@@ -186,12 +195,12 @@ export default function RegisterView() {
                 <div>
                   <div className="relative">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <User className="h-4 w-4 text-white/70" />
+                      <User className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                     </div>
                     <input
                       type="text"
                       placeholder="Apellido"
-                      className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -208,7 +217,7 @@ export default function RegisterView() {
                     />
                   </div>
                   {errors.lastName && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.lastName.message as string}
                     </p>
                   )}
@@ -219,13 +228,13 @@ export default function RegisterView() {
               <div>
                 <div className="relative">
                   <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Mail className="h-4 w-4 text-white/70" />
+                    <Mail className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                   </div>
                   <input
                     type="email"
                     placeholder="correo@ejemplo.com"
                     autoComplete="email"
-                    className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                    className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                       autofill:bg-transparent autofill:text-white
                       autofill:shadow-[0_0_0_1000px_transparent_inset]
                       autofill:[-webkit-text-fill-color:white]
@@ -245,7 +254,7 @@ export default function RegisterView() {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                  <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                     {errors.email.message as string}
                   </p>
                 )}
@@ -256,7 +265,7 @@ export default function RegisterView() {
                 <div className="flex gap-2">
                   <select
                     {...register("countryCode")}
-                    className="w-20 px-2 py-2 text-xs bg-transparent border border-white/50 rounded-lg text-white font-medium focus:outline-none focus:border-vet-primary transition-all"
+                    className="w-16 md:w-20 px-1 md:px-2 py-1.5 md:py-2 text-[10px] md:text-xs bg-transparent border border-white/50 rounded-lg text-white font-medium focus:outline-none focus:border-vet-primary transition-all"
                     style={{
                       WebkitBoxShadow: "0 0 0 1000px transparent inset",
                       WebkitTextFillColor: "white",
@@ -270,12 +279,12 @@ export default function RegisterView() {
                   </select>
                   <div className="relative flex-1">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Phone className="h-4 w-4 text-white/70" />
+                      <Phone className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                     </div>
                     <input
                       type="tel"
                       placeholder="4121234567"
-                      className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -296,7 +305,7 @@ export default function RegisterView() {
                   </div>
                 </div>
                 {errors.whatsapp && (
-                  <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                  <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                     {errors.whatsapp.message as string}
                   </p>
                 )}
@@ -307,12 +316,12 @@ export default function RegisterView() {
                 <div>
                   <div className="relative">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <FileText className="h-4 w-4 text-white/70" />
+                      <FileText className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                     </div>
                     <input
                       type="text"
                       placeholder="CI"
-                      className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -329,7 +338,7 @@ export default function RegisterView() {
                     />
                   </div>
                   {errors.ci && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.ci.message as string}
                     </p>
                   )}
@@ -338,11 +347,11 @@ export default function RegisterView() {
                 <div>
                   <div className="relative">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <MapPin className="h-4 w-4 text-white/70" />
+                      <MapPin className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                     </div>
                     <select
                       {...register("estado", { required: "El estado es obligatorio" })}
-                      className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white font-medium focus:outline-none transition-all appearance-none
+                      className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white font-medium focus:outline-none transition-all appearance-none
                         ${
                         errors.estado
                           ? "border-red-400 focus:ring-0"
@@ -360,7 +369,7 @@ export default function RegisterView() {
                     </select>
                   </div>
                   {errors.estado && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.estado.message as string}
                     </p>
                   )}
@@ -371,13 +380,13 @@ export default function RegisterView() {
               <div>
                 <div className="relative">
                   <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <FileText className="h-4 w-4 text-white/70" />
+                    <FileText className="h-3.5 md:h-4 w-3.5 md:w-4 text-white/70" />
                   </div>
                   <input
                     type="text"
                     placeholder={selectedEstado ? `COLVET ${selectedEstado}` : "Selecciona estado"}
                     disabled={!selectedEstado}
-                    className={`w-full pl-8 pr-3 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                    className={`w-full pl-7 md:pl-8 pr-2 md:pr-3 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                       autofill:bg-transparent autofill:text-white
                       autofill:shadow-[0_0_0_1000px_transparent_inset]
                       autofill:[-webkit-text-fill-color:white]
@@ -395,7 +404,7 @@ export default function RegisterView() {
                   />
                 </div>
                 {errors.cmv && (
-                  <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                  <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                     {errors.cmv.message as string}
                   </p>
                 )}
@@ -409,7 +418,7 @@ export default function RegisterView() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Contraseña"
                       autoComplete="new-password"
-                      className={`w-full px-3 pr-9 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full px-2 md:px-3 pr-8 md:pr-9 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -430,13 +439,13 @@ export default function RegisterView() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute top-1/2 -translate-y-1/2 right-2.5 text-white/70 hover:text-vet-accent transition-colors"
+                      className="absolute top-1/2 -translate-y-1/2 right-2 md:right-2.5 text-white/70 hover:text-vet-accent transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-3 md:h-4 w-3 md:w-4" /> : <Eye className="h-3 md:h-4 w-3 md:w-4" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.password.message as string}
                     </p>
                   )}
@@ -448,7 +457,7 @@ export default function RegisterView() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirmar"
                       autoComplete="new-password"
-                      className={`w-full px-3 pr-9 py-2 text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
+                      className={`w-full px-2 md:px-3 pr-8 md:pr-9 py-1.5 md:py-2 text-xs md:text-sm bg-transparent border rounded-lg text-white placeholder-white/50 font-medium focus:outline-none transition-all
                         autofill:bg-transparent autofill:text-white
                         autofill:shadow-[0_0_0_1000px_transparent_inset]
                         autofill:[-webkit-text-fill-color:white]
@@ -469,13 +478,13 @@ export default function RegisterView() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute top-1/2 -translate-y-1/2 right-2.5 text-white/70 hover:text-vet-accent transition-colors"
+                      className="absolute top-1/2 -translate-y-1/2 right-2 md:right-2.5 text-white/70 hover:text-vet-accent transition-colors"
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? <EyeOff className="h-3 md:h-4 w-3 md:w-4" /> : <Eye className="h-3 md:h-4 w-3 md:w-4" />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-red-300 text-[10px] mt-1 px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
+                    <p className="text-red-300 text-[9px] md:text-[10px] mt-0.5 md:mt-1 px-1 md:px-1.5 py-0.5 rounded font-semibold bg-black/20 backdrop-blur-sm">
                       {errors.confirmPassword.message as string}
                     </p>
                   )}
@@ -483,15 +492,15 @@ export default function RegisterView() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-center pt-2">
+              <div className="flex justify-center pt-1 md:pt-2">
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full bg-vet-primary text-white font-bold py-2.5 text-sm rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[8px_8px_16px_rgba(8,95,122,0.4),-8px_-8px_16px_rgba(54,188,212,0.2)] hover:shadow-[12px_12px_24px_rgba(8,95,122,0.5),-12px_-12px_24px_rgba(54,188,212,0.3)] border-2 border-vet-accent/30"
+                  className="w-full bg-vet-primary text-white font-bold py-2 md:py-2.5 text-xs md:text-sm rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[8px_8px_16px_rgba(8,95,122,0.4),-8px_-8px_16px_rgba(54,188,212,0.2)] hover:shadow-[12px_12px_24px_rgba(8,95,122,0.5),-12px_-12px_24px_rgba(54,188,212,0.3)] border-2 border-vet-accent/30"
                 >
                   {isPending ? (
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 md:w-4 h-3 md:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Creando...</span>
                     </div>
                   ) : (
@@ -502,7 +511,7 @@ export default function RegisterView() {
             </form>
 
             {/* Copyright */}
-            <p className="text-center text-[10px] text-white/70 font-medium mt-3 drop-shadow-md">
+            <p className="text-center text-[9px] md:text-[10px] text-white/70 font-medium mt-2 md:mt-3 drop-shadow-md">
               © 2024 BioVetTrack. Sistema profesional de gestión veterinaria.
             </p>
           </div>
