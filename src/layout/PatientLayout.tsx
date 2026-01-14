@@ -26,9 +26,9 @@ import { getPatientById, deletePatient } from "../api/patientAPI";
 import { getActiveAppointmentsByPatient } from "../api/appointmentAPI";
 import { getGroomingServicesByPatient } from "../api/groomingAPI";
 import { getPatientDebtSummary } from "../api/invoiceAPI";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PhotoModal from "../components/patients/PhotoModal";
 import { toast } from "../components/Toast";
+import ConfirmationModal from "../components/modal/ConfirmationModal";
 
 export default function PatientLayout() {
   const { patientId } = useParams<{ patientId?: string }>();
@@ -126,7 +126,7 @@ export default function PatientLayout() {
       setShowDeleteModal(false);
     },
     onSuccess: () => {
-      toast.success("Mascota eliminada con éxito");
+      toast.warning('Mascota eliminada',' ha sido retirada cliente.');
       queryClient.invalidateQueries({ queryKey: ["patients"] });
       navigate("/patients");
     },
@@ -638,12 +638,17 @@ export default function PatientLayout() {
       </div>
 
       {/* Modales */}
-      <DeleteConfirmationModal
+      <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={removePatient}
-        petName={patient.name || ""}
-        isDeleting={isDeleting}
+        title="¿Eliminar mascota?"
+        message={`¿Estás seguro de que deseas eliminar a ${patient.name}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={isDeleting}
+        loadingText="Eliminando..."
       />
 
       <PhotoModal isOpen={showPhotoModal} onClose={() => setShowPhotoModal(false)} patient={patient} />

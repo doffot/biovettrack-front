@@ -12,15 +12,20 @@ import RecipePrintModal from "../../components/recipes/RecipePrintModal";
 const PRESENTATIONS = [
   "Tabletas",
   "Cápsulas",
+  "Comprimidos",
   "Jarabe",
   "Suspensión",
   "Inyectable",
+  "Ampolla",
   "Gotas",
   "Crema",
-  "Pomada",
+  "Ungüento",
+  "Gel",
   "Polvo",
   "Solución",
-  "Otra",
+  "Champu",
+  "Jabón",
+  "Solución jabonosa",
 ];
 
 const emptyMedication: MedicationFormData = {

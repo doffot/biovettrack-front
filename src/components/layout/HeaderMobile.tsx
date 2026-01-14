@@ -3,7 +3,6 @@ import { User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
-import Logo from "../../components/Logo";
 
 const HeaderMobile: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -28,12 +27,14 @@ const HeaderMobile: React.FC = () => {
     <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-vet-primary to-vet-secondary shadow-soft">
       <div className="flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <Logo
-            size="sm"
-            showText={true}
-            showSubtitle={false}
-            layout="horizontal"
+          <img
+            src="/logo_menu.svg"
+            alt="BioVetTrack"
+            className="h-10 w-auto"
           />
+          <span className="text-white font-bold text-base tracking-wide">
+            BioVetTrack
+          </span>
         </Link>
 
         <div className="relative">

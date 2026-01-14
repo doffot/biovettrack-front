@@ -86,8 +86,11 @@ export default function CreatePatientView() {
     onError: (error: Error) => {
       toast.error(error.message || "Error al registrar mascota");
     },
-    onSuccess: () => {
-      toast.success('Registro completado', 'La mascota ha sido añadida al sistema.');
+    onSuccess: (data) => {
+        toast.success(
+    '¡Mascota registrada!',
+    `"${data.name}" ha sido añadida al cliente.`
+  );
       queryClient.invalidateQueries({ queryKey: ["patients", { ownerId }] });
       queryClient.invalidateQueries({ queryKey: ["owner", ownerId] });
       navigate(`/owners/${ownerId}`);
@@ -119,8 +122,8 @@ export default function CreatePatientView() {
 
             {/* Información del Header */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="p-2 bg-green-100 rounded-xl flex-shrink-0">
-                <PawPrint className="w-6 h-6 text-green-600" />
+              <div className="p-2 bg-vet-light rounded-xl flex-shrink-0">
+                <PawPrint className="w-6 h-6 text-vet-primary" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl font-bold text-gray-900">
@@ -186,7 +189,7 @@ export default function CreatePatientView() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-vet-light hover:bg-vet-primary text-vet-text hover:text-white font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isPending ? (
                     <>

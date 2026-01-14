@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, LogOut, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import Logo from "../../components/Logo";
 import { menuItems } from "../../layout/config/menuItems";
 
 interface SidebarDesktopProps {
@@ -49,14 +48,16 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
   return (
     <aside className="hidden lg:flex lg:flex-col fixed top-0 left-0 z-50 w-64 h-full bg-gradient-to-b from-vet-primary to-vet-secondary shadow-card">
       {/* Logo */}
-      <div className="flex items-center justify-center px-4 py-4 border-b border-white/10">
-        <Link to="/" className="flex items-center gap-3">
-          <Logo
-            size="lg"
-            showText={true}
-            showSubtitle={false}
-            layout="vertical"
+      <div className="flex flex-col items-center justify-center px-4 py-6 border-b border-white/10">
+        <Link to="/" className="flex flex-col items-center gap-2">
+          <img
+            src="/logo_menu.svg"
+            alt="BioVetTrack"
+            className="h-16 w-auto"
           />
+          <span className="text-white font-bold text-lg tracking-wide">
+            BioVetTrack
+          </span>
         </Link>
       </div>
 

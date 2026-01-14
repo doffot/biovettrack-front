@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import Logo from "../../components/Logo";
 import { useMutation } from "@tanstack/react-query";
 import { validateToken } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import type { confirmToken } from "../../types";
-import { KeyRound, Mail, Shield, ArrowLeft } from "lucide-react";
+import { KeyRound, Mail, Shield, CheckCircle2 } from "lucide-react";
 
 type NewPasswordTokenProps = {
   setValidToken: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,197 +43,114 @@ export default function NewPasswordToken({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 lg:p-8">
-      
-      {/* Mobile & Tablet Layout */}
-      <div className="w-full max-w-md lg:hidden">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Logo size="lg" showText={true} showSubtitle={true} layout="vertical" />
-          <div className="mt-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-vet-light rounded-full mb-4">
-              <KeyRound className="w-8 h-8 text-vet-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Código de Verificación
-            </h1>
-            <p className="text-gray-600 text-sm">
-              Ingresa el código de 6 dígitos enviado a tu email
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen flex relative overflow-hidden">
+      {/* Fondo principal - Imagen completa */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1415369629372-26f2fe60c467?q=80&w=1200')",
+        }}
+      />
 
-        {/* Form Card */}
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-          
-          {/* Security Badge */}
-          <div className="flex justify-between items-center mb-6 p-3 bg-vet-light rounded-lg">
-            <div className="flex items-center gap-2 text-vet-primary text-sm">
-              <Shield className="w-4 h-4" />
-              <span>Código seguro</span>
-            </div>
-            <div className="text-sm text-vet-muted font-medium">
-              10 min
-            </div>
-          </div>
+      {/* Overlay - Más oscuro */}
+      <div className="absolute inset-0 bg-slate-900/90"></div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700 text-center mb-3">
-                Código de Verificación
-              </label>
-              <input
-                id="token"
-                type="text"
-                placeholder="000000"
-                maxLength={6}
-                className={`w-full px-6 py-4 bg-white border-2 rounded-xl text-gray-900 text-center text-2xl font-bold tracking-widest placeholder-gray-300 focus:outline-none transition-all duration-200 ${
-                  errors.token ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
-                }`}
-                {...register("token", {
-                  required: "El código es obligatorio",
-                  pattern: {
-                    value: /^[0-9]{6}$/,
-                    message: "Debe ser un código de 6 dígitos",
-                  },
-                })}
-              />
-              {errors.token && (
-                <p className="text-red-600 text-sm mt-2 text-center font-medium">
-                  {errors.token.message as string}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-            >
-              {isPending ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Validando código...</span>
-                </div>
-              ) : (
-                "Validar Código"
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 pt-5 border-t border-gray-200 text-center space-y-3">
-            <p className="text-gray-600 text-sm">
-              ¿No recibiste el código?
-            </p>
-            <Link
-              to="/auth/forgot-password"
-              className="inline-flex items-center justify-center w-full py-2.5 text-vet-primary hover:text-vet-secondary font-medium transition-colors"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Solicitar nuevo código
-            </Link>
-          </div>
-
-          <div className="mt-4 text-center">
-            <Link
-              to="/auth/login"
-              className="inline-flex items-center text-sm text-gray-600 hover:text-vet-primary font-medium transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al inicio de sesión
-            </Link>
-          </div>
-        </div>
-
-        {/* Help Text */}
-        <div className="mt-6 p-4 bg-vet-light rounded-lg border border-vet-primary/20">
-          <p className="text-vet-muted text-xs text-center">
-            💡 Revisa tu bandeja de spam si no encuentras el correo
-          </p>
-        </div>
+      {/* Iniciar Sesión - Esquina superior derecha */}
+      <div className="absolute top-8 right-8 z-20">
+        <Link
+          to="/auth/login"
+          className="text-white font-semibold px-6 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all shadow-lg"
+        >
+          Iniciar Sesión
+        </Link>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex w-full max-w-4xl bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        
-        {/* Left Panel */}
-        <div className="w-2/5 bg-gradient-to-br from-vet-primary to-vet-secondary p-8 flex flex-col justify-center">
-          <div className="text-white">
-            <div className="mb-6">
-              <Logo 
-                size="xl" 
-                showText={true} 
-                showSubtitle={true} 
-                layout="vertical" 
-                textClassName="text-white" 
-                subtitleClassName="text-white/80" 
-              />
-            </div>
-            
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
-              <KeyRound className="w-10 h-10 text-white" />
-            </div>
-
-            <h1 className="text-2xl font-bold mb-4">
-              Verifica tu identidad
+      {/* Contenedor principal con dos columnas */}
+      <div className="absolute inset-0 flex z-10">
+        {/* Columna izquierda - Título grande */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="max-w-xl">
+            <h1 className="text-7xl lg:text-8xl font-black text-white leading-tight mb-6 drop-shadow-2xl">
+              BioVetTrack
             </h1>
-            <p className="text-white/80 mb-6 leading-relaxed">
-              Por seguridad, hemos enviado un código de 6 dígitos a tu correo electrónico para restablecer tu contraseña.
+            <p className="text-3xl lg:text-4xl font-bold text-vet-accent drop-shadow-lg mb-8">
+              Verifica tu identidad
             </p>
             
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-white/90">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span className="text-sm">Código válido por 10 minutos</span>
+            {/* Características */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Código válido por 10 minutos
+                </span>
               </div>
-              <div className="flex items-center gap-3 text-white/90">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span className="text-sm">Revisa tu bandeja de spam</span>
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Proceso seguro y encriptado
+                </span>
               </div>
-              <div className="flex items-center gap-3 text-white/90">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span className="text-sm">Soporte disponible 24/7</span>
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Soporte disponible 24/7
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Panel */}
-        <div className="w-3/5 p-8 flex items-center justify-center">
-          <div className="w-full max-w-sm">
-            
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Verificar Código
-              </h2>
-              <p className="text-gray-600">
-                Ingresa el código de 6 dígitos que recibiste por email
+        {/* Columna derecha - Formulario */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <img
+                src="/logo_main.svg"
+                alt="BioVetTrack Logo"
+                className="h-48 w-auto drop-shadow-2xl"
+              />
+            </div>
+
+            {/* Título */}
+            <div className="mb-6 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-vet-accent/20 backdrop-blur-sm rounded-full mb-4 border-2 border-vet-accent/50">
+                <KeyRound className="w-8 h-8 text-vet-accent" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Verificar Código</h2>
+              <p className="text-white/90 text-sm font-medium leading-relaxed">
+                Ingresa el código de 6 dígitos enviado a tu email
               </p>
             </div>
 
             {/* Security Badge */}
-            <div className="flex justify-between items-center mb-6 p-4 bg-vet-light rounded-lg">
-              <div className="flex items-center gap-2 text-vet-primary text-sm font-medium">
-                <Shield className="w-4 h-4" />
-                <span>Código expira en 10 minutos</span>
-              </div>
+            <div className="flex items-center justify-center gap-2 mb-6 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <Shield className="w-5 h-5 text-vet-accent" />
+              <span className="text-sm text-white font-medium">Código expira en 10 minutos</span>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Formulario */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label htmlFor="token" className="block text-sm font-medium text-gray-700 text-center mb-3">
-                  Código de 6 dígitos
-                </label>
                 <input
-                  id="token"
                   type="text"
                   placeholder="000000"
                   maxLength={6}
-                  className={`w-full px-6 py-4 bg-white border-2 rounded-xl text-gray-900 text-center text-2xl font-bold tracking-widest placeholder-gray-300 focus:outline-none transition-all duration-200 ${
-                    errors.token ? 'border-red-300 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary'
+                  className={`w-full px-6 py-4 bg-transparent border-2 rounded-xl text-white text-center text-3xl font-bold tracking-[0.5em] placeholder-white/30 focus:outline-none transition-all
+                    autofill:bg-transparent autofill:text-white
+                    autofill:shadow-[0_0_0_1000px_transparent_inset]
+                    autofill:[-webkit-text-fill-color:white]
+                    ${
+                    errors.token 
+                      ? 'border-red-400 focus:ring-0' 
+                      : 'border-white/50 focus:border-vet-primary'
                   }`}
+                  style={{
+                    WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                    WebkitTextFillColor: "white",
+                  }}
                   {...register("token", {
                     required: "El código es obligatorio",
                     pattern: {
@@ -244,50 +160,56 @@ export default function NewPasswordToken({
                   })}
                 />
                 {errors.token && (
-                  <p className="text-red-600 text-sm mt-2 text-center font-medium">
+                  <p className="text-red-300 text-xs mt-2 px-3 py-1.5 rounded-lg font-semibold bg-black/20 backdrop-blur-sm text-center">
                     {errors.token.message as string}
                   </p>
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={isPending}
-                className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isPending ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Validando código...</span>
-                  </div>
-                ) : (
-                  "Validar Código"
-                )}
-              </button>
+              {/* Submit Button */}
+              <div className="flex justify-center pt-2">
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full bg-vet-primary text-white font-bold py-3.5 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[8px_8px_16px_rgba(8,95,122,0.4),-8px_-8px_16px_rgba(54,188,212,0.2)] hover:shadow-[12px_12px_24px_rgba(8,95,122,0.5),-12px_-12px_24px_rgba(54,188,212,0.3)] border-2 border-vet-accent/30"
+                >
+                  {isPending ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Validando...</span>
+                    </div>
+                  ) : (
+                    "Validar Código"
+                  )}
+                </button>
+              </div>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-gray-200 text-center space-y-3">
-              <p className="text-gray-600 text-sm">
+            {/* Links adicionales */}
+            <div className="mt-6 pt-5 border-t border-white/20 text-center space-y-3">
+              <p className="text-white/80 text-sm">
                 ¿No recibiste el código?
               </p>
               <Link
                 to="/auth/forgot-password"
-                className="inline-flex items-center justify-center w-full py-2.5 text-vet-primary hover:text-vet-secondary font-medium transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-vet-accent hover:text-white font-medium transition-colors text-sm"
               >
-                <Mail className="w-4 h-4 mr-2" />
+                <Mail className="w-4 h-4" />
                 Solicitar nuevo código
               </Link>
             </div>
 
-            <div className="mt-4 text-center">
-              <Link
-                to="/auth/login"
-                className="inline-flex items-center text-sm text-gray-600 hover:text-vet-primary font-medium transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al inicio de sesión
-              </Link>
+            {/* Help Text */}
+            <div className="mt-4 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+              <p className="text-white/70 text-xs text-center">
+                💡 Revisa tu bandeja de spam si no encuentras el correo
+              </p>
             </div>
+
+            {/* Copyright */}
+            <p className="text-center text-xs text-white/70 font-medium mt-6 drop-shadow-md">
+              © 2024 BioVetTrack. Sistema profesional de gestión veterinaria.
+            </p>
           </div>
         </div>
       </div>

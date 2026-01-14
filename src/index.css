@@ -640,3 +640,24 @@
     font-size: 0.75rem;
   }
 }
+
+/* ========================================
+   🔒 FORZAR TRANSPARENCIA EN AUTOCOMPLETADO (Chrome/Edge)
+   ======================================== */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: white !important; /* Ajusta si usas otro color de texto */
+  -webkit-text-fill-color: white !important; /* Esencial para Chrome */
+}
+
+/* Opcional: también aplica a selects si los usas */
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  background-color: transparent !important;
+}

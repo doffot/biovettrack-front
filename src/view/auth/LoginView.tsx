@@ -1,11 +1,12 @@
+// src/views/LoginView.tsx
+
 import { useForm } from "react-hook-form";
-import Logo from "../../components/Logo";
 import type { UserLoginForm } from "../../types";
 import { login } from "../../api/AuthAPI";
 import { toast } from "../../components/Toast";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, Shield, User } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 export default function LoginView() {
@@ -29,7 +30,10 @@ export default function LoginView() {
       toast.error(error.message);
     },
     onSuccess: () => {
-      toast.success('Acceso concedido', 'Panel clínico de BioVetTrack listo para operar.');
+      toast.success(
+        "Acceso concedido",
+        "Panel clínico de BioVetTrack listo para operar."
+      );
       navigate("/dashboard");
     },
   });
@@ -39,228 +43,223 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 lg:p-8">
-      {/* Container responsive */}
-      <div className="w-full max-w-md lg:max-w-6xl">
-        
-        {/* Desktop: Two column layout */}
-        <div className="lg:flex lg:bg-white lg:rounded-2xl lg:shadow-lg lg:border lg:border-gray-100 lg:overflow-hidden">
-          
-          {/* Left Panel - Solo visible en Desktop */}
-          <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-vet-primary to-vet-secondary p-12 flex-col justify-center relative">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white rounded-full"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white rounded-full"></div>
-            </div>
+    <div className="min-h-screen flex relative overflow-hidden">
+      {/* Fondo principal - Imagen completa */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1415369629372-26f2fe60c467?q=80&w=1200')",
+        }}
+      />
 
-            <div className="relative z-10">
-              <div className="mb-8">
-                <Logo
-                  size="xl"
-                  showText={true}
-                  showSubtitle={true}
-                  layout="vertical"
-                  textClassName="text-white"
-                  subtitleClassName="text-white/80"
-                />
+      {/* Overlay - Más oscuro */}
+      <div className="absolute inset-0 bg-slate-900/90"></div>
+
+      {/* Registrarse - Esquina superior derecha */}
+      <div className="absolute top-8 right-8 z-20">
+        <Link
+          to="/auth/register"
+          className="text-white font-semibold px-6 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all shadow-lg"
+        >
+          Registrarse
+        </Link>
+      </div>
+
+      {/* Contenedor principal con dos columnas */}
+      <div className="absolute inset-0 flex z-10">
+        {/* Columna izquierda - Título grande y características */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="max-w-xl">
+            <h1 className="text-7xl lg:text-8xl font-black text-white leading-tight mb-6 drop-shadow-2xl">
+              BioVetTrack
+            </h1>
+            <p className="text-3xl lg:text-4xl font-bold text-vet-accent drop-shadow-lg mb-8">
+              Sistema integral veterinario
+            </p>
+
+            {/* Lista de características */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Gestión integral de pacientes
+                </span>
               </div>
-
-              <div className="space-y-6">
-                <h1 className="text-3xl font-bold text-white leading-tight">
-                  Bienvenido de vuelta
-                </h1>
-                <p className="text-white/80 text-lg leading-relaxed">
-                  Accede a tu panel de control veterinario para gestionar
-                  pacientes, citas y servicios.
-                </p>
-
-                {/* Features List */}
-                <div className="space-y-4 mt-8">
-                  <div className="flex items-center gap-3 text-white/90">
-                    <User className="h-5 w-5" />
-                    <span className="text-sm">Gestión integral de pacientes</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-sm">Control de citas y servicios</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <span className="text-sm">Reportes y estadísticas</span>
-                  </div>
-                </div>
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Control de citas y servicios
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-white/80">
+                <CheckCircle2 className="h-6 w-6 text-vet-accent flex-shrink-0" />
+                <span className="text-base font-medium">
+                  Reportes y estadísticas
+                </span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Right Panel / Mobile Panel - El formulario ÚNICO */}
-          <div className="lg:w-1/2 lg:p-12 lg:flex lg:items-center lg:justify-center">
-            <div className="w-full lg:max-w-sm">
-              
-              {/* Header Mobile - Solo visible en mobile/tablet */}
-              <div className="text-center mb-8 lg:hidden">
-                <Logo
-                  size="xl"
-                  showText={true}
-                  showSubtitle={true}
-                  layout="vertical"
-                />
-                <div className="mt-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    Bienvenido de vuelta
-                  </h1>
-                  <p className="text-gray-600 text-sm">
-                    Accede a tu panel de control veterinario
-                  </p>
+        {/* Columna derecha - Formulario */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            {/* Logo SVG centrado */}
+            <div className="flex justify-center mb-8">
+              <img
+                src="/logo_main.svg"
+                alt="BioVetTrack Logo"
+                className="h-48 w-auto drop-shadow-2xl"
+              />
+            </div>
+
+            {/* Descripción */}
+            <div className="mb-6 text-center">
+              <p className="text-white/90 text-sm font-medium leading-relaxed">
+                Accede a tu panel de control veterinario para gestionar
+                pacientes, citas y servicios.
+              </p>
+            </div>
+
+            {/* Formulario */}
+            <form onSubmit={handleSubmit(handleLogin)} className="space-y-5">
+              {/* Email Field */}
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-3 pointer-events-none">
+                    <img
+                      src="/vet_user.svg"
+                      alt="User icon"
+                      className="h-7 w-auto drop-shadow-2xl"
+                    />
+                    <span className="text-xs font-bold text-white uppercase tracking-wide">
+                      Email
+                    </span>
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    autoComplete="email"
+                    className={`w-full pl-28 pr-4 py-3.5 bg-transparent border rounded-xl text-white placeholder-transparent font-medium focus:outline-none transition-all
+                      autofill:bg-transparent autofill:text-white
+                      autofill:shadow-[0_0_0_1000px_transparent_inset]
+                      autofill:[-webkit-text-fill-color:white]
+                      ${
+                      errors.email
+                        ? "border-red-400 focus:ring-0"
+                        : "border-white/50 focus:border-vet-primary"
+                    }`}
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                      WebkitTextFillColor: "white",
+                    }}
+                    {...register("email", {
+                      required: "El correo es obligatorio",
+                      pattern: {
+                        value: /\S+@\S+\.\S+/,
+                        message: "Correo inválido",
+                      },
+                    })}
+                  />
                 </div>
+                {errors.email && (
+                  <p className="text-red-300 text-xs mt-2 px-3 py-1.5 rounded-lg font-semibold bg-black/20 backdrop-blur-sm">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
-              {/* Header Desktop - Solo visible en desktop */}
-              <div className="hidden lg:block mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Iniciar Sesión
-                </h2>
-                <p className="text-gray-600">
-                  Ingresa tus credenciales para acceder al sistema
-                </p>
-              </div>
-
-              {/* Form Card - Mobile tiene estilos de card */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 lg:bg-transparent lg:shadow-none lg:border-none lg:p-0">
-                
-                {/* ✅ FORMULARIO ÚNICO */}
-                <form onSubmit={handleSubmit(handleLogin)} className="space-y-5 lg:space-y-6">
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Correo Electrónico
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="email"
-                        placeholder="correo@ejemplo.com"
-                        className={`w-full pl-10 pr-4 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
-                          errors.email
-                            ? "border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary"
-                        }`}
-                        {...register("email", {
-                          required: "El correo electrónico es obligatorio",
-                          pattern: {
-                            value: /\S+@\S+\.\S+/,
-                            message: "Correo electrónico no válido",
-                          },
-                        })}
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="text-red-600 text-sm font-medium">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
+              {/* Password Field */}
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-3 pointer-events-none">
+                    <img
+                      src="/vet_pass.svg"
+                      alt="Password icon"
+                      className="h-7 w-auto drop-shadow-2xl"
+                    />
+                    <span className="text-xs font-bold text-white uppercase tracking-wide">
                       Contraseña
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Tu contraseña"
-                        className={`w-full pl-10 pr-12 py-3 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none transition-all ${
-                          errors.password
-                            ? "border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:ring-2 focus:ring-vet-primary focus:border-vet-primary"
-                        }`}
-                        {...register("password", {
-                          required: "La contraseña es obligatoria",
-                          minLength: {
-                            value: 6,
-                            message: "La contraseña debe tener al menos 6 caracteres",
-                          },
-                        })}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-red-600 text-sm font-medium">
-                        {errors.password.message}
-                      </p>
-                    )}
+                    </span>
                   </div>
-
-                  {/* Forgot Password */}
-                  <div className="text-right">
-                    <Link
-                      to="/auth/forgot-password"
-                      className="text-sm text-vet-primary hover:text-vet-secondary font-medium transition-colors"
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </Link>
-                  </div>
-
-                  {/* Submit Button */}
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Tu contraseña"
+                    autoComplete="current-password"
+                    className={`w-full pl-44 pr-12 py-3.5 bg-transparent border rounded-xl text-white placeholder-gray-300 font-medium focus:outline-none transition-all
+                      autofill:bg-transparent autofill:text-white
+                      autofill:shadow-[0_0_0_1000px_transparent_inset]
+                      autofill:[-webkit-text-fill-color:white]
+                      ${
+                      errors.password
+                        ? "border-red-400 focus:ring-0"
+                        : "border-white/50 focus:border-vet-primary"
+                    }`}
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                      WebkitTextFillColor: "white",
+                    }}
+                    {...register("password", {
+                      required: "La contraseña es obligatoria",
+                      minLength: {
+                        value: 6,
+                        message: "Mínimo 6 caracteres",
+                      },
+                    })}
+                  />
                   <button
-                    type="submit"
-                    disabled={isPending}
-                    className="w-full bg-vet-primary text-white font-medium py-3.5 rounded-lg hover:bg-vet-secondary focus:outline-none focus:ring-2 focus:ring-vet-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-1/2 -translate-y-1/2 right-4 flex items-center text-vet-muted hover:text-vet-accent transition-colors"
                   >
-                    {isPending ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Iniciando sesión...</span>
-                      </div>
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      "Iniciar Sesión"
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
-                </form>
-
-                {/* Register Link */}
-                <div className="mt-6 pt-6 border-t border-gray-200 text-center lg:mt-8">
-                  <p className="text-gray-600 text-sm">
-                    ¿No tienes cuenta?{" "}
-                    <Link
-                      to="/auth/register"
-                      className="text-vet-primary hover:text-vet-secondary font-medium transition-colors"
-                    >
-                      Regístrate aquí
-                    </Link>
+                </div>
+                {errors.password && (
+                  <p className="text-red-300 text-xs mt-2 px-3 py-1.5 rounded-lg font-semibold bg-black/20 backdrop-blur-sm">
+                    {errors.password.message}
                   </p>
-                </div>
+                )}
               </div>
 
-              {/* Security Notice - Solo Mobile */}
-              <div className="mt-6 p-4 bg-vet-light rounded-lg border border-vet-primary/20 lg:hidden">
-                <div className="flex items-center justify-center gap-2 text-vet-primary text-sm">
-                  <Shield className="h-4 w-4" />
-                  <span>Tus datos están protegidos con encriptación</span>
-                </div>
+              {/* Olvidaste tu contraseña - Debajo del campo de contraseña */}
+              <div className="text-right">
+                <Link
+                  to="/auth/forgot-password"
+                  className="text-white/80 hover:text-white text-sm font-medium transition-colors underline decoration-white/40 hover:decoration-white"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
-            </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-center pt-2">
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full bg-vet-primary text-white font-bold py-3.5 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[8px_8px_16px_rgba(8,95,122,0.4),-8px_-8px_16px_rgba(54,188,212,0.2)] hover:shadow-[12px_12px_24px_rgba(8,95,122,0.5),-12px_-12px_24px_rgba(54,188,212,0.3)] border-2 border-vet-accent/30"
+                >
+                  {isPending ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Cargando...</span>
+                    </div>
+                  ) : (
+                    "Iniciar Sesión"
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Copyright */}
+            <p className="text-center text-xs text-white/70 font-medium mt-6 drop-shadow-md">
+              © 2024 BioVetTrack. Sistema profesional de gestión veterinaria.
+            </p>
           </div>
         </div>
       </div>

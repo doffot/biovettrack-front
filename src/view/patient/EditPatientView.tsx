@@ -30,8 +30,8 @@ export default function EditPatientView() {
     sex: "",
     breed: "",
     weight: 0,
-    color: "", // ✅ Nuevo campo
-    identification: "", // ✅ Nuevo campo
+    color: "", 
+    identification: "", 
   });
 
   const [ageText, setAgeText] = useState<string>('');
@@ -52,8 +52,8 @@ export default function EditPatientView() {
         sex: patient.sex,
         breed: patient.breed || "",
         weight: patient.weight || 0,
-        color: patient.color || "", // ✅ Nuevo campo
-        identification: patient.identification || "", // ✅ Nuevo campo
+        color: patient.color || "",
+        identification: patient.identification || "", 
       });
       calculateAge(birthDate);
     }
@@ -70,7 +70,7 @@ export default function EditPatientView() {
       toast.error(error.message || "Error al actualizar la mascota");
     },
     onSuccess: () => {
-      toast.success("Información actualizada con éxito");
+      toast.success(`"${patient?.name}" actualizado/a`, 'Los datos han sido guardados correctamente.');
       queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
       queryClient.invalidateQueries({ queryKey: ["patients"] });
       navigate(`/patients/${patientId}`);
