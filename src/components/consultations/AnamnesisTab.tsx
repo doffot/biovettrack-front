@@ -1,4 +1,3 @@
-// src/components/consultations/AnamnesisTab.tsx
 import type { ConsultationFormData } from "../../types/consultation";
 import {
   TextInput,
@@ -138,7 +137,7 @@ export default function AnamnesisTab({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-2">
               Heces:
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -463,7 +462,7 @@ export default function AnamnesisTab({
         </div>
       </Section>
 
-      {/* ✅ OBSERVACIONES GENERALES - Usando adverseReactions */}
+      {/*  OBSERVACIONES GENERALES */}
       <Section title="Observaciones generales">
         <TextArea
           label="Alergias, reacciones adversas y observaciones adicionales"

@@ -138,23 +138,23 @@ export default function GroomingServicesView() {
 
   const getPaymentStatusBadge = (status: string): string => {
     const styles: Record<string, string> = {
-      'Pendiente': 'bg-orange-100 text-orange-700 border border-orange-200',
-      'Pagado': 'bg-green-100 text-green-700 border border-green-200',
-      'Parcial': 'bg-blue-100 text-blue-700 border border-blue-200',
-      'Cancelado': 'bg-red-100 text-red-700 border border-red-200',
-      'Sin facturar': 'bg-gray-100 text-gray-700 border border-gray-200'
+      'Pendiente': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+      'Pagado': 'bg-green-500/20 text-green-400 border border-green-500/30',
+      'Parcial': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+      'Cancelado': 'bg-red-500/20 text-red-400 border border-red-500/30',
+      'Sin facturar': 'bg-slate-700 text-slate-400 border border-slate-600'
     };
-    return styles[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
+    return styles[status] || 'bg-slate-700 text-slate-400 border border-slate-600';
   };
 
   const getPaymentStatusIcon = (status: string): ReactElement => {
     switch (status) {
-      case 'Pagado': return <CheckCircle className="w-3 h-3 text-green-600" />;
-      case 'Pendiente': return <Clock className="w-3 h-3 text-orange-600" />;
-      case 'Parcial': return <AlertTriangle className="w-3 h-3 text-blue-600" />;
-      case 'Cancelado': return <XCircle className="w-3 h-3 text-red-600" />;
-      case 'Sin facturar': return <AlertCircle className="w-3 h-3 text-gray-500" />;
-      default: return <Clock className="w-3 h-3 text-gray-500" />;
+      case 'Pagado': return <CheckCircle className="w-3 h-3 text-green-400" />;
+      case 'Pendiente': return <Clock className="w-3 h-3 text-orange-400" />;
+      case 'Parcial': return <AlertTriangle className="w-3 h-3 text-blue-400" />;
+      case 'Cancelado': return <XCircle className="w-3 h-3 text-red-400" />;
+      case 'Sin facturar': return <AlertCircle className="w-3 h-3 text-slate-500" />;
+      default: return <Clock className="w-3 h-3 text-slate-500" />;
     }
   };
 
@@ -248,6 +248,8 @@ export default function GroomingServicesView() {
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState error={error as Error} />;
 
+  
+
   return (
     <>
       <Header 
@@ -315,13 +317,13 @@ function ErrorState({ error }: { error: Error }) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-center h-[70vh]">
-        <div className="bg-white p-8 rounded-2xl border border-red-200 text-center max-w-md mx-auto shadow-sm">
-          <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Error al cargar servicios</h2>
-          <p className="text-gray-600 mb-6">{error.message || 'Error desconocido'}</p>
+        <div className="bg-sky-soft p-8 rounded-2xl border border-red-500/30 text-center max-w-md mx-auto shadow-lg shadow-black/20">
+          <AlertCircle className="w-16 h-16 mx-auto text-red-400 mb-4" />
+          <h2 className="text-2xl font-bold text-vet-text mb-3">Error al cargar servicios</h2>
+          <p className="text-vet-muted mb-6">{error.message || 'Error desconocido'}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all shadow-lg shadow-vet-primary/20"
           >
             Reintentar
           </button>
@@ -333,18 +335,18 @@ function ErrorState({ error }: { error: Error }) {
 
 function EmptyState({ searchTerm }: { searchTerm: string }) {
   return (
-    <div className="bg-white rounded-2xl p-12 text-center border border-gray-200 shadow-sm">
-      <Scissors className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-2xl font-bold text-gray-900 mb-3">
+    <div className="bg-sky-soft rounded-2xl p-12 text-center border border-slate-700/50 shadow-lg shadow-black/10">
+      <Scissors className="w-16 h-16 text-vet-muted mx-auto mb-4" />
+      <h3 className="text-2xl font-bold text-vet-text mb-3">
         {searchTerm ? "No hay resultados" : "No hay servicios hoy"}
       </h3>
-      <p className="text-gray-600 mb-6">
+      <p className="text-vet-muted mb-6">
         {searchTerm ? "Intenta con otros términos de búsqueda" : "No se encontraron servicios programados para hoy"}
       </p>
       {!searchTerm && (
         <Link 
           to="/patients" 
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all shadow-lg shadow-vet-primary/20"
         >
           <Plus className="w-5 h-5" />
           Crear Primer Servicio
@@ -360,24 +362,24 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
   setSearchTerm: (value: string) => void;
 }) {
   return (
-    <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-gray-100 shadow-sm">
+    <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-sky-soft border-b border-slate-700/50 shadow-lg shadow-black/10">
       <div className="px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <Link 
               to="/" 
-              className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-vet-primary/20 text-vet-primary transition-colors flex-shrink-0 border border-slate-700"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <div className="hidden sm:block p-2 bg-vet-primary/10 rounded-lg">
-                  <Scissors className="w-5 h-5 text-vet-primary" />
+                <div className="hidden sm:block p-2 bg-vet-primary/20 border border-vet-primary/30 rounded-lg">
+                  <Scissors className="w-5 h-5 text-vet-accent" />
                 </div>
                 <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">Peluquería</h1>
-                  <p className="text-xs sm:text-sm text-gray-500">
+                  <h1 className="text-lg sm:text-xl font-bold text-vet-text">Peluquería</h1>
+                  <p className="text-xs sm:text-sm text-vet-muted">
                     {totalsCount} servicios hoy
                   </p>
                 </div>
@@ -389,14 +391,14 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
             {/* Versión móvil - solo icono */}
             <Link 
               to="/patients" 
-              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white transition-all shadow-sm hover:shadow-md"
+              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white transition-all shadow-lg shadow-vet-primary/30"
             >
               <Plus className="w-5 h-5" />
             </Link>
             {/* Versión desktop - icono + texto */}
             <Link 
               to="/patients" 
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-sm hover:shadow-md"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-medium text-sm transition-all shadow-lg shadow-vet-primary/30"
             >
               <Plus className="w-4 h-4" />
               <span>Nuevo Servicio</span>
@@ -407,14 +409,14 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
         <div className="max-w-md">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="w-4 h-4 text-gray-400" />
+              <Search className="w-4 h-4 text-vet-muted" />
             </div>
             <input
               type="text"
               placeholder="Buscar servicios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors text-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-vet-light border border-slate-700 rounded-lg text-vet-text placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors text-sm"
             />
           </div>
         </div>

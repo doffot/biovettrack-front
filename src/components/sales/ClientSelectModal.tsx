@@ -43,7 +43,7 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
   });
 
   // Query clientes
-  const { data: owners = [], isLoading } = useQuery({
+  const {  data:owners = [], isLoading } = useQuery({
     queryKey: ["owners"],
     queryFn: getOwners,
     enabled: isOpen,
@@ -126,7 +126,7 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={handleSkip} />
 
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
         {/* Header */}
         <div className="bg-vet-primary p-4">
           <div className="flex items-center justify-between">
@@ -169,13 +169,13 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
           <div className="p-4">
             {/* Buscador */}
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, teléfono o cédula..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 autoFocus
               />
             </div>
@@ -185,12 +185,12 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
               {isLoading ? (
                 <div className="py-8 text-center">
                   <Loader2 className="w-6 h-6 animate-spin text-vet-primary mx-auto" />
-                  <p className="text-sm text-gray-500 mt-2">Cargando...</p>
+                  <p className="text-sm text-vet-muted mt-2">Cargando...</p>
                 </div>
               ) : filteredOwners.length === 0 ? (
                 <div className="py-8 text-center">
-                  <User className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">
+                  <User className="w-10 h-10 text-slate-500 mx-auto mb-2" />
+                  <p className="text-vet-muted text-sm">
                     {search ? "No se encontraron clientes" : "No hay clientes registrados"}
                   </p>
                 </div>
@@ -199,17 +199,17 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
                   <button
                     key={owner._id}
                     onClick={() => handleSelectOwner(owner)}
-                    className="w-full p-3 text-left rounded-xl border border-gray-200 hover:border-vet-primary hover:bg-vet-light transition-all flex items-center gap-3"
+                    className="w-full p-3 text-left rounded-xl border border-slate-700 hover:border-vet-primary hover:bg-vet-primary/10 transition-all flex items-center gap-3"
                   >
-                    <div className="w-10 h-10 rounded-full bg-vet-light flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-vet-primary/20 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-vet-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-vet-text truncate">{owner.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{owner.contact}</p>
+                      <p className="text-xs text-vet-muted truncate">{owner.contact}</p>
                     </div>
                     {(owner.creditBalance || 0) > 0 && (
-                      <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                      <span className="text-xs font-medium text-green-400 bg-green-900/20 px-2 py-1 rounded-full border border-green-700/50">
                         ${owner.creditBalance?.toFixed(2)}
                       </span>
                     )}
@@ -219,10 +219,10 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
             </div>
 
             {/* Acciones */}
-            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+            <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
               <button
                 onClick={() => setView("create")}
-                className="w-full py-2.5 flex items-center justify-center gap-2 text-vet-primary font-medium rounded-xl border-2 border-dashed border-vet-primary/30 hover:border-vet-primary hover:bg-vet-light transition-all"
+                className="w-full py-2.5 flex items-center justify-center gap-2 text-vet-primary font-medium rounded-xl border-2 border-dashed border-vet-primary/30 hover:border-vet-primary hover:bg-vet-primary/10 transition-all"
               >
                 <UserPlus className="w-4 h-4" />
                 Crear nuevo cliente
@@ -230,7 +230,7 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
 
               <button
                 onClick={handleSkip}
-                className="w-full py-2.5 flex items-center justify-center gap-2 text-gray-500 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                className="w-full py-2.5 flex items-center justify-center gap-2 text-vet-muted font-medium rounded-xl hover:bg-slate-700 transition-colors"
               >
                 Continuar sin cliente
                 <ArrowRight className="w-4 h-4" />
@@ -242,14 +242,14 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
             {/* Nombre */}
             <div>
               <label className="block text-sm font-medium text-vet-text mb-1">
-                Nombre <span className="text-red-500">*</span>
+                Nombre <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Nombre completo"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                className="w-full px-3 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 autoFocus
               />
             </div>
@@ -257,16 +257,16 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
             {/* Teléfono */}
             <div>
               <label className="block text-sm font-medium text-vet-text mb-1">
-                Teléfono <span className="text-red-500">*</span>
+                Teléfono <span className="text-red-400">*</span>
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   value={formData.contact}
                   onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                   placeholder="0412-1234567"
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
               </div>
             </div>
@@ -274,16 +274,16 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
             {/* Email (opcional) */}
             <div>
               <label className="block text-sm font-medium text-vet-text mb-1">
-                Email <span className="text-gray-400 font-normal">(opcional)</span>
+                Email <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
                   value={formData.email || ""}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="correo@ejemplo.com"
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
               </div>
             </div>
@@ -291,14 +291,14 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
             {/* Cédula (opcional) */}
             <div>
               <label className="block text-sm font-medium text-vet-text mb-1">
-                Cédula <span className="text-gray-400 font-normal">(opcional)</span>
+                Cédula <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
               <input
                 type="text"
                 value={formData.nationalId || ""}
                 onChange={(e) => setFormData({ ...formData, nationalId: e.target.value })}
                 placeholder="V-12345678"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                className="w-full px-3 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
               />
             </div>
 
@@ -307,7 +307,7 @@ export function ClientSelectModal({ isOpen, onSelect, onSkip }: ClientSelectModa
               <button
                 type="button"
                 onClick={() => setView("select")}
-                className="flex-1 py-2.5 text-gray-600 font-medium rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 text-vet-muted font-medium rounded-xl border border-slate-700 hover:bg-slate-700 transition-colors"
               >
                 Cancelar
               </button>

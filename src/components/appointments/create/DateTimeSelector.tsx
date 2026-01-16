@@ -1,5 +1,3 @@
-// src/components/appointments/create/DateTimeSelector.tsx
-
 import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Clock } from "lucide-react";
 import type { Appointment } from "../../../types/appointment";
@@ -153,9 +151,9 @@ export default function DateTimeSelector({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-vet-light shadow-soft overflow-hidden">
+    <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-soft overflow-hidden">
       {/* Header con mes y año */}
-      <div className="bg-vet-sidebar px-4 py-3">
+      <div className="bg-[var(--color-vet-primary)] px-4 py-3">
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -183,12 +181,12 @@ export default function DateTimeSelector({
       </div>
 
       {/* Selector de días horizontal con flechas */}
-      <div className="p-4 border-b border-vet-light">
+      <div className="p-4 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => scrollDays("left")}
-            className="flex-shrink-0 p-2 rounded-lg bg-vet-light hover:bg-vet-accent hover:text-white text-vet-text transition-colors"
+            className="flex-shrink-0 p-2 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-vet-accent)] hover:text-white text-[var(--color-vet-text)] transition-colors border border-[var(--color-border)]"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -212,15 +210,15 @@ export default function DateTimeSelector({
                   disabled={dayIsPast}
                   className={`
                     flex-shrink-0 flex flex-col items-center justify-center
-                    w-14 h-16 rounded-xl transition-all duration-200
+                    w-14 h-16 rounded-xl transition-all duration-200 border
                     ${
                       dayIsSelected
-                        ? "bg-vet-primary text-white shadow-lg"
+                        ? "bg-[var(--color-vet-primary)] text-white shadow-lg border-[var(--color-vet-primary)]"
                         : dayIsToday
-                        ? "bg-vet-light text-vet-primary ring-2 ring-vet-accent"
+                        ? "bg-[var(--color-hover)] text-[var(--color-vet-primary)] ring-2 ring-[var(--color-vet-accent)] border-transparent"
                         : dayIsPast
-                        ? "bg-sky-soft text-vet-muted cursor-not-allowed opacity-50"
-                        : "bg-vet-light text-vet-text hover:bg-vet-accent hover:text-white"
+                        ? "bg-[var(--color-card)] text-[var(--color-vet-muted)] cursor-not-allowed opacity-50 border-[var(--color-border)]"
+                        : "bg-[var(--color-hover)] text-[var(--color-vet-text)] hover:bg-[var(--color-vet-accent)] hover:text-white border-[var(--color-border)]"
                     }
                   `}
                 >
@@ -236,7 +234,7 @@ export default function DateTimeSelector({
           <button
             type="button"
             onClick={() => scrollDays("right")}
-            className="flex-shrink-0 p-2 rounded-lg bg-vet-light hover:bg-vet-accent hover:text-white text-vet-text transition-colors"
+            className="flex-shrink-0 p-2 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-vet-accent)] hover:text-white text-[var(--color-vet-text)] transition-colors border border-[var(--color-border)]"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -246,12 +244,12 @@ export default function DateTimeSelector({
       {/* Selector de horas */}
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-vet-muted" />
-          <span className="text-sm font-semibold text-vet-text">
+          <Clock className="w-4 h-4 text-[var(--color-vet-muted)]" />
+          <span className="text-sm font-semibold text-[var(--color-vet-text)]">
             Horarios disponibles
           </span>
           {selectedTime && (
-            <span className="ml-auto text-xs bg-vet-light text-vet-primary px-2 py-1 rounded-full font-medium">
+            <span className="ml-auto text-xs bg-[var(--color-hover)] text-[var(--color-vet-primary)] px-2 py-1 rounded-full font-medium border border-[var(--color-vet-primary)]/30">
               {timeSlots.find(s => s.value === selectedTime)?.label}
             </span>
           )}
@@ -266,13 +264,13 @@ export default function DateTimeSelector({
               disabled={slot.isDisabled}
               title={slot.isDisabled ? `Ocupado: ${slot.patientName || 'Cita existente'}` : `Seleccionar ${slot.label}`}
               className={`
-                p-2 text-xs rounded-lg font-medium transition-all duration-200
+                p-2 text-xs rounded-lg font-medium transition-all duration-200 border
                 ${
                   selectedTime === slot.value
-                    ? "bg-vet-primary text-white shadow-md"
+                    ? "bg-[var(--color-vet-primary)] text-white shadow-md border-[var(--color-vet-primary)]"
                     : slot.isDisabled
-                    ? "bg-red-50 text-red-300 cursor-not-allowed line-through"
-                    : "bg-vet-light text-vet-text hover:bg-vet-accent hover:text-white"
+                    ? "bg-red-600/10 text-red-400 cursor-not-allowed line-through border-red-500/20"
+                    : "bg-[var(--color-hover)] text-[var(--color-vet-text)] hover:bg-[var(--color-vet-accent)] hover:text-white border-[var(--color-border)]"
                 }
               `}
             >

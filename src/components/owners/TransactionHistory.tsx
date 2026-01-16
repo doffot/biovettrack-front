@@ -14,6 +14,8 @@ import {
   ArrowUpRight,
   History,
   Calendar,
+  X,
+  Filter,
 } from "lucide-react";
 import type { Invoice } from "../../types/invoice";
 import type { Patient } from "../../types/patient";
@@ -39,8 +41,8 @@ interface TransactionHistoryProps {
   invoices: Invoice[];
   creditBalance?: number;
   isLoading?: boolean;
-  owner?: Owner;  // ✅ NUEVO
-  patients?: Patient[];  // ✅ NUEVO
+  owner?: Owner;
+  patients?: Patient[];
   onPayInvoice?: (invoiceId: string, paymentData: PaymentData) => Promise<void>;
   onPayAll?: (invoiceIds: string[], paymentData: PaymentData) => Promise<void>;
 }
@@ -49,8 +51,8 @@ export function TransactionHistory({
   invoices,
   creditBalance = 0,
   isLoading,
-  owner,  // ✅ NUEVO
-  patients = [],  // ✅ NUEVO
+  owner,
+  patients = [],
   onPayInvoice,
   onPayAll,
 }: TransactionHistoryProps) {
@@ -64,7 +66,6 @@ export function TransactionHistory({
 
   // ==================== HELPERS PARA EL MODAL ====================
 
-  // Convertir items de invoice a PaymentServiceItem
   const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
     if (!invoice.items || invoice.items.length === 0) return [];
     return invoice.items.map((item) => ({
@@ -75,7 +76,6 @@ export function TransactionHistory({
     }));
   };
 
-  // Obtener info del paciente de una factura
   const getPatientInfo = (invoice: Invoice): PaymentPatientInfo | undefined => {
     const patient = patients.find((p) => {
       if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
@@ -89,7 +89,6 @@ export function TransactionHistory({
       };
     }
 
-    // Fallback al nombre del patientId poblado
     if (typeof invoice.patientId === "object" && invoice.patientId) {
       return { name: invoice.patientId.name };
     }
@@ -97,7 +96,6 @@ export function TransactionHistory({
     return undefined;
   };
 
-  // Obtener info del owner
   const getOwnerInfo = (): PaymentOwnerInfo | undefined => {
     if (!owner) return undefined;
     return {
@@ -108,9 +106,9 @@ export function TransactionHistory({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-8">
+      <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 p-8 shadow-xl">
         <div className="flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-vet-accent border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -118,7 +116,6 @@ export function TransactionHistory({
 
   // Filtrar facturas
   const filteredInvoices = invoices.filter((inv) => {
-    // Filtro por búsqueda
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       const patientName = getPatientName(inv).toLowerCase();
@@ -128,7 +125,6 @@ export function TransactionHistory({
       }
     }
 
-    // Filtro por tipo
     if (filter === "pending") {
       return inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial";
     }
@@ -141,12 +137,10 @@ export function TransactionHistory({
     return true;
   });
 
-  // Ordenar por fecha (más reciente primero)
   const sortedInvoices = [...filteredInvoices].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  // Agrupar por fecha
   const groupedByDate = sortedInvoices.reduce((acc, invoice) => {
     const date = new Date(invoice.date).toLocaleDateString("es-ES", {
       year: "numeric",
@@ -212,13 +206,13 @@ export function TransactionHistory({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "Pagado":
-        return { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" };
+        return { icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/30" };
       case "Parcial":
-        return { icon: Clock, color: "text-amber-600", bg: "bg-amber-100" };
+        return { icon: Clock, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/30" };
       case "Pendiente":
-        return { icon: AlertCircle, color: "text-red-600", bg: "bg-red-100" };
+        return { icon: AlertCircle, color: "text-red-400", bg: "bg-red-500/20", border: "border-red-500/30" };
       default:
-        return { icon: FileText, color: "text-gray-600", bg: "bg-gray-100" };
+        return { icon: FileText, color: "text-slate-400", bg: "bg-slate-500/20", border: "border-slate-500/30" };
     }
   };
 
@@ -229,8 +223,7 @@ export function TransactionHistory({
     return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
   };
 
-  // ==================== DATOS PARA EL MODAL ====================
-
+  // Datos para el modal
   const modalServices: PaymentServiceItem[] = payAllMode
     ? pendingInvoices.flatMap((inv) => getInvoiceServices(inv))
     : selectedInvoice
@@ -238,7 +231,7 @@ export function TransactionHistory({
       : [];
 
   const modalPatient: PaymentPatientInfo | undefined = payAllMode
-    ? undefined  // No mostrar paciente específico si son varias facturas
+    ? undefined
     : selectedInvoice
       ? getPatientInfo(selectedInvoice)
       : undefined;
@@ -253,24 +246,27 @@ export function TransactionHistory({
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden shadow-xl">
         {/* Header */}
-        <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-3">
+        <div className="px-4 py-4 bg-gradient-to-r from-slate-800/60 via-slate-800/40 to-slate-800/60 border-b border-white/10">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <History className="w-5 h-5 text-gray-700" />
-              <h3 className="font-semibold text-gray-900">Transacciones</h3>
-              <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs font-medium rounded-full">
+              <div className="p-1.5 bg-vet-accent/20 rounded-lg border border-vet-accent/30">
+                <History className="w-4 h-4 text-vet-accent" />
+              </div>
+              <h3 className="font-semibold text-white">Transacciones</h3>
+              <span className="px-2 py-0.5 bg-slate-700/50 text-slate-300 text-xs font-medium rounded-full border border-white/10">
                 {invoices.length}
               </span>
             </div>
+            
             {pendingInvoices.length > 1 && onPayAll && (
               <button
                 onClick={handleOpenPayAll}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-emerald-500/25"
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                Pagar Todo
+                Pagar Todo (${totalDebtUSD.toFixed(2)})
               </button>
             )}
           </div>
@@ -278,30 +274,40 @@ export function TransactionHistory({
           {/* Búsqueda y filtros */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Buscar por mascota o descripción..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                className="w-full pl-9 pr-8 py-2.5 text-sm bg-slate-800/60 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-vet-accent/50 focus:border-vet-accent/50 transition-all"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-slate-400" />
+                </button>
+              )}
             </div>
-            <div className="flex gap-1">
+            
+            <div className="flex gap-1 bg-slate-800/40 p-1 rounded-xl border border-white/10">
               {[
-                { value: "all", label: "Todas" },
-                { value: "pending", label: "Pendientes" },
-                { value: "payments", label: "Pagadas" },
+                { value: "all", label: "Todas", icon: Filter },
+                { value: "pending", label: "Pendientes", icon: AlertCircle },
+                { value: "payments", label: "Pagadas", icon: CheckCircle2 },
               ].map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setFilter(opt.value as FilterType)}
-                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 ${
                     filter === opt.value
-                      ? "bg-slate-800 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-vet-accent text-slate-900 shadow-lg shadow-vet-accent/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
+                  <opt.icon className="w-3 h-3" />
                   {opt.label}
                 </button>
               ))}
@@ -310,20 +316,27 @@ export function TransactionHistory({
         </div>
 
         {/* Lista de transacciones */}
-        <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+        <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto custom-scrollbar">
           {Object.keys(groupedByDate).length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500 text-sm">No hay transacciones</p>
+              <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 rounded-full flex items-center justify-center border border-white/10">
+                <FileText className="w-8 h-8 text-slate-500" />
+              </div>
+              <p className="text-white font-medium mb-1">No hay transacciones</p>
+              <p className="text-slate-500 text-sm">
+                {searchTerm || filter !== "all" ? "Prueba con otros filtros" : "Aún no se han registrado movimientos"}
+              </p>
             </div>
           ) : (
             Object.entries(groupedByDate).map(([date, dateInvoices]) => (
               <div key={date}>
                 {/* Fecha separadora */}
-                <div className="px-4 py-2 bg-gray-50 sticky top-0 z-10">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <Calendar className="w-3.5 h-3.5" />
+                <div className="px-4 py-2 bg-slate-800/40 sticky top-0 z-10 backdrop-blur-sm border-b border-white/5">
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <Calendar className="w-3.5 h-3.5 text-vet-accent" />
                     <span className="font-medium">{date}</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-slate-500">{dateInvoices.length} transacción{dateInvoices.length !== 1 ? "es" : ""}</span>
                   </div>
                 </div>
 
@@ -336,32 +349,34 @@ export function TransactionHistory({
                   const isPending = invoice.paymentStatus === "Pendiente" || invoice.paymentStatus === "Parcial";
 
                   return (
-                    <div key={invoice._id} className="hover:bg-gray-50/50 transition-colors">
+                    <div key={invoice._id} className="hover:bg-white/[0.02] transition-colors">
                       <div className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {/* Icono de tipo */}
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                            isPending ? "bg-red-50" : "bg-emerald-50"
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                            isPending 
+                              ? "bg-red-500/10 border-red-500/30" 
+                              : "bg-emerald-500/10 border-emerald-500/30"
                           }`}>
                             {isPending ? (
-                              <ArrowUpRight className="w-5 h-5 text-red-500" />
+                              <ArrowUpRight className="w-5 h-5 text-red-400" />
                             ) : (
-                              <ArrowDownLeft className="w-5 h-5 text-emerald-500" />
+                              <ArrowDownLeft className="w-5 h-5 text-emerald-400" />
                             )}
                           </div>
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900 text-sm truncate">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-white text-sm truncate">
                                 {getPatientName(invoice)}
                               </span>
-                              <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${status.bg} ${status.color}`}>
+                              <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${status.bg} ${status.color} ${status.border}`}>
                                 <StatusIcon className="w-2.5 h-2.5" />
                                 {invoice.paymentStatus}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 truncate mt-0.5">
+                            <p className="text-xs text-slate-500 truncate mt-0.5">
                               {getInvoiceDescription(invoice)}
                             </p>
                           </div>
@@ -369,21 +384,23 @@ export function TransactionHistory({
                           {/* Monto y acciones */}
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <p className={`text-sm font-bold ${isPending ? "text-gray-900" : "text-emerald-600"}`}>
+                              <p className={`text-sm font-bold ${isPending ? "text-white" : "text-emerald-400"}`}>
                                 {isPending ? "-" : "+"}${invoice.total.toFixed(2)}
                               </p>
                               {pendingAmount > 0.01 && (
-                                <p className="text-[10px] text-red-500 font-medium">
+                                <p className="text-[10px] text-red-400 font-medium">
                                   Debe: ${pendingAmount.toFixed(2)}
                                 </p>
                               )}
                             </div>
 
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => setExpandedInvoice(isExpanded ? null : invoice._id!)}
-                                className={`p-1.5 rounded-lg transition-colors ${
-                                  isExpanded ? "bg-slate-100 text-slate-700" : "text-gray-400 hover:bg-gray-100"
+                                className={`p-1.5 rounded-lg border transition-all duration-200 ${
+                                  isExpanded 
+                                    ? "bg-vet-accent/20 text-vet-accent border-vet-accent/30" 
+                                    : "text-slate-400 hover:text-white hover:bg-white/10 border-transparent"
                                 }`}
                               >
                                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -392,7 +409,7 @@ export function TransactionHistory({
                               {pendingAmount > 0.01 && onPayInvoice && (
                                 <button
                                   onClick={() => handleOpenPayment(invoice)}
-                                  className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors"
+                                  className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-emerald-500/20"
                                 >
                                   Pagar
                                 </button>
@@ -404,8 +421,8 @@ export function TransactionHistory({
 
                       {/* Detalles expandidos */}
                       {isExpanded && (
-                        <div className="px-4 pb-3">
-                          <div className="ml-13 pl-4 border-l-2 border-gray-200">
+                        <div className="px-4 pb-4">
+                          <div className="ml-13 pl-4 border-l-2 border-vet-accent/30">
                             <InvoicePayments
                               invoiceId={invoice._id!}
                               onPaymentCancelled={handlePaymentCancelled}
@@ -420,9 +437,33 @@ export function TransactionHistory({
             ))
           )}
         </div>
+
+        {/* Footer con resumen */}
+        {invoices.length > 0 && (
+          <div className="px-4 py-3 bg-slate-800/40 border-t border-white/10">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-4">
+                <span className="text-slate-400">
+                  {invoices.length} factura{invoices.length !== 1 ? "s" : ""}
+                </span>
+                {pendingInvoices.length > 0 && (
+                  <span className="inline-flex items-center gap-1 text-amber-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    {pendingInvoices.length} pendiente{pendingInvoices.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+              {totalDebtUSD > 0 && (
+                <span className="text-amber-400 font-semibold">
+                  Total pendiente: ${totalDebtUSD.toFixed(2)}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ✅ Modal de pago ACTUALIZADO con nuevos props */}
+      {/* Modal de pago */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => {

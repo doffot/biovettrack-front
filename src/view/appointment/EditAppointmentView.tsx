@@ -1,5 +1,3 @@
-// src/views/appointment/EditAppointmentView.tsx
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -136,8 +134,8 @@ export default function EditAppointmentView() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-vet-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-vet-muted font-medium">Cargando cita...</p>
+          <div className="w-12 h-12 border-4 border-[var(--color-vet-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[var(--color-vet-muted)] font-medium">Cargando cita...</p>
         </div>
       </div>
     );
@@ -146,10 +144,10 @@ export default function EditAppointmentView() {
   if (!appointment) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-2xl font-bold text-vet-text mb-4">Cita no encontrada</h2>
+        <h2 className="text-2xl font-bold text-[var(--color-vet-text)] mb-4">Cita no encontrada</h2>
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-vet-light hover:bg-vet-accent hover:text-white text-vet-text font-semibold transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] text-white font-semibold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver
@@ -171,16 +169,16 @@ export default function EditAppointmentView() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg hover:bg-vet-light text-vet-muted transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-vet-text flex items-center gap-2 font-montserrat">
-              <CalendarClock className="w-6 h-6 text-vet-primary" />
+            <h1 className="text-xl font-bold text-[var(--color-vet-text)] flex items-center gap-2 font-montserrat">
+              <CalendarClock className="w-6 h-6 text-[var(--color-vet-accent)]" />
               Editar Cita
             </h1>
-            <p className="text-sm text-vet-muted">
+            <p className="text-sm text-[var(--color-vet-muted)]">
               Modifica los datos de la cita
             </p>
           </div>
@@ -195,7 +193,7 @@ export default function EditAppointmentView() {
           onSelect={setSelectedType}
         />
         {errors.type && (
-          <p className="text-sm text-vet-danger font-medium -mt-2 ml-1">
+          <p className="text-sm text-red-400 font-medium -mt-2 ml-1">
             ⚠️ {errors.type}
           </p>
         )}
@@ -209,7 +207,7 @@ export default function EditAppointmentView() {
           disabledHoursData={vetAppointmentsOnDate.filter(apt => apt._id !== appointmentId)}
         />
         {errors.time && (
-          <p className="text-sm text-vet-danger font-medium -mt-2 ml-1">
+          <p className="text-sm text-red-400 font-medium -mt-2 ml-1">
             ⚠️ {errors.time}
           </p>
         )}
@@ -228,7 +226,7 @@ export default function EditAppointmentView() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex-1 sm:flex-none px-6 py-3 rounded-xl border-2 border-vet-light text-vet-text font-semibold hover:bg-vet-light transition-all"
+            className="flex-1 sm:flex-none px-6 py-3 rounded-xl border-2 border-[var(--color-border)] text-[var(--color-vet-text)] font-semibold hover:bg-[var(--color-hover)] transition-all"
           >
             Cancelar
           </button>
@@ -236,7 +234,7 @@ export default function EditAppointmentView() {
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="flex-1 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-soft hover:shadow-card"
+            className="flex-1 px-6 py-3 rounded-xl bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-soft hover:shadow-lg"
           >
             {isPending ? (
               <>

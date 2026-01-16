@@ -3,10 +3,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Download, ChevronLeft, ChevronRight, ChevronDown, Eye } from "lucide-react";
 import type { Invoice, InvoiceStatus } from "../../types/invoice";
-import type { FilterState,  StatusFilter, PaymentCurrencyFilter } from "../../types/reportTypes";
+import type { FilterState, StatusFilter, PaymentCurrencyFilter } from "../../types/reportTypes";
 import { formatCurrency, formatDate, getItemTypeLabel } from "../../utils/reportUtils";
 import { exportToCSV } from "../../utils/exportUtils";
-import { DateRangeSelector } from "./DateRangeSelector"; // <-- Nuevo import
+import { DateRangeSelector } from "./DateRangeSelector";
 
 interface ReportInvoicesTableProps {
   invoices: Invoice[];
@@ -22,20 +22,20 @@ function StatusBadge({ status }: { status: InvoiceStatus }) {
   const isPending = status === "Pendiente" || status === "Parcial";
   const isCanceled = status === "Cancelado";
 
-  let bgColor = "bg-gray-500";
+  let bgColor = "bg-gray-600 text-gray-300";
   let label: string = status;
 
   if (isPaid) {
-    bgColor = "bg-emerald-600";
+    bgColor = "bg-emerald-900/50 text-emerald-400";
   } else if (isPending) {
-    bgColor = "bg-red-600";
+    bgColor = "bg-red-900/50 text-red-400";
     label = "Debe";
   } else if (isCanceled) {
-    bgColor = "bg-gray-600";
+    bgColor = "bg-gray-700 text-gray-400";
   }
 
   return (
-    <span className={`inline-block px-2.5 py-1 text-xs font-semibold text-white rounded-md ${bgColor}`}>
+    <span className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-md ${bgColor}`}>
       {label}
     </span>
   );
@@ -103,9 +103,9 @@ export function ReportInvoicesTable({
   };
 
   const selectClasses = `
-    appearance-none bg-white border border-gray-200 rounded-md
-    px-3 py-1.5 pr-8 text-sm text-gray-700
-    focus:outline-none focus:ring-1 focus:ring-[#0A7EA4] focus:border-[#0A7EA4]
+    appearance-none bg-slate-800 border border-slate-700 rounded-md
+    px-3 py-1.5 pr-8 text-sm text-vet-text
+    focus:outline-none focus:ring-1 focus:ring-vet-primary focus:border-vet-primary
     cursor-pointer
   `;
 
@@ -133,12 +133,10 @@ export function ReportInvoicesTable({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md overflow-hidden">
+    <div className="bg-slate-800 border border-slate-700 rounded-md overflow-hidden">
       {/* Toolbar */}
-      <div className="px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-slate-700 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          
-          {/* Reemplazo del select de período por DateRangeSelector */}
           <DateRangeSelector
             dateRange={filters.dateRange}
             customFrom={filters.customFrom}
@@ -164,7 +162,7 @@ export function ReportInvoicesTable({
               <option value="Parcial">Parcial</option>
               <option value="Cancelado">Cancelado</option>
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted pointer-events-none" />
           </div>
 
           {/* Tipo de pago */}
@@ -179,7 +177,7 @@ export function ReportInvoicesTable({
               <option value="bs">Bolívares</option>
               <option value="mixed">Mixto</option>
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted pointer-events-none" />
           </div>
 
           {/* Servicio */}
@@ -196,7 +194,7 @@ export function ReportInvoicesTable({
               <option value="labExam">Laboratorio</option>
               <option value="producto">Producto</option>
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted pointer-events-none" />
           </div>
 
           {/* Limpiar */}
@@ -205,7 +203,7 @@ export function ReportInvoicesTable({
               setCurrentPage(1);
               onResetFilters();
             }}
-            className="text-sm text-gray-500 hover:text-gray-700 px-2 py-1.5"
+            className="text-sm text-vet-muted hover:text-vet-text px-2 py-1.5"
           >
             Limpiar
           </button>
@@ -215,12 +213,12 @@ export function ReportInvoicesTable({
         <div className="flex items-center gap-3">
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-vet-muted">
                 {selectedIds.size} seleccionada{selectedIds.size > 1 ? "s" : ""}
               </span>
               <button
                 onClick={clearSelection}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm text-vet-muted hover:text-vet-text"
               >
                 Deseleccionar
               </button>
@@ -229,7 +227,7 @@ export function ReportInvoicesTable({
           <button
             onClick={handleExportCSV}
             disabled={invoices.length === 0}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-vet-text bg-slate-900 hover:bg-slate-700 border border-slate-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
             {selectedIds.size > 0 ? `Exportar (${selectedIds.size})` : "Exportar CSV"}
@@ -240,42 +238,42 @@ export function ReportInvoicesTable({
       {/* Table */}
       {invoices.length === 0 ? (
         <div className="py-16 text-center">
-          <p className="text-gray-500">No hay facturas para mostrar</p>
-          <p className="text-sm text-gray-400 mt-1">Ajusta los filtros o el período</p>
+          <p className="text-vet-muted">No hay facturas para mostrar</p>
+          <p className="text-sm text-vet-muted mt-1">Ajusta los filtros o el período</p>
         </div>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
+                <tr className="border-b border-slate-700 bg-slate-900">
                   <th className="w-12 px-4 py-3">
                     <input
                       type="checkbox"
                       checked={allCurrentSelected}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-[#0A7EA4] focus:ring-[#0A7EA4] cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-600 text-vet-primary focus:ring-vet-primary cursor-pointer bg-slate-800"
                     />
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Fecha
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Cliente
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider hidden md:table-cell">
                     Servicio
                   </th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-center px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-right px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="text-right px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider hidden sm:table-cell">
                     USD
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="text-right px-4 py-3 text-xs font-medium text-vet-muted uppercase tracking-wider hidden sm:table-cell">
                     Bs
                   </th>
                   <th className="w-12 px-4 py-3"></th>
@@ -294,8 +292,8 @@ export function ReportInvoicesTable({
                     <tr
                       key={invoice._id}
                       className={`
-                        border-b border-gray-200 hover:bg-gray-50/80 transition-colors
-                        ${isSelected ? "bg-[#0A7EA4]/5" : ""}
+                        border-b border-slate-700 hover:bg-slate-700/50 transition-colors
+                        ${isSelected ? "bg-vet-primary/10" : ""}
                       `}
                     >
                       <td className="px-4 py-3">
@@ -303,27 +301,27 @@ export function ReportInvoicesTable({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => invoice._id && toggleSelect(invoice._id)}
-                          className="w-4 h-4 rounded border-gray-300 text-[#0A7EA4] focus:ring-[#0A7EA4] cursor-pointer"
+                          className="w-4 h-4 rounded border-slate-600 text-vet-primary focus:ring-vet-primary cursor-pointer bg-slate-800"
                         />
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="px-4 py-3 text-sm text-vet-muted">
                         {formatDate(invoice.date)}
                       </td>
                       <td className="px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                          <p className="text-sm font-medium text-vet-text truncate max-w-[180px]">
                             {name}
                           </p>
                           {phone && (
-                            <p className="text-xs text-gray-500 mt-0.5">{phone}</p>
+                            <p className="text-xs text-vet-muted mt-0.5">{phone}</p>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <div>
-                          <p className="text-sm text-gray-900">{mainService}</p>
+                          <p className="text-sm text-vet-text">{mainService}</p>
                           {patientName && (
-                            <p className="text-xs text-gray-500 mt-0.5">{patientName}</p>
+                            <p className="text-xs text-vet-muted mt-0.5">{patientName}</p>
                           )}
                         </div>
                       </td>
@@ -331,24 +329,24 @@ export function ReportInvoicesTable({
                         <StatusBadge status={invoice.paymentStatus} />
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                        <span className="text-sm font-semibold text-vet-text tabular-nums">
                           {formatCurrency(invoice.total || 0, invoice.currency)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right hidden sm:table-cell">
-                        <span className={`text-sm tabular-nums ${paidUSD > 0 ? "text-emerald-600 font-medium" : "text-gray-300"}`}>
+                        <span className={`text-sm tabular-nums ${paidUSD > 0 ? "text-emerald-400 font-medium" : "text-slate-500"}`}>
                           {paidUSD > 0 ? formatCurrency(paidUSD, "USD") : "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right hidden sm:table-cell">
-                        <span className={`text-sm tabular-nums ${paidBs > 0 ? "text-[#0A7EA4] font-medium" : "text-gray-300"}`}>
+                        <span className={`text-sm tabular-nums ${paidBs > 0 ? "text-vet-primary font-medium" : "text-slate-500"}`}>
                           {paidBs > 0 ? formatCurrency(paidBs, "Bs") : "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <Link
                           to={`/invoices/${invoice._id}`}
-                          className="p-1.5 inline-flex text-gray-400 hover:text-[#0A7EA4] transition-colors rounded-md hover:bg-gray-100"
+                          className="p-1.5 inline-flex text-vet-muted hover:text-vet-primary transition-colors rounded-md hover:bg-slate-700"
                           title="Ver factura"
                         >
                           <Eye className="w-4 h-4" />
@@ -363,8 +361,8 @@ export function ReportInvoicesTable({
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
+            <div className="px-4 py-3 border-t border-slate-700 flex items-center justify-between">
+              <p className="text-sm text-vet-muted">
                 {startIndex + 1}–{Math.min(endIndex, invoices.length)} de {invoices.length}
               </p>
 
@@ -372,7 +370,7 @@ export function ReportInvoicesTable({
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 text-vet-muted hover:text-vet-text disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -392,15 +390,15 @@ export function ReportInvoicesTable({
                       return (
                         <div key={page} className="flex items-center">
                           {showEllipsis && (
-                            <span className="px-2 text-gray-400">...</span>
+                            <span className="px-2 text-vet-muted">...</span>
                           )}
                           <button
                             onClick={() => goToPage(page)}
                             className={`
                               w-8 h-8 text-sm font-medium rounded-md transition-colors
                               ${currentPage === page
-                                ? "bg-[#0A7EA4] text-white"
-                                : "text-gray-600 hover:bg-gray-100"
+                                ? "bg-vet-primary text-white"
+                                : "text-vet-text hover:bg-slate-700"
                               }
                             `}
                           >
@@ -414,7 +412,7 @@ export function ReportInvoicesTable({
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 text-vet-muted hover:text-vet-text disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

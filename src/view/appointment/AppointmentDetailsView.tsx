@@ -1,5 +1,3 @@
-// src/views/appointment/AppointmentDetailsView.tsx
-
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -26,7 +24,6 @@ import {
 import type { AppointmentStatus } from "../../types/appointment";
 import StatusDropdown from "../../components/appointments/StatusDropdown";
 
-// Tipo para owner poblado
 type PopulatedOwner = {
   _id: string;
   name: string;
@@ -112,7 +109,7 @@ export default function AppointmentDetailsView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[var(--color-vet-accent)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -120,12 +117,12 @@ export default function AppointmentDetailsView() {
   if (error || !appointment) {
     return (
       <div className="text-center py-16">
-        <p className="text-vet-muted mb-4">
+        <p className="text-[var(--color-vet-muted)] mb-4">
           {error ? "Error al cargar la cita" : "Cita no encontrada"}
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="text-vet-primary hover:underline text-sm font-medium"
+          className="text-[var(--color-vet-primary)] hover:underline text-sm font-medium"
         >
           ← Volver
         </button>
@@ -148,7 +145,6 @@ export default function AppointmentDetailsView() {
   const canCreateService = appointment.type === "Peluquería" && 
                           (appointment.status === "Programada" || appointment.status === "Completada");
 
-  // Obtener datos del owner
   const owner = patient?.owner && typeof patient.owner === "object" 
     ? (patient.owner as PopulatedOwner) 
     : null;
@@ -163,7 +159,7 @@ export default function AppointmentDetailsView() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(`/patients/${patientId}`)}
-          className="text-vet-muted hover:text-vet-text transition-colors text-sm font-medium flex items-center gap-1.5"
+          className="text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)] transition-colors text-sm font-medium flex items-center gap-1.5"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver
@@ -172,7 +168,7 @@ export default function AppointmentDetailsView() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => navigate(`/patients/${patientId}/appointments/${appointmentId}/edit`)}
-            className="p-2 rounded-lg hover:bg-vet-light text-vet-muted hover:text-vet-primary transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] hover:text-[var(--color-vet-accent)] transition-colors"
             title="Editar"
           >
             <Edit className="w-4 h-4" />
@@ -180,7 +176,7 @@ export default function AppointmentDetailsView() {
           <button
             onClick={() => setShowDeleteModal(true)}
             disabled={isDeleting}
-            className="p-2 rounded-lg hover:bg-red-50 text-vet-muted hover:text-red-500 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-red-600/10 text-[var(--color-vet-muted)] hover:text-red-400 transition-colors disabled:opacity-50"
             title="Eliminar"
           >
             <Trash2 className="w-4 h-4" />
@@ -189,12 +185,12 @@ export default function AppointmentDetailsView() {
       </div>
 
       {/* Card principal */}
-      <div className="bg-white rounded-2xl border border-vet-light shadow-soft overflow-hidden">
+      <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] shadow-soft overflow-hidden">
         
         {/* Header de la card */}
-        <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-6 py-5">
+        <div className="bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] px-6 py-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -225,50 +221,50 @@ export default function AppointmentDetailsView() {
             {/* Paciente */}
             <Link 
               to={`/patients/${patientId}`}
-              className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-vet-light/50 hover:bg-vet-light transition-colors group"
+              className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-[var(--color-hover)] hover:bg-[var(--color-border)] transition-colors group border border-[var(--color-border)]"
             >
               {patient?.photo ? (
                 <img 
                   src={patient.photo} 
                   alt={patient.name} 
-                  className="w-12 h-12 rounded-xl object-cover"
+                  className="w-12 h-12 rounded-xl object-cover border border-[var(--color-border)]"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-vet-light flex items-center justify-center">
-                  <PawPrint className="w-5 h-5 text-vet-primary" />
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-vet-primary)]/10 flex items-center justify-center border border-[var(--color-vet-primary)]/20">
+                  <PawPrint className="w-5 h-5 text-[var(--color-vet-accent)]" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-vet-muted uppercase tracking-wider">Paciente</p>
-                <p className="font-semibold text-vet-text truncate group-hover:text-vet-primary transition-colors">
+                <p className="text-[10px] text-[var(--color-vet-muted)] uppercase tracking-wider">Paciente</p>
+                <p className="font-semibold text-[var(--color-vet-text)] truncate group-hover:text-[var(--color-vet-accent)] transition-colors">
                   {patient?.name || "—"}
                 </p>
-                <p className="text-xs text-vet-muted">{patient?.species} · {patient?.breed}</p>
+                <p className="text-xs text-[var(--color-vet-muted)]">{patient?.species} · {patient?.breed}</p>
               </div>
             </Link>
 
             {/* Propietario */}
             {ownerName && (
-              <div className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-vet-light/50">
-                <div className="w-12 h-12 rounded-xl bg-vet-light flex items-center justify-center">
-                  <User className="w-5 h-5 text-vet-primary" />
+              <div className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-[var(--color-hover)] border border-[var(--color-border)]">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-vet-primary)]/10 flex items-center justify-center border border-[var(--color-vet-primary)]/20">
+                  <User className="w-5 h-5 text-[var(--color-vet-accent)]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-vet-muted uppercase tracking-wider">Propietario</p>
+                  <p className="text-[10px] text-[var(--color-vet-muted)] uppercase tracking-wider">Propietario</p>
                   {ownerId ? (
                     <Link 
                       to={`/owners/${ownerId}`}
-                      className="font-semibold text-vet-text truncate hover:text-vet-primary transition-colors block"
+                      className="font-semibold text-[var(--color-vet-text)] truncate hover:text-[var(--color-vet-accent)] transition-colors block"
                     >
                       {ownerName}
                     </Link>
                   ) : (
-                    <p className="font-semibold text-vet-text truncate">{ownerName}</p>
+                    <p className="font-semibold text-[var(--color-vet-text)] truncate">{ownerName}</p>
                   )}
                   {ownerPhone && (
                     <a 
                       href={`tel:${ownerPhone}`}
-                      className="text-xs text-vet-primary hover:text-vet-secondary flex items-center gap-1 mt-0.5"
+                      className="text-xs text-[var(--color-vet-accent)] hover:text-[var(--color-vet-primary)] flex items-center gap-1 mt-0.5"
                     >
                       <Phone className="w-3 h-3" />
                       {ownerPhone}
@@ -281,9 +277,9 @@ export default function AppointmentDetailsView() {
           
           {/* Prepago */}
           {appointment.prepaidAmount && appointment.prepaidAmount > 0 && (
-            <div className="flex items-center justify-between py-3 px-4 bg-emerald-50 rounded-xl">
-              <span className="text-sm font-medium text-emerald-700">Anticipo</span>
-              <span className="font-bold text-emerald-600">
+            <div className="flex items-center justify-between py-3 px-4 bg-emerald-600/10 rounded-xl border border-emerald-500/20">
+              <span className="text-sm font-medium text-emerald-400">Anticipo</span>
+              <span className="font-bold text-emerald-300">
                 ${appointment.prepaidAmount.toFixed(2)}
               </span>
             </div>
@@ -291,12 +287,12 @@ export default function AppointmentDetailsView() {
 
           {/* Motivo */}
           <div>
-            <h3 className="text-xs font-semibold text-vet-muted uppercase tracking-wider mb-2">
+            <h3 className="text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wider mb-2">
               Motivo de la cita
             </h3>
-            <p className="text-vet-text leading-relaxed">
+            <p className="text-[var(--color-vet-text)] leading-relaxed">
               {appointment.reason || (
-                <span className="text-vet-muted italic">Sin especificar</span>
+                <span className="text-[var(--color-vet-muted)] italic">Sin especificar</span>
               )}
             </p>
           </div>
@@ -304,10 +300,10 @@ export default function AppointmentDetailsView() {
           {/* Observaciones */}
           {appointment.observations && (
             <div>
-              <h3 className="text-xs font-semibold text-vet-muted uppercase tracking-wider mb-2">
+              <h3 className="text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wider mb-2">
                 Observaciones
               </h3>
-              <p className="text-vet-text leading-relaxed whitespace-pre-wrap">
+              <p className="text-[var(--color-vet-text)] leading-relaxed whitespace-pre-wrap">
                 {appointment.observations}
               </p>
             </div>
@@ -315,10 +311,10 @@ export default function AppointmentDetailsView() {
 
           {/* Crear servicio de peluquería */}
           {canCreateService && (
-            <div className="pt-4 border-t border-vet-light">
+            <div className="pt-4 border-t border-[var(--color-border)]">
               <Link
                 to={`/patients/${patientId}/grooming-services/create?appointmentId=${appointmentId}`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-vet-light hover:bg-vet-accent hover:text-white text-vet-primary text-sm font-medium transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-vet-primary)]/10 hover:bg-[var(--color-vet-accent)] hover:text-white text-[var(--color-vet-accent)] text-sm font-medium transition-all"
               >
                 <Scissors className="w-4 h-4" />
                 <Plus className="w-3 h-3 -ml-1" />
@@ -329,8 +325,8 @@ export default function AppointmentDetailsView() {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-sky-soft border-t border-vet-light">
-          <div className="flex items-center justify-between text-xs text-vet-muted">
+        <div className="px-6 py-4 bg-[var(--color-hover)] border-t border-[var(--color-border)]">
+          <div className="flex items-center justify-between text-xs text-[var(--color-vet-muted)]">
             <span>
               Creada el {new Date(appointment.createdAt).toLocaleDateString('es-ES', {
                 day: 'numeric',
@@ -362,18 +358,18 @@ export default function AppointmentDetailsView() {
 
       {/* Modal de cancelación con prepago */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[var(--color-card)] rounded-2xl shadow-xl max-w-sm w-full overflow-hidden border border-[var(--color-border)]">
             
             {/* Header del modal */}
-            <div className="bg-amber-50 px-6 py-4 border-b border-amber-100">
+            <div className="bg-amber-600/10 px-6 py-4 border-b border-amber-500/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-xl bg-amber-600/20 flex items-center justify-center border border-amber-500/20">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-vet-text">Cancelar cita</h3>
-                  <p className="text-sm text-vet-muted">
+                  <h3 className="font-bold text-[var(--color-vet-text)]">Cancelar cita</h3>
+                  <p className="text-sm text-[var(--color-vet-muted)]">
                     Anticipo de ${appointment?.prepaidAmount?.toFixed(2)}
                   </p>
                 </div>
@@ -382,7 +378,7 @@ export default function AppointmentDetailsView() {
 
             {/* Contenido del modal */}
             <div className="p-6">
-              <p className="text-sm text-vet-muted mb-6">
+              <p className="text-sm text-[var(--color-vet-muted)] mb-6">
                 ¿Qué deseas hacer con el anticipo al cancelar esta cita?
               </p>
 
@@ -390,7 +386,7 @@ export default function AppointmentDetailsView() {
                 <button
                   onClick={() => handleCancelWithRefund(true)}
                   disabled={isUpdatingStatus}
-                  className="w-full py-3 px-4 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
                   {isUpdatingStatus ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -402,7 +398,7 @@ export default function AppointmentDetailsView() {
                 <button
                   onClick={() => handleCancelWithRefund(false)}
                   disabled={isUpdatingStatus}
-                  className="w-full py-3 px-4 rounded-xl bg-vet-light hover:bg-gray-200 text-vet-text font-medium transition-colors disabled:opacity-50"
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] font-medium transition-colors disabled:opacity-50 border border-[var(--color-border)]"
                 >
                   Mantener como crédito
                 </button>
@@ -410,7 +406,7 @@ export default function AppointmentDetailsView() {
                 <button
                   onClick={() => setShowCancelModal(false)}
                   disabled={isUpdatingStatus}
-                  className="w-full py-2 text-sm text-vet-muted hover:text-vet-text transition-colors"
+                  className="w-full py-2 text-sm text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)] transition-colors"
                 >
                   Cancelar
                 </button>

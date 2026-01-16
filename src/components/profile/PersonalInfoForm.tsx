@@ -42,7 +42,6 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
     },
   });
 
-  // Reset form cuando cambia el perfil
   useEffect(() => {
     reset({
       name: profile.name,
@@ -81,12 +80,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Header con botón de editar */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Datos Personales</h2>
+        <h2 className="text-lg font-semibold text-vet-text">Datos Personales</h2>
         {!isEditing ? (
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-vet-primary bg-vet-primary/10 rounded-lg hover:bg-vet-primary/20 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-vet-accent bg-vet-primary/20 border border-vet-primary/30 rounded-lg hover:bg-vet-primary/30 transition-colors"
           >
             <Edit3 className="w-4 h-4" />
             Editar
@@ -96,7 +95,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
             <button
               type="button"
               onClick={handleCancel}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-vet-muted bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 hover:text-vet-text transition-colors"
             >
               <X className="w-4 h-4" />
               Cancelar
@@ -104,7 +103,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
             <button
               type="submit"
               disabled={!isDirty || isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-vet-primary rounded-lg hover:bg-vet-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-vet-primary to-vet-secondary rounded-lg hover:from-vet-secondary hover:to-vet-primary transition-all shadow-lg shadow-vet-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
               {isPending ? "Guardando..." : "Guardar"}
@@ -114,27 +113,27 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
       </div>
 
       {/* Campos NO editables */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-vet-light rounded-xl border border-slate-700/50">
         <div>
-          <label className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-1">
+          <label className="flex items-center gap-2 text-xs font-medium text-vet-muted mb-1">
             <Mail className="w-3.5 h-3.5" />
             Correo Electrónico
           </label>
-          <p className="text-sm font-medium text-gray-900">{profile.email}</p>
+          <p className="text-sm font-medium text-vet-text">{profile.email}</p>
         </div>
         <div>
-          <label className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-1">
+          <label className="flex items-center gap-2 text-xs font-medium text-vet-muted mb-1">
             <IdCard className="w-3.5 h-3.5" />
             Cédula de Identidad
           </label>
-          <p className="text-sm font-medium text-gray-900">{profile.ci}</p>
+          <p className="text-sm font-medium text-vet-text">{profile.ci}</p>
         </div>
         <div>
-          <label className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-1">
+          <label className="flex items-center gap-2 text-xs font-medium text-vet-muted mb-1">
             <Award className="w-3.5 h-3.5" />
             CMV
           </label>
-          <p className="text-sm font-medium text-gray-900">{profile.cmv}</p>
+          <p className="text-sm font-medium text-vet-text">{profile.cmv}</p>
         </div>
       </div>
 
@@ -142,8 +141,8 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Nombre */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <User className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-muted mb-2">
+            <User className="w-4 h-4 text-vet-muted" />
             Nombre
           </label>
           <input
@@ -158,21 +157,21 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               w-full px-4 py-2.5 rounded-xl border transition-all
               ${
                 isEditing
-                  ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                  : "border-transparent bg-gray-50 text-gray-700"
+                  ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                  : "border-transparent bg-vet-light text-vet-text"
               }
-              ${errors.name ? "border-red-300 focus:border-red-500" : ""}
+              ${errors.name ? "border-red-500/50 focus:border-red-500" : ""}
             `}
           />
           {errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+            <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>
           )}
         </div>
 
         {/* Apellido */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <User className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-muted mb-2">
+            <User className="w-4 h-4 text-vet-muted" />
             Apellido
           </label>
           <input
@@ -187,21 +186,21 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               w-full px-4 py-2.5 rounded-xl border transition-all
               ${
                 isEditing
-                  ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                  : "border-transparent bg-gray-50 text-gray-700"
+                  ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                  : "border-transparent bg-vet-light text-vet-text"
               }
-              ${errors.lastName ? "border-red-300 focus:border-red-500" : ""}
+              ${errors.lastName ? "border-red-500/50 focus:border-red-500" : ""}
             `}
           />
           {errors.lastName && (
-            <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
+            <p className="text-red-400 text-xs mt-1">{errors.lastName.message}</p>
           )}
         </div>
 
         {/* WhatsApp */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <Phone className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-muted mb-2">
+            <Phone className="w-4 h-4 text-vet-muted" />
             WhatsApp
           </label>
           <input
@@ -218,21 +217,21 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               w-full px-4 py-2.5 rounded-xl border transition-all
               ${
                 isEditing
-                  ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                  : "border-transparent bg-gray-50 text-gray-700"
+                  ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                  : "border-transparent bg-vet-light text-vet-text"
               }
-              ${errors.whatsapp ? "border-red-300 focus:border-red-500" : ""}
+              ${errors.whatsapp ? "border-red-500/50 focus:border-red-500" : ""}
             `}
           />
           {errors.whatsapp && (
-            <p className="text-red-500 text-xs mt-1">{errors.whatsapp.message}</p>
+            <p className="text-red-400 text-xs mt-1">{errors.whatsapp.message}</p>
           )}
         </div>
 
         {/* Estado */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <MapPin className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-muted mb-2">
+            <MapPin className="w-4 h-4 text-vet-muted" />
             Estado
           </label>
           <select
@@ -244,10 +243,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               w-full px-4 py-2.5 rounded-xl border transition-all
               ${
                 isEditing
-                  ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                  : "border-transparent bg-gray-50 text-gray-700"
+                  ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                  : "border-transparent bg-vet-light text-vet-text"
               }
-              ${errors.estado ? "border-red-300 focus:border-red-500" : ""}
+              ${errors.estado ? "border-red-500/50 focus:border-red-500" : ""}
             `}
           >
             <option value="">Seleccionar estado</option>
@@ -258,21 +257,21 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
             ))}
           </select>
           {errors.estado && (
-            <p className="text-red-500 text-xs mt-1">{errors.estado.message}</p>
+            <p className="text-red-400 text-xs mt-1">{errors.estado.message}</p>
           )}
         </div>
       </div>
 
       {/* Credenciales opcionales */}
-      <div className="pt-4 border-t border-gray-100">
-        <h3 className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
+      <div className="pt-4 border-t border-slate-700/50">
+        <h3 className="text-sm font-medium text-vet-text mb-4 flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-vet-accent" />
           Credenciales Adicionales (Opcionales)
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* RUNSAI */}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-2 block">
+            <label className="text-xs font-medium text-vet-muted mb-2 block">
               RUNSAI
             </label>
             <input
@@ -283,11 +282,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               })}
               placeholder={isEditing ? "Ej: 12345" : "-"}
               className={`
-                w-full px-4 py-2.5 rounded-xl border transition-all text-sm
+                w-full px-4 py-2.5 rounded-xl border transition-all text-sm placeholder:text-slate-500
                 ${
                   isEditing
-                    ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                    : "border-transparent bg-gray-50 text-gray-700"
+                    ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                    : "border-transparent bg-vet-light text-vet-text"
                 }
               `}
             />
@@ -295,7 +294,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
 
           {/* MSDS */}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-2 block">
+            <label className="text-xs font-medium text-vet-muted mb-2 block">
               MSDS
             </label>
             <input
@@ -306,11 +305,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               })}
               placeholder={isEditing ? "Ej: MSDS-12345" : "-"}
               className={`
-                w-full px-4 py-2.5 rounded-xl border transition-all text-sm
+                w-full px-4 py-2.5 rounded-xl border transition-all text-sm placeholder:text-slate-500
                 ${
                   isEditing
-                    ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                    : "border-transparent bg-gray-50 text-gray-700"
+                    ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                    : "border-transparent bg-vet-light text-vet-text"
                 }
               `}
             />
@@ -318,7 +317,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
 
           {/* SOMEVEPA */}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-2 block">
+            <label className="text-xs font-medium text-vet-muted mb-2 block">
               SOMEVEPA
             </label>
             <input
@@ -329,11 +328,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ profile }) => {
               })}
               placeholder={isEditing ? "Ej: SV-12345" : "-"}
               className={`
-                w-full px-4 py-2.5 rounded-xl border transition-all text-sm
+                w-full px-4 py-2.5 rounded-xl border transition-all text-sm placeholder:text-slate-500
                 ${
                   isEditing
-                    ? "border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
-                    : "border-transparent bg-gray-50 text-gray-700"
+                    ? "border-slate-700 bg-sky-soft text-vet-text focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/30"
+                    : "border-transparent bg-vet-light text-vet-text"
                 }
               `}
             />

@@ -110,10 +110,10 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       return (
         <div key={field.name} className={field.colSpan}>
           <div className="space-y-1.5">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <Icon className="w-3.5 h-3.5 text-vet-primary" />
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-vet-muted">
+              <Icon className="w-3.5 h-3.5 text-vet-accent" />
               {field.label}
-              {field.required && <span className="text-red-500">*</span>}
+              {field.required && <span className="text-red-400">*</span>}
             </label>
             <select
               {...register(field.name, {
@@ -121,9 +121,9 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
               })}
               className={`w-full px-2.5 py-1.5 rounded-md border text-xs transition-colors ${
                 error
-                  ? "border-red-300 bg-red-50 text-red-900"
-                  : "border-gray-300 bg-white text-gray-700 hover:border-vet-primary focus:border-vet-primary"
-              } focus:outline-none focus:ring-1 focus:ring-vet-primary appearance-none`}
+                  ? "border-red-500/50 bg-red-500/10 text-red-400"
+                  : "border-slate-700 bg-sky-soft text-vet-text hover:border-vet-primary focus:border-vet-primary"
+              } focus:outline-none focus:ring-2 focus:ring-vet-primary/30 appearance-none`}
             >
               <option value="">{field.placeholder}</option>
               {groomers.map((groomer) => (
@@ -133,7 +133,7 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
               ))}
             </select>
             {error && (
-              <p className="text-red-600 text-xs font-medium">{error.message}</p>
+              <p className="text-red-400 text-xs font-medium">{error.message}</p>
             )}
           </div>
         </div>
@@ -144,10 +144,10 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       return (
         <div key={field.name} className={field.colSpan}>
           <div className="space-y-1.5">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <Icon className="w-3.5 h-3.5 text-vet-primary" />
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-vet-muted">
+              <Icon className="w-3.5 h-3.5 text-vet-accent" />
               {field.label}
-              {field.required && <span className="text-red-500">*</span>}
+              {field.required && <span className="text-red-400">*</span>}
             </label>
             <select
               {...register(field.name, {
@@ -155,9 +155,9 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
               })}
               className={`w-full px-2.5 py-1.5 rounded-md border text-xs transition-colors ${
                 error
-                  ? "border-red-300 bg-red-50 text-red-900"
-                  : "border-gray-300 bg-white text-gray-700 hover:border-vet-primary focus:border-vet-primary"
-              } focus:outline-none focus:ring-1 focus:ring-vet-primary appearance-none`}
+                  ? "border-red-500/50 bg-red-500/10 text-red-400"
+                  : "border-slate-700 bg-sky-soft text-vet-text hover:border-vet-primary focus:border-vet-primary"
+              } focus:outline-none focus:ring-2 focus:ring-vet-primary/30 appearance-none`}
             >
               <option value="">{field.placeholder}</option>
               {field.options.map((opt) => (
@@ -167,7 +167,7 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
               ))}
             </select>
             {error && (
-              <p className="text-red-600 text-xs font-medium">{error.message}</p>
+              <p className="text-red-400 text-xs font-medium">{error.message}</p>
             )}
           </div>
         </div>
@@ -178,10 +178,10 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       return (
         <div key={field.name} className={field.colSpan}>
           <div className="space-y-1.5">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <Icon className="w-3.5 h-3.5 text-vet-primary" />
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-vet-muted">
+              <Icon className="w-3.5 h-3.5 text-vet-accent" />
               {field.label}
-              {field.required && <span className="text-red-500">*</span>}
+              {field.required && <span className="text-red-400">*</span>}
             </label>
             <textarea
               placeholder={field.placeholder}
@@ -192,12 +192,12 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
               })}
               className={`w-full px-2.5 py-1.5 rounded-md border text-xs transition-colors resize-none ${
                 error
-                  ? "border-red-300 bg-red-50 text-red-900"
-                  : "border-gray-300 bg-white text-gray-700 hover:border-vet-primary focus:border-vet-primary"
-              } focus:outline-none focus:ring-1 focus:ring-vet-primary`}
+                  ? "border-red-500/50 bg-red-500/10 text-red-400 placeholder:text-red-400/50"
+                  : "border-slate-700 bg-sky-soft text-vet-text placeholder:text-slate-500 hover:border-vet-primary focus:border-vet-primary"
+              } focus:outline-none focus:ring-2 focus:ring-vet-primary/30`}
             />
             {error && (
-              <p className="text-red-600 text-xs font-medium">{error.message}</p>
+              <p className="text-red-400 text-xs font-medium">{error.message}</p>
             )}
           </div>
         </div>
@@ -207,10 +207,10 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
     return (
       <div key={field.name} className={field.colSpan}>
         <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-            <Icon className="w-3.5 h-3.5 text-vet-primary" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-vet-muted">
+            <Icon className="w-3.5 h-3.5 text-vet-accent" />
             {field.label}
-            {field.required && <span className="text-red-500">*</span>}
+            {field.required && <span className="text-red-400">*</span>}
           </label>
           <input
             type={field.type}
@@ -223,12 +223,12 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
             })}
             className={`w-full px-2.5 py-1.5 rounded-md border text-xs transition-colors ${
               error
-                ? "border-red-300 bg-red-50 text-red-900"
-                : "border-gray-300 bg-white text-gray-700 hover:border-vet-primary focus:border-vet-primary"
-            } focus:outline-none focus:ring-1 focus:ring-vet-primary`}
+                ? "border-red-500/50 bg-red-500/10 text-red-400 placeholder:text-red-400/50"
+                : "border-slate-700 bg-sky-soft text-vet-text placeholder:text-slate-500 hover:border-vet-primary focus:border-vet-primary"
+            } focus:outline-none focus:ring-2 focus:ring-vet-primary/30`}
           />
           {error && (
-            <p className="text-red-600 text-xs font-medium">{error.message}</p>
+            <p className="text-red-400 text-xs font-medium">{error.message}</p>
           )}
         </div>
       </div>
@@ -238,8 +238,8 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <Scissors className="w-4 h-4 text-vet-primary" />
+        <h4 className="text-sm font-semibold text-vet-text mb-3 flex items-center gap-2">
+          <Scissors className="w-4 h-4 text-vet-accent" />
           Información del Servicio
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -248,8 +248,8 @@ const GroomingServiceForm: React.FC<GroomingServiceFormProps> = ({
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-vet-primary" />
+        <h4 className="text-sm font-semibold text-vet-text mb-3 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-vet-accent" />
           Detalles Adicionales
         </h4>
         <div className="grid grid-cols-1 gap-3">

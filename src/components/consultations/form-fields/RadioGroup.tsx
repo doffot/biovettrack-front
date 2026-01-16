@@ -1,4 +1,3 @@
-// src/components/consultations/form-fields/RadioGroup.tsx
 interface RadioGroupProps {
   label: string;
   name: string;
@@ -14,7 +13,7 @@ export default function RadioGroup({
 }: RadioGroupProps) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-600 mb-1">
+      <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
         {label}
       </label>
       <div className="flex gap-4">
@@ -24,9 +23,9 @@ export default function RadioGroup({
             name={name}
             checked={value === true}
             onChange={() => onChange(true)}
-            className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
+            className="w-4 h-4 text-[var(--color-vet-primary)] focus:ring-[var(--color-vet-primary)]"
           />
-          <span className="text-sm text-gray-700">Sí</span>
+          <span className="text-sm text-[var(--color-vet-text)]">Sí</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -34,9 +33,9 @@ export default function RadioGroup({
             name={name}
             checked={value === false}
             onChange={() => onChange(false)}
-            className="w-4 h-4 text-vet-primary focus:ring-vet-primary"
+            className="w-4 h-4 text-[var(--color-vet-primary)] focus:ring-[var(--color-vet-primary)]"
           />
-          <span className="text-sm text-gray-700">No</span>
+          <span className="text-sm text-[var(--color-vet-text)]">No</span>
         </label>
       </div>
     </div>

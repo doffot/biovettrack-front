@@ -1,10 +1,17 @@
+// src/components/layout/HeaderDesktop.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 
-const HeaderDesktop: React.FC = () => {
+interface HeaderDesktopProps {
+  isSidebarCollapsed?: boolean;
+}
+
+const HeaderDesktop: React.FC<HeaderDesktopProps> = ({ 
+  isSidebarCollapsed = false 
+}) => {
   const { data } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -38,12 +45,24 @@ const HeaderDesktop: React.FC = () => {
         : "Usuario";
 
   return (
-    <header className="hidden lg:flex fixed top-0 left-64 right-0 z-40 h-16 items-center justify-end px-6 bg-white border-b border-vet-light shadow-soft">
+    <header 
+      className={`
+        hidden lg:flex fixed top-0 right-0 z-40 h-16 
+        items-center justify-end px-6 
+        bg-vet-light/80 backdrop-blur-md
+        border-b border-border
+        transition-all duration-300
+        ${isSidebarCollapsed ? "left-20" : "left-64"}
+      `}
+    >
       <div className="relative" ref={dropdownRef}>
-        {/* Botón para abrir/cerrar dropdown - NO SE CAMBIA */}
+        {/* Botón para abrir/cerrar dropdown */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-3 px-4 py-2 rounded-xl bg-vet-light/50 hover:bg-vet-light transition-all duration-200 group"
+          className="flex items-center gap-3 px-4 py-2 rounded-xl 
+            bg-card/50 hover:bg-card 
+            border border-border hover:border-vet-primary/30
+            transition-all duration-200 group"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-soft">
             <User className="w-5 h-5 text-white" />
@@ -65,11 +84,15 @@ const HeaderDesktop: React.FC = () => {
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-64 bg-white border border-vet-light rounded-2xl shadow-card overflow-hidden z-50 animate-scale-in">
+          <div className="absolute right-0 mt-2 w-64 
+            bg-card border border-border 
+            rounded-2xl shadow-card overflow-hidden z-50 
+            animate-scale-in"
+          >
             {/* Header del usuario */}
-            <div className="px-4 py-3 bg-gradient-to-r from-vet-light/30 to-transparent border-b border-vet-light">
+            <div className="px-4 py-3 bg-gradient-to-r from-vet-light to-transparent border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-soft">
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -83,30 +106,34 @@ const HeaderDesktop: React.FC = () => {
               </div>
             </div>
 
-            {/* ✅ Mi Perfil - CAMBIADO de button a Link */}
+            {/* Mi Perfil */}
             <Link
               to="/profile"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-vet-text hover:bg-vet-light/50 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left 
+                text-vet-text hover:bg-hover 
+                transition-colors"
             >
-              <div className="p-2 bg-vet-light rounded-lg">
-                <User className="w-4 h-4 text-vet-primary" />
+              <div className="p-2 bg-sky-soft rounded-lg border border-border">
+                <User className="w-4 h-4 text-vet-accent" />
               </div>
               <span className="text-sm font-medium">Mi Perfil</span>
             </Link>
 
-            {/* Cerrar Sesión - NO SE CAMBIA */}
+            {/* Cerrar Sesión */}
             <button
               onClick={() => {
                 logout();
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-left border-t border-vet-light"
+              className="w-full flex items-center gap-3 px-4 py-3 
+                hover:bg-vet-danger/10 
+                transition-colors text-left border-t border-border"
             >
-              <div className="p-2 bg-red-50 rounded-lg">
-                <LogOut className="w-4 h-4 text-red-500" />
+              <div className="p-2 bg-vet-danger/10 rounded-lg">
+                <LogOut className="w-4 h-4 text-vet-danger" />
               </div>
-              <span className="text-sm font-medium text-red-600">
+              <span className="text-sm font-medium text-vet-danger">
                 Cerrar Sesión
               </span>
             </button>

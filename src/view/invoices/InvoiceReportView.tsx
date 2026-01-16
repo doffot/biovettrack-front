@@ -8,10 +8,10 @@ import { useInvoiceReport } from "../../hooks/useInvoiceReport";
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="text-center">
-        <div className="w-8 h-8 mx-auto mb-3 border-2 border-gray-200 border-t-[#0A7EA4] rounded-full animate-spin" />
-        <p className="text-sm text-gray-500">Cargando reporte...</p>
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-slate-700 border-t-vet-primary rounded-full animate-spin" />
+        <p className="text-sm text-vet-muted">Cargando reporte...</p>
       </div>
     </div>
   );
@@ -33,7 +33,7 @@ export default function InvoiceReportView() {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-3 lg:pt-0">
+    <div className="min-h-screen bg-slate-900 pt-3 lg:pt-0">
       <ReportHeader
         periodLabel={periodLabel}
         isFetching={isFetching}

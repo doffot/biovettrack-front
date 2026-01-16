@@ -30,13 +30,13 @@ export function CartItem({
             disabled={!item.isDivisible}
             className={`text-[9px] px-1 py-0.5 rounded ${
               item.isDivisible
-                ? "bg-vet-light text-vet-primary cursor-pointer"
-                : "bg-gray-100 text-gray-500"
+                ? "bg-vet-primary/20 text-vet-primary cursor-pointer"
+                : "bg-slate-700/50 text-slate-500"
             }`}
           >
             {item.isFullUnit ? item.unit : item.doseUnit}
           </button>
-          <span className="text-[9px] text-gray-500">${unitPrice.toFixed(2)}</span>
+          <span className="text-[9px] text-vet-muted">${unitPrice.toFixed(2)}</span>
         </div>
       </div>
 
@@ -44,22 +44,22 @@ export function CartItem({
       <div className="flex items-center gap-0.5">
         <button
           onClick={() => onUpdateQuantity(index, item.quantity - 1)}
-          className="w-5 h-5 flex items-center justify-center rounded border border-gray-200 hover:bg-gray-100"
+          className="w-5 h-5 flex items-center justify-center rounded border border-slate-700 hover:bg-slate-700/50"
         >
-          <Minus className="w-2.5 h-2.5" />
+          <Minus className="w-2.5 h-2.5 text-vet-text" />
         </button>
         <input
           type="number"
           value={item.quantity}
           onChange={(e) => onUpdateQuantity(index, parseFloat(e.target.value) || 0)}
-          className="w-8 text-center text-[10px] font-medium border border-gray-200 rounded py-0.5"
+          className="w-8 text-center text-[10px] font-medium border border-slate-700 rounded py-0.5 bg-slate-800 text-vet-text"
         />
         <button
           onClick={() => onUpdateQuantity(index, item.quantity + 1)}
           disabled={item.quantity >= item.availableStock}
-          className="w-5 h-5 flex items-center justify-center rounded border border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+          className="w-5 h-5 flex items-center justify-center rounded border border-slate-700 hover:bg-slate-700/50 disabled:opacity-50"
         >
-          <Plus className="w-2.5 h-2.5" />
+          <Plus className="w-2.5 h-2.5 text-vet-text" />
         </button>
       </div>
 
@@ -71,7 +71,7 @@ export function CartItem({
       {/* Eliminar */}
       <button
         onClick={() => onRemove(index)}
-        className="p-0.5 text-gray-400 hover:text-red-500 rounded"
+        className="p-0.5 text-slate-400 hover:text-red-400 rounded"
       >
         <Trash2 className="w-3 h-3" />
       </button>

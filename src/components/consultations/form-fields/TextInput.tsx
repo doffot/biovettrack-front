@@ -1,4 +1,3 @@
-// src/components/consultations/form-fields/TextInput.tsx
 interface TextInputProps {
   label: string;
   name: string;
@@ -22,7 +21,13 @@ export default function TextInput({
 }: TextInputProps) {
   return (
     <div>
-      <label className={`block mb-1 ${sublabel ? "text-xs text-gray-500" : "text-xs font-medium text-gray-600"}`}>
+      <label 
+        className={`block mb-1 ${
+          sublabel 
+            ? "text-xs text-[var(--color-vet-muted)]" 
+            : "text-xs font-medium text-[var(--color-vet-muted)]"
+        }`}
+      >
         {label}
       </label>
       <input
@@ -31,7 +36,7 @@ export default function TextInput({
         value={value}
         onChange={onChange}
         maxLength={maxLength}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+        className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
         placeholder={placeholder}
       />
     </div>

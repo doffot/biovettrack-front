@@ -46,8 +46,8 @@ export default function GroomingServiceListView() {
     if (!invoice) {
       return {
         status: "Sin facturar",
-        statusColor: "bg-gray-100 text-gray-600 border-gray-200",
-        statusIcon: <AlertCircle className="w-4 h-4 text-gray-500" />,
+        statusColor: "bg-slate-700 text-slate-400 border border-slate-600",
+        statusIcon: <AlertCircle className="w-4 h-4 text-slate-500" />,
         amount: null,
         isPaid: false
       };
@@ -71,8 +71,8 @@ export default function GroomingServiceListView() {
       case "Pagado":
         return {
           status: "Pagado",
-          statusColor: "bg-green-100 text-green-700 border-green-200",
-          statusIcon: <CheckCircle className="w-4 h-4 text-green-600" />,
+          statusColor: "bg-green-500/20 text-green-400 border border-green-500/30",
+          statusIcon: <CheckCircle className="w-4 h-4 text-green-400" />,
           amount: formatAmount(serviceAmount, invoice.currency),
           isPaid: true
         };
@@ -81,8 +81,8 @@ export default function GroomingServiceListView() {
         const paidAmount = (invoice.amountPaid || 0) * (serviceAmount / invoice.total);
         return {
           status: "Pago Parcial",
-          statusColor: "bg-amber-100 text-amber-700 border-amber-200",
-          statusIcon: <Clock className="w-4 h-4 text-amber-600" />,
+          statusColor: "bg-amber-500/20 text-amber-400 border border-amber-500/30",
+          statusIcon: <Clock className="w-4 h-4 text-amber-400" />,
           amount: formatAmount(paidAmount, invoice.currency),
           isPaid: false
         };
@@ -90,8 +90,8 @@ export default function GroomingServiceListView() {
       case "Pendiente":
         return {
           status: "Por Cobrar",
-          statusColor: "bg-red-100 text-red-700 border-red-200",
-          statusIcon: <CreditCard className="w-4 h-4 text-red-600" />,
+          statusColor: "bg-red-500/20 text-red-400 border border-red-500/30",
+          statusIcon: <CreditCard className="w-4 h-4 text-red-400" />,
           amount: formatAmount(serviceAmount, invoice.currency),
           isPaid: false
         };
@@ -99,8 +99,8 @@ export default function GroomingServiceListView() {
       default:
         return {
           status: invoice.paymentStatus,
-          statusColor: "bg-gray-100 text-gray-600 border-gray-200",
-          statusIcon: <AlertCircle className="w-4 h-4 text-gray-500" />,
+          statusColor: "bg-slate-700 text-slate-400 border border-slate-600",
+          statusIcon: <AlertCircle className="w-4 h-4 text-slate-500" />,
           amount: null,
           isPaid: false
         };
@@ -133,19 +133,19 @@ export default function GroomingServiceListView() {
     <>
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h2 className="text-lg font-semibold text-vet-secondary font-montserrat">
+          <h2 className="text-lg font-semibold text-vet-text font-montserrat">
             Peluquería y Baño
           </h2>
         </div>
         <Link
           to="create"
-          className="inline-flex justify-center items-center gap-2 px-2 py-2 rounded-md bg-vet-primary/10 hover:bg-vet-secondary text-vet-primary font-medium hover:text-white shadow-sm hover:shadow-md transition-all text-sm font-playfair-display"
+          className="inline-flex justify-center items-center gap-2 px-2 py-2 rounded-md bg-vet-primary/20 hover:bg-gradient-to-r hover:from-vet-primary hover:to-vet-secondary border border-vet-primary/30 text-vet-accent font-medium hover:text-white shadow-lg shadow-vet-primary/10 hover:shadow-vet-primary/30 transition-all text-sm font-playfair-display"
         >
           <Plus className="w-4 h-4" />
           Agregar
         </Link>
       </div>
-      <div className="border border-gray-200 mb-5"></div>
+      <div className="border border-slate-700/50 mb-5"></div>
 
       <div
         className={`${
@@ -153,9 +153,9 @@ export default function GroomingServiceListView() {
         } transition-all duration-500`}
       >
         {services.length ? (
-          <div className="bg-white overflow-hidden">
-            <div className="hidden sm:block bg-gray-50 px-6 py-2 border-b border-gray-200">
-              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-400 tracking-wide uppercase">
+          <div className="bg-sky-soft border border-slate-700/50 rounded-xl overflow-hidden shadow-lg shadow-black/10">
+            <div className="hidden sm:block bg-vet-light px-6 py-2 border-b border-slate-700/50">
+              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-vet-muted tracking-wide uppercase">
                 <div className="col-span-4">Servicio</div>
                 <div className="col-span-2">Fecha</div>
                 <div className="col-span-2">Costo</div>
@@ -164,21 +164,21 @@ export default function GroomingServiceListView() {
               </div>
             </div>
 
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-700/30">
               {services.map((service: GroomingService) => {
                 const paymentInfo = getPaymentInfo(service);
 
                 return (
                   <div
                     key={service._id}
-                    className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors group"
+                    className="px-4 sm:px-6 py-4 hover:bg-slate-700/30 transition-colors group"
                   >
                     {/* Mobile */}
                     <div className="sm:hidden space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <Scissors className="w-4 h-4 text-vet-primary" />
+                            <Scissors className="w-4 h-4 text-vet-accent" />
                             <h3 className="font-medium text-vet-text truncate">
                               {service.service}
                             </h3>
@@ -191,15 +191,15 @@ export default function GroomingServiceListView() {
                         </div>
                         <Link
                           to={`${service._id}`}
-                          className="p-1.5 rounded-md bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600"
+                          className="p-1.5 rounded-md bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500 hover:text-white text-blue-400 transition-colors"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Link>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{formatDate(service.date)}</span>
-                        <span className="font-semibold text-vet-primary">${service.cost.toFixed(2)}</span>
+                        <span className="text-vet-muted">{formatDate(service.date)}</span>
+                        <span className="font-semibold text-vet-accent">${service.cost.toFixed(2)}</span>
                       </div>
 
                       <div className="flex justify-between items-center">
@@ -221,11 +221,11 @@ export default function GroomingServiceListView() {
                     <div className="hidden sm:grid grid-cols-12 gap-4 items-center">
                       <div className="col-span-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-vet-primary/10 flex items-center justify-center">
-                            <Scissors className="w-4 h-4 text-vet-primary" />
+                          <div className="w-8 h-8 rounded-lg bg-vet-primary/20 border border-vet-primary/30 flex items-center justify-center">
+                            <Scissors className="w-4 h-4 text-vet-accent" />
                           </div>
                           <div className="min-w-0">
-                            <h3 className="font-medium text-sm text-vet-primary truncate">
+                            <h3 className="font-medium text-sm text-vet-text truncate">
                               {service.service}
                             </h3>
                             {service.specifications && (
@@ -238,13 +238,13 @@ export default function GroomingServiceListView() {
                       </div>
 
                       <div className="col-span-2">
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-vet-muted text-sm">
                           {formatDate(service.date)}
                         </span>
                       </div>
 
                       <div className="col-span-2">
-                        <span className="font-semibold text-vet-primary">
+                        <span className="font-semibold text-vet-accent">
                           ${service.cost.toFixed(2)}
                         </span>
                       </div>
@@ -261,7 +261,7 @@ export default function GroomingServiceListView() {
                       <div className="col-span-2 flex items-center justify-center gap-2">
                         <Link
                           to={`${service._id}`}
-                          className="p-2 rounded-md bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 transition-colors"
+                          className="p-2 rounded-md bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500 hover:text-white text-blue-400 transition-colors"
                           title="Ver detalles"
                         >
                           <Eye className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function GroomingServiceListView() {
 
                         {!paymentInfo.isPaid && (
                           <button
-                            className="p-2 rounded-md bg-red-50 hover:bg-red-500 hover:text-white text-red-600 transition-colors"
+                            className="p-2 rounded-md bg-red-500/20 border border-red-500/30 hover:bg-red-500 hover:text-white text-red-400 transition-colors"
                             title="Pendiente de pago"
                           >
                             <CreditCard className="w-4 h-4" />
@@ -283,8 +283,8 @@ export default function GroomingServiceListView() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-vet-light flex items-center justify-center">
+          <div className="bg-sky-soft rounded-xl border border-slate-700/50 p-8 text-center shadow-lg shadow-black/10">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-vet-light border border-slate-700 flex items-center justify-center">
               <Scissors className="w-6 h-6 text-vet-muted" />
             </div>
             <h3 className="text-lg font-medium text-vet-text mb-2">
@@ -295,7 +295,7 @@ export default function GroomingServiceListView() {
             </p>
             <Link
               to="create"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-vet-primary hover:bg-vet-secondary text-white font-medium shadow-sm hover:shadow-md transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-medium shadow-lg shadow-vet-primary/30 hover:shadow-vet-primary/50 transition-all"
             >
               <Plus className="w-4 h-4" />
               Agregar Primer Servicio

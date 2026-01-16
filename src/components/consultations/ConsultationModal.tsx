@@ -1,4 +1,3 @@
-// src/components/consultations/ConsultationModal.tsx
 import { X, Calendar, Thermometer, Heart, Wind, Scale } from "lucide-react";
 import type { Consultation } from "../../types/consultation";
 
@@ -31,10 +30,12 @@ export default function ConsultationModal({
     children: React.ReactNode;
   }) => (
     <div className="mb-4">
-      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h4 className="text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide mb-2">
         {title}
       </h4>
-      <div className="bg-gray-50 rounded-lg p-3 space-y-2">{children}</div>
+      <div className="bg-[var(--color-hover)] rounded-lg p-3 space-y-2 border border-[var(--color-border)]">
+        {children}
+      </div>
     </div>
   );
 
@@ -50,8 +51,8 @@ export default function ConsultationModal({
       typeof value === "boolean" ? (value ? "Sí" : "No") : value;
     return (
       <div className="flex justify-between text-sm">
-        <span className="text-gray-500">{label}</span>
-        <span className="text-gray-900 font-medium text-right max-w-[60%]">
+        <span className="text-[var(--color-vet-muted)]">{label}</span>
+        <span className="text-[var(--color-vet-text)] font-medium text-right max-w-[60%]">
           {displayValue}
         </span>
       </div>
@@ -68,8 +69,8 @@ export default function ConsultationModal({
     if (!value) return null;
     return (
       <div className="text-sm">
-        <span className="text-gray-500 block mb-1">{label}</span>
-        <p className="text-gray-900 bg-white p-2 rounded border border-gray-100">
+        <span className="text-[var(--color-vet-muted)] block mb-1">{label}</span>
+        <p className="text-[var(--color-vet-text)] bg-[var(--color-card)] p-2 rounded border border-[var(--color-border)]">
           {value}
         </p>
       </div>
@@ -77,22 +78,22 @@ export default function ConsultationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[var(--color-card)] rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-[var(--color-border)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-gradient-to-r from-blue-600/10 to-[var(--color-card)]">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 className="text-lg font-bold text-[var(--color-vet-text)]">
               Detalle de Consulta
             </h3>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
+            <p className="text-sm text-[var(--color-vet-muted)] flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               {formatDate(consultation.consultationDate)}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -102,33 +103,33 @@ export default function ConsultationModal({
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-140px)]">
           {/* Signos vitales */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <div className="bg-red-50 rounded-xl p-3 text-center">
-              <Thermometer className="w-5 h-5 text-red-500 mx-auto mb-1" />
-              <p className="text-lg font-bold text-gray-900">
+            <div className="bg-red-600/10 rounded-xl p-3 text-center border border-red-500/20">
+              <Thermometer className="w-5 h-5 text-red-400 mx-auto mb-1" />
+              <p className="text-lg font-bold text-[var(--color-vet-text)]">
                 {consultation.temperature ?? "-"}°C
               </p>
-              <p className="text-xs text-gray-500">Temperatura</p>
+              <p className="text-xs text-[var(--color-vet-muted)]">Temperatura</p>
             </div>
-            <div className="bg-pink-50 rounded-xl p-3 text-center">
-              <Heart className="w-5 h-5 text-pink-500 mx-auto mb-1" />
-              <p className="text-lg font-bold text-gray-900">
+            <div className="bg-pink-600/10 rounded-xl p-3 text-center border border-pink-500/20">
+              <Heart className="w-5 h-5 text-pink-400 mx-auto mb-1" />
+              <p className="text-lg font-bold text-[var(--color-vet-text)]">
                 {consultation.heartRate ?? "-"} lpm
               </p>
-              <p className="text-xs text-gray-500">Frec. Cardíaca</p>
+              <p className="text-xs text-[var(--color-vet-muted)]">Frec. Cardíaca</p>
             </div>
-            <div className="bg-blue-50 rounded-xl p-3 text-center">
-              <Wind className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-              <p className="text-lg font-bold text-gray-900">
+            <div className="bg-blue-600/10 rounded-xl p-3 text-center border border-blue-500/20">
+              <Wind className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+              <p className="text-lg font-bold text-[var(--color-vet-text)]">
                 {consultation.respiratoryRate ?? "-"} rpm
               </p>
-              <p className="text-xs text-gray-500">Frec. Respiratoria</p>
+              <p className="text-xs text-[var(--color-vet-muted)]">Frec. Respiratoria</p>
             </div>
-            <div className="bg-green-50 rounded-xl p-3 text-center">
-              <Scale className="w-5 h-5 text-green-500 mx-auto mb-1" />
-              <p className="text-lg font-bold text-gray-900">
+            <div className="bg-green-600/10 rounded-xl p-3 text-center border border-green-500/20">
+              <Scale className="w-5 h-5 text-green-400 mx-auto mb-1" />
+              <p className="text-lg font-bold text-[var(--color-vet-text)]">
                 {consultation.weight ?? "-"} kg
               </p>
-              <p className="text-xs text-gray-500">Peso</p>
+              <p className="text-xs text-[var(--color-vet-muted)]">Peso</p>
             </div>
           </div>
 
@@ -158,8 +159,8 @@ export default function ConsultationModal({
           {/* Tratamiento - SECCIÓN DESTACADA */}
           {consultation.treatmentPlan && (
             <Section title="Plan de tratamiento">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">
+              <div className="bg-emerald-600/10 border border-emerald-500/30 rounded-lg p-3">
+                <p className="text-sm text-[var(--color-vet-text)] whitespace-pre-wrap">
                   {consultation.treatmentPlan}
                 </p>
               </div>
@@ -324,16 +325,16 @@ export default function ConsultationModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-4 border-t border-[var(--color-border)] bg-[var(--color-hover)]">
           <div>
-            <p className="text-xs text-gray-500">Costo de consulta</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-xs text-[var(--color-vet-muted)]">Costo de consulta</p>
+            <p className="text-xl font-bold text-[var(--color-vet-text)]">
               ${consultation.cost != null ? consultation.cost.toFixed(2) : "0.00"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] font-medium rounded-lg transition-colors border border-[var(--color-border)]"
           >
             Cerrar
           </button>

@@ -1,4 +1,3 @@
-// src/components/MainMenu.tsx
 import React from "react";
 import {
   User,
@@ -56,8 +55,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Gestionar propietarios",
           icon: User,
           to: "/owners",
-          color: "text-sky-600",
-          bgColor: "bg-sky-50",
+          color: "text-sky-400",
+          bgColor: "bg-sky-600/10",
           gradientFrom: "from-sky-500",
           gradientTo: "to-sky-600",
         },
@@ -67,8 +66,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Expedientes médicos",
           icon: PawPrint,
           to: "/patients",
-          color: "text-pink-600",
-          bgColor: "bg-pink-50",
+          color: "text-pink-400",
+          bgColor: "bg-pink-600/10",
           gradientFrom: "from-pink-500",
           gradientTo: "to-pink-600",
         },
@@ -78,8 +77,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Gestionar turnos médicos",
           icon: Calendar,
           to: "/appointments",
-          color: "text-amber-600",
-          bgColor: "bg-amber-50",
+          color: "text-amber-400",
+          bgColor: "bg-amber-600/10",
           gradientFrom: "from-amber-500",
           gradientTo: "to-amber-600",
         },
@@ -96,8 +95,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Gestionar exámenes clínicos",
           icon: Activity,
           to: "/lab-exams",
-          color: "text-purple-600",
-          bgColor: "bg-purple-50",
+          color: "text-purple-400",
+          bgColor: "bg-purple-600/10",
           gradientFrom: "from-purple-500",
           gradientTo: "to-purple-600",
         },
@@ -107,20 +106,19 @@ const MainMenu: React.FC = () => {
           subtitle: "Servicios de estética",
           icon: Scissors,
           to: "/grooming-services",
-          color: "text-emerald-600",
-          bgColor: "bg-emerald-50",
+          color: "text-emerald-400",
+          bgColor: "bg-emerald-600/10",
           gradientFrom: "from-emerald-500",
           gradientTo: "to-emerald-600",
         },
-        //  Ventas 
         {
           id: "sales",
           title: "Registrar Venta",
           subtitle: "Productos y servicios",
           icon: ShoppingCart,
           to: "/sales",
-          color: "text-green-600",
-          bgColor: "bg-green-50",
+          color: "text-green-400",
+          bgColor: "bg-green-600/10",
           gradientFrom: "from-green-500",
           gradientTo: "to-green-600",
         },
@@ -137,8 +135,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Catálogo e inventario",
           icon: Package,
           to: "/products",
-          color: "text-orange-600",
-          bgColor: "bg-orange-50",
+          color: "text-orange-400",
+          bgColor: "bg-orange-600/10",
           gradientFrom: "from-orange-500",
           gradientTo: "to-orange-600",
         },
@@ -155,8 +153,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Estadísticas de servicios",
           icon: Scissors,
           to: "/grooming/report",
-          color: "text-indigo-600",
-          bgColor: "bg-indigo-50",
+          color: "text-indigo-400",
+          bgColor: "bg-indigo-600/10",
           gradientFrom: "from-indigo-500",
           gradientTo: "to-indigo-600",
         },
@@ -166,8 +164,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Resúmenes de ingresos",
           icon: FileText,
           to: "/invoices/report",
-          color: "text-blue-600",
-          bgColor: "bg-blue-50",
+          color: "text-blue-400",
+          bgColor: "bg-blue-600/10",
           gradientFrom: "from-blue-500",
           gradientTo: "to-blue-600",
         },
@@ -184,8 +182,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Configurar formas de pago",
           icon: CreditCard,
           to: "/payment-methods",
-          color: "text-green-600",
-          bgColor: "bg-green-50",
+          color: "text-green-400",
+          bgColor: "bg-green-600/10",
           gradientFrom: "from-green-500",
           gradientTo: "to-green-600",
         },
@@ -195,8 +193,8 @@ const MainMenu: React.FC = () => {
           subtitle: "Gestionar personal médico",
           icon: Users,
           to: "/staff",
-          color: "text-teal-600",
-          bgColor: "bg-teal-50",
+          color: "text-teal-400",
+          bgColor: "bg-teal-600/10",
           gradientFrom: "from-teal-500",
           gradientTo: "to-teal-600",
         },
@@ -210,7 +208,7 @@ const MainMenu: React.FC = () => {
     return (
       <div
         className="
-          relative bg-white rounded-2xl p-4 border border-gray-100/50
+          relative bg-[var(--color-card)] rounded-2xl p-4 border border-[var(--color-border)]
           transition-all duration-300 shadow-sm hover:shadow-lg active:scale-[0.97]
           overflow-hidden group
         "
@@ -218,13 +216,13 @@ const MainMenu: React.FC = () => {
         <div
           className={`
             absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
-            opacity-0 group-hover:opacity-5 transition-opacity duration-300
+            opacity-0 group-hover:opacity-10 transition-opacity duration-300
           `}
         />
         <div
           className={`
             absolute -top-8 -right-8 w-24 h-24 ${item.bgColor}
-            rounded-full opacity-30 blur-2xl
+            rounded-full opacity-50 blur-2xl
             group-hover:scale-150 transition-transform duration-500
           `}
         />
@@ -233,7 +231,7 @@ const MainMenu: React.FC = () => {
             <div
               className={`
                 absolute inset-0 bg-gradient-to-br ${item.gradientFrom} ${item.gradientTo}
-                rounded-2xl blur-md opacity-20 group-hover:opacity-30 transition-opacity
+                rounded-2xl blur-md opacity-30 group-hover:opacity-40 transition-opacity
               `}
             />
             <div
@@ -241,25 +239,25 @@ const MainMenu: React.FC = () => {
                 relative flex-shrink-0 w-14 h-14 ${item.bgColor}
                 rounded-2xl flex items-center justify-center
                 shadow-sm group-hover:shadow-md transition-all duration-300
-                group-hover:scale-110
+                group-hover:scale-110 border border-[var(--color-border)]
               `}
             >
               <Icon className={`w-7 h-7 ${item.color}`} />
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-vet-text text-base mb-0.5 font-montserrat">
+            <h3 className="font-bold text-[var(--color-vet-text)] text-base mb-0.5 font-montserrat">
               {item.title}
             </h3>
-            <p className="text-xs text-vet-muted truncate font-inter">
+            <p className="text-xs text-[var(--color-vet-muted)] truncate font-inter">
               {item.subtitle}
             </p>
           </div>
           <div className="flex-shrink-0">
             <ChevronRight
               className="
-                w-6 h-6 text-gray-400
-                group-hover:text-vet-primary group-hover:translate-x-1
+                w-6 h-6 text-[var(--color-vet-muted)]
+                group-hover:text-[var(--color-vet-accent)] group-hover:translate-x-1
                 transition-all duration-300
               "
             />
@@ -282,13 +280,13 @@ const MainMenu: React.FC = () => {
     return (
       <div key={section.id} className="space-y-3">
         <div className="flex items-center gap-2 px-1">
-          <div className="p-1.5 bg-vet-light rounded-lg">
-            <SectionIcon className="w-4 h-4 text-vet-primary" />
+          <div className="p-1.5 bg-[var(--color-vet-primary)]/10 rounded-lg border border-[var(--color-vet-primary)]/20">
+            <SectionIcon className="w-4 h-4 text-[var(--color-vet-accent)]" />
           </div>
-          <h2 className="text-sm font-semibold text-vet-text font-montserrat">
+          <h2 className="text-sm font-semibold text-[var(--color-vet-text)] font-montserrat">
             {section.title}
           </h2>
-          <div className="flex-1 h-px bg-gradient-to-r from-vet-light to-transparent ml-2" />
+          <div className="flex-1 h-px bg-gradient-to-r from-[var(--color-border)] to-transparent ml-2" />
         </div>
         <div className="space-y-2.5">
           {section.items.map((item) => (
@@ -302,14 +300,14 @@ const MainMenu: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-vet-light/30 via-white to-vet-light/20 pt-3">
+    <div className="flex flex-col h-full bg-gradient-to-b from-[var(--color-vet-light)] via-[var(--color-vet-light)] to-[var(--color-vet-light)] pt-3">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-vet-primary/5 to-vet-accent/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-vet-primary)]/10 to-[var(--color-vet-accent)]/10" />
         <div className="relative px-6 pt-4 pb-4">
-          <h1 className="text-2xl font-bold text-vet-text font-montserrat mb-1">
+          <h1 className="text-2xl font-bold text-[var(--color-vet-text)] font-montserrat mb-1">
             Panel Principal
           </h1>
-          <p className="text-sm text-vet-muted font-inter">
+          <p className="text-sm text-[var(--color-vet-muted)] font-inter">
             Accede rápidamente a todas las funciones
           </p>
         </div>

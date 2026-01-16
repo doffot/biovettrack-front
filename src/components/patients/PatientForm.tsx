@@ -1,4 +1,3 @@
-// src/components/patients/PatientForm.tsx
 import React, { useState } from "react";
 import {
   CalendarDays,
@@ -85,42 +84,42 @@ const PatientForm: React.FC<PatientFormProps> = ({
         
         {/* ===== COLUMNA 1: Información Básica ===== */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-vet-muted uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-vet-muted)] uppercase tracking-wider">
             Información Básica
           </h3>
 
           {/* Nombre */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-vet-text mb-2">
-              Nombre del paciente <span className="text-vet-danger">*</span>
+            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
+              Nombre del paciente <span className="text-red-400">*</span>
             </label>
             <input
               id="name"
               type="text"
               placeholder="Nombre de la mascota"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted/60 ${
-                errors.name ? 'border-vet-danger/50 bg-red-50/30' : 'border-gray-200 hover:border-vet-primary/30'
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] ${
+                errors.name ? 'border-red-500/50 bg-red-600/10' : 'border-[var(--color-border)] hover:border-[var(--color-vet-primary)]/30'
               }`}
               {...register("name", {
                 required: "El nombre es obligatorio",
               })}
             />
             {errors.name && (
-              <p className="mt-2 text-vet-danger text-xs font-medium">
+              <p className="mt-2 text-red-400 text-xs font-medium">
                 {errors.name.message}
               </p>
             )}
           </div>
 
           {/* Especie */}
-          <div>
-            <label htmlFor="species" className="block text-sm font-medium text-vet-text mb-2">
-              Especie <span className="text-vet-danger">*</span>
+          <div className="relative">
+            <label htmlFor="species" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
+              Especie <span className="text-red-400">*</span>
             </label>
             <select
               id="species"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text appearance-none cursor-pointer ${
-                errors.species ? 'border-vet-danger/50 bg-red-50/30' : 'border-gray-200 hover:border-vet-primary/30'
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] appearance-none cursor-pointer ${
+                errors.species ? 'border-red-500/50 bg-red-600/10' : 'border-[var(--color-border)] hover:border-[var(--color-vet-primary)]/30'
               }`}
               {...register("species", {
                 required: "La especie es obligatoria",
@@ -136,27 +135,27 @@ const PatientForm: React.FC<PatientFormProps> = ({
               <option value="Hurón">Hurón</option>
               <option value="Otro">Otro</option>
             </select>
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-vet-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute right-4 top-[2.7rem] pointer-events-none">
+              <svg className="w-4 h-4 text-[var(--color-vet-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
             {errors.species && (
-              <p className="mt-2 text-vet-danger text-xs font-medium">
+              <p className="mt-2 text-red-400 text-xs font-medium">
                 {errors.species.message}
               </p>
             )}
           </div>
 
           {/* Sexo */}
-          <div>
-            <label htmlFor="sex" className="block text-sm font-medium text-vet-text mb-2">
-              Sexo <span className="text-vet-danger">*</span>
+          <div className="relative">
+            <label htmlFor="sex" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
+              Sexo <span className="text-red-400">*</span>
             </label>
             <select
               id="sex"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text appearance-none cursor-pointer ${
-                errors.sex ? 'border-vet-danger/50 bg-red-50/30' : 'border-gray-200 hover:border-vet-primary/30'
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] appearance-none cursor-pointer ${
+                errors.sex ? 'border-red-500/50 bg-red-600/10' : 'border-[var(--color-border)] hover:border-[var(--color-vet-primary)]/30'
               }`}
               {...register("sex", {
                 required: "El sexo es obligatorio",
@@ -166,13 +165,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
               <option value="Macho">Macho</option>
               <option value="Hembra">Hembra</option>
             </select>
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-vet-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute right-4 top-[2.7rem] pointer-events-none">
+              <svg className="w-4 h-4 text-[var(--color-vet-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
             {errors.sex && (
-              <p className="mt-2 text-vet-danger text-xs font-medium">
+              <p className="mt-2 text-red-400 text-xs font-medium">
                 {errors.sex.message}
               </p>
             )}
@@ -181,41 +180,41 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
         {/* ===== COLUMNA 2: Características Físicas ===== */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-vet-muted uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-vet-muted)] uppercase tracking-wider">
             Características Físicas
           </h3>
 
           {/* Raza */}
           <div>
-            <label htmlFor="breed" className="block text-sm font-medium text-vet-text mb-2">
+            <label htmlFor="breed" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
               Raza
             </label>
             <input
               id="breed"
               type="text"
               placeholder="Raza o mestizo"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl hover:border-vet-primary/30 focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted/60"
+              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-xl hover:border-[var(--color-vet-primary)]/30 focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)]"
               {...register("breed")}
             />
           </div>
 
           {/* Color */}
           <div>
-            <label htmlFor="color" className="block text-sm font-medium text-vet-text mb-2">
+            <label htmlFor="color" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
               Color o patrón
             </label>
             <input
               id="color"
               type="text"
               placeholder="Descripción del color"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl hover:border-vet-primary/30 focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted/60"
+              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-xl hover:border-[var(--color-vet-primary)]/30 focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)]"
               {...register("color")}
             />
           </div>
 
           {/* Peso */}
           <div>
-            <label htmlFor="weight" className="block text-sm font-medium text-vet-text mb-2">
+            <label htmlFor="weight" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
               Peso actual
             </label>
             <div className="relative">
@@ -225,12 +224,12 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 step="0.1"
                 min="0"
                 placeholder="0.0"
-                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl hover:border-vet-primary/30 focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted/60"
+                className="w-full px-4 py-3 pr-12 border border-[var(--color-border)] rounded-xl hover:border-[var(--color-vet-primary)]/30 focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)]"
                 {...register("weight", {
                   valueAsNumber: true,
                 })}
               />
-              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-vet-muted text-sm font-medium">
+              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--color-vet-muted)] text-sm font-medium">
                 kg
               </span>
             </div>
@@ -239,22 +238,22 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
         {/* ===== COLUMNA 3: Información Adicional ===== */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-vet-muted uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-vet-muted)] uppercase tracking-wider">
             Información Adicional
           </h3>
 
           {/* Fecha de nacimiento */}
           <div>
-            <label htmlFor="birthDate" className="block text-sm font-medium text-vet-text mb-2">
-              Fecha de nacimiento <span className="text-vet-danger">*</span>
+            <label htmlFor="birthDate" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
+              Fecha de nacimiento <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <input
                 id="birthDate"
                 type="date"
                 max={new Date().toISOString().split('T')[0]}
-                className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text ${
-                  errors.birthDate ? 'border-vet-danger/50 bg-red-50/30' : 'border-gray-200 hover:border-vet-primary/30'
+                className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] ${
+                  errors.birthDate ? 'border-red-500/50 bg-red-600/10' : 'border-[var(--color-border)] hover:border-[var(--color-vet-primary)]/30'
                 }`}
                 {...register("birthDate", {
                   required: "La fecha es obligatoria",
@@ -270,15 +269,15 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   },
                 })}
               />
-              <CalendarDays className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vet-muted w-5 h-5" />
+              <CalendarDays className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-vet-muted)] w-5 h-5" />
             </div>
             {ageText && (
-              <p className="mt-2 text-sm text-vet-muted">
-                Edad actual: <span className="text-vet-primary font-semibold">{ageText}</span>
+              <p className="mt-2 text-sm text-[var(--color-vet-muted)]">
+                Edad actual: <span className="text-[var(--color-vet-accent)] font-semibold">{ageText}</span>
               </p>
             )}
             {errors.birthDate && (
-              <p className="mt-2 text-vet-danger text-xs font-medium">
+              <p className="mt-2 text-red-400 text-xs font-medium">
                 {errors.birthDate.message}
               </p>
             )}
@@ -286,21 +285,21 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
           {/* Señas/Marcas */}
           <div>
-            <label htmlFor="identification" className="block text-sm font-medium text-vet-text mb-2">
+            <label htmlFor="identification" className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
               Señas particulares
             </label>
             <input
               id="identification"
               type="text"
               placeholder="Marcas distintivas o características especiales"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl hover:border-vet-primary/30 focus:ring-2 focus:ring-vet-accent/20 focus:border-vet-primary transition-all bg-white text-vet-text placeholder-vet-muted/60"
+              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-xl hover:border-[var(--color-vet-primary)]/30 focus:ring-2 focus:ring-[var(--color-vet-accent)]/20 focus:border-[var(--color-vet-primary)] transition-all bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)]"
               {...register("identification")}
             />
           </div>
 
           {/* Foto */}
           <div>
-            <label className="block text-sm font-medium text-vet-text mb-2">
+            <label className="block text-sm font-medium text-[var(--color-vet-text)] mb-2">
               Fotografía
             </label>
             <div className="flex items-center gap-4">
@@ -309,26 +308,26 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   <img 
                     src={previewImage} 
                     alt="Preview" 
-                    className="w-20 h-20 rounded-xl object-cover border-2 border-vet-accent/30 shadow-soft"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-[var(--color-vet-accent)]/30 shadow-md"
                   />
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 bg-vet-danger hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-colors"
+                    className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-vet-primary/30 flex items-center justify-center bg-vet-light/30">
-                  <div className="text-center text-vet-muted/50 text-xs">
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-[var(--color-vet-primary)]/30 flex items-center justify-center bg-[var(--color-vet-primary)]/5">
+                  <div className="text-center text-[var(--color-vet-muted)] text-xs">
                     Sin foto
                   </div>
                 </div>
               )}
               
               <label className="flex-1 cursor-pointer">
-                <div className="px-6 py-3 rounded-xl border-2 border-dashed border-vet-primary/30 hover:border-vet-primary hover:bg-vet-light/50 transition-all flex items-center justify-center gap-2 text-sm text-vet-muted hover:text-vet-primary">
+                <div className="px-6 py-3 rounded-xl border-2 border-dashed border-[var(--color-vet-primary)]/30 hover:border-[var(--color-vet-primary)] hover:bg-[var(--color-vet-primary)]/5 transition-all flex items-center justify-center gap-2 text-sm text-[var(--color-vet-muted)] hover:text-[var(--color-vet-accent)]">
                   <Upload className="w-4 h-4" />
                   <span>{previewImage ? 'Cambiar fotografía' : 'Cargar fotografía'}</span>
                 </div>
@@ -344,7 +343,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 />
               </label>
             </div>
-            <p className="mt-2 text-xs text-vet-muted">
+            <p className="mt-2 text-xs text-[var(--color-vet-muted)]">
               Opcional. Se asignará una imagen predeterminada si no se proporciona.
             </p>
           </div>

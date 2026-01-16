@@ -1,0 +1,70 @@
+/* ========================================
+   🎨 THEME - Variables y Configuración
+   ======================================== */
+
+@theme {
+  /* Fuentes */
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-yellowtail: "Yellowtail", cursive;
+  
+  /* 🌊 Paleta Azul Océano Oscuro - Ultra Profesional */
+  --color-vet-primary: #0A7EA4;
+  --color-vet-secondary: #085F7A;
+  --color-vet-accent: #36BCD4;
+  --color-vet-light: #0F172A;
+  --color-vet-text: #F1F5F9;
+  --color-vet-muted: #94A3B8;
+  --color-vet-danger: #FCA5A5;
+  --color-sky-soft: #1E293B;
+
+  /* Alias funcionales */
+  --color-primary: var(--color-vet-primary);
+  --color-background: var(--color-vet-light);
+  --color-text: var(--color-vet-text);
+  --color-muted: var(--color-vet-muted);
+  --color-danger: var(--color-vet-danger);
+
+  /* Sombras adaptadas al oscuro */
+  --shadow-soft: 0 4px 6px -1px rgba(10, 126, 164, 0.2), 0 2px 4px -1px rgba(10, 126, 164, 0.1);
+  --shadow-card: 0 10px 15px -3px rgba(10, 126, 164, 0.15), 0 4px 6px -2px rgba(10, 126, 164, 0.1);
+
+  /* Variables para Dark Mode */
+  --color-card: #1E293B;
+  --color-border: #334155;
+  --color-hover: #334155;
+  --color-active: #0A7EA4;
+  --color-highlight: #36BCD4;
+
+  /* Animaciones personalizadas */
+  --animate-gradient-shift: gradient-shift 3s ease infinite;
+  --animate-spin-slow: spin-slow 20s linear infinite;
+  --animate-reverse-spin: reverse-spin 15s linear infinite;
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-gentle-pulse: gentle-pulse 3s ease-in-out infinite;
+  --animate-float-particle: float-particle 6s ease-in-out infinite;
+  --animate-float-up: float-up 3s ease-in-out infinite;
+  --animate-shine: shine 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite;
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-bounce: scale-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animate-twinkle: twinkle 1.5s ease-in-out infinite;
+  --animate-twinkle-delayed: twinkle-delayed 1.5s ease-in-out infinite;
+  --animate-sparkle: sparkle 2s ease-in-out infinite;
+  --animate-fade-in: fadeIn 0.3s ease-out;
+  --animate-fade-in-up: fade-in-up 0.5s ease-out;
+  --animate-progress-bar: progress-bar 1.5s ease-in-out infinite;
+  --animate-progress-fill: progress-fill 0.7s ease-out forwards;
+  --animate-ripple: ripple 1.5s ease-out infinite;
+  --animate-morph: morph 8s ease-in-out infinite;
+}
+
+:root {
+  --gradient-vet-from: #E0F4F8;
+  --gradient-vet-via: #EEF9FC;
+  --gradient-vet-to: #ffffff;
+}

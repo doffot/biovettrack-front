@@ -94,7 +94,6 @@ export function DateRangeSelector({
       setTempTo("");
       setSelectingStart(false);
     } else {
-      // Si la fecha final es anterior a la inicial, intercambiar
       if (tempFrom && dateStr < tempFrom) {
         setTempTo(tempFrom);
         setTempFrom(dateStr);
@@ -164,7 +163,6 @@ export function DateRangeSelector({
   const getDisplayLabel = (): string => {
     if (dateRange === "custom" && customFrom) {
       if (customTo && customFrom !== customTo) {
-        // Verificar si es un mes completo
         const from = new Date(customFrom + "T00:00:00");
         const to = new Date(customTo + "T00:00:00");
         
@@ -188,24 +186,24 @@ export function DateRangeSelector({
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:border-gray-300 transition-colors text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md hover:border-slate-600 transition-colors text-sm text-vet-text"
       >
-        <Calendar className="w-4 h-4 text-gray-400" />
-        <span className="text-gray-700">{getDisplayLabel()}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <Calendar className="w-4 h-4 text-vet-muted" />
+        <span>{getDisplayLabel()}</span>
+        <ChevronDown className={`w-4 h-4 text-vet-muted transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[280px]">
+        <div className="absolute top-full left-0 mt-1 bg-slate-800 rounded-lg shadow-card border border-slate-700 z-50 min-w-[280px]">
           {/* Tabs de navegación */}
-          <div className="flex items-center justify-between p-2 border-b border-gray-100">
+          <div className="flex items-center justify-between p-2 border-b border-slate-700">
             <div className="flex gap-1">
               <button
                 onClick={() => setView("presets")}
                 className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
                   view === "presets"
-                    ? "bg-[#0A7EA4] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-vet-primary text-white"
+                    : "text-vet-muted hover:bg-slate-700"
                 }`}
               >
                 Rápido
@@ -214,8 +212,8 @@ export function DateRangeSelector({
                 onClick={() => setView("months")}
                 className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
                   view === "months"
-                    ? "bg-[#0A7EA4] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-vet-primary text-white"
+                    : "text-vet-muted hover:bg-slate-700"
                 }`}
               >
                 Mes
@@ -228,8 +226,8 @@ export function DateRangeSelector({
                 }}
                 className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
                   view === "calendar"
-                    ? "bg-[#0A7EA4] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-vet-primary text-white"
+                    : "text-vet-muted hover:bg-slate-700"
                 }`}
               >
                 Rango
@@ -237,9 +235,9 @@ export function DateRangeSelector({
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-1 hover:bg-slate-700 rounded"
             >
-              <X className="w-4 h-4 text-gray-400" />
+              <X className="w-4 h-4 text-vet-muted" />
             </button>
           </div>
 
@@ -252,8 +250,8 @@ export function DateRangeSelector({
                   onClick={() => handlePresetSelect(option.value)}
                   className={`w-full px-3 py-2 text-sm text-left rounded transition-colors ${
                     dateRange === option.value && !customFrom
-                      ? "bg-[#0A7EA4] text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-vet-primary text-white"
+                      : "text-vet-text hover:bg-slate-700"
                   }`}
                 >
                   {option.label}
@@ -268,16 +266,16 @@ export function DateRangeSelector({
               <div className="flex items-center justify-between mb-3">
                 <button
                   onClick={() => setCalendarDate(new Date(calendarDate.getFullYear() - 1, 0))}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 hover:bg-slate-700 rounded"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 text-vet-muted" />
                 </button>
-                <span className="text-sm font-medium">{calendarDate.getFullYear()}</span>
+                <span className="text-sm font-medium text-vet-text">{calendarDate.getFullYear()}</span>
                 <button
                   onClick={() => setCalendarDate(new Date(calendarDate.getFullYear() + 1, 0))}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 hover:bg-slate-700 rounded"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-vet-muted" />
                 </button>
               </div>
 
@@ -288,7 +286,6 @@ export function DateRangeSelector({
                     now.getMonth() === index &&
                     now.getFullYear() === calendarDate.getFullYear();
                   
-                  // Verificar si este mes está seleccionado
                   const monthStart = `${calendarDate.getFullYear()}-${String(index + 1).padStart(2, "0")}-01`;
                   const lastDay = new Date(calendarDate.getFullYear(), index + 1, 0).getDate();
                   const monthEnd = `${calendarDate.getFullYear()}-${String(index + 1).padStart(2, "0")}-${lastDay}`;
@@ -300,10 +297,10 @@ export function DateRangeSelector({
                       onClick={() => handleMonthSelect(index)}
                       className={`px-2 py-2 text-sm rounded transition-colors ${
                         isSelected
-                          ? "bg-[#0A7EA4] text-white"
+                          ? "bg-vet-primary text-white"
                           : isCurrentMonth
-                          ? "bg-[#0A7EA4]/10 text-[#0A7EA4] font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "bg-vet-primary/20 text-vet-primary font-medium"
+                          : "text-vet-text hover:bg-slate-700"
                       }`}
                     >
                       {month.slice(0, 3)}
@@ -320,25 +317,25 @@ export function DateRangeSelector({
               <div className="flex items-center justify-between mb-3">
                 <button
                   onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1))}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 hover:bg-slate-700 rounded"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 text-vet-muted" />
                 </button>
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-vet-text">
                   {MONTHS[calendarDate.getMonth()]} {calendarDate.getFullYear()}
                 </span>
                 <button
                   onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1))}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 hover:bg-slate-700 rounded"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-vet-muted" />
                 </button>
               </div>
 
               {/* Días de la semana */}
               <div className="grid grid-cols-7 gap-0.5 mb-1">
                 {DAYS.map((day) => (
-                  <div key={day} className="text-center text-xs text-gray-400 py-1">
+                  <div key={day} className="text-center text-xs text-vet-muted py-1">
                     {day}
                   </div>
                 ))}
@@ -363,14 +360,14 @@ export function DateRangeSelector({
                     <button
                       key={day.toISOString()}
                       onClick={() => handleDayClick(day)}
-                      className={`h-7 text-xs rounded transition-colors ${
+                      className={`h-7 text-xs rounded transition-colors flex items-center justify-center ${
                         edge
-                          ? "bg-[#0A7EA4] text-white"
+                          ? "bg-vet-primary text-white"
                           : inRange
-                          ? "bg-[#0A7EA4]/20 text-[#0A7EA4]"
+                          ? "bg-vet-primary/20 text-vet-primary"
                           : isToday
-                          ? "ring-1 ring-[#0A7EA4] text-[#0A7EA4]"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "ring-1 ring-vet-primary text-vet-primary"
+                          : "text-vet-text hover:bg-slate-700"
                       }`}
                     >
                       {day.getDate()}
@@ -380,12 +377,12 @@ export function DateRangeSelector({
               </div>
 
               {/* Footer con selección y botón */}
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <p className="text-xs text-vet-muted mb-2">
                   {selectingStart ? "Selecciona fecha inicio" : "Selecciona fecha fin"}
                 </p>
                 {tempFrom && (
-                  <p className="text-sm text-gray-700 mb-2">
+                  <p className="text-sm text-vet-text mb-2">
                     {formatDisplayDate(tempFrom)}
                     {tempTo && tempTo !== tempFrom && ` → ${formatDisplayDate(tempTo)}`}
                   </p>
@@ -393,7 +390,7 @@ export function DateRangeSelector({
                 <button
                   onClick={applyCustomRange}
                   disabled={!tempFrom}
-                  className="w-full py-2 bg-[#0A7EA4] text-white text-sm font-medium rounded-md hover:bg-[#086F8E] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full py-2 bg-vet-primary text-white text-sm font-medium rounded-md hover:bg-vet-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Aplicar
                 </button>

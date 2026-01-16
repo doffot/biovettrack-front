@@ -173,9 +173,9 @@ export default function GroomingDetailView() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Scissors className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500 mb-4">Servicio no encontrado</p>
-          <Link to="/grooming" className="text-vet-primary hover:underline">
+          <Scissors className="w-12 h-12 mx-auto text-vet-muted mb-3" />
+          <p className="text-vet-muted mb-4">Servicio no encontrado</p>
+          <Link to="/grooming" className="text-vet-accent hover:text-vet-primary transition-colors">
             Volver
           </Link>
         </div>
@@ -201,13 +201,13 @@ export default function GroomingDetailView() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Header minimalista */}
         <div className="flex items-center justify-between mb-6">
           <Link
             to={`/patients/${patientId}/grooming-services`}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-2 text-vet-muted hover:text-vet-text transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Volver</span>
@@ -216,13 +216,13 @@ export default function GroomingDetailView() {
           <div className="flex items-center gap-2">
             <Link
               to={`/patients/${patientId}/grooming-services/${service._id}/edit`}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+              className="p-2 text-vet-muted hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
             >
               <Edit3 className="w-4 h-4" />
             </Link>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+              className="p-2 text-vet-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -230,18 +230,18 @@ export default function GroomingDetailView() {
         </div>
 
         {/* Card principal */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-sky-soft rounded-xl shadow-lg shadow-black/10 border border-slate-700/50 overflow-hidden">
           {/* Encabezado del servicio */}
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-6 border-b border-slate-700/50">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-vet-primary/10 rounded-xl flex items-center justify-center">
-                <Scissors className="w-6 h-6 text-vet-primary" />
+              <div className="w-12 h-12 bg-vet-primary/20 border border-vet-primary/30 rounded-xl flex items-center justify-center">
+                <Scissors className="w-6 h-6 text-vet-accent" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-xl font-semibold text-vet-text">
                   {service.service}
                 </h1>
-                <p className="text-sm text-gray-500">{patientName}</p>
+                <p className="text-sm text-vet-muted">{patientName}</p>
               </div>
             </div>
           </div>
@@ -250,20 +250,20 @@ export default function GroomingDetailView() {
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
-                <Calendar className="w-4 h-4 text-gray-400" />
+                <Calendar className="w-4 h-4 text-vet-muted" />
                 <div>
-                  <p className="text-xs text-gray-500">Fecha</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-vet-muted">Fecha</p>
+                  <p className="text-sm font-medium text-vet-text">
                     {formatDate(service.date)}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <DollarSign className="w-4 h-4 text-gray-400" />
+                <DollarSign className="w-4 h-4 text-vet-muted" />
                 <div>
-                  <p className="text-xs text-gray-500">Costo</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-vet-muted">Costo</p>
+                  <p className="text-sm font-medium text-vet-accent">
                     ${service.cost.toFixed(2)}
                   </p>
                 </div>
@@ -271,38 +271,38 @@ export default function GroomingDetailView() {
             </div>
 
             {service.specifications && (
-              <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-1">Especificaciones</p>
-                <p className="text-sm text-gray-700">{service.specifications}</p>
+              <div className="pt-4 border-t border-slate-700/30">
+                <p className="text-xs text-vet-muted mb-1">Especificaciones</p>
+                <p className="text-sm text-vet-text">{service.specifications}</p>
               </div>
             )}
 
             {service.observations && (
               <div>
-                <p className="text-xs text-gray-500 mb-1">Observaciones</p>
-                <p className="text-sm text-gray-700">{service.observations}</p>
+                <p className="text-xs text-vet-muted mb-1">Observaciones</p>
+                <p className="text-sm text-vet-text">{service.observations}</p>
               </div>
             )}
           </div>
 
           {/* Sección de Pago */}
-          <div className="p-6 bg-gray-50 border-t border-gray-100">
+          <div className="p-6 bg-vet-light/50 border-t border-slate-700/50">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-gray-500" />
+              <h3 className="text-sm font-semibold text-vet-text flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-vet-muted" />
                 Estado de Pago
               </h3>
 
-              {/* Badge de estado de pago - ✅ ESTO SÍ SE MANTIENE */}
+              {/* Badge de estado de pago */}
               <span
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                   paymentInfo.status === "Pagado"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-green-500/20 text-green-400 border-green-500/30"
                     : paymentInfo.status === "Parcial"
-                    ? "bg-blue-100 text-blue-700"
+                    ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
                     : paymentInfo.status === "Pendiente"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-red-500/20 text-red-400 border-red-500/30"
+                    : "bg-slate-700 text-slate-400 border-slate-600"
                 }`}
               >
                 {paymentInfo.status === "Pagado" && <CheckCircle className="w-3 h-3" />}
@@ -315,11 +315,11 @@ export default function GroomingDetailView() {
             {/* Barra de progreso */}
             {paymentInfo.status !== "Sin facturar" && (
               <div className="mb-4">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <div className="flex justify-between text-xs text-vet-muted mb-1">
                   <span>Pagado: ${paymentInfo.amountPaid.toFixed(2)}</span>
                   <span>Total: ${paymentInfo.total.toFixed(2)}</span>
                 </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       progressPercent === 100 ? "bg-green-500" : "bg-blue-500"
@@ -330,19 +330,19 @@ export default function GroomingDetailView() {
                 
                 <div className="flex justify-between text-xs mt-2">
                   {paymentInfo.amountPaidUSD > 0 && (
-                    <span className="text-green-600">
+                    <span className="text-green-400">
                       USD: ${paymentInfo.amountPaidUSD.toFixed(2)}
                     </span>
                   )}
                   {paymentInfo.amountPaidBs > 0 && (
-                    <span className="text-blue-600">
+                    <span className="text-blue-400">
                       Bs: {paymentInfo.amountPaidBs.toLocaleString("es-VE", { minimumFractionDigits: 2 })}
                     </span>
                   )}
                 </div>
                 
                 {paymentInfo.pending > 0 && (
-                  <p className="text-xs text-red-600 mt-1">
+                  <p className="text-xs text-red-400 mt-1">
                     Pendiente: ${paymentInfo.pending.toFixed(2)}
                   </p>
                 )}
@@ -353,7 +353,7 @@ export default function GroomingDetailView() {
             {paymentInfo.status !== "Pagado" && paymentInfo.status !== "Sin facturar" && (
               <button
                 onClick={() => setShowPaymentModal(true)}
-                className="group relative w-full py-3.5 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl shadow-lg shadow-vet-primary/25 hover:shadow-xl hover:shadow-vet-primary/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+                className="group relative w-full py-3.5 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl shadow-lg shadow-vet-primary/25 hover:shadow-xl hover:shadow-vet-primary/40 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 <span className="relative flex items-center justify-center gap-2">
@@ -364,13 +364,13 @@ export default function GroomingDetailView() {
             )}
 
             {paymentInfo.status === "Sin facturar" && (
-              <p className="text-sm text-gray-500 text-center py-2">
+              <p className="text-sm text-vet-muted text-center py-2">
                 Este servicio aún no ha sido facturado
               </p>
             )}
 
             {paymentInfo.status === "Pagado" && (
-              <div className="flex items-center justify-center gap-2 py-2 text-green-600">
+              <div className="flex items-center justify-center gap-2 py-2 text-green-400">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Pago completado</span>
               </div>
@@ -379,32 +379,29 @@ export default function GroomingDetailView() {
         </div>
       </div>
 
-     {/* Modal de Pago */}
-{showPaymentModal && invoice && (
-  <PaymentModal
-    isOpen={showPaymentModal}
-    onClose={() => setShowPaymentModal(false)}
-    onConfirm={handlePaymentConfirm} // ✅ Esta función ya está bien
-    amountUSD={paymentInfo.pending}
-    // creditBalance: No lo tenemos aquí, así que no se pasa
-    title="Procesar Pago"
-    subtitle={`${service.service} - ${patientName}`}
-    // ✅ NUEVO: Usamos 'services' en lugar de 'items'
-    services={[
-      {
-        description: service.service,
-        quantity: 1,
-        unitPrice: service.cost,
-        total: service.cost,
-      },
-    ]}
-    // ✅ NUEVO: Pasamos la info del paciente
-    patient={{
-      name: patientName,
-    }}
-    allowPartial={true}
-  />
-)}
+      {/* Modal de Pago */}
+      {showPaymentModal && invoice && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={handlePaymentConfirm}
+          amountUSD={paymentInfo.pending}
+          title="Procesar Pago"
+          subtitle={`${service.service} - ${patientName}`}
+          services={[
+            {
+              description: service.service,
+              quantity: 1,
+              unitPrice: service.cost,
+              total: service.cost,
+            },
+          ]}
+          patient={{
+            name: patientName,
+          }}
+          allowPartial={true}
+        />
+      )}
 
       {/* Modal de Eliminación */}
       <DeleteConfirmationModal

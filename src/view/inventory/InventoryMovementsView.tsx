@@ -30,7 +30,7 @@ export default function InventoryMovementsView() {
       const allMovements: any[] = [];
       
       for (const product of products) {
-        if (!product._id) continue; // Asegurarse de que tiene ID
+        if (!product._id) continue;
         try {
           const inventory = await getInventory(product._id);
           if (inventory) {
@@ -52,7 +52,6 @@ export default function InventoryMovementsView() {
         }
       }
       
-      // Ordenar por fecha descendente
       return allMovements.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     },
     enabled: products.length > 0,
@@ -83,8 +82,8 @@ export default function InventoryMovementsView() {
 
   const getTypeColor = (type: string) => {
     return type === "entrada" 
-      ? "bg-green-100 text-green-800" 
-      : "bg-red-100 text-red-800";
+      ? "bg-green-900/30 text-green-400" 
+      : "bg-red-900/30 text-red-400";
   };
 
   const getTypeIcon = (type: string) => {
@@ -120,27 +119,27 @@ export default function InventoryMovementsView() {
           placeholder="Buscar por producto, tipo o razón..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
         />
       </div>
 
       {/* Lista de movimientos */}
       {paginatedMovements.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-card">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-700">
+              <thead className="bg-slate-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Razón</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Tipo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Cantidad</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Razón</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Fecha</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-slate-800 divide-y divide-slate-700">
                 {paginatedMovements.map((movement) => (
-                  <tr key={movement._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={movement._id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-vet-text">{movement.product?.name}</div>
                       <div className="text-xs text-vet-muted">
@@ -148,7 +147,7 @@ export default function InventoryMovementsView() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeColor(movement.type)}`}>
+                      <span className={`px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${getTypeColor(movement.type)}`}>
                         {getTypeIcon(movement.type)}
                         <span className="ml-1">{movement.type === "entrada" ? "Entrada" : "Salida"}</span>
                       </span>
@@ -175,7 +174,7 @@ export default function InventoryMovementsView() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
               <p className="text-sm text-vet-muted">
                 Página {currentPage} de {totalPages}
               </p>
@@ -183,14 +182,14 @@ export default function InventoryMovementsView() {
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
                 </button>
@@ -200,8 +199,8 @@ export default function InventoryMovementsView() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
-            <ClipboardList className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-xl flex items-center justify-center">
+            <ClipboardList className="w-8 h-8 text-vet-muted" />
           </div>
           <h3 className="text-lg font-medium text-vet-text mb-1">
             {searchTerm ? "Sin resultados" : "Sin movimientos"}

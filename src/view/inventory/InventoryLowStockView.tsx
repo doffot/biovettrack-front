@@ -10,17 +10,17 @@ const LOW_STOCK_THRESHOLD = 5;
 export default function InventoryLowStockView() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: products = [], isLoading: loadingProducts } = useQuery({
+  const {  data:products = [], isLoading: loadingProducts } = useQuery({
     queryKey: ["products", "active"],
     queryFn: getActiveProducts,
   });
 
-  const { data: inventories = [], isLoading: loadingInventory } = useQuery({
+  const {  data:inventories = [], isLoading: loadingInventory } = useQuery({
     queryKey: ["inventory", "low-stock"],
     queryFn: async () => {
       const invs: any[] = [];
       for (const product of products) {
-        if (!product._id) continue; // Asegurarse de que tiene ID
+        if (!product._id) continue;
         try {
           const inv = await getInventory(product._id);
           if (inv.stockUnits < LOW_STOCK_THRESHOLD) {
@@ -83,7 +83,7 @@ export default function InventoryLowStockView() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-6 h-6 text-amber-500" />
+          <AlertTriangle className="w-6 h-6 text-amber-400" />
           <h1 className="text-xl font-semibold text-vet-text">Stock Bajo</h1>
         </div>
         <p className="text-sm text-vet-muted">
@@ -100,47 +100,47 @@ export default function InventoryLowStockView() {
           placeholder="Buscar productos con stock bajo..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
         />
       </div>
 
       {/* Lista de productos con stock bajo */}
       {filteredProducts.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-card">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-700">
+              <thead className="bg-slate-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Producto
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Categoría
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Stock Actual
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Umbral Bajo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">
                     Acción
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-slate-800 divide-y divide-slate-700">
                 {filteredProducts.map((product) => {
                   const stockUnits = product.inventory?.stockUnits || 0;
 
                   return (
                     <tr
                       key={product._id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-slate-700/50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="p-2 bg-amber-100 rounded-lg">
-                            <AlertTriangle className="w-4 h-4 text-amber-600" />
+                          <div className="p-2 bg-amber-900/30 rounded-lg">
+                            <AlertTriangle className="w-4 h-4 text-amber-400" />
                           </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-vet-text">
@@ -155,11 +155,11 @@ export default function InventoryLowStockView() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-light text-vet-primary capitalize">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-primary/20 text-vet-primary capitalize">
                           {product.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-400">
                         <div className="flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" />
                           {stockUnits} {product.unit}
@@ -187,8 +187,8 @@ export default function InventoryLowStockView() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-xl flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-green-900/20 rounded-xl flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-green-400" />
           </div>
           <h3 className="text-lg font-medium text-vet-text mb-1">
             ¡Excelente! Todo el stock está bien

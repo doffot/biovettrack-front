@@ -1,5 +1,3 @@
-// src/components/appointments/create/StaffSelector.tsx
-
 import type { Staff } from "../../../types/staff";
 
 type StaffSelectorProps = {
@@ -27,15 +25,15 @@ export default function StaffSelector({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-vet-light p-4 shadow-soft">
-        <h3 className="text-sm font-semibold text-vet-text mb-3">
+      <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-soft">
+        <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3">
           Veterinario que atenderá
         </h3>
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-10 w-28 bg-vet-light rounded-lg animate-pulse"
+              className="h-10 w-28 bg-[var(--color-hover)] rounded-lg animate-pulse"
             />
           ))}
         </div>
@@ -44,8 +42,8 @@ export default function StaffSelector({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-vet-light p-4 shadow-soft">
-      <h3 className="text-sm font-semibold text-vet-text mb-3">
+    <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-soft">
+      <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3">
         Veterinario que atenderá
       </h3>
 
@@ -55,11 +53,11 @@ export default function StaffSelector({
             type="button"
             onClick={() => onSelect(currentVetId)}
             className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+              px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
               ${
                 selectedStaffId === currentVetId
-                  ? "bg-vet-primary text-white shadow-md"
-                  : "bg-vet-light text-vet-text hover:bg-vet-accent hover:text-white"
+                  ? "bg-[var(--color-vet-primary)] text-white shadow-md border-[var(--color-vet-primary)]"
+                  : "bg-[var(--color-hover)] text-[var(--color-vet-text)] hover:bg-[var(--color-vet-accent)] hover:text-white border-[var(--color-border)]"
               }
             `}
           >
@@ -75,11 +73,11 @@ export default function StaffSelector({
               type="button"
               onClick={() => onSelect(staff._id!)}
               className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                 ${
                   selectedStaffId === staff._id
-                    ? "bg-vet-primary text-white shadow-md"
-                    : "bg-vet-light text-vet-text hover:bg-vet-accent hover:text-white"
+                    ? "bg-[var(--color-vet-primary)] text-white shadow-md border-[var(--color-vet-primary)]"
+                    : "bg-[var(--color-hover)] text-[var(--color-vet-text)] hover:bg-[var(--color-vet-accent)] hover:text-white border-[var(--color-border)]"
                 }
               `}
             >

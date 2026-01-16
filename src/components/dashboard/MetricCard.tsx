@@ -1,4 +1,4 @@
-// src/views/dashboard/components/MetricCard.tsx
+// src/components/dashboard/MetricCard.tsx
 import type { LucideIcon } from "lucide-react";
 
 interface MetricCardProps {
@@ -8,6 +8,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   color: string;
   bgColor: string;
+  iconBgColor?: string;
 }
 
 export function MetricCard({
@@ -17,19 +18,48 @@ export function MetricCard({
   icon: Icon,
   color,
   bgColor,
+  iconBgColor = "bg-slate-800/80",
 }: MetricCardProps) {
   return (
-    <div className={`${bgColor} rounded-xl p-3 border border-vet-light shadow-soft hover:shadow-card transition-all duration-200 animate-scale-in group`}>
+    <div 
+      className={`
+        ${bgColor} 
+        rounded-xl p-4 
+        shadow-lg
+        hover:shadow-xl
+        transition-all duration-300 
+        animate-scale-in 
+        group
+      `}
+    >
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-semibold text-vet-muted uppercase tracking-wide">
+        {/* Contenido */}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
             {title}
           </p>
-          <p className={`text-xl font-bold ${color} mt-0.5`}>{value}</p>
-          {subtitle && <p className="text-[10px] text-vet-muted mt-0.5">{subtitle}</p>}
+          <p className={`text-2xl font-bold ${color}`}>
+            {value}
+          </p>
+          {subtitle && (
+            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+              <span className="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
+              {subtitle}
+            </p>
+          )}
         </div>
-        <div className={`p-2 rounded-lg bg-white/50 group-hover:bg-white/70 transition-colors`}>
-          <Icon className={`w-5 h-5 ${color}`} />
+        
+        {/* Icono */}
+        <div 
+          className={`
+            ${iconBgColor} 
+            p-3 rounded-xl 
+            group-hover:scale-110 
+            transition-all duration-300
+            shadow-lg
+          `}
+        >
+          <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
     </div>

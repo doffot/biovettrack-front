@@ -140,18 +140,18 @@ export default function CreateVaccinationView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Registrar Vacuna</h1>
+          <h1 className="text-lg font-bold text-vet-text">Registrar Vacuna</h1>
         </div>
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800"
           >
             Cancelar
           </button>
@@ -161,7 +161,7 @@ export default function CreateVaccinationView() {
             className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
               isValid && !isPending
                 ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-slate-800 text-slate-600 cursor-not-allowed"
             }`}
           >
             {isPending ? (
@@ -179,17 +179,17 @@ export default function CreateVaccinationView() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Selector de producto */}
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-vet-muted mb-1">
             Producto del catálogo
           </label>
           <div className="relative">
             <select
               value={selectedProduct}
               onChange={handleProductChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary pr-8"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text pr-8"
             >
               <option value="">-- Selecciona un producto o ingresa manualmente --</option>
-              <option value="manual">📝 Ingresar manualmente</option>
+              <option value="manual">Ingresar manualmente</option>
               {products
                 .filter(p => p.category === "vacuna")
                 .map((product) => (
@@ -198,7 +198,7 @@ export default function CreateVaccinationView() {
                   </option>
                 ))}
             </select>
-            <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
         </div>
 
@@ -207,14 +207,14 @@ export default function CreateVaccinationView() {
             {/* Fila 1: Vacuna + Fecha + Costo */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-vet-muted mb-1">
                   Vacuna *
                 </label>
                 <select
                   name="vaccineType"
                   value={formData.vaccineType}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                 >
                   <option value="">Seleccionar</option>
                   {VACCINE_TYPES.map((type) => (
@@ -226,7 +226,7 @@ export default function CreateVaccinationView() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-vet-muted mb-1">
                   Fecha *
                 </label>
                 <input
@@ -235,12 +235,12 @@ export default function CreateVaccinationView() {
                   value={formData.vaccinationDate}
                   onChange={handleChange}
                   max={new Date().toISOString().split("T")[0]}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-vet-muted mb-1">
                   Costo ($) *
                 </label>
                 <input
@@ -251,14 +251,14 @@ export default function CreateVaccinationView() {
                   min="0"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                 />
               </div>
             </div>
 
             {formData.vaccineType === "Otra" && (
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-vet-muted mb-1">
                   Especificar vacuna *
                 </label>
                 <input
@@ -267,7 +267,7 @@ export default function CreateVaccinationView() {
                   onChange={(e) => setCustomVaccine(e.target.value)}
                   placeholder="Nombre de la vacuna"
                   maxLength={50}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                 />
               </div>
             )}
@@ -277,7 +277,7 @@ export default function CreateVaccinationView() {
         {/* Fila 2: Laboratorio + Lote + Vencimiento */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Laboratorio
             </label>
             <input
@@ -287,12 +287,12 @@ export default function CreateVaccinationView() {
               onChange={handleChange}
               placeholder="Opcional"
               maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Nº Lote
             </label>
             <input
@@ -302,12 +302,12 @@ export default function CreateVaccinationView() {
               onChange={handleChange}
               placeholder="Opcional"
               maxLength={50}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Vencimiento
             </label>
             <input
@@ -315,7 +315,7 @@ export default function CreateVaccinationView() {
               name="expirationDate"
               value={formData.expirationDate}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>
@@ -323,7 +323,7 @@ export default function CreateVaccinationView() {
         {/* Fila 3: Próxima vacuna + Observaciones */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Próxima vacunación
             </label>
             <input
@@ -332,12 +332,12 @@ export default function CreateVaccinationView() {
               value={formData.nextVaccinationDate}
               onChange={handleChange}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Observaciones
             </label>
             <input
@@ -347,7 +347,7 @@ export default function CreateVaccinationView() {
               onChange={handleChange}
               placeholder="Opcional"
               maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>

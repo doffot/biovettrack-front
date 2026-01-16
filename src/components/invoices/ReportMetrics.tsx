@@ -15,16 +15,16 @@ interface MetricItemProps {
 
 function MetricItem({ value, label, variant = "default" }: MetricItemProps) {
   const valueColors = {
-    default: "text-gray-900",
-    success: "text-emerald-600",
-    warning: "text-amber-600",
-    info: "text-[#0A7EA4]",
+    default: "text-vet-text",
+    success: "text-emerald-400",
+    warning: "text-amber-400",
+    info: "text-vet-primary",
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md p-4 text-center">
+    <div className="bg-slate-800 border border-slate-700 rounded-md p-4 text-center">
       <p className={`text-3xl font-bold ${valueColors[variant]}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
+      <p className="text-xs text-vet-muted mt-1">{label}</p>
     </div>
   );
 }

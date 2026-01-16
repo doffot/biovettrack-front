@@ -27,7 +27,7 @@ export default function ProductListView() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const { data: products = [], isLoading } = useQuery({
+  const {  data:products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
   });
@@ -118,12 +118,12 @@ export default function ProductListView() {
             placeholder="Buscar por nombre o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-10 pr-8 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-slate-700 rounded"
             >
               <X className="w-4 h-4 text-vet-muted" />
             </button>
@@ -137,7 +137,7 @@ export default function ProductListView() {
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               categoryFilter === "all"
                 ? "bg-vet-primary text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Todos
@@ -147,7 +147,7 @@ export default function ProductListView() {
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               categoryFilter === "vacuna"
                 ? "bg-vet-primary text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Vacunas
@@ -157,7 +157,7 @@ export default function ProductListView() {
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               categoryFilter === "desparasitante"
                 ? "bg-vet-primary text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Desparasitantes
@@ -167,25 +167,25 @@ export default function ProductListView() {
 
       {/* Lista de productos */}
       {paginatedProducts.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-card">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-700">
+              <thead className="bg-slate-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Venta</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Categoría</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Precio Venta</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Unidad</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-vet-muted uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-slate-800 divide-y divide-slate-700">
                 {paginatedProducts.map((product) => (
-                  <tr key={product._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={product._id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="p-2 bg-vet-light rounded-lg">
+                        <div className="p-2 bg-vet-primary/20 rounded-lg">
                           <Tag className="w-4 h-4 text-vet-primary" />
                         </div>
                         <div className="ml-3">
@@ -197,7 +197,7 @@ export default function ProductListView() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-light text-vet-primary capitalize">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-primary/20 text-vet-primary capitalize">
                         {product.category}
                       </span>
                     </td>
@@ -210,8 +210,8 @@ export default function ProductListView() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         product.active 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-red-100 text-red-800"
+                          ? "bg-green-900/30 text-green-400" 
+                          : "bg-red-900/30 text-red-400"
                       }`}>
                         {product.active ? "Activo" : "Inactivo"}
                       </span>
@@ -226,7 +226,7 @@ export default function ProductListView() {
                       </Link>
                       <button
                         onClick={() => handleDelete(product)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-400 hover:text-red-300"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -240,7 +240,7 @@ export default function ProductListView() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
               <p className="text-sm text-vet-muted">
                 Página {currentPage} de {totalPages}
               </p>
@@ -248,14 +248,14 @@ export default function ProductListView() {
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
                 </button>
@@ -265,8 +265,8 @@ export default function ProductListView() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
-            <Package className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-xl flex items-center justify-center">
+            <Package className="w-8 h-8 text-vet-muted" />
           </div>
           <h3 className="text-lg font-medium text-vet-text mb-1">
             {searchTerm || categoryFilter !== "all" ? "Sin resultados" : "Sin productos"}

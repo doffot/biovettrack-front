@@ -57,7 +57,7 @@ export default function ShareResultsModal({
   const [isGenerating, setIsGenerating] = useState(false);
 
   // ✅ Obtener perfil completo del veterinario
-  const { data: profile } = useQuery({
+  const {  data:profile } = useQuery({
     queryKey: ["profile"],
     queryFn: getProfile,
     staleTime: 1000 * 60 * 10, // 10 minutos de cache
@@ -201,7 +201,7 @@ export default function ShareResultsModal({
       />
 
       {/* Modal Ultra Compacto */}
-      <div className="relative z-10 w-full max-w-xs overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="relative z-10 w-full max-w-xs overflow-hidden rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl">
         {/* Header */}
         <div className="flex flex-col items-center bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-5">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
@@ -213,18 +213,18 @@ export default function ShareResultsModal({
 
         {/* Body */}
         <div className="p-4 text-center">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-vet-muted">
             Resultados listos para descargar
           </p>
-          <p className="mt-1 text-xs text-slate-400">{date}</p>
+          <p className="mt-1 text-xs text-vet-muted">{date}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3">
+        <div className="flex gap-2 border-t border-slate-700 bg-slate-800 px-4 py-3">
           <button
             onClick={onClose}
             disabled={isGenerating}
-            className="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-50"
+            className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-2.5 text-sm font-medium text-vet-muted hover:bg-slate-700 transition-colors disabled:opacity-50"
           >
             Cerrar
           </button>
@@ -407,7 +407,7 @@ export default function ShareResultsModal({
             </div>
           )}
 
-          {/* ✅ Footer Dinámico con Datos del Perfil */}
+          {/* ✅Footer Dinámico con Datos del Perfil */}
           <div style={{ 
             paddingTop: "10px", 
             borderTop: "1px solid #E0F4F8", 

@@ -25,7 +25,7 @@ export default function PatientLabExamListView() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [examToDelete, setExamToDelete] = useState<LabExam | null>(null);
 
-  const { data: exams = [], isLoading, isError } = useQuery({
+  const {  data:exams = [], isLoading, isError } = useQuery({
     queryKey: ["labExams", "patient", patientId],
     queryFn: () => getLabExamsByPatient(patientId!),
     enabled: !!patientId,
@@ -61,7 +61,7 @@ export default function PatientLabExamListView() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-vet-muted">
         <AlertCircle className="w-8 h-8 mb-2" />
         <p className="text-sm">Error al cargar exámenes</p>
       </div>
@@ -73,8 +73,8 @@ export default function PatientLabExamListView() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Exámenes de Laboratorio</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-lg font-bold text-vet-text">Exámenes de Laboratorio</h2>
+          <p className="text-sm text-vet-muted">
             {exams.length} registrado{exams.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -93,17 +93,17 @@ export default function PatientLabExamListView() {
           {exams.map((exam) => (
             <div
               key={exam._id}
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
+              className="flex items-center gap-4 p-4 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
             >
               {/* Icono */}
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                <FlaskConical className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-lg bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                <FlaskConical className="w-5 h-5 text-purple-400" />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900">Hemograma</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                <p className="font-semibold text-vet-text">Hemograma</p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-vet-muted">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDate(exam.date)}
@@ -119,7 +119,7 @@ export default function PatientLabExamListView() {
 
               {/* Precio */}
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-gray-900">${exam.cost.toFixed(2)}</p>
+                <p className="font-semibold text-vet-text">${exam.cost.toFixed(2)}</p>
               </div>
 
               {/* Acciones */}
@@ -129,7 +129,7 @@ export default function PatientLabExamListView() {
                     setSelectedExam(exam);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-vet-primary hover:bg-vet-primary/10 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -138,7 +138,7 @@ export default function PatientLabExamListView() {
                     setExamToDelete(exam);
                     setShowDeleteModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -147,9 +147,9 @@ export default function PatientLabExamListView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-          <FlaskConical className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500 mb-4">Sin exámenes registrados</p>
+        <div className="text-center py-12 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-700">
+          <FlaskConical className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <p className="text-vet-muted mb-4">Sin exámenes registrados</p>
           <Link
             to="create"
             className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"

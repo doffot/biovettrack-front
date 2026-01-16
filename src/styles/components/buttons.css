@@ -1,0 +1,17 @@
+/* ========================================
+   🔘 BUTTONS - Botones veterinarios
+   ======================================== */
+
+.vet-button-primary {
+  background-color: #0A7EA4;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-primary:hover {
+  background-color: #36BCD4;
+}

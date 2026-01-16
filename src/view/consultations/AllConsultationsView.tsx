@@ -1,4 +1,3 @@
-// src/views/consultations/AllConsultationsView.tsx
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -92,7 +91,7 @@ export default function AllConsultationsView() {
       });
     }
 
-    // ✅ Filtro por búsqueda - CORREGIDO
+    // ✅ Filtro por búsqueda
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(c => {
@@ -127,7 +126,7 @@ export default function AllConsultationsView() {
     });
   };
 
-  // ✅ Estadísticas - CORREGIDO
+  // ✅ Estadísticas
   const stats = useMemo(() => {
     const total = filteredConsultations.length;
     const totalRevenue = filteredConsultations.reduce((sum, c) => sum + (c.cost ?? 0), 0);
@@ -149,8 +148,8 @@ export default function AllConsultationsView() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-vet-text font-medium">Cargando consultas...</p>
+          <div className="w-12 h-12 mx-auto mb-4 border-4 border-[var(--color-vet-accent)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[var(--color-vet-text)] font-medium">Cargando consultas...</p>
         </div>
       </div>
     );
@@ -163,93 +162,93 @@ export default function AllConsultationsView() {
         <div className="flex items-center gap-3 mb-2">
           <Link
             to="/"
-            className="p-2 rounded-lg hover:bg-vet-light text-vet-primary transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-accent)] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-2xl font-bold text-vet-text flex items-center gap-2">
-            <Stethoscope className="w-7 h-7 text-vet-primary" />
+          <h1 className="text-2xl font-bold text-[var(--color-vet-text)] flex items-center gap-2">
+            <Stethoscope className="w-7 h-7 text-[var(--color-vet-accent)]" />
             Todas las Consultas
           </h1>
         </div>
-        <p className="text-vet-muted ml-11">Vista global de consultas médicas veterinarias</p>
+        <p className="text-[var(--color-vet-muted)] ml-11">Vista global de consultas médicas veterinarias</p>
       </div>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border border-vet-light">
+        <div className="bg-gradient-to-br from-blue-600/10 to-sky-600/10 rounded-xl p-4 border border-blue-500/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-vet-muted uppercase">Consultas Hoy</p>
-              <p className="text-2xl font-bold text-vet-primary mt-1">{stats.todayCount}</p>
-              <p className="text-xs text-vet-muted mt-1">Realizadas hoy</p>
+              <p className="text-xs text-[var(--color-vet-muted)] uppercase">Consultas Hoy</p>
+              <p className="text-2xl font-bold text-blue-400 mt-1">{stats.todayCount}</p>
+              <p className="text-xs text-[var(--color-vet-muted)] mt-1">Realizadas hoy</p>
             </div>
-            <Calendar className="w-8 h-8 text-vet-primary/20" />
+            <Calendar className="w-8 h-8 text-blue-400/30" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-vet-light">
+        <div className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 rounded-xl p-4 border border-purple-500/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-vet-muted uppercase">Total Período</p>
-              <p className="text-2xl font-bold text-purple-600 mt-1">{stats.total}</p>
-              <p className="text-xs text-vet-muted mt-1">En filtro actual</p>
+              <p className="text-xs text-[var(--color-vet-muted)] uppercase">Total Período</p>
+              <p className="text-2xl font-bold text-purple-400 mt-1">{stats.total}</p>
+              <p className="text-xs text-[var(--color-vet-muted)] mt-1">En filtro actual</p>
             </div>
-            <FileText className="w-8 h-8 text-purple-600/20" />
+            <FileText className="w-8 h-8 text-purple-400/30" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-vet-light">
+        <div className="bg-gradient-to-br from-green-600/10 to-emerald-600/10 rounded-xl p-4 border border-green-500/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-vet-muted uppercase">Ingresos</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
+              <p className="text-xs text-[var(--color-vet-muted)] uppercase">Ingresos</p>
+              <p className="text-2xl font-bold text-green-400 mt-1">
                 ${stats.totalRevenue.toFixed(0)}
               </p>
-              <p className="text-xs text-vet-muted mt-1">Total período</p>
+              <p className="text-xs text-[var(--color-vet-muted)] mt-1">Total período</p>
             </div>
-            <DollarSign className="w-8 h-8 text-green-600/20" />
+            <DollarSign className="w-8 h-8 text-green-400/30" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-vet-light">
+        <div className="bg-gradient-to-br from-amber-600/10 to-orange-600/10 rounded-xl p-4 border border-amber-500/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-vet-muted uppercase">Promedio</p>
-              <p className="text-2xl font-bold text-amber-600 mt-1">
+              <p className="text-xs text-[var(--color-vet-muted)] uppercase">Promedio</p>
+              <p className="text-2xl font-bold text-amber-400 mt-1">
                 ${stats.avgCost.toFixed(0)}
               </p>
-              <p className="text-xs text-vet-muted mt-1">Por consulta</p>
+              <p className="text-xs text-[var(--color-vet-muted)] mt-1">Por consulta</p>
             </div>
-            <DollarSign className="w-8 h-8 text-amber-600/20" />
+            <DollarSign className="w-8 h-8 text-amber-400/30" />
           </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-sm border border-vet-light p-4 mb-6">
+      <div className="bg-[var(--color-card)] rounded-xl shadow-sm border border-[var(--color-border)] p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Búsqueda */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-vet-muted)]" />
               <input
                 type="text"
                 placeholder="Buscar por paciente, dueño, diagnóstico o motivo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-vet-primary focus:border-vet-primary"
+                className="w-full pl-10 pr-4 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-vet-primary)] focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
               />
             </div>
           </div>
 
           {/* Filtro de fecha */}
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-vet-muted" />
+            <Filter className="w-4 h-4 text-[var(--color-vet-muted)]" />
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
-              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-vet-primary"
+              className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] transition-colors"
             >
               <option value="today">Hoy</option>
               <option value="week">Última semana</option>
@@ -261,56 +260,56 @@ export default function AllConsultationsView() {
       </div>
 
       {/* Lista de consultas */}
-      <div className="bg-white rounded-xl shadow-sm border border-vet-light overflow-hidden">
+      <div className="bg-[var(--color-card)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden">
         {filteredConsultations.length === 0 ? (
           <div className="p-12 text-center">
-            <Stethoscope className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 font-medium">No se encontraron consultas</p>
-            <p className="text-gray-400 text-sm mt-1">Ajusta los filtros para ver resultados</p>
+            <Stethoscope className="w-12 h-12 mx-auto text-[var(--color-vet-muted)] opacity-30 mb-3" />
+            <p className="text-[var(--color-vet-text)] font-medium">No se encontraron consultas</p>
+            <p className="text-[var(--color-vet-muted)] text-sm mt-1">Ajusta los filtros para ver resultados</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-[var(--color-hover)] border-b border-[var(--color-border)]">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Fecha/Hora
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Paciente
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Propietario
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Motivo
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Diagnóstico
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Costo
                   </th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-vet-text uppercase">
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-[var(--color-vet-text)] uppercase">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[var(--color-border)]">
                 {filteredConsultations.map((consultation) => {
                   const patientInfo = getPatientInfo(consultation.patientId);
                   
                   return (
                     <tr 
                       key={consultation._id} 
-                      className="hover:bg-vet-light/20 transition-colors"
+                      className="hover:bg-[var(--color-hover)] transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-vet-text">
+                          <p className="text-sm font-medium text-[var(--color-vet-text)]">
                             {formatDate(consultation.consultationDate)}
                           </p>
-                          <p className="text-xs text-vet-muted">
+                          <p className="text-xs text-[var(--color-vet-muted)]">
                             {formatTime(consultation.consultationDate)}
                           </p>
                         </div>
@@ -321,12 +320,12 @@ export default function AllConsultationsView() {
                           className="group"
                         >
                           <div className="flex items-center gap-2">
-                            <PawPrint className="w-4 h-4 text-vet-muted" />
+                            <PawPrint className="w-4 h-4 text-[var(--color-vet-muted)]" />
                             <div>
-                              <p className="text-sm font-medium text-vet-primary group-hover:underline">
+                              <p className="text-sm font-medium text-[var(--color-vet-accent)] group-hover:underline">
                                 {patientInfo.name}
                               </p>
-                              <p className="text-xs text-vet-muted">
+                              <p className="text-xs text-[var(--color-vet-muted)]">
                                 {patientInfo.species}
                               </p>
                             </div>
@@ -335,31 +334,31 @@ export default function AllConsultationsView() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-vet-muted" />
-                          <span className="text-sm text-vet-text">
+                          <User className="w-4 h-4 text-[var(--color-vet-muted)]" />
+                          <span className="text-sm text-[var(--color-vet-text)]">
                             {patientInfo.owner}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-sm text-vet-text truncate max-w-[150px]">
+                        <p className="text-sm text-[var(--color-vet-text)] truncate max-w-[150px]">
                           {consultation.reasonForVisit ?? "Sin especificar"}
                         </p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-sm font-medium text-emerald-600 truncate max-w-[150px]">
+                        <p className="text-sm font-medium text-emerald-400 truncate max-w-[150px]">
                           {consultation.presumptiveDiagnosis ?? "Sin diagnóstico"}
                         </p>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-sm font-semibold text-green-600">
+                        <span className="text-sm font-semibold text-green-400">
                           ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <button
                           onClick={() => setSelectedConsultation(consultation)}
-                          className="mx-auto flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary/10 hover:bg-vet-primary/20 text-vet-primary rounded-lg transition-colors"
+                          className="mx-auto flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-vet-primary)]/10 hover:bg-[var(--color-vet-primary)]/20 text-[var(--color-vet-accent)] rounded-lg transition-colors"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span className="text-xs font-medium">Ver</span>

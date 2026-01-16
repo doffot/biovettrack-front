@@ -30,25 +30,14 @@ export type GroomingDateRange = "today" | "week" | "month" | "year" | "all";
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="text-center">
-        <div className="w-8 h-8 mx-auto mb-3 border-2 border-gray-200 border-t-[#0A7EA4] rounded-full animate-spin" />
-        <p className="text-sm text-gray-500">Cargando reporte...</p>
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-slate-700 border-t-vet-primary rounded-full animate-spin" />
+        <p className="text-sm text-vet-muted">Cargando reporte...</p>
       </div>
     </div>
   );
 }
-
-// const getPeriodLabel = (dateRange: GroomingDateRange): string => {
-//   const labels: Record<GroomingDateRange, string> = {
-//     today: "Hoy",
-//     week: "Esta semana",
-//     month: "Este mes",
-//     year: "Este año",
-//     all: "Todo",
-//   };
-//   return labels[dateRange] || "";
-// };
 
 export default function GroomingReportView() {
   const {
@@ -147,12 +136,12 @@ export default function GroomingReportView() {
 
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Error al cargar el reporte</p>
+          <p className="text-vet-muted mb-4">Error al cargar el reporte</p>
           <button
             onClick={() => refetch()}
-            className="px-4 py-2 bg-[#0A7EA4] text-white rounded-md hover:bg-[#085F7A]"
+            className="px-4 py-2 bg-vet-primary text-white rounded-md hover:bg-vet-secondary transition-colors"
           >
             Reintentar
           </button>
@@ -162,23 +151,23 @@ export default function GroomingReportView() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-slate-800 border-b border-slate-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-4">
               <Link
                 to="/"
-                className="p-1.5 -ml-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1.5 -ml-1.5 text-vet-muted hover:text-vet-text transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div>
-                <h1 className="text-base font-semibold text-gray-900">
+                <h1 className="text-base font-semibold text-vet-text">
                   Reporte de Peluquería
                 </h1>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-vet-muted">
                   {enrichedServices.length} servicios
                 </p>
               </div>
@@ -187,7 +176,7 @@ export default function GroomingReportView() {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50"
+              className="p-2 text-vet-muted hover:text-vet-text hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
             </button>

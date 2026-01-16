@@ -27,11 +27,11 @@ const studyTypeIcons: Record<string, string> = {
 };
 
 const studyTypeColors: Record<string, string> = {
-  "Radiografía": "bg-blue-100 text-blue-700 border-blue-200",
-  "Ecografía": "bg-purple-100 text-purple-700 border-purple-200",
-  "Hemograma externo": "bg-red-100 text-red-700 border-red-200",
-  "Química sanguínea": "bg-amber-100 text-amber-700 border-amber-200",
-  "Otro": "bg-gray-100 text-gray-700 border-gray-200",
+  "Radiografía": "bg-blue-900/30 text-blue-400 border-blue-700",
+  "Ecografía": "bg-purple-900/30 text-purple-400 border-purple-700",
+  "Hemograma externo": "bg-red-900/30 text-red-400 border-red-700",
+  "Química sanguínea": "bg-amber-900/30 text-amber-400 border-amber-700",
+  "Otro": "bg-slate-700/30 text-slate-400 border-slate-600",
 };
 
 export default function MedicalStudyListView() {
@@ -45,7 +45,7 @@ export default function MedicalStudyListView() {
   const [studyToDelete, setStudyToDelete] = useState<MedicalStudy | null>(null);
 
   // Query para obtener estudios
-  const { data: studies = [], isLoading } = useQuery({
+  const {  data:studies = [], isLoading } = useQuery({
     queryKey: ["medicalStudies", patientId],
     queryFn: () => getMedicalStudiesByPatient(patientId!),
     enabled: !!patientId,
@@ -95,7 +95,7 @@ export default function MedicalStudyListView() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="w-8 h-8 mx-auto mb-3 border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Cargando estudios...</p>
+          <p className="text-sm text-vet-muted">Cargando estudios...</p>
         </div>
       </div>
     );
@@ -106,8 +106,8 @@ export default function MedicalStudyListView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Estudios Médicos</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-xl font-bold text-vet-text">Estudios Médicos</h2>
+          <p className="text-sm text-vet-muted mt-1">
             {studies.length} estudio{studies.length !== 1 ? "s" : ""} registrado{studies.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -124,13 +124,13 @@ export default function MedicalStudyListView() {
       {/* Buscador */}
       {studies.length > 0 && (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por tipo, profesional o diagnóstico..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl text-sm bg-slate-800 text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
           />
         </div>
       )}
@@ -141,7 +141,7 @@ export default function MedicalStudyListView() {
           {filteredStudies.map((study) => (
             <div
               key={study._id}
-              className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all"
+              className="bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-slate-600 hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-4">
                 {/* Icono del tipo */}
@@ -153,8 +153,8 @@ export default function MedicalStudyListView() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="font-semibold text-gray-900">{study.studyType}</h3>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                      <h3 className="font-semibold text-vet-text">{study.studyType}</h3>
+                      <div className="flex items-center gap-3 mt-1 text-sm text-vet-muted">
                         <span className="flex items-center gap-1">
                           <User className="w-3.5 h-3.5" />
                           {study.professional}
@@ -170,14 +170,14 @@ export default function MedicalStudyListView() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleView(study)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-vet-primary hover:bg-vet-primary/10 transition-colors"
+                        className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
                         title="Ver detalles"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteClick(study)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -187,14 +187,14 @@ export default function MedicalStudyListView() {
 
                   {/* Diagnóstico presuntivo */}
                   {study.presumptiveDiagnosis && (
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                    <p className="mt-2 text-sm text-vet-text line-clamp-2">
                       <span className="font-medium">Dx:</span> {study.presumptiveDiagnosis}
                     </p>
                   )}
 
                   {/* Notas */}
                   {study.notes && (
-                    <p className="mt-1 text-xs text-gray-400 line-clamp-1">
+                    <p className="mt-1 text-xs text-vet-muted line-clamp-1">
                       {study.notes}
                     </p>
                   )}
@@ -206,8 +206,8 @@ export default function MedicalStudyListView() {
       ) : studies.length > 0 ? (
         // Sin resultados de búsqueda
         <div className="text-center py-12">
-          <Search className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500">No se encontraron estudios</p>
+          <Search className="w-12 h-12 mx-auto text-slate-500 mb-3" />
+          <p className="text-vet-muted">No se encontraron estudios</p>
           <button
             onClick={() => setSearchQuery("")}
             className="mt-2 text-sm text-vet-primary hover:underline"
@@ -217,10 +217,10 @@ export default function MedicalStudyListView() {
         </div>
       ) : (
         // Lista vacía
-        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-          <FolderOpen className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Sin estudios registrados</h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+        <div className="text-center py-16 bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-700">
+          <FolderOpen className="w-16 h-16 mx-auto text-slate-500 mb-4" />
+          <h3 className="text-lg font-semibold text-vet-text mb-2">Sin estudios registrados</h3>
+          <p className="text-sm text-vet-muted mb-6 max-w-sm mx-auto">
             Agrega radiografías, ecografías, hemogramas externos y otros estudios de laboratorios externos.
           </p>
           <Link

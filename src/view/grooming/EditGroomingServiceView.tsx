@@ -25,6 +25,15 @@ import {
 import type { ServiceType } from "../../types";
 import type { Invoice } from "../../types/invoice";
 
+//  Función helper para fecha local
+// const getLocalDateString = () => {
+//   const now = new Date();
+//   const year = now.getFullYear();
+//   const month = String(now.getMonth() + 1).padStart(2, '0');
+//   const day = String(now.getDate()).padStart(2, '0');
+//   return `${year}-${month}-${day}`;
+// };
+
 export default function EditGroomingServiceView() {
   const { patientId, serviceId } = useParams<{ patientId: string; serviceId: string }>();
   const navigate = useNavigate();
@@ -51,19 +60,16 @@ export default function EditGroomingServiceView() {
     enabled: !!service,
   });
 
-  // Obtener datos del paciente
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => getPatientById(patientId!),
     enabled: !!patientId,
   });
 
-  // Obtener el ownerId del paciente
   const ownerId = typeof patient?.owner === "object" 
     ? patient.owner._id 
     : patient?.owner;
 
-  // Query para obtener el owner con creditBalance
   const { data: owner } = useQuery({
     queryKey: ["owner", ownerId],
     queryFn: () => getOwnersById(ownerId!),
@@ -71,7 +77,6 @@ export default function EditGroomingServiceView() {
   });
 
   const ownerCreditBalance = owner?.creditBalance || 0;
-
   const invoices = invoicesData?.invoices || [];
 
   const invoice = invoices.find((inv: Invoice) =>
@@ -172,21 +177,21 @@ export default function EditGroomingServiceView() {
       const amount = isPayingInBs 
         ? paymentData.addAmountPaidBs 
         : paymentData.addAmountPaidUSD;
-     const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
+      const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
 
-     const payload: {
-  invoiceId: string;
-  amount?: number;
-  currency: "USD" | "Bs";
-  exchangeRate: number;
-  paymentMethod?: string;
-  reference?: string;
-  creditAmountUsed?: number;
-} = {
-  invoiceId: invoice._id,
-  currency,
-  exchangeRate: paymentData.exchangeRate,
-};
+      const payload: {
+        invoiceId: string;
+        amount?: number;
+        currency: "USD" | "Bs";
+        exchangeRate: number;
+        paymentMethod?: string;
+        reference?: string;
+        creditAmountUsed?: number;
+      } = {
+        invoiceId: invoice._id,
+        currency,
+        exchangeRate: paymentData.exchangeRate,
+      };
 
       if (amount > 0 && paymentData.paymentMethodId) {
         payload.amount = amount;
@@ -245,7 +250,7 @@ export default function EditGroomingServiceView() {
   if (!service) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Servicio no encontrado</p>
+        <p className="text-vet-muted">Servicio no encontrado</p>
       </div>
     );
   }
@@ -259,40 +264,43 @@ export default function EditGroomingServiceView() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-sky-soft border-b border-slate-700/50 shadow-lg shadow-black/10">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center gap-3">
           <Link
             to={`/patients/${patientId}/grooming-services/${serviceId}`}
-            className="p-1.5 -ml-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 -ml-1.5 hover:bg-slate-700 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 text-vet-muted hover:text-vet-text" />
           </Link>
           <div>
-            <h1 className="text-sm font-semibold text-gray-900">Editar Servicio</h1>
-            <p className="text-xs text-gray-500">{patientName}</p>
+            <h1 className="text-sm font-semibold text-vet-text">Editar Servicio</h1>
+            <p className="text-xs text-vet-muted">{patientName}</p>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-6">
         <section className="space-y-4">
+          {/* Fecha y Servicio */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Fecha</label>
+              <label className="block text-xs font-medium text-vet-muted mb-1.5">Fecha</label>
               <input
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                className="w-full px-3 py-2 text-sm border border-slate-700 bg-sky-soft text-vet-text rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary transition-all"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Servicio</label>
+              <label className="block text-xs font-medium text-vet-muted mb-1.5">Servicio</label>
               <select
                 value={formData.service}
                 onChange={(e) => setFormData({ ...formData, service: e.target.value as ServiceType })}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all appearance-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-700 bg-sky-soft text-vet-text rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary transition-all appearance-none"
               >
                 <option value="Corte">Corte</option>
                 <option value="Baño">Baño</option>
@@ -301,29 +309,31 @@ export default function EditGroomingServiceView() {
             </div>
           </div>
 
+          {/* Costo */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Costo</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1.5">Costo</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-vet-muted text-sm">$</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={formData.cost || ""}
                 onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
-                className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                className="w-full pl-7 pr-3 py-2 text-sm border border-slate-700 bg-sky-soft text-vet-text rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary transition-all placeholder:text-slate-500"
                 placeholder="0.00"
               />
             </div>
           </div>
 
+          {/* Alerta de cambio de costo */}
           {costChanged && invoice && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-amber-800">
+                <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-amber-300">
                   <p className="font-medium">La factura se actualizará automáticamente</p>
-                  <p className="mt-0.5">
+                  <p className="mt-0.5 text-amber-400/90">
                     Costo: ${service.cost.toFixed(2)} → ${formData.cost.toFixed(2)}
                     {newInvoiceTotal !== null && (
                       <span className="ml-2">• Nuevo total: ${newInvoiceTotal.toFixed(2)}</span>
@@ -334,8 +344,9 @@ export default function EditGroomingServiceView() {
             </div>
           )}
 
+          {/* Especificaciones */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">
+            <label className="block text-xs font-medium text-vet-muted mb-1.5">
               Especificaciones
             </label>
             <textarea
@@ -344,27 +355,29 @@ export default function EditGroomingServiceView() {
               rows={2}
               maxLength={300}
               placeholder="Detalles del corte, estilo..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all resize-none"
+              className="w-full px-3 py-2 text-sm border border-slate-700 bg-sky-soft text-vet-text rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary transition-all resize-none placeholder:text-slate-500"
             />
           </div>
 
+          {/* Observaciones */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">
-              Observaciones <span className="text-gray-400 font-normal">(opcional)</span>
+            <label className="block text-xs font-medium text-vet-muted mb-1.5">
+              Observaciones <span className="text-slate-500 font-normal">(opcional)</span>
             </label>
             <textarea
               value={formData.observations}
               onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
               rows={2}
               placeholder="Notas adicionales..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all resize-none"
+              className="w-full px-3 py-2 text-sm border border-slate-700 bg-sky-soft text-vet-text rounded-lg focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary transition-all resize-none placeholder:text-slate-500"
             />
           </div>
 
+          {/* Botón Guardar */}
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white text-sm font-medium rounded-lg transition-all shadow-lg shadow-vet-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? (
               <>
@@ -380,19 +393,20 @@ export default function EditGroomingServiceView() {
           </button>
         </section>
 
-        <section className="mt-6 -mx-4 px-4 py-5 bg-vet-light">
+        {/* Sección de Pago */}
+        <section className="mt-6 -mx-4 px-4 py-5 bg-vet-light/50 border-y border-slate-700/30">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Pago</h2>
+              <h2 className="text-sm font-semibold text-vet-text">Pago</h2>
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                   paymentInfo.status === "Pagado"
-                    ? "bg-emerald-100 text-emerald-700"
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                     : paymentInfo.status === "Parcial"
-                    ? "bg-amber-100 text-amber-700"
+                    ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                     : paymentInfo.status === "Pendiente"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-red-500/20 text-red-400 border-red-500/30"
+                    : "bg-slate-700 text-slate-400 border-slate-600"
                 }`}
               >
                 {paymentInfo.status === "Pagado" && <Check className="w-3 h-3" />}
@@ -402,10 +416,10 @@ export default function EditGroomingServiceView() {
               </span>
             </div>
 
-            {/* Mostrar crédito disponible si el owner tiene */}
+            {/* Crédito disponible */}
             {ownerCreditBalance > 0 && paymentInfo.status !== "Pagado" && paymentInfo.status !== "Sin facturar" && (
-              <div className="mb-3 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <p className="text-xs text-emerald-700 flex items-center gap-1.5">
+              <div className="mb-3 p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                <p className="text-xs text-emerald-400 flex items-center gap-1.5">
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Crédito disponible: <strong>${ownerCreditBalance.toFixed(2)}</strong></span>
                 </p>
@@ -414,7 +428,8 @@ export default function EditGroomingServiceView() {
 
             {paymentInfo.status !== "Sin facturar" ? (
               <div className="space-y-3">
-                <div className="h-1.5 bg-white rounded-full overflow-hidden">
+                {/* Barra de progreso */}
+                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 ${
                       progress === 100 ? "bg-emerald-500" : "bg-vet-primary"
@@ -423,29 +438,31 @@ export default function EditGroomingServiceView() {
                   />
                 </div>
 
+                {/* Montos */}
                 <div className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="text-gray-500 text-xs">Pagado</p>
-                    <p className="font-semibold text-gray-900">${paymentInfo.amountPaid.toFixed(2)}</p>
+                    <p className="text-vet-muted text-xs">Pagado</p>
+                    <p className="font-semibold text-vet-text">${paymentInfo.amountPaid.toFixed(2)}</p>
                     {(paymentInfo.amountPaidUSD > 0 || paymentInfo.amountPaidBs > 0) && (
-                      <div className="flex gap-2 text-xs text-gray-400 mt-0.5">
+                      <div className="flex gap-2 text-xs text-slate-500 mt-0.5">
                         {paymentInfo.amountPaidUSD > 0 && <span>${paymentInfo.amountPaidUSD.toFixed(2)} USD</span>}
                         {paymentInfo.amountPaidBs > 0 && <span>Bs {paymentInfo.amountPaidBs.toLocaleString("es-VE", { minimumFractionDigits: 2 })}</span>}
                       </div>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-500 text-xs">Pendiente</p>
-                    <p className={`font-semibold ${paymentInfo.pending > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                    <p className="text-vet-muted text-xs">Pendiente</p>
+                    <p className={`font-semibold ${paymentInfo.pending > 0 ? "text-red-400" : "text-emerald-400"}`}>
                       ${paymentInfo.pending.toFixed(2)}
                     </p>
                   </div>
                 </div>
 
+                {/* Botón registrar pago */}
                 {paymentInfo.pending > 0 && (
                   <button
                     onClick={() => setShowPaymentModal(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-vet-primary border border-vet-primary/30 rounded-lg hover:bg-white transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-vet-accent border border-vet-primary/30 bg-vet-primary/10 rounded-lg hover:bg-vet-primary/20 transition-colors"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
                     Registrar Pago
@@ -453,7 +470,7 @@ export default function EditGroomingServiceView() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-400 text-center py-2">
+              <p className="text-sm text-vet-muted text-center py-2">
                 Sin factura asociada
               </p>
             )}
@@ -461,32 +478,30 @@ export default function EditGroomingServiceView() {
         </section>
       </main>
 
-     {showPaymentModal && invoice && (
-  <PaymentModal
-    isOpen={showPaymentModal}
-    onClose={() => setShowPaymentModal(false)}
-    onConfirm={handlePaymentConfirm}
-    amountUSD={paymentInfo.pending}
-    creditBalance={ownerCreditBalance}
-    title="Registrar Pago"
-    subtitle={`${service.service} • ${patientName}`}
-    // ✅ NUEVO: Usamos 'services' en lugar de 'items'
-    services={[
-      {
-        description: service.service,
-        quantity: 1,
-        unitPrice: service.cost,
-        total: service.cost,
-      },
-    ]}
-    // ✅ NUEVO: Pasamos la info del paciente
-    patient={{
-      name: patientName,
-      // photo: patient?.photo || undefined // Opcional, si quieres mostrar la foto
-    }}
-    allowPartial={true}
-  />
-)}
+      {/* Payment Modal */}
+      {showPaymentModal && invoice && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={handlePaymentConfirm}
+          amountUSD={paymentInfo.pending}
+          creditBalance={ownerCreditBalance}
+          title="Registrar Pago"
+          subtitle={`${service.service} • ${patientName}`}
+          services={[
+            {
+              description: service.service,
+              quantity: 1,
+              unitPrice: service.cost,
+              total: service.cost,
+            },
+          ]}
+          patient={{
+            name: patientName,
+          }}
+          allowPartial={true}
+        />
+      )}
     </div>
   );
 }

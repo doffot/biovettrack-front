@@ -111,34 +111,26 @@ const LandingView: React.FC = () => {
         />
       </div>
 
-      {/* Header */}
+      {/* Header CORREGIDO */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled 
           ? 'bg-slate-950/80 backdrop-blur-xl border-b border-white/10 py-4' 
-          : 'bg-transparent py-6'
+          : 'bg-transparent py-4'
       }`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-3 group">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
+          {/* Logo */}
+          <Link to="/" className="flex items-center group">
             <div className="relative">
               <img
                 src="/logo_menu.svg"
                 alt="BioVetTrack"
-                className="h-10 md:h-12 transition-transform duration-300 group-hover:scale-105"
+                className="h-10 md:h-16 transition-transform duration-300 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-vet-accent/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-bold tracking-tight">
-                <span className="text-white">Bio</span>
-                <span className="text-vet-accent">Vet</span>
-                <span className="text-white">Track</span>
-              </span>
-              <span className="text-[10px] md:text-xs text-white/50 font-light tracking-[0.2em] uppercase">
-                Software Veterinario
-              </span>
-            </div>
           </Link>
 
+          {/* Navegación Desktop */}
           <nav className="hidden lg:flex items-center gap-8">
             <a href="#features" className="text-white/70 hover:text-white transition-colors text-sm font-medium">
               Características
@@ -151,6 +143,7 @@ const LandingView: React.FC = () => {
             </a>
           </nav>
 
+          {/* Botones Desktop */}
           <div className="hidden md:flex items-center gap-3">
             <Link
               to="/auth/login"
@@ -167,6 +160,7 @@ const LandingView: React.FC = () => {
             </Link>
           </div>
 
+          {/* Menú Móvil */}
           <button 
             className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -175,6 +169,7 @@ const LandingView: React.FC = () => {
           </button>
         </div>
 
+        {/* Menú Mobile */}
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 p-6 animate-fade-in-down">
             <nav className="flex flex-col gap-4 mb-6">

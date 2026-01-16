@@ -13,7 +13,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, setActiveTab }) =>
   ];
 
   return (
-    <div className="flex border-b border-gray-100">
+    <div className="flex border-b border-slate-700">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -27,8 +27,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, setActiveTab }) =>
               transition-all duration-200 border-b-2
               ${
                 isActive
-                  ? "text-vet-primary border-vet-primary bg-vet-primary/5"
-                  : "text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50"
+                  ? "text-vet-primary border-vet-primary bg-vet-primary/10"
+                  : "text-vet-muted border-transparent hover:text-vet-text hover:bg-slate-800"
               }
             `}
           >

@@ -1,0 +1,57 @@
+/* ========================================
+   📜 SCROLLBARS - Estilos personalizados
+   ======================================== */
+
+/* Scrollbar veterinario azul */
+.scrollbar-thumb-vet::-webkit-scrollbar-thumb {
+  background: rgba(10, 126, 164, 0.3);
+  border-radius: 999px;
+}
+
+.scrollbar-thumb-vet:hover::-webkit-scrollbar-thumb {
+  background: rgba(10, 126, 164, 0.5);
+}
+
+/* Scrollbar para tablas - Azul océano */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #E0F4F8;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #0A7EA4, #36BCD4);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, #085F7A, #0A7EA4);
+}
+
+/* Para Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #0A7EA4 #E0F4F8;
+}
+
+/* Scrollbar para sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

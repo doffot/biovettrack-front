@@ -48,7 +48,7 @@ const Footer: React.FC<FooterProps> = ({ logout }) => {
       />
 
       {/* Footer fijo */}
-      <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-vet-light shadow-soft">
+      <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-card)] border-t border-[var(--color-border)] shadow-lg">
         <div className="flex items-center justify-around py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -62,18 +62,18 @@ const Footer: React.FC<FooterProps> = ({ logout }) => {
                 onClick={() => handleTabClick(tab)}
                 className={`relative flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all duration-200 ${
                   isLogout
-                    ? "text-red-500 hover:text-red-600"
+                    ? "text-red-400 hover:text-red-300"
                     : active
-                      ? "text-vet-primary"
-                      : "text-vet-muted hover:text-vet-primary"
+                      ? "text-[var(--color-vet-accent)]"
+                      : "text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)]"
                 }`}
               >
                 <div
                   className={`relative p-2 rounded-lg transition-all ${
                     isLogout
-                      ? "bg-red-50"
+                      ? "bg-red-600/10 border border-red-500/20"
                       : active
-                        ? "bg-vet-light"
+                        ? "bg-[var(--color-vet-primary)]/10 border border-[var(--color-vet-primary)]/20"
                         : "bg-transparent"
                   }`}
                 >
@@ -87,8 +87,8 @@ const Footer: React.FC<FooterProps> = ({ logout }) => {
                       className={`
                         absolute -top-1 -right-1 flex items-center justify-center
                         min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white
-                        rounded-full border-2 border-white shadow-sm
-                        ${urgentCount > 0 ? "bg-red-500 animate-pulse" : "bg-vet-primary"}
+                        rounded-full border-2 border-[var(--color-card)] shadow-md
+                        ${urgentCount > 0 ? "bg-red-500 animate-pulse" : "bg-[var(--color-vet-primary)]"}
                       `}
                     >
                       {notificationCount > 99 ? "99+" : notificationCount}
@@ -96,12 +96,12 @@ const Footer: React.FC<FooterProps> = ({ logout }) => {
                   )}
                 </div>
                 <span
-                  className={`text-xs font-medium ${isLogout ? "text-red-500" : ""}`}
+                  className={`text-xs font-medium ${isLogout ? "text-red-400" : ""}`}
                 >
                   {tab.label}
                 </span>
                 {active && !isLogout && (
-                  <div className="w-1 h-1 rounded-full bg-vet-primary mt-0.5" />
+                  <div className="w-1 h-1 rounded-full bg-[var(--color-vet-accent)] mt-0.5 shadow-sm" />
                 )}
               </button>
             );

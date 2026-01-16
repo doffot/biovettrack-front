@@ -1,5 +1,3 @@
-// src/components/appointments/StatusDropdown.tsx
-
 import { useState, useRef, useEffect } from "react";
 import { 
   ChevronDown, 
@@ -33,10 +31,10 @@ const statusOptions: {
     label: "Programada",
     icon: <CalendarClock className="w-4 h-4" />,
     colors: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      hover: "hover:bg-blue-100",
-      activeBg: "bg-blue-100",
+      bg: "bg-blue-600/10",
+      text: "text-blue-400",
+      hover: "hover:bg-blue-600/20",
+      activeBg: "bg-blue-600/20",
     },
   },
   {
@@ -44,10 +42,10 @@ const statusOptions: {
     label: "Completada",
     icon: <CheckCircle2 className="w-4 h-4" />,
     colors: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-700",
-      hover: "hover:bg-emerald-100",
-      activeBg: "bg-emerald-100",
+      bg: "bg-emerald-600/10",
+      text: "text-emerald-400",
+      hover: "hover:bg-emerald-600/20",
+      activeBg: "bg-emerald-600/20",
     },
   },
   {
@@ -55,10 +53,10 @@ const statusOptions: {
     label: "Cancelada",
     icon: <XCircle className="w-4 h-4" />,
     colors: {
-      bg: "bg-red-50",
-      text: "text-red-700",
-      hover: "hover:bg-red-100",
-      activeBg: "bg-red-100",
+      bg: "bg-red-600/10",
+      text: "text-red-400",
+      hover: "hover:bg-red-600/20",
+      activeBg: "bg-red-600/20",
     },
   },
   {
@@ -66,10 +64,10 @@ const statusOptions: {
     label: "No asistió",
     icon: <AlertCircle className="w-4 h-4" />,
     colors: {
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      hover: "hover:bg-amber-100",
-      activeBg: "bg-amber-100",
+      bg: "bg-amber-600/10",
+      text: "text-amber-400",
+      hover: "hover:bg-amber-600/20",
+      activeBg: "bg-amber-600/20",
     },
   },
 ];
@@ -120,7 +118,7 @@ export default function StatusDropdown({
         onClick={() => !isUpdating && setIsOpen(!isOpen)}
         disabled={isUpdating}
         className={`
-          flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 
+          flex items-center gap-3 px-4 py-2.5 rounded-xl border
           ${currentOption.colors.bg} ${currentOption.colors.text} 
           border-current/20 hover:border-current/40
           transition-all duration-200 min-w-[180px]
@@ -142,7 +140,7 @@ export default function StatusDropdown({
 
       {/* Menú Desplegable */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full left-0 mt-2 w-full bg-[var(--color-card)] rounded-xl shadow-lg border border-[var(--color-border)] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {statusOptions.map((option) => {
             const isActive = option.value === currentStatus;
             return (

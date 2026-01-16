@@ -1,4 +1,3 @@
-// src/components/consultations/DiagnosisTab.tsx
 import type { ConsultationFormData } from "../../types/consultation";
 
 interface DiagnosisTabProps {
@@ -26,12 +25,12 @@ export default function DiagnosisTab({
       {/* DIAGNÓSTICO */}
       {/* ===================== */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Diagnóstico
         </h3>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
               Diagnóstico presuntivo *
             </label>
             <textarea
@@ -41,12 +40,12 @@ export default function DiagnosisTab({
               rows={2}
               maxLength={300}
               placeholder="Diagnóstico inicial basado en la evaluación clínica..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] resize-none bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
               Diagnóstico definitivo *
             </label>
             <textarea
@@ -56,12 +55,12 @@ export default function DiagnosisTab({
               rows={2}
               maxLength={300}
               placeholder="Diagnóstico confirmado (puede ser igual al presuntivo)..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] resize-none bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
               Exámenes solicitados
             </label>
             <textarea
@@ -71,7 +70,7 @@ export default function DiagnosisTab({
               rows={2}
               maxLength={300}
               placeholder="Hemograma, bioquímica, radiografía, ecografía..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] resize-none bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
             />
           </div>
         </div>
@@ -81,11 +80,11 @@ export default function DiagnosisTab({
       {/* TRATAMIENTO */}
       {/* ===================== */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Plan de tratamiento
         </h3>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
             Tratamiento indicado *
           </label>
           <textarea
@@ -95,7 +94,7 @@ export default function DiagnosisTab({
             rows={4}
             maxLength={500}
             placeholder="Medicamentos, dosis, frecuencia, duración, indicaciones especiales, dieta, reposo..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
+            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] resize-none bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
           />
         </div>
       </section>
@@ -104,11 +103,11 @@ export default function DiagnosisTab({
       {/* COSTO */}
       {/* ===================== */}
       <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Facturación
         </h3>
         <div className="max-w-xs">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
             Costo de la consulta ($) *
           </label>
           <input
@@ -119,9 +118,9 @@ export default function DiagnosisTab({
             min="0"
             step="0.01"
             placeholder="0.00"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
           />
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-[var(--color-vet-muted)] opacity-70">
             Se generará factura automáticamente
           </span>
         </div>

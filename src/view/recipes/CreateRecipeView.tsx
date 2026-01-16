@@ -64,7 +64,7 @@ export default function CreateRecipeView() {
       toast.success("Receta creada");
       queryClient.invalidateQueries({ queryKey: ["recipes", patientId] });
       setCreatedRecipe(recipe);
-      setShowPrintModal(true); // 👈 Mostrar modal de impresión
+      setShowPrintModal(true);
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -122,7 +122,7 @@ export default function CreateRecipeView() {
   const handleClosePrintModal = () => {
     setShowPrintModal(false);
     setCreatedRecipe(null);
-    navigate(-1); // 👈 Navegar después de cerrar
+    navigate(-1);
   };
 
   const isValid = formData.medications.every(
@@ -146,18 +146,18 @@ export default function CreateRecipeView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Nueva Receta</h1>
+          <h1 className="text-lg font-bold text-vet-text">Nueva Receta</h1>
         </div>
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800"
           >
             Cancelar
           </button>
@@ -167,7 +167,7 @@ export default function CreateRecipeView() {
             className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
               isValid && !isPending
                 ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-slate-800 text-slate-600 cursor-not-allowed"
             }`}
           >
             {isPending ? (
@@ -186,7 +186,7 @@ export default function CreateRecipeView() {
         {/* Fecha de emisión */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Fecha de emisión *
             </label>
             <input
@@ -196,12 +196,12 @@ export default function CreateRecipeView() {
                 setFormData((prev) => ({ ...prev, issueDate: e.target.value }))
               }
               max={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Notas generales
             </label>
             <input
@@ -212,7 +212,7 @@ export default function CreateRecipeView() {
               }
               placeholder="Indicaciones adicionales..."
               maxLength={500}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function CreateRecipeView() {
         {/* Medicamentos */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <label className="text-sm font-medium text-vet-text flex items-center gap-2">
               <Pill className="w-4 h-4 text-vet-primary" />
               Medicamentos ({formData.medications.length})
             </label>
@@ -238,26 +238,26 @@ export default function CreateRecipeView() {
             {formData.medications.map((medication, index) => (
               <div
                 key={index}
-                className="p-4 bg-gray-50 rounded-xl border border-gray-200 relative"
+                className="p-4 bg-slate-800 rounded-xl border border-slate-700 relative"
               >
                 {formData.medications.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeMedication(index)}
-                    className="absolute top-2 right-2 p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    className="absolute top-2 right-2 p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
 
-                <p className="text-xs font-semibold text-gray-500 mb-3">
+                <p className="text-xs font-semibold text-vet-muted mb-3">
                   Medicamento {index + 1}
                 </p>
 
                 {/* Fila 1: Nombre + Presentación */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-vet-muted mb-1">
                       Nombre *
                     </label>
                     <input
@@ -268,12 +268,12 @@ export default function CreateRecipeView() {
                       }
                       placeholder="Ej: Amoxicilina"
                       maxLength={100}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-vet-muted mb-1">
                       Presentación *
                     </label>
                     <select
@@ -281,7 +281,7 @@ export default function CreateRecipeView() {
                       onChange={(e) =>
                         handleMedicationChange(index, "presentation", e.target.value)
                       }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                     >
                       <option value="">Seleccionar</option>
                       {PRESENTATIONS.map((pres) => (
@@ -296,7 +296,7 @@ export default function CreateRecipeView() {
                 {/* Fila 2: Uso + Cantidad */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-vet-muted mb-1">
                       Adquirir en *
                     </label>
                     <div className="flex gap-2">
@@ -307,8 +307,8 @@ export default function CreateRecipeView() {
                         }
                         className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${
                           medication.source === "farmacia"
-                            ? "bg-blue-100 border-blue-300 text-blue-700 font-medium"
-                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                            ? "bg-blue-900/30 border-blue-700 text-blue-400 font-medium"
+                            : "bg-slate-800 border-slate-700 text-vet-muted hover:bg-slate-700"
                         }`}
                       >
                         Farmacia
@@ -320,8 +320,8 @@ export default function CreateRecipeView() {
                         }
                         className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${
                           medication.source === "veterinario"
-                            ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-medium"
-                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                            ? "bg-emerald-900/30 border-emerald-700 text-emerald-400 font-medium"
+                            : "bg-slate-800 border-slate-700 text-vet-muted hover:bg-slate-700"
                         }`}
                       >
                         Veterinario
@@ -330,7 +330,7 @@ export default function CreateRecipeView() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-vet-muted mb-1">
                       Cantidad
                     </label>
                     <input
@@ -341,14 +341,14 @@ export default function CreateRecipeView() {
                       }
                       placeholder="Ej: 14 tabletas, 1 frasco"
                       maxLength={50}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
                     />
                   </div>
                 </div>
 
                 {/* Fila 3: Instrucciones */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-vet-muted mb-1">
                     Modo de uso *
                   </label>
                   <textarea
@@ -359,7 +359,7 @@ export default function CreateRecipeView() {
                     placeholder="Ej: 1 tableta cada 12 horas por 7 días"
                     maxLength={300}
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white resize-none"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text resize-none"
                   />
                 </div>
               </div>

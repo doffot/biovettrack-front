@@ -34,7 +34,7 @@ export default function LabExamListView() {
   const [examToDelete, setExamToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const {
-    data: labExams = [],
+     data:labExams = [],
     isLoading,
     isError,
     error,
@@ -137,10 +137,10 @@ export default function LabExamListView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-vet-gradient flex items-center justify-center">
+      <div className="min-h-screen bg-vet-light flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-vet-light border-t-vet-primary rounded-full animate-spin" />
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-slate-700 border-t-vet-primary rounded-full animate-spin" />
             <FlaskConical className="w-6 h-6 text-vet-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
           <p className="text-vet-text font-medium font-montserrat">Cargando exámenes...</p>
@@ -152,8 +152,8 @@ export default function LabExamListView() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-vet-gradient flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl p-8 shadow-card max-w-md text-center relative overflow-hidden">
+      <div className="min-h-screen bg-vet-light flex items-center justify-center px-4">
+        <div className="bg-slate-900 rounded-2xl p-8 shadow-card max-w-md text-center relative overflow-hidden border border-slate-700">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-vet-danger via-vet-danger to-vet-danger" />
           <div className="w-16 h-16 mx-auto mb-4 bg-vet-danger/10 rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-vet-danger" />
@@ -173,19 +173,19 @@ export default function LabExamListView() {
   }
 
   return (
-    <div className="min-h-screen bg-vet-gradient">
-      <header className="bg-white shadow-soft border-b border-vet-light sticky top-0 z-20">
+    <div className="min-h-screen bg-vet-light">
+      <header className="bg-slate-900 shadow-soft border-b border-slate-700 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link
                 to="/"
-                className="p-2 rounded-xl bg-vet-light text-vet-primary hover:bg-vet-accent/20 transition-all duration-200 group"
+                className="p-2 rounded-xl bg-slate-800 text-vet-accent hover:bg-vet-primary/20 transition-all duration-200 group"
               >
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
               </Link>
 
-              <div className="hidden sm:block h-8 w-px bg-vet-light" />
+              <div className="hidden sm:block h-8 w-px bg-slate-700" />
 
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-xl shadow-soft">
@@ -226,11 +226,11 @@ export default function LabExamListView() {
         </div>
 
         <div
-          className={`bg-white rounded-2xl shadow-soft border border-vet-light/50 overflow-hidden transition-all duration-500 delay-100 ${
+          className={`bg-slate-900 rounded-2xl shadow-soft border border-slate-700 overflow-hidden transition-all duration-500 delay-100 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="p-4 border-b border-vet-light/50 bg-gradient-to-r from-vet-light/30 to-transparent">
+          <div className="p-4 border-b border-slate-700 bg-gradient-to-r from-slate-950 to-transparent">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
@@ -239,14 +239,14 @@ export default function LabExamListView() {
                   placeholder="Buscar por nombre o raza..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all"
                 />
               </div>
 
               <select
                 value={speciesFilter}
                 onChange={(e) => setSpeciesFilter(e.target.value)}
-                className="px-4 py-2.5 bg-white border border-vet-light rounded-xl text-sm text-vet-text focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all appearance-none cursor-pointer min-w-[140px]"
+                className="px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 transition-all appearance-none cursor-pointer min-w-[140px]"
               >
                 <option value="all">Todas especies</option>
                 <option value="canino">Caninos</option>
@@ -255,10 +255,10 @@ export default function LabExamListView() {
             </div>
 
             {(searchTerm || speciesFilter !== "all") && (
-              <div className="mt-3 pt-3 border-t border-vet-light/50 flex items-center gap-2 flex-wrap">
+              <div className="mt-3 pt-3 border-t border-slate-700 flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-vet-muted">Filtros:</span>
                 {searchTerm && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/10 text-vet-primary rounded-lg text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/20 text-vet-primary rounded-lg text-xs font-medium">
                     "{searchTerm}"
                     <button onClick={() => setSearchTerm("")} className="hover:text-vet-secondary ml-1">
                       ×
@@ -266,7 +266,7 @@ export default function LabExamListView() {
                   </span>
                 )}
                 {speciesFilter !== "all" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/10 text-vet-primary rounded-lg text-xs font-medium capitalize">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-vet-primary/20 text-vet-primary rounded-lg text-xs font-medium capitalize">
                     {speciesFilter}
                     <button onClick={() => setSpeciesFilter("all")} className="hover:text-vet-secondary ml-1">
                       ×
@@ -291,7 +291,7 @@ export default function LabExamListView() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-vet-light/30 border-b border-vet-light/50">
+                    <tr className="bg-slate-800 border-b border-slate-700">
                       <th className="px-6 py-4 text-left text-xs font-semibold text-vet-muted uppercase tracking-wider">
                         Paciente
                       </th>
@@ -312,7 +312,7 @@ export default function LabExamListView() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-vet-light/50">
+                  <tbody className="divide-y divide-slate-700">
                     {currentExams.map((exam, index) => {
                       const hematocritStatus = getHematocritStatus(exam.hematocrit, exam.species);
                       const isAltered = hematocritStatus !== "normal";
@@ -320,8 +320,8 @@ export default function LabExamListView() {
                       return (
                         <tr
                           key={exam._id}
-                          className={`hover:bg-vet-light/30 transition-colors ${
-                            isAltered ? "bg-vet-danger/5" : ""
+                          className={`hover:bg-slate-800/50 transition-colors ${
+                            isAltered ? "bg-red-900/10" : ""
                           }`}
                           style={{ animationDelay: `${index * 30}ms` }}
                         >
@@ -330,8 +330,8 @@ export default function LabExamListView() {
                               <div
                                 className={`p-2 rounded-lg ${
                                   exam.species.toLowerCase() === "felino"
-                                    ? "bg-vet-secondary/10"
-                                    : "bg-vet-primary/10"
+                                    ? "bg-vet-secondary/20"
+                                    : "bg-vet-primary/20"
                                 }`}
                               >
                                 <PawPrint
@@ -355,8 +355,8 @@ export default function LabExamListView() {
                             <span
                               className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
                                 exam.species.toLowerCase() === "felino"
-                                  ? "bg-vet-secondary/10 text-vet-secondary"
-                                  : "bg-vet-primary/10 text-vet-primary"
+                                  ? "bg-vet-secondary/20 text-vet-secondary"
+                                  : "bg-vet-primary/20 text-vet-primary"
                               }`}
                             >
                               {exam.species}
@@ -374,13 +374,13 @@ export default function LabExamListView() {
                             <div className="flex flex-col items-center">
                               <span
                                 className={`text-lg font-bold ${
-                                  isAltered ? "text-vet-danger" : "text-vet-primary"
+                                  isAltered ? "text-red-400" : "text-vet-primary"
                                 }`}
                               >
                                 {exam.hematocrit}%
                               </span>
                               {isAltered && (
-                                <span className="text-xs mt-0.5 text-vet-danger">
+                                <span className="text-xs mt-0.5 text-red-400">
                                   {hematocritStatus === "low" ? "↓ Bajo" : "↑ Alto"}
                                 </span>
                               )}
@@ -398,7 +398,7 @@ export default function LabExamListView() {
                             <div className="flex items-center justify-center gap-2">
                               <Link
                                 to={`${exam._id}`}
-                                className="p-2 rounded-lg bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all duration-200"
+                                className="p-2 rounded-lg bg-slate-800 text-vet-primary hover:bg-vet-primary hover:text-white transition-all duration-200"
                                 title="Ver detalles"
                               >
                                 <Eye className="w-4 h-4" />
@@ -409,7 +409,7 @@ export default function LabExamListView() {
                                     handleDeleteClick({ _id: exam._id, patientName: exam.patientName });
                                   }
                                 }}
-                                className="p-2 rounded-lg bg-vet-danger/10 text-vet-danger hover:bg-vet-danger hover:text-white transition-all duration-200"
+                                className="p-2 rounded-lg bg-red-900/20 text-red-400 hover:bg-red-600 hover:text-white transition-all duration-200"
                                 title="Eliminar"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -424,7 +424,7 @@ export default function LabExamListView() {
               </div>
 
               {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-vet-light/50 bg-vet-light/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="px-6 py-4 border-t border-slate-700 bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-sm text-vet-muted">
                     Mostrando{" "}
                     <span className="font-semibold text-vet-text">{startIndex + 1}</span> -{" "}
@@ -440,8 +440,8 @@ export default function LabExamListView() {
                       disabled={currentPage === 1}
                       className={`p-2 rounded-lg transition-all ${
                         currentPage === 1
-                          ? "bg-vet-light/50 text-vet-muted cursor-not-allowed"
-                          : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
+                          ? "bg-slate-800/50 text-slate-600 cursor-not-allowed"
+                          : "bg-slate-800 border border-slate-700 text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
                       }`}
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -464,7 +464,7 @@ export default function LabExamListView() {
                               className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
                                 isCurrentPage
                                   ? "bg-vet-primary text-white shadow-soft"
-                                  : "bg-white border border-vet-light text-vet-text hover:border-vet-primary hover:text-vet-primary"
+                                  : "bg-slate-800 border border-slate-700 text-vet-text hover:border-vet-primary hover:text-vet-primary"
                               }`}
                             >
                               {pageNum}
@@ -486,8 +486,8 @@ export default function LabExamListView() {
                       disabled={currentPage === totalPages}
                       className={`p-2 rounded-lg transition-all ${
                         currentPage === totalPages
-                          ? "bg-vet-light/50 text-vet-muted cursor-not-allowed"
-                          : "bg-white border border-vet-light text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
+                          ? "bg-slate-800/50 text-slate-600 cursor-not-allowed"
+                          : "bg-slate-800 border border-slate-700 text-vet-primary hover:bg-vet-primary hover:text-white hover:border-vet-primary"
                       }`}
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -498,7 +498,7 @@ export default function LabExamListView() {
             </>
           ) : (
             <div className="p-12 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 bg-vet-light rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-slate-800 rounded-full flex items-center justify-center">
                 <Microscope className="w-10 h-10 text-vet-muted" />
               </div>
 
@@ -529,7 +529,7 @@ export default function LabExamListView() {
                       setSearchTerm("");
                       setSpeciesFilter("all");
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-light text-vet-primary hover:bg-vet-primary hover:text-white transition-all font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-vet-primary hover:bg-vet-primary hover:text-white transition-all font-medium"
                   >
                     Limpiar filtros
                   </button>
@@ -564,26 +564,26 @@ interface StatCardProps {
 function StatCard({ icon: Icon, label, value, variant }: StatCardProps) {
   const variantClasses = {
     primary: {
-      bg: "bg-vet-light",
-      iconBg: "bg-vet-primary/10",
+      bg: "bg-slate-900",
+      iconBg: "bg-vet-primary/20",
       icon: "text-vet-primary",
       value: "text-vet-primary",
     },
     secondary: {
-      bg: "bg-vet-secondary/5",
-      iconBg: "bg-vet-secondary/10",
+      bg: "bg-slate-900",
+      iconBg: "bg-vet-secondary/20",
       icon: "text-vet-secondary",
       value: "text-vet-secondary",
     },
     accent: {
-      bg: "bg-vet-accent/5",
+      bg: "bg-slate-900",
       iconBg: "bg-vet-accent/20",
       icon: "text-vet-accent",
       value: "text-vet-secondary",
     },
     light: {
-      bg: "bg-white",
-      iconBg: "bg-vet-light",
+      bg: "bg-slate-900",
+      iconBg: "bg-slate-800",
       icon: "text-vet-primary",
       value: "text-vet-text",
     },
@@ -592,7 +592,7 @@ function StatCard({ icon: Icon, label, value, variant }: StatCardProps) {
   const classes = variantClasses[variant];
 
   return (
-    <div className={`${classes.bg} rounded-2xl p-4 shadow-soft border border-vet-light/50 hover:shadow-card transition-all duration-300`}>
+    <div className={`${classes.bg} rounded-2xl p-4 shadow-soft border border-slate-700 hover:shadow-card transition-all duration-300`}>
       <div className="flex items-center gap-3">
         <div className={`p-2.5 rounded-xl ${classes.iconBg}`}>
           <Icon className={`w-5 h-5 ${classes.icon}`} />

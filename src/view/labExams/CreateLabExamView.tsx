@@ -471,7 +471,7 @@ export default function CreateLabExamView() {
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => navigate(-1)}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-white hover:bg-vet-primary hover:text-white text-vet-muted transition-all duration-200 shadow-soft group"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800 hover:bg-vet-primary hover:text-white text-vet-muted transition-all duration-200 border border-slate-700 group"
                 >
                   <ArrowLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </button>
@@ -495,7 +495,7 @@ export default function CreateLabExamView() {
                 <button
                   type="button"
                   onClick={handleClearPatient}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-400 hover:text-red-300 border border-red-900/30 hover:border-red-700 rounded-lg hover:bg-red-900/20 transition-colors"
                 >
                   <X className="w-4 h-4" />
                   Cambiar paciente
@@ -506,10 +506,10 @@ export default function CreateLabExamView() {
             {isPatientSelected && (
               <div className="space-y-3 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-vet-primary" />
+                      <div className="w-9 h-9 rounded-lg bg-vet-primary/20 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-vet-accent" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -522,10 +522,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-cyan-100 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-cyan-600" />
+                      <div className="w-9 h-9 rounded-lg bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-cyan-400" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -538,10 +538,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <Stethoscope className="w-4 h-4 text-emerald-600" />
+                      <div className="w-9 h-9 rounded-lg bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                        <Stethoscope className="w-4 h-4 text-emerald-400" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -554,10 +554,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-3 shadow-soft border border-gray-100">
+                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                        <Calendar className="w-4 h-4 text-amber-600" />
+                      <div className="w-9 h-9 rounded-lg bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="w-4 h-4 text-amber-400" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -579,7 +579,7 @@ export default function CreateLabExamView() {
               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
-            <div className="bg-white rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden">
+            <div className="bg-slate-800 rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden border border-slate-700">
               <TabNavigation
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
@@ -611,12 +611,12 @@ export default function CreateLabExamView() {
                           key={tab}
                           className={`transition-all duration-300 ${
                             isLocked
-                              ? "w-2 h-2 rounded-full bg-gray-200"
+                              ? "w-2 h-2 rounded-full bg-slate-600"
                               : isCompleted
                               ? "w-6 h-2 rounded-full bg-emerald-500"
                               : isCurrent
                               ? "w-6 h-2 rounded-full bg-vet-primary animate-pulse"
-                              : "w-2 h-2 rounded-full bg-gray-300"
+                              : "w-2 h-2 rounded-full bg-slate-500"
                           }`}
                         />
                       );
@@ -638,14 +638,14 @@ export default function CreateLabExamView() {
               </div>
 
               {totalCells > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white shadow-soft border border-gray-100">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 shadow-soft border border-slate-700">
                   <span className="text-sm text-vet-muted">Células:</span>
                   <div className="flex items-center gap-1">
                     <span
                       className={`text-lg font-bold ${
                         totalCells === 100
-                          ? "text-emerald-600"
-                          : "text-vet-primary"
+                          ? "text-emerald-400"
+                          : "text-vet-accent"
                       }`}
                     >
                       {totalCells}
@@ -653,7 +653,7 @@ export default function CreateLabExamView() {
                     <span className="text-sm text-vet-muted">/100</span>
                   </div>
                   {totalCells === 100 && (
-                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-xs bg-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded-full font-semibold border border-emerald-700">
                       ✓ Completo
                     </span>
                   )}

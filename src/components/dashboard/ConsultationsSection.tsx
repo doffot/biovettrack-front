@@ -1,6 +1,6 @@
-// src/views/dashboard/components/ConsultationsSection.tsx
+// src/components/dashboard/ConsultationsSection.tsx
 import { useState, useMemo } from "react";
-import { Stethoscope, ChevronRight, FileText, Eye, User } from "lucide-react";
+import { Stethoscope, ChevronRight, FileText, Eye, User, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { formatTime } from "../../utils/dashboardUtils";
@@ -21,7 +21,7 @@ export function ConsultationsSection({ consultations }: ConsultationsSectionProp
   const { data: patients = [] } = useQuery({
     queryKey: ["patients"],
     queryFn: getPatients,
-    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+    staleTime: 1000 * 60 * 5,
   });
 
   // Crear mapa de pacientes para búsqueda rápida
@@ -58,21 +58,26 @@ export function ConsultationsSection({ consultations }: ConsultationsSectionProp
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-card border border-vet-light overflow-hidden animate-fade-in-up">
-        <div className="px-4 py-3 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-vet-text flex items-center gap-2">
-            <div className="p-1.5 bg-white rounded-lg shadow-soft">
-              <Stethoscope className="w-4 h-4 text-emerald-600" />
+      <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden animate-fade-in-up shadow-xl">
+        {/* Header */}
+        <div className="px-4 py-3 bg-gradient-to-r from-emerald-900/30 via-slate-800/40 to-emerald-900/30 border-b border-white/10 flex items-center justify-between">
+          <h2 className="font-semibold text-white flex items-center gap-2">
+            <div className="p-1.5 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+              <Stethoscope className="w-4 h-4 text-emerald-400" />
             </div>
             Consultas de Hoy
           </h2>
+          
           <div className="flex items-center gap-2">
-            <span className="text-xs bg-white px-2 py-1 rounded-full font-medium text-vet-muted shadow-soft">
+            {/* Badge contador */}
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-semibold border border-emerald-500/30">
               {consultations.length} {consultations.length === 1 ? 'consulta' : 'consultas'}
             </span>
+            
+            {/* Link "Ver todas" */}
             <Link
               to="/consultations"
-              className="text-xs text-vet-primary hover:text-vet-accent font-medium flex items-center gap-0.5 transition-colors group"
+              className="text-xs text-emerald-400 hover:text-white font-medium flex items-center gap-0.5 transition-colors group"
             >
               Ver todas
               <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -80,17 +85,30 @@ export function ConsultationsSection({ consultations }: ConsultationsSectionProp
           </div>
         </div>
         
+        {/* Content */}
         <div className="p-4">
           {isEmpty ? (
+            /* Estado vacío */
             <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-3 bg-emerald-50 rounded-full flex items-center justify-center animate-gentle-pulse">
-                <Stethoscope className="w-8 h-8 text-emerald-300" />
+              <div className="w-16 h-16 mx-auto mb-4 bg-emerald-500/10 rounded-full flex items-center justify-center animate-gentle-pulse border border-emerald-500/20">
+                <Stethoscope className="w-8 h-8 text-emerald-500/50" />
               </div>
-              <p className="text-vet-text text-sm font-medium">Sin consultas programadas</p>
-              <p className="text-vet-muted text-xs mt-1">No hay consultas para hoy</p>
+              <p className="text-white text-sm font-medium">Sin consultas programadas</p>
+              <p className="text-slate-400 text-xs mt-1">No hay consultas para hoy</p>
+              
+              {/* Botón CTA */}
+              <Link
+                to="/consultations"
+                className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-sm font-medium transition-colors border border-emerald-500/30"
+              >
+                <Stethoscope className="w-4 h-4" />
+                Registrar consulta
+              </Link>
             </div>
           ) : (
+            /* Lista de consultas */
             <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
+              {/* Primeras 3 consultas */}
               {consultations.slice(0, 3).map((consultation) => {
                 const patientInfo = getPatientInfo(consultation.patientId);
                 return (
@@ -103,18 +121,21 @@ export function ConsultationsSection({ consultations }: ConsultationsSectionProp
                 );
               })}
               
+              {/* Separador si hay más de 3 */}
               {consultations.length > 3 && (
                 <>
-                  <div className="relative my-2">
+                  <div className="relative my-3">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-vet-light"></div>
+                      <div className="w-full border-t border-white/10"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-white px-2 text-vet-muted">
-                        {consultations.length - 3} más
+                      <span className="bg-slate-900/80 px-3 py-1 text-slate-400 rounded-full border border-white/10">
+                        +{consultations.length - 3} más
                       </span>
                     </div>
                   </div>
+                  
+                  {/* Resto de consultas */}
                   {consultations.slice(3).map((consultation) => {
                     const patientInfo = getPatientInfo(consultation.patientId);
                     return (
@@ -145,7 +166,7 @@ export function ConsultationsSection({ consultations }: ConsultationsSectionProp
   );
 }
 
-// Componente interno mejorado con información del paciente
+// Componente interno mejorado
 interface ConsultationItemProps {
   consultation: Consultation;
   patientInfo: {
@@ -160,53 +181,72 @@ interface ConsultationItemProps {
 function ConsultationItem({ consultation, patientInfo, onClick }: ConsultationItemProps) {
   return (
     <div 
-      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-emerald-200/50 hover:shadow-md hover:border-emerald-300 transition-all duration-200 group animate-fadeIn"
+      className="flex items-center gap-3 p-3 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 group animate-fadeIn cursor-pointer"
+      onClick={onClick}
     >
       {/* Foto o icono del paciente */}
-      <div className="relative">
+      <div className="relative flex-shrink-0">
         {patientInfo.photo ? (
           <img
             src={patientInfo.photo}
             alt={patientInfo.name}
-            className="w-10 h-10 rounded-full object-cover border-2 border-emerald-200"
+            className="w-11 h-11 rounded-xl object-cover border-2 border-emerald-500/30 group-hover:border-emerald-400/50 transition-colors"
           />
         ) : (
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-50 to-green-50 rounded-full flex items-center justify-center">
-            <FileText className="w-5 h-5 text-emerald-600" />
+          <div className="w-11 h-11 bg-gradient-to-br from-emerald-500/20 to-green-500/10 rounded-xl flex items-center justify-center border border-emerald-500/30">
+            <FileText className="w-5 h-5 text-emerald-400" />
           </div>
         )}
+        
+        {/* Badge de tipo */}
+        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500/30 rounded-full flex items-center justify-center border border-slate-900">
+          <Stethoscope className="w-3 h-3 text-emerald-400" />
+        </div>
       </div>
       
+      {/* Información */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-vet-text text-sm truncate">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="font-semibold text-white text-sm truncate">
             {patientInfo.name}
           </p>
-          <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">
+          <span className="text-[10px] px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded-full font-medium border border-emerald-500/30">
             {patientInfo.species}
           </span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-vet-muted">
-          <User className="w-3 h-3" />
+        
+        <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-1">
+          <User className="w-3 h-3 flex-shrink-0" />
           <span className="truncate">{patientInfo.owner}</span>
         </div>
-        <p className="text-xs text-emerald-600 mt-0.5 truncate">
-          {consultation.presumptiveDiagnosis}
+        
+        <p className="text-xs text-emerald-400 truncate italic">
+          "{consultation.presumptiveDiagnosis}"
         </p>
       </div>
       
-      <div className="flex items-center gap-2">
-        <div className="text-right">
-          <p className="text-xs font-semibold text-emerald-600">
-            ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}git
-          </p>
-          <p className="text-xs text-vet-muted">
-            {formatTime(consultation.consultationDate)}
+      {/* Precio y hora */}
+      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        {/* Precio */}
+        <div className="px-2.5 py-1 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+          <p className="text-xs font-bold text-emerald-300">
+            ${consultation.cost ? consultation.cost.toFixed(2) : "0.00"}
           </p>
         </div>
+        
+        {/* Hora */}
+        <div className="flex items-center gap-1 text-xs text-slate-400">
+          <Clock className="w-3 h-3" />
+          <span>{formatTime(consultation.consultationDate)}</span>
+        </div>
+        
+        {/* Botón ver detalle */}
         <button
-          onClick={onClick}
-          className="p-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-600 transition-colors group-hover:opacity-100 lg:opacity-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition-colors opacity-0 group-hover:opacity-100 border border-emerald-500/30"
           title="Ver detalle"
         >
           <Eye className="w-3.5 h-3.5" />

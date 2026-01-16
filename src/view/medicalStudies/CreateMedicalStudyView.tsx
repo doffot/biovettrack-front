@@ -115,11 +115,11 @@ export default function CreateMedicalStudyView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted hover:text-vet-text transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Agregar Estudio</h1>
+          <h1 className="text-lg font-bold text-vet-text">Agregar Estudio</h1>
         </div>
         
         <div className="flex gap-2">
@@ -127,17 +127,17 @@ export default function CreateMedicalStudyView() {
             type="button"
             onClick={() => navigate(-1)}
             disabled={isPending}
-            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800 hover:text-vet-text transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={!isValid || isPending}
-            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
+            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg ${
               isValid && !isPending
-                ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                ? "bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white shadow-vet-primary/30"
+                : "bg-slate-800 text-slate-600 cursor-not-allowed shadow-black/20"
             }`}
           >
             {isPending ? (
@@ -163,10 +163,10 @@ export default function CreateMedicalStudyView() {
             onClick={() => fileInputRef.current?.click()}
             className={`relative border-2 border-dashed rounded-lg px-3 py-2 cursor-pointer transition-all flex items-center gap-3 ${
               dragActive
-                ? "border-vet-primary bg-vet-primary/5"
+                ? "border-vet-primary bg-vet-primary/20 shadow-lg shadow-vet-primary/20"
                 : pdfFile
-                ? "border-emerald-400 bg-emerald-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-emerald-500/50 bg-emerald-500/10"
+                : "border-slate-700 hover:border-slate-600 bg-sky-soft"
             }`}
           >
             <input
@@ -179,25 +179,25 @@ export default function CreateMedicalStudyView() {
 
             {pdfFile ? (
               <>
-                <FileText className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{pdfFile.name}</p>
-                  <p className="text-xs text-gray-500">{(pdfFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                  <p className="text-sm font-medium text-vet-text truncate">{pdfFile.name}</p>
+                  <p className="text-xs text-vet-muted">{(pdfFile.size / 1024 / 1024).toFixed(1)} MB</p>
                 </div>
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setPdfFile(null); }}
-                  className="p-1 rounded hover:bg-red-100 text-gray-400 hover:text-red-600"
+                  className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </>
             ) : (
               <>
-                <Upload className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <Upload className="w-5 h-5 text-slate-400 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Subir PDF</p>
-                  <p className="text-xs text-gray-400">Máx 10MB</p>
+                  <p className="text-sm text-vet-text">Subir PDF</p>
+                  <p className="text-xs text-vet-muted">Máx 10MB</p>
                 </div>
               </>
             )}
@@ -205,12 +205,12 @@ export default function CreateMedicalStudyView() {
 
           {/* Tipo */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Tipo *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Tipo *</label>
             <select
               name="studyType"
               value={formData.studyType}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+              className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text transition-all"
             >
               <option value="">Seleccionar</option>
               {STUDY_TYPES.map((type) => (
@@ -221,14 +221,14 @@ export default function CreateMedicalStudyView() {
 
           {/* Fecha */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Fecha *</label>
             <input
               type="date"
               name="date"
               value={formData.date}
               onChange={handleInputChange}
               max={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text transition-all"
             />
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function CreateMedicalStudyView() {
         <div className={`grid gap-3 ${formData.studyType === "Otro" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
           {formData.studyType === "Otro" && (
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Especificar tipo *</label>
+              <label className="block text-xs font-medium text-vet-muted mb-1">Especificar tipo *</label>
               <input
                 type="text"
                 name="customStudyType"
@@ -245,13 +245,13 @@ export default function CreateMedicalStudyView() {
                 onChange={handleInputChange}
                 placeholder="Ej: Electrocardiograma"
                 maxLength={50}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text placeholder:text-slate-500 transition-all"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Laboratorio / Profesional *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Laboratorio / Profesional *</label>
             <input
               type="text"
               name="professional"
@@ -259,7 +259,7 @@ export default function CreateMedicalStudyView() {
               onChange={handleInputChange}
               placeholder="Nombre del laboratorio o profesional"
               maxLength={100}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text placeholder:text-slate-500 transition-all"
             />
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function CreateMedicalStudyView() {
         {/* Fila 3: Diagnóstico + Notas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Diagnóstico presuntivo</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Diagnóstico presuntivo</label>
             <input
               type="text"
               name="presumptiveDiagnosis"
@@ -275,12 +275,12 @@ export default function CreateMedicalStudyView() {
               onChange={handleInputChange}
               placeholder="Opcional"
               maxLength={500}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text placeholder:text-slate-500 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Notas</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Notas</label>
             <input
               type="text"
               name="notes"
@@ -288,21 +288,22 @@ export default function CreateMedicalStudyView() {
               onChange={handleInputChange}
               placeholder="Opcional"
               maxLength={300}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/30 focus:border-vet-primary bg-sky-soft text-vet-text placeholder:text-slate-500 transition-all"
             />
           </div>
         </div>
-      </form>
-       {/* Advertencia */}
-        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mt-4">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-800">
-            <p className="font-medium">Importante</p>
-            <p className="text-amber-700 mt-0.5">
+
+        {/* Advertencia */}
+        <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mt-4">
+          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-amber-300">Importante</p>
+            <p className="text-amber-400/90 mt-0.5">
               Asegúrate de que el PDF sea legible y contenga toda la información del estudio.
             </p>
           </div>
         </div>
+      </form>
     </div>
   );
 }

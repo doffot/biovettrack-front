@@ -1,0 +1,119 @@
+/* ========================================
+   🗓️ CALENDAR - React DatePicker
+   ======================================== */
+
+/* Contenedor del calendario */
+.react-datepicker {
+  background-color: #0C4A5E;
+  border: 1px solid #0A7EA4;
+  border-radius: 0.75rem;
+  font-family: var(--font-inter), sans-serif;
+  color: white;
+  width: 100%;
+  max-width: 300px;
+  padding: 1rem;
+}
+
+/* Encabezado del calendario */
+.react-datepicker__header {
+  background-color: #0C4A5E;
+  border-bottom: 1px solid #0A7EA4;
+  padding: 0.5rem 0;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: #E0F4F8;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Navegación (flechas) */
+.react-datepicker__navigation {
+  top: 0.5rem;
+  border: none;
+}
+
+.react-datepicker__navigation--previous {
+  border-right-color: #5A7C88;
+}
+
+.react-datepicker__navigation--next {
+  border-left-color: #5A7C88;
+}
+
+/* Días de la semana */
+.react-datepicker__day-name {
+  color: #5A7C88;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+/* Días del mes */
+.react-datepicker__day {
+  color: white;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin: 0.125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__day:hover {
+  background-color: #085F7A;
+  color: white;
+}
+
+/* Día seleccionado */
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  background-color: #0A7EA4;
+  color: #E0F4F8;
+  font-weight: bold;
+}
+
+/* Día con cita (marcado con punto) */
+.has-appointment {
+  position: relative;
+}
+
+.has-appointment::after {
+  content: '';
+  position: absolute;
+  top: 0.125rem;
+  right: 0.125rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #36BCD4;
+  border-radius: 50%;
+}
+
+/* Texto del día con cita */
+.has-appointment {
+  background-color: #085F7A;
+  color: #E0F4F8;
+}
+
+/* Foco y selección */
+.react-datepicker__day:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #36BCD4;
+}
+
+/* Ajuste de tamaño para mobile */
+@media (max-width: 640px) {
+  .react-datepicker {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+
+  .react-datepicker__day {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+}

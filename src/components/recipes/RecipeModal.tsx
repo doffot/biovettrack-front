@@ -53,35 +53,35 @@ export default function RecipePrintModal({
         @page { size: A4; margin: 12mm; }
         body {
           font-family: 'Segoe UI', Arial, sans-serif;
-          color: #1A3E4A;
+          color: #F1F5F9;
+          background: #0F172A;
           font-size: 11px;
           padding: 10mm 12mm;
-          background: white;
           line-height: 1.4;
         }
         .header {
           text-align: center;
-          border-bottom: 3px solid #6366F1;
+          border-bottom: 3px solid #36BCD4;
           padding-bottom: 12px;
           margin-bottom: 16px;
         }
         .header h1 {
-          color: #6366F1;
+          color: #36BCD4;
           font-size: 22px;
           font-weight: 700;
           letter-spacing: 1px;
         }
         .header .subtitle {
-          color: #5A7C88;
+          color: #94A3B8;
           font-size: 11px;
           margin-top: 4px;
         }
         .info-section {
           margin-bottom: 16px;
           padding: 12px 16px;
-          background-color: #F0F4FF;
+          background-color: #1E293B;
           border-radius: 8px;
-          border: 1px solid #E0E7FF;
+          border: 1px solid #334155;
         }
         .info-grid {
           display: grid;
@@ -93,13 +93,13 @@ export default function RecipePrintModal({
         }
         .info-item .label {
           font-weight: 600;
-          color: #4338CA;
+          color: #36BCD4;
         }
         .info-item .value {
-          color: #1A3E4A;
+          color: #F1F5F9;
         }
         .section-title {
-          background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+          background: linear-gradient(135deg, #0A7EA4 0%, #085F7A 100%);
           color: white;
           padding: 8px 16px;
           margin-bottom: 12px;
@@ -113,8 +113,8 @@ export default function RecipePrintModal({
           padding: 14px 16px;
           margin-bottom: 12px;
           border-radius: 8px;
-          border: 1px solid #E5E7EB;
-          background: white;
+          border: 1px solid #334155;
+          background: #1E293B;
           page-break-inside: avoid;
         }
         .medication-header {
@@ -123,7 +123,7 @@ export default function RecipePrintModal({
           align-items: flex-start;
           margin-bottom: 10px;
           padding-bottom: 10px;
-          border-bottom: 1px dashed #E5E7EB;
+          border-bottom: 1px dashed #334155;
         }
         .medication-number {
           display: inline-flex;
@@ -131,7 +131,7 @@ export default function RecipePrintModal({
           justify-content: center;
           width: 24px;
           height: 24px;
-          background: #6366F1;
+          background: #0A7EA4;
           color: white;
           border-radius: 50%;
           font-size: 12px;
@@ -141,11 +141,11 @@ export default function RecipePrintModal({
         .medication-name {
           font-size: 14px;
           font-weight: 700;
-          color: #1A3E4A;
+          color: #F1F5F9;
         }
         .medication-presentation {
           font-size: 11px;
-          color: #5A7C88;
+          color: #94A3B8;
           margin-top: 2px;
         }
         .medication-source {
@@ -155,116 +155,116 @@ export default function RecipePrintModal({
           border-radius: 12px;
         }
         .source-farmacia {
-          background-color: #DBEAFE;
-          color: #1E40AF;
+          background-color: #1E3A8A;
+          color: #93C5FD;
         }
         .source-veterinario {
-          background-color: #D1FAE5;
-          color: #065F46;
+          background-color: #064E3B;
+          color: #6EE7B7;
         }
         .medication-quantity {
           font-size: 11px;
-          color: #374151;
+          color: #CBD5E1;
           margin-bottom: 8px;
         }
         .medication-quantity span {
           font-weight: 600;
         }
         .instructions-box {
-          background-color: #FEF3C7;
+          background-color: #78350F;
           border-left: 4px solid #F59E0B;
           padding: 10px 12px;
           border-radius: 0 6px 6px 0;
         }
         .instructions-title {
           font-weight: 700;
-          color: #92400E;
+          color: #FDE68A;
           font-size: 10px;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
         .instructions-text {
-          color: #78350F;
+          color: #FED7AA;
           font-size: 11px;
           line-height: 1.5;
         }
         .notes-section {
           margin-top: 16px;
           padding: 12px 16px;
-          background-color: #FEF3C7;
+          background-color: #78350F;
           border-left: 4px solid #F59E0B;
           border-radius: 0 8px 8px 0;
         }
         .notes-title {
           font-weight: 700;
-          color: #92400E;
+          color: #FDE68A;
           font-size: 11px;
           margin-bottom: 4px;
         }
         .notes-text {
-          color: #78350F;
+          color: #FED7AA;
           font-size: 11px;
         }
         .footer {
           margin-top: 30px;
           padding-top: 16px;
-          border-top: 2px solid #E0E7FF;
+          border-top: 2px solid #334155;
           text-align: center;
         }
         .vet-name {
           font-weight: 700;
-          color: #6366F1;
+          color: #36BCD4;
           font-size: 14px;
         }
         .vet-title {
-          color: #5A7C88;
+          color: #94A3B8;
           font-size: 10px;
           margin-top: 2px;
         }
         .vet-credentials {
-          color: #5A7C88;
+          color: #94A3B8;
           font-size: 9px;
           margin-top: 8px;
         }
         .disclaimer {
           margin-top: 12px;
           padding: 8px 12px;
-          background-color: #F3F4F6;
+          background-color: #1E293B;
           border-radius: 6px;
           font-size: 8px;
-          color: #6B7280;
+          color: #94A3B8;
           font-style: italic;
         }
       </style>
     </head>
     <body>
       <div class="header">
-        <h1>📋 RECETA MÉDICA VETERINARIA</h1>
+        <h1>RECETA MÉDICA VETERINARIA</h1>
         <p class="subtitle">Prescripción de medicamentos</p>
       </div>
       
       <div class="info-section">
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">📅 Fecha:</span>
+            <span class="label">Fecha:</span>
             <span class="value">${date}</span>
           </div>
           <div class="info-item">
-            <span class="label">🐾 Paciente:</span>
+            <span class="label">Paciente:</span>
             <span class="value">${patientData.name}</span>
           </div>
           <div class="info-item">
-            <span class="label">🏷️ Especie:</span>
+            <span class="label">Especie:</span>
             <span class="value">${patientData.species}${patientData.breed ? ` - ${patientData.breed}` : ""}</span>
           </div>
           <div class="info-item">
-            <span class="label">👤 Propietario:</span>
+            <span class="label">Propietario:</span>
             <span class="value">${patientData.owner.name}</span>
           </div>
         </div>
       </div>
       
-      <div class="section-title">💊 Medicamentos Recetados (${recipe.medications.length})</div>
+      <div class="section-title">Medicamentos Recetados (${recipe.medications.length})</div>
       
       ${recipe.medications
         .map(
@@ -279,14 +279,14 @@ export default function RecipePrintModal({
               </div>
             </div>
             <span class="medication-source ${med.source === "veterinario" ? "source-veterinario" : "source-farmacia"}">
-              ${med.source === "veterinario" ? "🏥 Veterinaria" : "💊 Farmacia"}
+              ${med.source === "veterinario" ? "Veterinaria" : "Farmacia"}
             </span>
           </div>
           
-          ${med.quantity ? `<div class="medication-quantity">📦 <span>Cantidad:</span> ${med.quantity}</div>` : ""}
+          ${med.quantity ? `<div class="medication-quantity">Cantidad: <span>${med.quantity}</span></div>` : ""}
           
           <div class="instructions-box">
-            <div class="instructions-title">📋 Indicaciones</div>
+            <div class="instructions-title">Indicaciones</div>
             <div class="instructions-text">${med.instructions}</div>
           </div>
         </div>
@@ -298,7 +298,7 @@ export default function RecipePrintModal({
         recipe.notes
           ? `
         <div class="notes-section">
-          <div class="notes-title">⚠️ Notas Adicionales</div>
+          <div class="notes-title">Notas Adicionales</div>
           <div class="notes-text">${recipe.notes}</div>
         </div>
       `
@@ -400,14 +400,14 @@ export default function RecipePrintModal({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-xs overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="relative z-10 w-full max-w-xs overflow-hidden rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl">
         {/* Header */}
-        <div className="flex flex-col items-center bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-5">
+        <div className="flex flex-col items-center bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-5">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
             <CheckCircle2 className="h-7 w-7 text-white" />
           </div>
           <h2 className="text-base font-bold text-white">Receta Lista</h2>
-          <p className="text-xs text-white/80">
+          <p className="text-xs text-slate-300">
             {patientData.name} • {recipe.medications.length} medicamento
             {recipe.medications.length !== 1 ? "s" : ""}
           </p>
@@ -415,16 +415,16 @@ export default function RecipePrintModal({
 
         {/* Body */}
         <div className="p-4 text-center">
-          <p className="text-sm text-slate-600">¿Qué deseas hacer?</p>
-          <p className="mt-1 text-xs text-slate-400">{date}</p>
+          <p className="text-sm text-slate-400">¿Qué deseas hacer?</p>
+          <p className="mt-1 text-xs text-slate-500">{date}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3">
+        <div className="flex flex-col gap-2 border-t border-slate-700 bg-slate-800 px-4 py-3">
           <button
             onClick={handlePrint}
             disabled={isGenerating}
-            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-vet-primary py-2.5 text-sm font-semibold text-white hover:bg-vet-secondary transition-colors disabled:opacity-60"
           >
             {isGenerating && action === "print" ? (
               <>
@@ -442,7 +442,7 @@ export default function RecipePrintModal({
           <button
             onClick={handleDownload}
             disabled={isGenerating}
-            className="flex items-center justify-center gap-2 rounded-xl border border-indigo-600 bg-white py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl border border-vet-primary bg-slate-800 py-2.5 text-sm font-semibold text-vet-accent hover:bg-slate-700 transition-colors disabled:opacity-60"
           >
             {isGenerating && action === "download" ? (
               <>
@@ -460,7 +460,7 @@ export default function RecipePrintModal({
           <button
             onClick={onClose}
             disabled={isGenerating}
-            className="rounded-xl py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
+            className="rounded-xl py-2 text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
           >
             Cerrar
           </button>

@@ -1,4 +1,3 @@
-// src/views/consultations/CreateConsultationView.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -417,34 +416,34 @@ export default function CreateConsultationView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-gray-900">Nueva Consulta</h1>
+              <h1 className="text-lg font-bold text-[var(--color-vet-text)]">Nueva Consulta</h1>
               {/* ✅ Indicador de guardado */}
               {saveStatus === "saving" && (
-                <span className="flex items-center gap-1 text-xs text-gray-500">
+                <span className="flex items-center gap-1 text-xs text-[var(--color-vet-muted)]">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   Guardando...
                 </span>
               )}
               {saveStatus === "saved" && (
-                <span className="flex items-center gap-1 text-xs text-green-600">
+                <span className="flex items-center gap-1 text-xs text-green-400">
                   <Check className="w-3 h-3" />
                   Guardado
                 </span>
               )}
               {saveStatus === "error" && (
-                <span className="flex items-center gap-1 text-xs text-red-600">
+                <span className="flex items-center gap-1 text-xs text-red-400">
                   Error al guardar
                 </span>
               )}
             </div>
             {patient && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[var(--color-vet-muted)]">
                 {patient.name} • {patient.species}
               </p>
             )}
@@ -454,14 +453,14 @@ export default function CreateConsultationView() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+          className="px-4 py-2 text-sm text-[var(--color-vet-muted)] font-medium rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-colors"
         >
           Cancelar
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-xl">
+      <div className="flex gap-1 mb-4 bg-[var(--color-hover)] p-1 rounded-xl">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -473,8 +472,8 @@ export default function CreateConsultationView() {
               onClick={() => handleTabChange(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-white text-vet-primary shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-[var(--color-card)] text-[var(--color-vet-accent)] shadow-sm"
+                  : "text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)]"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -486,7 +485,7 @@ export default function CreateConsultationView() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-gray-50 rounded-xl p-4 sm:p-6 max-h-[55vh] overflow-y-auto">
+      <div className="bg-[var(--color-hover)] rounded-xl p-4 sm:p-6 max-h-[55vh] overflow-y-auto border border-[var(--color-border)]">
         {activeTab === "anamnesis" && (
           <AnamnesisTab
             formData={formData}
@@ -512,8 +511,8 @@ export default function CreateConsultationView() {
           disabled={isFirstTab}
           className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
             isFirstTab
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-600 hover:bg-gray-100"
+              ? "text-[var(--color-vet-muted)] opacity-40 cursor-not-allowed"
+              : "text-[var(--color-vet-text)] hover:bg-[var(--color-hover)]"
           }`}
         >
           ← Anterior
@@ -525,8 +524,8 @@ export default function CreateConsultationView() {
             disabled={!isFormValid || isPending}
             className={`px-6 py-2.5 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
               isFormValid && !isPending
-                ? "bg-vet-primary hover:bg-vet-secondary text-white shadow-sm"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                ? "bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] text-white shadow-sm"
+                : "bg-[var(--color-hover)] text-[var(--color-vet-muted)] opacity-40 cursor-not-allowed"
             }`}
           >
             {isPending ? (
@@ -544,7 +543,7 @@ export default function CreateConsultationView() {
         ) : (
           <button
             onClick={goToNextTab}
-            className="px-4 py-2 text-sm font-medium rounded-lg text-vet-primary hover:bg-vet-primary/10 transition-colors"
+            className="px-4 py-2 text-sm font-medium rounded-lg text-[var(--color-vet-accent)] hover:bg-[var(--color-vet-accent)]/10 transition-colors"
           >
             Siguiente →
           </button>

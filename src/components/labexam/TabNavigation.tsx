@@ -52,7 +52,7 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
   const currentIndex = getTabIndex(activeTab);
 
   return (
-    <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+    <div className="border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-900">
       <nav className="flex">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -73,10 +73,10 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
                 transition-all duration-200
                 group
                 ${isActive 
-                  ? 'text-vet-primary bg-white' 
+                  ? 'text-vet-accent bg-slate-800' 
                   : isEnabled
-                    ? 'text-gray-500 hover:text-vet-primary hover:bg-white/80'
-                    : 'text-gray-300 cursor-not-allowed bg-gray-50/50'
+                    ? 'text-slate-400 hover:text-vet-accent hover:bg-slate-800/80'
+                    : 'text-slate-600 cursor-not-allowed bg-slate-800/50'
                 }
               `}
             >
@@ -90,8 +90,8 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
                   : isActive 
                     ? 'bg-vet-primary text-white shadow-sm shadow-vet-primary/30' 
                     : isEnabled
-                      ? 'bg-gray-200 text-gray-500 group-hover:bg-vet-primary/20 group-hover:text-vet-primary'
-                      : 'bg-gray-100 text-gray-300'
+                      ? 'bg-slate-700 text-slate-400 group-hover:bg-vet-primary/20 group-hover:text-vet-primary'
+                      : 'bg-slate-700/50 text-slate-600'
                 }
               `}>
                 {isCompleted ? (
@@ -105,7 +105,7 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
               
               {/* Icono en móvil */}
               <Icon className={`w-4 h-4 sm:hidden ${
-                isActive ? 'text-vet-primary' : isEnabled ? 'text-gray-400' : 'text-gray-200'
+                isActive ? 'text-vet-accent' : isEnabled ? 'text-slate-500' : 'text-slate-600'
               }`} />
               
               <span className="hidden sm:inline truncate">{tab.label}</span>
@@ -114,7 +114,7 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
               
               {/* Línea activa inferior */}
               {isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-vet-primary rounded-full" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-vet-accent rounded-full" />
               )}
               
               {/* Línea completada */}
@@ -128,8 +128,8 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
       
       {/* Mensaje si no hay paciente */}
       {!isPatientSelected && activeTab === 'patient' && (
-        <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-t border-amber-100">
-          <p className="text-xs text-amber-700 text-center flex items-center justify-center gap-1.5">
+        <div className="px-4 py-2 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-t border-amber-700/30">
+          <p className="text-xs text-amber-400 text-center flex items-center justify-center gap-1.5">
             <Lock className="w-3 h-3" />
             <span>Selecciona un paciente para desbloquear las siguientes secciones</span>
           </p>

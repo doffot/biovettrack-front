@@ -81,8 +81,8 @@ export default function VaccinationListView() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Vacunas</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-lg font-bold text-vet-text">Vacunas</h2>
+          <p className="text-sm text-vet-muted">
             {vaccinations.length} registrada{vaccinations.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -101,26 +101,26 @@ export default function VaccinationListView() {
           {vaccinations.map((vaccination) => (
             <div
               key={vaccination._id}
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
+              className="flex items-center gap-4 p-4 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
             >
               {/* Icono */}
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <Syringe className="w-5 h-5 text-emerald-600" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                <Syringe className="w-5 h-5 text-emerald-400" />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-vet-text">
                     {vaccination.vaccineType}
                   </p>
                   {vaccination.laboratory && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-vet-muted">
                       • {vaccination.laboratory}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                <div className="flex items-center gap-3 mt-1 text-xs text-vet-muted">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDate(vaccination.vaccinationDate)}
@@ -129,10 +129,10 @@ export default function VaccinationListView() {
                     <span
                       className={`flex items-center gap-1 ${
                         isPastDue(vaccination.nextVaccinationDate)
-                          ? "text-red-600"
+                          ? "text-red-400"
                           : isUpcoming(vaccination.nextVaccinationDate)
-                          ? "text-amber-600"
-                          : "text-gray-500"
+                          ? "text-amber-400"
+                          : "text-vet-muted"
                       }`}
                     >
                       <Clock className="w-3 h-3" />
@@ -147,7 +147,7 @@ export default function VaccinationListView() {
 
               {/* Precio */}
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-vet-text">
                   ${vaccination.cost.toFixed(2)}
                 </p>
               </div>
@@ -159,7 +159,7 @@ export default function VaccinationListView() {
                     setSelectedVaccination(vaccination);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-vet-primary hover:bg-vet-primary/10 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -168,7 +168,7 @@ export default function VaccinationListView() {
                     setVaccinationToDelete(vaccination);
                     setShowDeleteModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -177,9 +177,9 @@ export default function VaccinationListView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-          <Syringe className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500 mb-4">Sin vacunas registradas</p>
+        <div className="text-center py-12 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-700">
+          <Syringe className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <p className="text-vet-muted mb-4">Sin vacunas registradas</p>
           <Link
             to="create"
             className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"

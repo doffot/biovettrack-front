@@ -1,7 +1,7 @@
-// src/views/owners/components/OwnerTable.tsx
+// src/components/owners/OwnerTable.tsx
 import { ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, Trash2, ChevronRight } from "lucide-react";
-import type { OwnerWithStats } from "../../view/owner/OwnerListView";
 import type { Owner } from "../../types";
+import type { OwnerWithStats } from "../../view/owner/OwnerListView";
 
 type SortField = "name" | "petsCount" | "lastVisit" | "totalDebt";
 type SortDirection = "asc" | "desc";
@@ -36,9 +36,9 @@ export default function OwnerTable({
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return <ArrowUpDown className="w-3 h-3 opacity-30" />;
     return sortDirection === "asc" ? (
-      <ArrowUp className="w-3 h-3 text-vet-primary" />
+      <ArrowUp className="w-3 h-3 text-vet-accent" />
     ) : (
-      <ArrowDown className="w-3 h-3 text-vet-primary" />
+      <ArrowDown className="w-3 h-3 text-vet-accent" />
     );
   };
 
@@ -54,37 +54,35 @@ export default function OwnerTable({
     return d.toLocaleDateString();
   };
 
- 
-
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-slate-900/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-xl">
       <table className="w-full">
-        <thead className="bg-gray-50 border-b border-gray-200">
+        <thead className="bg-slate-800/60 border-b border-white/10">
           <tr>
             <th className="w-10 px-4 py-3">
               <input
                 type="checkbox"
                 checked={allSelected}
                 onChange={(e) => onSelectAll(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-vet-primary focus:ring-vet-primary"
+                className="w-4 h-4 rounded border-white/20 bg-slate-700 text-vet-accent focus:ring-vet-accent/50 focus:ring-offset-0 focus:ring-offset-transparent"
               />
             </th>
             <th
-              className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide cursor-pointer hover:bg-gray-100"
+              className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide cursor-pointer hover:bg-white/5 transition-colors"
               onClick={() => onSort("name")}
             >
               <div className="flex items-center gap-1.5">
                 Nombre <SortIcon field="name" />
               </div>
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide">
               Teléfono
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide hidden xl:table-cell">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide hidden xl:table-cell">
               Email
             </th>
             <th
-              className="px-4 py-3 text-center text-xs font-semibold text-vet-muted uppercase tracking-wide cursor-pointer hover:bg-gray-100"
+              className="px-4 py-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wide cursor-pointer hover:bg-white/5 transition-colors"
               onClick={() => onSort("petsCount")}
             >
               <div className="flex items-center justify-center gap-1.5">
@@ -92,7 +90,7 @@ export default function OwnerTable({
               </div>
             </th>
             <th
-              className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide cursor-pointer hover:bg-gray-100"
+              className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide cursor-pointer hover:bg-white/5 transition-colors"
               onClick={() => onSort("lastVisit")}
             >
               <div className="flex items-center gap-1.5">
@@ -100,7 +98,7 @@ export default function OwnerTable({
               </div>
             </th>
             <th
-              className="px-4 py-3 text-right text-xs font-semibold text-vet-muted uppercase tracking-wide cursor-pointer hover:bg-gray-100"
+              className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wide cursor-pointer hover:bg-white/5 transition-colors"
               onClick={() => onSort("totalDebt")}
             >
               <div className="flex items-center justify-end gap-1.5">
@@ -110,11 +108,11 @@ export default function OwnerTable({
             <th className="px-4 py-3 w-28"></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-white/5">
           {owners.map((owner) => (
             <tr
               key={owner._id}
-              className="group hover:bg-gray-50 cursor-pointer transition-colors"
+              className="group hover:bg-white/5 cursor-pointer transition-all duration-200"
               onClick={() => onNavigate(owner._id)}
             >
               <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -122,49 +120,76 @@ export default function OwnerTable({
                   type="checkbox"
                   checked={selectedIds.has(owner._id)}
                   onChange={(e) => onSelectOne(owner._id, e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-vet-primary focus:ring-vet-primary"
+                  className="w-4 h-4 rounded border-white/20 bg-slate-700 text-vet-accent focus:ring-vet-accent/50 focus:ring-offset-0 focus:ring-offset-transparent"
                 />
               </td>
               <td className="px-4 py-3">
                 <div>
-                  <p className="font-medium text-vet-text">{owner.name}</p>
+                  <p className="font-medium text-white">{owner.name}</p>
                   {owner.nationalId && (
-                    <p className="text-xs text-vet-muted">{owner.nationalId}</p>
+                    <p className="text-xs text-slate-500">{owner.nationalId}</p>
                   )}
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm text-vet-text">{owner.contact}</td>
-              <td className="px-4 py-3 text-sm text-vet-muted hidden xl:table-cell truncate max-w-[200px]">
-                {owner.email || "—"}
+              <td className="px-4 py-3">
+                <span className="text-sm text-slate-300">{owner.contact}</span>
               </td>
-              <td className="px-4 py-3 text-sm text-vet-text text-center">{owner.petsCount}</td>
-              <td className="px-4 py-3 text-sm text-vet-muted">{formatLastVisit(owner.lastVisit)}</td>
-           <td className="px-4 py-3 text-right">
-  {owner.totalDebt > 0 ? (
-    <span className="inline-block px-2 py-1 text-xs font-medium bg-red-500 text-white rounded">
-      ${owner.totalDebt.toFixed(2)}
-    </span>
-  ) : (
-    <span className="text-sm text-green-600">Al día</span>
-  )}
-</td>
+              <td className="px-4 py-3 hidden xl:table-cell">
+                <span className="text-sm text-slate-400 truncate block max-w-[200px]">
+                  {owner.email || "—"}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800/80 text-white text-sm font-medium">
+                  {owner.petsCount}
+                </span>
+              </td>
+              <td className="px-4 py-3">
+                <span className={`text-sm ${
+                  owner.lastVisit && new Date(owner.lastVisit).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+                    ? 'text-emerald-400'
+                    : owner.lastVisit && new Date(owner.lastVisit).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
+                    ? 'text-slate-300'
+                    : 'text-slate-500'
+                }`}>
+                  {formatLastVisit(owner.lastVisit)}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-right">
+                {owner.totalDebt > 0 ? (
+                  <div className="flex items-center justify-end gap-1">
+                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-red-500/20 text-red-300 rounded-lg border border-red-500/30">
+                      ${owner.totalDebt.toFixed(2)}
+                    </span>
+                    {owner.pendingInvoices > 0 && (
+                      <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-red-500 text-white rounded-full">
+                        {owner.pendingInvoices}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                    Al día
+                  </span>
+                )}
+              </td>
               <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <button
                     onClick={() => onWhatsApp(owner.contact)}
-                    className="p-1.5 rounded hover:bg-green-50 text-gray-400 hover:text-green-600 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-green-500/20 text-slate-400 hover:text-green-400 transition-all duration-200 border border-transparent hover:border-green-500/30"
                     title="WhatsApp"
                   >
                     <MessageCircle className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => onDelete(owner)}
-                    className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all duration-200 border border-transparent hover:border-red-500/30"
                     title="Eliminar"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <ChevronRight className="w-4 h-4 text-gray-300 ml-1" />
+                  <ChevronRight className="w-4 h-4 text-slate-600 ml-1" />
                 </div>
               </td>
             </tr>

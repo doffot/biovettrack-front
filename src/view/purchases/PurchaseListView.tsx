@@ -8,7 +8,6 @@ import {
   X, 
   Plus, 
   FileText,
- 
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -21,7 +20,7 @@ export default function PurchaseListView() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: purchases = [], isLoading } = useQuery({
+  const {  data:purchases = [], isLoading } = useQuery({
     queryKey: ["purchases"],
     queryFn: getAllPurchases,
   });
@@ -95,12 +94,12 @@ export default function PurchaseListView() {
             placeholder="Buscar por proveedor o producto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-10 pr-8 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-slate-700 rounded"
             >
               <X className="w-4 h-4 text-vet-muted" />
             </button>
@@ -114,7 +113,7 @@ export default function PurchaseListView() {
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               statusFilter === "all"
                 ? "bg-vet-primary text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Todas
@@ -123,8 +122,8 @@ export default function PurchaseListView() {
             onClick={() => handleFilterChange("completada")}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               statusFilter === "completada"
-                ? "bg-green-100 text-green-800 border border-green-200"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                ? "bg-green-900/30 text-green-400 border border-green-900/50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Completadas
@@ -133,8 +132,8 @@ export default function PurchaseListView() {
             onClick={() => handleFilterChange("pendiente")}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               statusFilter === "pendiente"
-                ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                ? "bg-yellow-900/30 text-yellow-400 border border-yellow-900/50"
+                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
             }`}
           >
             Pendientes
@@ -144,26 +143,26 @@ export default function PurchaseListView() {
 
       {/* Lista de compras */}
       {paginatedPurchases.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-card">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-700">
+              <thead className="bg-slate-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compra</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proveedor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Compra</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Proveedor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Productos</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Método</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Estado</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-slate-800 divide-y divide-slate-700">
                 {paginatedPurchases.map((purchase) => (
-                  <tr key={purchase._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={purchase._id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="p-2 bg-vet-light rounded-lg">
+                        <div className="p-2 bg-slate-900 rounded-lg">
                           <FileText className="w-4 h-4 text-vet-primary" />
                         </div>
                         <div className="ml-3">
@@ -193,7 +192,7 @@ export default function PurchaseListView() {
                       ${purchase.totalAmount.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-light text-vet-primary capitalize">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-primary/20 text-vet-primary capitalize">
                         {purchase.paymentMethod}
                       </span>
                     </td>
@@ -203,10 +202,10 @@ export default function PurchaseListView() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         purchase.status === "completada" 
-                          ? "bg-green-100 text-green-800" 
+                          ? "bg-green-900/30 text-green-400" 
                           : purchase.status === "pendiente"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
+                          ? "bg-yellow-900/30 text-yellow-400"
+                          : "bg-red-900/30 text-red-400"
                       }`}>
                         {purchase.status === "completada" 
                           ? "Completada" 
@@ -223,7 +222,7 @@ export default function PurchaseListView() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
               <p className="text-sm text-vet-muted">
                 Página {currentPage} de {totalPages}
               </p>
@@ -231,14 +230,14 @@ export default function PurchaseListView() {
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
                 </button>
@@ -248,8 +247,8 @@ export default function PurchaseListView() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
-            <ShoppingCart className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-xl flex items-center justify-center">
+            <ShoppingCart className="w-8 h-8 text-vet-muted" />
           </div>
           <h3 className="text-lg font-medium text-vet-text mb-1">
             {searchTerm || statusFilter !== "all" ? "Sin resultados" : "Sin compras"}

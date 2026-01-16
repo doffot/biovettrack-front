@@ -10,6 +10,15 @@ import type { GroomingServiceFormData } from "../../types/grooming";
 import { toast } from "../../components/Toast";
 import GroomingServiceForm from "../../components/grooming/groomingForm";
 
+// ✅ Función helper para obtener fecha local en formato YYYY-MM-DD
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function CreateGroomingServiceView() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
@@ -26,7 +35,7 @@ export default function CreateGroomingServiceView() {
     formState: { errors },
   } = useForm<GroomingServiceFormData>({
     defaultValues: {
-      date: new Date().toISOString().split("T")[0],
+      date: getLocalDateString(), // ✅ CORREGIDO: Ahora usa fecha local
       service: undefined,
       specifications: "",
       observations: "",
@@ -78,21 +87,24 @@ export default function CreateGroomingServiceView() {
         <div>
           <form id="grooming-form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <GroomingServiceForm register={register} errors={errors} groomers={groomers} />
-            <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-slate-700/50">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-vet-muted hover:text-vet-text font-medium transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all duration-200 shadow-lg shadow-vet-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <>
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Guardando...</span>
+                  </>
                 ) : (
                   "Guardar Servicio"
                 )}

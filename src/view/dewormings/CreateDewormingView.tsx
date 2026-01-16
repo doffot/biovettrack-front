@@ -159,18 +159,18 @@ export default function CreateDewormingView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Registrar Desparasitación</h1>
+          <h1 className="text-lg font-bold text-vet-text">Registrar Desparasitación</h1>
         </div>
         
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-gray-600 font-medium rounded-lg border border-gray-200 hover:bg-gray-50"
+            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800"
           >
             Cancelar
           </button>
@@ -180,7 +180,7 @@ export default function CreateDewormingView() {
             className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
               isValid && !isPending
                 ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-slate-800 text-slate-600 cursor-not-allowed"
             }`}
           >
             {isPending ? (
@@ -198,14 +198,14 @@ export default function CreateDewormingView() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Selector de producto */}
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-vet-muted mb-1">
             Producto del catálogo
           </label>
           <div className="relative">
             <select
               value={selectedProduct}
               onChange={handleProductChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary pr-8"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text pr-8"
             >
               <option value="">-- Selecciona un producto --</option>
               <option value="manual">📝 Ingresar manualmente</option>
@@ -218,7 +218,7 @@ export default function CreateDewormingView() {
                 </option>
               ))}
             </select>
-            <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
         </div>
 
@@ -233,13 +233,13 @@ export default function CreateDewormingView() {
                 className="sr-only"
               />
               <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                useFullUnit ? "bg-vet-primary" : "bg-gray-300"
+                useFullUnit ? "bg-vet-primary" : "bg-slate-600"
               }`}>
                 <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
                   useFullUnit ? "translate-x-5" : ""
                 }`} />
               </div>
-              <span className="ml-3 text-sm text-gray-700">
+              <span className="ml-3 text-sm text-vet-text">
                 {useFullUnit ? "Usar unidad completa" : "Usar dosis/fracción"}
               </span>
             </label>
@@ -249,7 +249,7 @@ export default function CreateDewormingView() {
         {/* Cantidad */}
         {isProductSelected && (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-vet-muted mb-1">
               Cantidad (
               {useFullUnit 
                 ? selectedProductData?.unit || "unidad" 
@@ -262,7 +262,7 @@ export default function CreateDewormingView() {
               step={useFullUnit ? "1" : "0.1"}
               value={doseAmount}
               onChange={handleDoseAmountChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         )}
@@ -270,12 +270,12 @@ export default function CreateDewormingView() {
         {/* Fila 1: Tipo + Fecha + Costo */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Tipo *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Tipo *</label>
             <select
               name="dewormingType"
               value={formData.dewormingType}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             >
               {DEWORMING_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
@@ -284,19 +284,19 @@ export default function CreateDewormingView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Fecha *</label>
             <input
               type="date"
               name="applicationDate"
               value={formData.applicationDate}
               onChange={handleChange}
               max={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Costo Total ($) *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Costo Total ($) *</label>
             <input
               type="number"
               name="cost"
@@ -306,7 +306,7 @@ export default function CreateDewormingView() {
               step="0.01"
               placeholder="0.00"
               disabled={isProductSelected}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function CreateDewormingView() {
         {/* Fila 2: Producto + Dosis */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Producto *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Producto *</label>
             <input
               type="text"
               name="productName"
@@ -323,12 +323,12 @@ export default function CreateDewormingView() {
               placeholder="Nombre del producto"
               maxLength={100}
               disabled={isProductSelected}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary bg-white"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Dosis *</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Dosis *</label>
             <input
               type="text"
               name="dose"
@@ -339,7 +339,7 @@ export default function CreateDewormingView() {
                 : selectedProductData?.doseUnit || "dosis"
               }`}
               maxLength={50}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>
@@ -347,14 +347,14 @@ export default function CreateDewormingView() {
         {/* Fila 3: Próxima aplicación */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Próxima aplicación</label>
+            <label className="block text-xs font-medium text-vet-muted mb-1">Próxima aplicación</label>
             <input
               type="date"
               name="nextApplicationDate"
               value={formData.nextApplicationDate}
               onChange={handleChange}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
             />
           </div>
         </div>

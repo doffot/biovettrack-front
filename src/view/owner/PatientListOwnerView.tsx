@@ -43,10 +43,10 @@ export default function PatientListView({ ownerId }: PatientListViewProps) {
   if (patients.length === 0) {
     return (
       <div className="text-center py-10">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
-          <PawPrint className="w-6 h-6 text-gray-400" />
+        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-sky-soft flex items-center justify-center">
+          <PawPrint className="w-6 h-6 text-vet-muted" />
         </div>
-        <p className="text-gray-500 text-sm">Sin mascotas registradas</p>
+        <p className="text-vet-muted text-sm">Sin mascotas registradas</p>
       </div>
     );
   }
@@ -57,32 +57,32 @@ export default function PatientListView({ ownerId }: PatientListViewProps) {
         <Link
           key={pet._id}
           to={`/patients/${pet._id}`}
-          className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+          className="flex items-center gap-4 p-3 rounded-xl bg-sky-soft/50 hover:bg-sky-soft border border-transparent hover:border-vet-primary/20 transition-all duration-200 group"
         >
           {/* Foto */}
           {pet.photo ? (
             <img
               src={pet.photo}
               alt={pet.name}
-              className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+              className="w-12 h-12 rounded-xl object-cover flex-shrink-0 ring-2 ring-vet-primary/20"
             />
           ) : (
-            <div className="w-12 h-12 rounded-xl bg-vet-light flex items-center justify-center flex-shrink-0">
-              <PawPrint className="w-5 h-5 text-vet-primary" />
+            <div className="w-12 h-12 rounded-xl bg-vet-secondary/30 flex items-center justify-center flex-shrink-0 ring-2 ring-vet-primary/20">
+              <PawPrint className="w-5 h-5 text-vet-accent" />
             </div>
           )}
 
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h4 className="font-medium text-vet-text truncate group-hover:text-vet-primary transition-colors">
+              <h4 className="font-medium text-vet-text truncate group-hover:text-vet-accent transition-colors">
                 {pet.name}
               </h4>
               <span
                 className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                   pet.sex === "Macho"
-                    ? "bg-blue-50 text-blue-600"
-                    : "bg-pink-50 text-pink-600"
+                    ? "bg-blue-500/20 text-blue-400"
+                    : "bg-pink-500/20 text-pink-400"
                 }`}
               >
                 {pet.sex === "Macho" ? "M" : "H"}
@@ -99,7 +99,7 @@ export default function PatientListView({ ownerId }: PatientListViewProps) {
           </div>
 
           {/* Arrow */}
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-vet-primary transition-colors flex-shrink-0" />
+          <ChevronRight className="w-4 h-4 text-vet-muted group-hover:text-vet-accent group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" />
         </Link>
       ))}
     </div>

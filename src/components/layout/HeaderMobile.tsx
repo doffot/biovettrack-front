@@ -24,27 +24,25 @@ const HeaderMobile: React.FC = () => {
         : "Usuario";
 
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-vet-primary to-vet-secondary shadow-soft">
+    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[var(--color-vet-light)] to-[var(--color-vet-secondary)] shadow-lg">
       <div className="flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
           <img
             src="/logo_menu.svg"
             alt="BioVetTrack"
-            className="h-10 w-auto"
+            className="h-12 w-auto"
           />
-          <span className="text-white font-bold text-base tracking-wide">
-            BioVetTrack
-          </span>
+          
         </Link>
 
         <div className="relative">
-          {/* Botón para abrir/cerrar dropdown - NO SE CAMBIA */}
+          {/* Botón para abrir/cerrar dropdown */}
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 active:scale-95 transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 active:scale-95 transition-all hover:bg-white/15"
           >
-            <div className="w-7 h-7 rounded-lg bg-white/90 flex items-center justify-center">
-              <User className="w-4 h-4 text-vet-primary" />
+            <div className="w-7 h-7 rounded-lg bg-white/90 flex items-center justify-center shadow-sm">
+              <User className="w-4 h-4 text-[var(--color-vet-primary)]" />
             </div>
             <div
               className={`w-1.5 h-1.5 border-r-2 border-b-2 border-white transition-transform duration-300 ${
@@ -58,55 +56,55 @@ const HeaderMobile: React.FC = () => {
             <>
               {/* Overlay */}
               <div
-                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+                className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
                 onClick={() => setShowDropdown(false)}
               />
 
               {/* Menu */}
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-card overflow-hidden animate-scale-in z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-[var(--color-card)] rounded-2xl shadow-2xl overflow-hidden animate-scale-in z-50 border border-[var(--color-border)]">
                 {/* Header del usuario */}
-                <div className="px-4 py-3 bg-gradient-to-r from-vet-light/30 to-transparent border-b border-vet-light">
+                <div className="px-4 py-3 bg-gradient-to-r from-[var(--color-vet-primary)]/10 to-transparent border-b border-[var(--color-border)]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] flex items-center justify-center shadow-md">
                       <User className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-vet-text truncate">
+                      <p className="text-sm font-bold text-[var(--color-vet-text)] truncate">
                         {displayName}
                       </p>
-                      <p className="text-xs text-vet-muted truncate">
+                      <p className="text-xs text-[var(--color-vet-muted)] truncate">
                         {data?.email}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* ✅ Mi Perfil - CAMBIADO de button a Link */}
+                {/* Mi Perfil */}
                 <Link
                   to="/profile"
                   onClick={() => setShowDropdown(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-vet-light/50 active:bg-vet-light transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-hover)] active:bg-[var(--color-border)] transition-colors text-left"
                 >
-                  <div className="p-2 bg-vet-light rounded-lg">
-                    <User className="w-4 h-4 text-vet-primary" />
+                  <div className="p-2 bg-[var(--color-vet-primary)]/10 rounded-lg border border-[var(--color-vet-primary)]/20">
+                    <User className="w-4 h-4 text-[var(--color-vet-accent)]" />
                   </div>
-                  <span className="text-sm font-medium text-vet-text">
+                  <span className="text-sm font-medium text-[var(--color-vet-text)]">
                     Mi Perfil
                   </span>
                 </Link>
 
-                {/* Cerrar Sesión - NO SE CAMBIA */}
+                {/* Cerrar Sesión */}
                 <button
                   onClick={() => {
                     logout();
                     setShowDropdown(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 active:bg-red-100 transition-colors text-left border-t border-vet-light"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-600/10 active:bg-red-600/20 transition-colors text-left border-t border-[var(--color-border)]"
                 >
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <LogOut className="w-4 h-4 text-red-500" />
+                  <div className="p-2 bg-red-600/10 rounded-lg border border-red-500/20">
+                    <LogOut className="w-4 h-4 text-red-400" />
                   </div>
-                  <span className="text-sm font-medium text-red-600">
+                  <span className="text-sm font-medium text-red-400">
                     Cerrar Sesión
                   </span>
                 </button>

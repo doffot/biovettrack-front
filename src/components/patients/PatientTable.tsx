@@ -1,4 +1,3 @@
-// src/views/patients/components/PatientTable.tsx
 import { Trash2, ChevronRight, PawPrint } from "lucide-react";
 import type { PatientWithOwner } from "../../view/patient/PatientListView";
 import type { Patient } from "../../types";
@@ -36,41 +35,41 @@ export default function PatientTable({
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-[var(--color-card)] rounded-xl overflow-hidden border border-[var(--color-border)]">
       <table className="w-full">
-        <thead className="bg-gray-50 border-b border-gray-200">
+        <thead className="bg-[var(--color-hover)] border-b border-[var(--color-border)]">
           <tr>
             <th className="w-10 px-4 py-3">
               <input
                 type="checkbox"
                 checked={allSelected}
                 onChange={(e) => onSelectAll(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-vet-primary focus:ring-vet-primary"
+                className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-vet-primary)] focus:ring-[var(--color-vet-primary)] bg-[var(--color-card)] cursor-pointer"
               />
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide">
               Paciente
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide">
               Especie / Raza
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide">
               Propietario
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide">
               Edad
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-vet-muted uppercase tracking-wide">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase tracking-wide">
               Peso
             </th>
             <th className="px-4 py-3 w-20"></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-[var(--color-border)]">
           {patients.map((patient) => (
             <tr
               key={patient._id}
-              className="group hover:bg-gray-50 cursor-pointer transition-colors"
+              className="group hover:bg-[var(--color-hover)] cursor-pointer transition-colors"
               onClick={() => onNavigate(patient._id)}
             >
               <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -78,7 +77,7 @@ export default function PatientTable({
                   type="checkbox"
                   checked={selectedIds.has(patient._id)}
                   onChange={(e) => onSelectOne(patient._id, e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-vet-primary focus:ring-vet-primary"
+                  className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-vet-primary)] focus:ring-[var(--color-vet-primary)] bg-[var(--color-card)] cursor-pointer"
                 />
               </td>
               <td className="px-4 py-3">
@@ -87,20 +86,20 @@ export default function PatientTable({
                     <img
                       src={patient.photo}
                       alt={patient.name}
-                      className="w-10 h-10 rounded-lg object-cover"
+                      className="w-10 h-10 rounded-lg object-cover border border-[var(--color-border)]"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-vet-light flex items-center justify-center">
-                      <PawPrint className="w-5 h-5 text-vet-primary" />
+                    <div className="w-10 h-10 rounded-lg bg-[var(--color-vet-primary)]/10 flex items-center justify-center border border-[var(--color-vet-primary)]/20">
+                      <PawPrint className="w-5 h-5 text-[var(--color-vet-accent)]" />
                     </div>
                   )}
                   <div>
-                    <p className="font-medium text-vet-text">{patient.name}</p>
+                    <p className="font-medium text-[var(--color-vet-text)]">{patient.name}</p>
                     <span
                       className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                         patient.sex === "Macho"
-                          ? "bg-blue-50 text-blue-600"
-                          : "bg-pink-50 text-pink-600"
+                          ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
+                          : "bg-pink-600/10 text-pink-400 border border-pink-500/20"
                       }`}
                     >
                       {patient.sex === "Macho" ? "M" : "H"}
@@ -108,28 +107,28 @@ export default function PatientTable({
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm text-vet-text">
+              <td className="px-4 py-3 text-sm text-[var(--color-vet-text)]">
                 {patient.species}
                 {patient.breed && (
-                  <span className="text-vet-muted"> · {patient.breed}</span>
+                  <span className="text-[var(--color-vet-muted)]"> · {patient.breed}</span>
                 )}
               </td>
-              <td className="px-4 py-3 text-sm text-vet-text">{patient.ownerName}</td>
-              <td className="px-4 py-3 text-sm text-vet-muted">
+              <td className="px-4 py-3 text-sm text-[var(--color-vet-text)]">{patient.ownerName}</td>
+              <td className="px-4 py-3 text-sm text-[var(--color-vet-muted)]">
                 {calculateAge(patient.birthDate)}
               </td>
-              <td className="px-4 py-3 text-sm text-vet-muted">
+              <td className="px-4 py-3 text-sm text-[var(--color-vet-muted)]">
                 {patient.weight ? `${patient.weight} kg` : "—"}
               </td>
               <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => onDelete(patient)}
-                    className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
+                    className="p-1.5 rounded hover:bg-red-600/10 text-[var(--color-vet-muted)] hover:text-red-400 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <ChevronRight className="w-4 h-4 text-gray-300 ml-1" />
+                  <ChevronRight className="w-4 h-4 text-[var(--color-vet-muted)] opacity-30 ml-1" />
                 </div>
               </td>
             </tr>

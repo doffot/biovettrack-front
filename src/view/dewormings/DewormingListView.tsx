@@ -18,9 +18,9 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import DewormingModal from "../../components/dewormings/DewormingModal";
 
 const typeColors: Record<string, string> = {
-  "Interna": "bg-purple-100 text-purple-700",
-  "Externa": "bg-blue-100 text-blue-700",
-  "Ambas": "bg-emerald-100 text-emerald-700",
+  "Interna": "bg-purple-900/30 text-purple-400 border border-purple-700",
+  "Externa": "bg-blue-900/30 text-blue-400 border border-blue-700",
+  "Ambas": "bg-emerald-900/30 text-emerald-400 border border-emerald-700",
 };
 
 export default function DewormingListView() {
@@ -85,8 +85,8 @@ export default function DewormingListView() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Desparasitación</h2>
-          <p className="text-sm text-gray-500">{dewormings.length} registro{dewormings.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-bold text-vet-text">Desparasitación</h2>
+          <p className="text-sm text-vet-muted">{dewormings.length} registro{dewormings.length !== 1 ? "s" : ""}</p>
         </div>
         <Link
           to="create"
@@ -103,22 +103,22 @@ export default function DewormingListView() {
           {dewormings.map((deworming) => (
             <div
               key={deworming._id}
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
+              className="flex items-center gap-4 p-4 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
             >
               {/* Icono */}
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <Bug className="w-5 h-5 text-orange-600" />
+              <div className="w-10 h-10 rounded-lg bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                <Bug className="w-5 h-5 text-orange-400" />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-semibold text-gray-900">{deworming.productName}</p>
+                  <p className="font-semibold text-vet-text">{deworming.productName}</p>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[deworming.dewormingType]}`}>
                     {deworming.dewormingType}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                <div className="flex items-center gap-3 mt-1 text-xs text-vet-muted">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDate(deworming.applicationDate)}
@@ -127,10 +127,10 @@ export default function DewormingListView() {
                   {deworming.nextApplicationDate && (
                     <span className={`flex items-center gap-1 ${
                       isPastDue(deworming.nextApplicationDate)
-                        ? "text-red-600"
+                        ? "text-red-400"
                         : isUpcoming(deworming.nextApplicationDate)
-                        ? "text-amber-600"
-                        : "text-gray-500"
+                        ? "text-amber-400"
+                        : "text-vet-muted"
                     }`}>
                       <Clock className="w-3 h-3" />
                       Próxima: {formatDate(deworming.nextApplicationDate)}
@@ -144,7 +144,7 @@ export default function DewormingListView() {
 
               {/* Precio */}
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-gray-900">${deworming.cost.toFixed(2)}</p>
+                <p className="font-semibold text-vet-text">${deworming.cost.toFixed(2)}</p>
               </div>
 
               {/* Acciones */}
@@ -154,7 +154,7 @@ export default function DewormingListView() {
                     setSelectedDeworming(deworming);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-vet-primary hover:bg-vet-primary/10 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -163,7 +163,7 @@ export default function DewormingListView() {
                     setDewormingToDelete(deworming);
                     setShowDeleteModal(true);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -172,9 +172,9 @@ export default function DewormingListView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-          <Bug className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500 mb-4">Sin registros de desparasitación</p>
+        <div className="text-center py-12 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-700">
+          <Bug className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <p className="text-vet-muted mb-4">Sin registros de desparasitación</p>
           <Link
             to="create"
             className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"

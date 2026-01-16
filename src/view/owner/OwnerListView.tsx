@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Search, X, Download, UserPlus } from "lucide-react";
+import { Users, Search, X, Download, UserPlus, Filter, CreditCard, Clock } from "lucide-react";
 import { getOwners, deleteOwners } from "../../api/OwnerAPI";
 import { getInvoices } from "../../api/invoiceAPI";
 import { getPatients } from "../../api/patientAPI";
@@ -262,8 +262,8 @@ export default function OwnerListView() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-vet-muted text-sm">Cargando...</p>
+          <div className="w-10 h-10 mx-auto border-3 border-vet-accent border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-slate-400 text-sm">Cargando...</p>
         </div>
       </div>
     );
@@ -273,42 +273,42 @@ export default function OwnerListView() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8">
- 
-{/* Header */}
-<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-  <div>
-    <h1 className="text-xl font-semibold text-vet-text">Propietarios</h1>
-    <p className="text-sm text-vet-muted">
-      {owners.length} cliente{owners.length !== 1 ? "s" : ""} registrados
-    </p>
-  </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Propietarios</h1>
+          <p className="text-sm text-slate-400">
+            {owners.length} cliente{owners.length !== 1 ? "s" : ""} registrados
+          </p>
+        </div>
 
-  <Link
-    to="/owners/new"
-    className="inline-flex items-center justify-center px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    Nuevo Propietario
-  </Link>
-</div>
+        <Link
+          to="/owners/new"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-vet-accent to-cyan-400 hover:from-cyan-400 hover:to-vet-accent text-slate-900 text-sm font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-vet-accent/25"
+        >
+          <UserPlus className="w-4 h-4" />
+          Nuevo Propietario
+        </Link>
+      </div>
 
-      {/* Búsqueda y Filtros en línea */}
+      {/* Búsqueda y Filtros */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         {/* Búsqueda */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             placeholder="Buscar por nombre, teléfono, email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-10 pr-8 py-2.5 bg-slate-800/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-vet-accent/50 focus:border-vet-accent/50 transition-all"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/10 rounded-lg transition-colors"
             >
-              <X className="w-4 h-4 text-vet-muted" />
+              <X className="w-4 h-4 text-slate-400" />
             </button>
           )}
         </div>
@@ -317,33 +317,38 @@ export default function OwnerListView() {
         <div className="flex gap-2">
           <button
             onClick={() => setActiveFilter("all")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "all"
-                ? "bg-vet-primary text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                ? "bg-vet-accent text-slate-900 shadow-lg shadow-vet-accent/20"
+                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
             }`}
           >
+            <Filter className="w-3.5 h-3.5" />
             Todos ({owners.length})
           </button>
+          
           <button
             onClick={() => setActiveFilter("withDebt")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "withDebt"
-                ? "bg-red-500 text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
             }`}
           >
+            <CreditCard className="w-3.5 h-3.5" />
             Con deuda {filterStats.withDebt > 0 && `(${filterStats.withDebt})`}
           </button>
+          
           <button
             onClick={() => setActiveFilter("noRecentVisit")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "noRecentVisit"
-                ? "bg-amber-500 text-white"
-                : "bg-white text-vet-text border border-gray-200 hover:bg-gray-50"
+                ? "bg-amber-500 text-slate-900 shadow-lg shadow-amber-500/20"
+                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
             }`}
           >
-            Sin visita reciente {filterStats.noRecentVisit > 0 && `(${filterStats.noRecentVisit})`}
+            <Clock className="w-3.5 h-3.5" />
+            Sin visita {filterStats.noRecentVisit > 0 && `(${filterStats.noRecentVisit})`}
           </button>
         </div>
       </div>
@@ -353,16 +358,21 @@ export default function OwnerListView() {
         <>
           {/* Toolbar de exportación */}
           <div className="flex items-center justify-between mb-3 px-1">
-            <div className="text-sm text-vet-muted">
+            <div className="text-sm text-slate-400">
               {selectedIds.size > 0 ? (
-                <span>{selectedIds.size} seleccionado{selectedIds.size !== 1 ? "s" : ""}</span>
+                <span className="font-medium">
+                  {selectedIds.size} seleccionado{selectedIds.size !== 1 ? "s" : ""}
+                </span>
               ) : (
-                <span>{sortedOwners.length} resultado{sortedOwners.length !== 1 ? "s" : ""}</span>
+                <span>
+                  {sortedOwners.length} resultado{sortedOwners.length !== 1 ? "s" : ""}
+                </span>
               )}
             </div>
+            
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-vet-text hover:bg-gray-100 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-300 hover:text-white bg-slate-800/60 hover:bg-white/10 border border-white/10 rounded-lg transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Exportar {selectedIds.size > 0 ? `(${selectedIds.size})` : "todos"}
@@ -435,28 +445,31 @@ export default function OwnerListView() {
 function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
   return (
     <div className="text-center py-16">
-      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
-        <Users className="w-8 h-8 text-gray-400" />
+      <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10">
+        <Users className="w-8 h-8 text-slate-500" />
       </div>
-      <h3 className="text-lg font-medium text-vet-text mb-1">
+      
+      <h3 className="text-lg font-semibold text-white mb-1">
         {hasFilters ? "Sin resultados" : "Sin propietarios"}
       </h3>
-      <p className="text-sm text-vet-muted mb-4">
+      
+      <p className="text-sm text-slate-400 mb-6">
         {hasFilters
           ? "No hay propietarios con esos criterios"
           : "Registra tu primer cliente"}
       </p>
+      
       {hasFilters ? (
         <button
           onClick={onClear}
-          className="text-sm text-vet-primary hover:underline"
+          className="text-sm text-vet-accent hover:text-white transition-colors font-medium"
         >
           Limpiar filtros
         </button>
       ) : (
         <Link
           to="/owners/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-vet-accent/25 transition-all duration-300"
         >
           <UserPlus className="w-4 h-4" />
           Registrar Propietario

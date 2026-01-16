@@ -19,9 +19,9 @@ function BreakdownList({ title, items }: BreakdownListProps) {
   const maxValue = Math.max(...items.map((item) => item.value));
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+    <div className="bg-slate-800 border border-slate-700 rounded-md">
+      <div className="px-4 py-3 border-b border-slate-700">
+        <h3 className="text-sm font-semibold text-vet-text">{title}</h3>
       </div>
       <div className="p-4 space-y-3">
         {items.map((item) => {
@@ -30,19 +30,19 @@ function BreakdownList({ title, items }: BreakdownListProps) {
           return (
             <div key={item.label}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-gray-700">{item.label}</span>
+                <span className="text-sm text-vet-muted">{item.label}</span>
                 <div className="flex items-center gap-2">
                   {item.secondary && (
-                    <span className="text-xs text-gray-400">{item.secondary}</span>
+                    <span className="text-xs text-slate-500">{item.secondary}</span>
                   )}
-                  <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                  <span className="text-sm font-semibold text-vet-text tabular-nums">
                     {item.value}
                   </span>
                 </div>
               </div>
-              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#0A7EA4]/20 rounded-full"
+                  className="h-full bg-vet-primary/20 rounded-full"
                   style={{ width: `${percentage}%` }}
                 />
               </div>

@@ -1,6 +1,6 @@
-// src/views/dashboard/components/RevenueChart.tsx
+// src/components/dashboard/RevenueChart.tsx
 import { useState } from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, DollarSign, Calendar } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -31,44 +31,65 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
       maximumFractionDigits: 2,
     })}`;
 
+  // Tooltip personalizado para dark mode
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-800 border border-white/20 rounded-lg px-3 py-2 shadow-xl">
+          <p className="text-white font-medium text-sm mb-1">{label}</p>
+          {payload.map((entry: any) => (
+            <p key={entry.name} className="text-slate-300 text-xs">
+              {entry.name}: <span className="text-vet-accent font-semibold">{entry.value}</span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Colores para las barras en dark mode
+ 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 lg:p-6">
+    <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 p-4 lg:p-6 shadow-xl">
       <div className="flex flex-col gap-4 mb-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-vet-primary" />
+          <h2 className="font-semibold text-white flex items-center gap-2">
+            <div className="p-1.5 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-lg border border-emerald-500/30">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            </div>
             Ingresos Últimos 7 Días
           </h2>
 
           {/* Filtro de moneda */}
-          <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-800/60 p-1 rounded-lg border border-white/10">
             <button
               onClick={() => setCurrencyFilter("total")}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
                 currencyFilter === "total"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-vet-accent text-slate-900 shadow-lg shadow-vet-accent/20"
+                  : "text-slate-400 hover:text-white hover:bg-white/10"
               }`}
             >
               Total USD
             </button>
             <button
               onClick={() => setCurrencyFilter("USD")}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
                 currencyFilter === "USD"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-white/10"
               }`}
             >
               USD
             </button>
             <button
               onClick={() => setCurrencyFilter("Bs")}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
                 currencyFilter === "Bs"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-violet-500 text-white shadow-lg shadow-violet-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-white/10"
               }`}
             >
               Bs
@@ -78,20 +99,29 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
 
         {/* Resumen */}
         <div className="flex flex-wrap items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-            <span className="text-gray-500">Semana:</span>
+          {/* Card Semana */}
+          <div className="flex items-center gap-3 bg-slate-800/40 px-4 py-3 rounded-xl border border-white/10 backdrop-blur-sm">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Calendar className="w-4 h-4 text-blue-400" />
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-gray-900">{formatUSD(weekRevenue.totalUSD)}</span>
-              <span className="text-[10px] text-gray-500">
+              <span className="text-slate-400 text-xs">Semana</span>
+              <span className="font-bold text-blue-400 text-lg">{formatUSD(weekRevenue.totalUSD)}</span>
+              <span className="text-[10px] text-slate-500">
                 {formatUSD(weekRevenue.USD)} + {formatBs(weekRevenue.Bs)}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-            <span className="text-gray-500">Mes:</span>
+
+          {/* Card Mes */}
+          <div className="flex items-center gap-3 bg-slate-800/40 px-4 py-3 rounded-xl border border-white/10 backdrop-blur-sm">
+            <div className="p-2 bg-emerald-500/20 rounded-lg">
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-gray-900">{formatUSD(monthRevenue.totalUSD)}</span>
-              <span className="text-[10px] text-gray-500">
+              <span className="text-slate-400 text-xs">Mes</span>
+              <span className="font-bold text-emerald-400 text-lg">{formatUSD(monthRevenue.totalUSD)}</span>
+              <span className="text-[10px] text-slate-500">
                 {formatUSD(monthRevenue.USD)} + {formatBs(monthRevenue.Bs)}
               </span>
             </div>
@@ -99,48 +129,76 @@ export function RevenueChart({ data, weekRevenue, monthRevenue }: RevenueChartPr
         </div>
       </div>
 
+      {/* Gráfico */}
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip
-              formatter={(value: number, name: string) => {
-                if (name === "totalUSD") return [formatUSD(value), "Total USD"];
-                if (name === "USD") return [formatUSD(value), "Dólares"];
-                if (name === "Bs") return [formatBs(value), "Bolívares"];
-                return [value, name];
-              }}
-              contentStyle={{
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
+            <defs>
+              {/* Gradientes para las barras */}
+              <linearGradient id="gradient-total" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#36BCD4" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#36BCD4" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="gradient-usd" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10B981" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#10B981" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="gradient-bs" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.3}/>
+              </linearGradient>
+            </defs>
+            
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis 
+              dataKey="day" 
+              tick={{ fontSize: 11, fill: "#94A3B8" }}
+              stroke="rgba(255,255,255,0.1)"
             />
-            {currencyFilter !== "total" && <Legend />}
+            <YAxis 
+              tick={{ fontSize: 11, fill: "#94A3B8" }}
+              stroke="rgba(255,255,255,0.1)"
+            />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+            />
+            {currencyFilter !== "total" && (
+              <Legend 
+                wrapperStyle={{ paddingTop: "20px" }}
+                iconType="circle"
+                formatter={(value) => <span style={{ color: "#94A3B8", fontSize: "12px" }}>{value}</span>}
+              />
+            )}
 
             {currencyFilter === "total" && (
               <Bar 
                 dataKey="totalUSD" 
-                fill="#0A7EA4" 
-                radius={[4, 4, 0, 0]} 
-                name="Total USD" 
+                fill="url(#gradient-total)"
+                radius={[8, 8, 0, 0]} 
+                name="Total USD"
+                animationDuration={600}
+                animationBegin={0}
               />
             )}
             {currencyFilter === "USD" && (
               <Bar 
                 dataKey="USD" 
-                fill="#10b981" 
-                radius={[4, 4, 0, 0]} 
-                name="USD" 
+                fill="url(#gradient-usd)"
+                radius={[8, 8, 0, 0]} 
+                name="USD"
+                animationDuration={600}
+                animationBegin={0}
               />
             )}
             {currencyFilter === "Bs" && (
               <Bar 
                 dataKey="Bs" 
-                fill="#3b82f6" 
-                radius={[4, 4, 0, 0]} 
-                name="Bs" 
+                fill="url(#gradient-bs)"
+                radius={[8, 8, 0, 0]} 
+                name="Bs"
+                animationDuration={600}
+                animationBegin={0}
               />
             )}
           </BarChart>

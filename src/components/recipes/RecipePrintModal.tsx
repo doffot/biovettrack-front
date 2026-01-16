@@ -61,7 +61,6 @@ export default function RecipePrintModal({
         .from(element)
         .save();
 
-      // Cerrar modal y mostrar toast de éxito
       onClose();
       toast.success(
         "PDF Descargado",
@@ -80,144 +79,143 @@ export default function RecipePrintModal({
     }
   };
 
-  // 👇 Componente reutilizable para el contenido de la receta (VERSIÓN PROFESIONAL)
-const RecipeContent = () => (
-  <div
-    style={{
-      width: "210mm",
-      padding: "15mm 15mm",
-      backgroundColor: "white",
-      fontFamily: "'Times New Roman', serif",
-      color: "#000",
-      fontSize: "11pt",
-      lineHeight: 1.6,
-      boxSizing: "border-box",
-    }}
-  >
-    {/* Header */}
-    <div style={{ textAlign: "center", marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #000" }}>
-      <h1 style={{ fontSize: "18pt", fontWeight: "bold", margin: "0 0 5px 0", letterSpacing: "2px" }}>
-        RECIPE
-      </h1>
-      <p style={{ fontSize: "10pt", margin: 0, color: "#333" }}>
-        {getVetFullName()}
-      </p>
-      <p style={{ fontSize: "9pt", margin: "2px 0 0 0", color: "#666" }}>
-        Médico Veterinario | CMV: 1833
-      </p>
-    </div>
-
-    {/* Info del paciente */}
-    <div style={{ marginBottom: "20px", fontSize: "10pt" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <tbody>
-          <tr>
-            <td style={{ padding: "4px 0", width: "50%" }}>
-              <strong>Fecha:</strong> {date}
-            </td>
-            <td style={{ padding: "4px 0" }}>
-              <strong>Paciente:</strong> {patientData.name}
-            </td>
-          </tr>
-          <tr>
-            <td style={{ padding: "4px 0" }}>
-              <strong>Especie:</strong> {patientData.species}
-              {patientData.breed ? ` (${patientData.breed})` : ""}
-            </td>
-            <td style={{ padding: "4px 0" }}>
-              <strong>Propietario:</strong> {patientData.owner.name}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    {/* Separador */}
-    <div style={{ borderTop: "1px solid #ccc", margin: "15px 0" }} />
-
-    {/* Título Rp/ (símbolo de receta) */}
-    <div style={{ marginBottom: "15px" }}>
-      <p style={{ fontSize: "14pt", fontWeight: "bold", margin: 0 }}>Rp/</p>
-    </div>
-
-    {/* Medicamentos */}
-    <div style={{ marginBottom: "20px" }}>
-      {recipe.medications.map((med, index) => (
-        <div
-          key={index}
-          style={{
-            marginBottom: "20px",
-            paddingBottom: "15px",
-            borderBottom: index < recipe.medications.length - 1 ? "1px dashed #ddd" : "none"
-          }}
-        >
-          {/* Nombre y presentación */}
-          <div style={{ marginBottom: "8px" }}>
-            <p style={{ margin: 0, fontSize: "11pt", fontWeight: "bold" }}>
-              {index + 1}. {med.name}
-            </p>
-            <p style={{ margin: "2px 0 0 0", fontSize: "10pt", color: "#555", fontStyle: "italic" }}>
-              {med.presentation}
-              {med.quantity && ` — ${med.quantity}`}
-            </p>
-          </div>
-
-          {/* Indicaciones */}
-          <div style={{ marginLeft: "15px", fontSize: "10pt" }}>
-            <p style={{ margin: "5px 0 0 0" }}>
-              <strong>Sig.:</strong> {med.instructions}
-            </p>
-            <p style={{ margin: "3px 0 0 0", fontSize: "9pt", color: "#666" }}>
-              {med.source === "veterinario" ? "Dispensar en consultorio veterinario" : "Adquirir en farmacia"}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* Notas */}
-    {recipe.notes && (
-      <div style={{ 
-        marginTop: "15px", 
-        padding: "12px", 
-        backgroundColor: "#f9f9f9", 
-        border: "1px solid #ddd",
-        borderRadius: "4px"
-      }}>
-        <p style={{ margin: 0, fontSize: "10pt" }}>
-          <strong>Nota:</strong> {recipe.notes}
+  const RecipeContent = () => (
+    <div
+      style={{
+        width: "210mm",
+        padding: "15mm 15mm",
+        backgroundColor: "white",
+        fontFamily: "'Times New Roman', serif",
+        color: "#000",
+        fontSize: "11pt",
+        lineHeight: 1.6,
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #000" }}>
+        <h1 style={{ fontSize: "18pt", fontWeight: "bold", margin: "0 0 5px 0", letterSpacing: "2px" }}>
+          RECIPE
+        </h1>
+        <p style={{ fontSize: "10pt", margin: 0, color: "#333" }}>
+          {getVetFullName()}
+        </p>
+        <p style={{ fontSize: "9pt", margin: "2px 0 0 0", color: "#666" }}>
+          Médico Veterinario | CMV: 1833
         </p>
       </div>
-    )}
 
-    {/* Footer con firma */}
-    <div style={{ marginTop: "40px", textAlign: "right" }}>
-      <div style={{ display: "inline-block", textAlign: "center", minWidth: "200px" }}>
-        <div style={{ borderTop: "1px solid #000", paddingTop: "8px", marginBottom: "5px" }}>
-          <p style={{ margin: 0, fontSize: "10pt", fontWeight: "bold" }}>{getVetFullName()}</p>
-          <p style={{ margin: "2px 0 0 0", fontSize: "9pt", color: "#666" }}>CMV: 1833</p>
+      {/* Info del paciente */}
+      <div style={{ marginBottom: "20px", fontSize: "10pt" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: "4px 0", width: "50%" }}>
+                <strong>Fecha:</strong> {date}
+              </td>
+              <td style={{ padding: "4px 0" }}>
+                <strong>Paciente:</strong> {patientData.name}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "4px 0" }}>
+                <strong>Especie:</strong> {patientData.species}
+                {patientData.breed ? ` (${patientData.breed})` : ""}
+              </td>
+              <td style={{ padding: "4px 0" }}>
+                <strong>Propietario:</strong> {patientData.owner.name}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Separador */}
+      <div style={{ borderTop: "1px solid #ccc", margin: "15px 0" }} />
+
+      {/* Título Rp/ (símbolo de receta) */}
+      <div style={{ marginBottom: "15px" }}>
+        <p style={{ fontSize: "14pt", fontWeight: "bold", margin: 0 }}>Rp/</p>
+      </div>
+
+      {/* Medicamentos */}
+      <div style={{ marginBottom: "20px" }}>
+        {recipe.medications.map((med, index) => (
+          <div
+            key={index}
+            style={{
+              marginBottom: "20px",
+              paddingBottom: "15px",
+              borderBottom: index < recipe.medications.length - 1 ? "1px dashed #ddd" : "none"
+            }}
+          >
+            {/* Nombre y presentación */}
+            <div style={{ marginBottom: "8px" }}>
+              <p style={{ margin: 0, fontSize: "11pt", fontWeight: "bold" }}>
+                {index + 1}. {med.name}
+              </p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "10pt", color: "#555", fontStyle: "italic" }}>
+                {med.presentation}
+                {med.quantity && ` — ${med.quantity}`}
+              </p>
+            </div>
+
+            {/* Indicaciones */}
+            <div style={{ marginLeft: "15px", fontSize: "10pt" }}>
+              <p style={{ margin: "5px 0 0 0" }}>
+                <strong>Sig.:</strong> {med.instructions}
+              </p>
+              <p style={{ margin: "3px 0 0 0", fontSize: "9pt", color: "#666" }}>
+                {med.source === "veterinario" ? "Dispensar en consultorio veterinario" : "Adquirir en farmacia"}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Notas */}
+      {recipe.notes && (
+        <div style={{ 
+          marginTop: "15px", 
+          padding: "12px", 
+          backgroundColor: "#f9f9f9", 
+          border: "1px solid #ddd",
+          borderRadius: "4px"
+        }}>
+          <p style={{ margin: 0, fontSize: "10pt" }}>
+            <strong>Nota:</strong> {recipe.notes}
+          </p>
+        </div>
+      )}
+
+      {/* Footer con firma */}
+      <div style={{ marginTop: "40px", textAlign: "right" }}>
+        <div style={{ display: "inline-block", textAlign: "center", minWidth: "200px" }}>
+          <div style={{ borderTop: "1px solid #000", paddingTop: "8px", marginBottom: "5px" }}>
+            <p style={{ margin: 0, fontSize: "10pt", fontWeight: "bold" }}>{getVetFullName()}</p>
+            <p style={{ margin: "2px 0 0 0", fontSize: "9pt", color: "#666" }}>CMV: 1833</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    {/* Info adicional al pie */}
-    <div style={{ 
-      marginTop: "30px", 
-      paddingTop: "15px", 
-      borderTop: "1px solid #ccc",
-      fontSize: "8pt",
-      color: "#666",
-      textAlign: "center"
-    }}>
-      <p style={{ margin: "0 0 3px 0" }}>
-        C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642
-      </p>
-      <p style={{ margin: 0, fontStyle: "italic" }}>
-        Esta receta es válida únicamente para el paciente indicado
-      </p>
+      {/* Info adicional al pie */}
+      <div style={{ 
+        marginTop: "30px", 
+        paddingTop: "15px", 
+        borderTop: "1px solid #ccc",
+        fontSize: "8pt",
+        color: "#666",
+        textAlign: "center"
+      }}>
+        <p style={{ margin: "0 0 3px 0" }}>
+          C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642
+        </p>
+        <p style={{ margin: 0, fontStyle: "italic" }}>
+          Esta receta es válida únicamente para el paciente indicado
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -225,10 +223,10 @@ const RecipeContent = () => (
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal GRANDE - VERSIÓN VISUAL (con Tailwind) */}
-      <div className="relative z-10 w-full max-w-3xl max-h-[95vh] overflow-hidden rounded-2xl bg-white shadow-2xl flex flex-col">
+      <div className="relative z-10 w-full max-w-3xl max-h-[95vh] overflow-hidden rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl flex flex-col">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-indigo-500 to-purple-600">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-gradient-to-r from-vet-primary to-vet-secondary">
           <h2 className="text-lg font-bold text-white">Vista Previa - Receta Médica</h2>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/20 text-white transition-colors">
             <X className="h-5 w-5" />
@@ -236,68 +234,68 @@ const RecipeContent = () => (
         </div>
 
         {/* Contenido VISUAL (Tailwind CSS) */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          <div className="bg-white mx-auto p-8 rounded-xl shadow-sm" style={{ maxWidth: "210mm" }}>
+        <div className="flex-1 overflow-y-auto bg-slate-900 p-6">
+          <div className="bg-slate-800 mx-auto p-8 rounded-xl border border-slate-700" style={{ maxWidth: "210mm" }}>
             
-            <div className="text-center border-b-3 border-indigo-500 pb-4 mb-6">
-              <h1 className="text-2xl font-bold text-indigo-600 mb-1">📋 RECETA MÉDICA VETERINARIA</h1>
-              <p className="text-sm text-gray-600">Prescripción de medicamentos</p>
+            <div className="text-center border-b-3 border-vet-accent pb-4 mb-6">
+              <h1 className="text-2xl font-bold text-vet-accent mb-1">RECETA MÉDICA VETERINARIA</h1>
+              <p className="text-sm text-vet-muted">Prescripción de medicamentos</p>
             </div>
 
-            <div className="bg-indigo-50 rounded-lg p-4 mb-6 grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-semibold text-indigo-700">📅 Fecha:</span> <span className="text-gray-700">{date}</span></div>
-              <div><span className="font-semibold text-indigo-700">🐾 Paciente:</span> <span className="text-gray-700">{patientData.name}</span></div>
-              <div><span className="font-semibold text-indigo-700">🏷️ Especie:</span> <span className="text-gray-700">{patientData.species}{patientData.breed ? ` - ${patientData.breed}` : ""}</span></div>
-              <div><span className="font-semibold text-indigo-700">👤 Propietario:</span> <span className="text-gray-700">{patientData.owner.name}</span></div>
+            <div className="bg-slate-700/30 rounded-lg p-4 mb-6 grid grid-cols-2 gap-3 text-sm">
+              <div><span className="font-semibold text-vet-accent">Fecha:</span> <span className="text-vet-text">{date}</span></div>
+              <div><span className="font-semibold text-vet-accent">Paciente:</span> <span className="text-vet-text">{patientData.name}</span></div>
+              <div><span className="font-semibold text-vet-accent">Especie:</span> <span className="text-vet-text">{patientData.species}{patientData.breed ? ` - ${patientData.breed}` : ""}</span></div>
+              <div><span className="font-semibold text-vet-accent">Propietario:</span> <span className="text-vet-text">{patientData.owner.name}</span></div>
             </div>
 
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-lg mb-4">
-              <h3 className="font-bold text-sm uppercase">💊 Medicamentos Recetados ({recipe.medications.length})</h3>
+            <div className="bg-gradient-to-r from-vet-primary to-vet-secondary text-white px-4 py-2 rounded-lg mb-4">
+              <h3 className="font-bold text-sm uppercase">Medicamentos Recetados ({recipe.medications.length})</h3>
             </div>
 
             <div className="space-y-4">
               {recipe.medications.map((med, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white">
-                  <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-100">
+                <div key={index} className="border border-slate-700 rounded-lg p-4 bg-slate-800">
+                  <div className="flex items-start justify-between mb-3 pb-3 border-b border-slate-700">
                     <div className="flex items-start gap-3">
-                      <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold flex-shrink-0">
+                      <span className="flex items-center justify-center w-7 h-7 bg-vet-primary text-white rounded-full text-sm font-bold flex-shrink-0">
                         {index + 1}
                       </span>
                       <div>
-                        <p className="font-bold text-gray-900">{med.name}</p>
-                        <p className="text-sm text-gray-600">{med.presentation}</p>
+                        <p className="font-bold text-vet-text">{med.name}</p>
+                        <p className="text-sm text-vet-muted">{med.presentation}</p>
                       </div>
                     </div>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap ${med.source === "veterinario" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
-                      {med.source === "veterinario" ? "🏥 Veterinaria" : "💊 Farmacia"}
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap ${med.source === "veterinario" ? "bg-emerald-900/30 text-emerald-400 border border-emerald-700" : "bg-blue-900/30 text-blue-400 border border-blue-700"}`}>
+                      {med.source === "veterinario" ? "Veterinaria" : "Farmacia"}
                     </span>
                   </div>
                   {med.quantity && (
-                    <div className="text-sm text-gray-700 mb-2">
-                      📦 <span className="font-semibold">Cantidad:</span> {med.quantity}
+                    <div className="text-sm text-vet-text mb-2">
+                      Cantidad: <span className="font-semibold">{med.quantity}</span>
                     </div>
                   )}
-                  <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg p-3">
-                    <p className="text-xs font-bold text-amber-700 uppercase mb-1">📋 Indicaciones</p>
-                    <p className="text-sm text-amber-800">{med.instructions}</p>
+                  <div className="bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg p-3">
+                    <p className="text-xs font-bold text-amber-400 uppercase mb-1">Indicaciones</p>
+                    <p className="text-sm text-amber-300">{med.instructions}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {recipe.notes && (
-              <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg p-4">
-                <p className="font-bold text-yellow-800 text-sm mb-1">⚠️ Notas Adicionales</p>
-                <p className="text-sm text-yellow-700">{recipe.notes}</p>
+              <div className="mt-6 bg-yellow-900/20 border-l-4 border-yellow-500 rounded-r-lg p-4">
+                <p className="font-bold text-yellow-400 text-sm mb-1">Notas Adicionales</p>
+                <p className="text-sm text-yellow-300">{recipe.notes}</p>
               </div>
             )}
 
-            <div className="mt-8 pt-4 border-t-2 border-gray-200 text-center">
-              <p className="font-bold text-indigo-600 text-lg">{getVetFullName()}</p>
-              <p className="text-sm text-gray-600">Médico Veterinario</p>
-              <p className="text-xs text-gray-500 mt-2">C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642</p>
-              <div className="mt-4 p-3 bg-gray-100 rounded-lg">
-                <p className="text-xs text-gray-600 italic">
+            <div className="mt-8 pt-4 border-t-2 border-slate-700 text-center">
+              <p className="font-bold text-vet-accent text-lg">{getVetFullName()}</p>
+              <p className="text-sm text-vet-muted">Médico Veterinario</p>
+              <p className="text-xs text-vet-muted mt-2">C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642</p>
+              <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
+                <p className="text-xs text-vet-muted italic">
                   Esta receta es válida únicamente para el paciente indicado.
                   Ante cualquier reacción adversa, suspenda el tratamiento y consulte inmediatamente.
                 </p>
@@ -307,13 +305,13 @@ const RecipeContent = () => (
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <p className="text-sm text-gray-600">Vista previa del documento a descargar</p>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-700 bg-slate-800">
+          <p className="text-sm text-vet-muted">Vista previa del documento a descargar</p>
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={isGenerating} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50">
+            <button onClick={onClose} disabled={isGenerating} className="px-4 py-2 text-sm font-medium text-vet-muted hover:text-vet-text transition-colors disabled:opacity-50">
               Cerrar
             </button>
-            <button onClick={handleDownloadPDF} disabled={isGenerating} className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-lg transition-colors disabled:opacity-60">
+            <button onClick={handleDownloadPDF} disabled={isGenerating} className="flex items-center gap-2 px-5 py-2 bg-vet-primary hover:bg-vet-secondary text-white font-semibold text-sm rounded-lg transition-colors disabled:opacity-60">
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

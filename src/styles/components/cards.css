@@ -1,0 +1,35 @@
+/* ========================================
+   🃏 CARDS - Tarjetas y contenedores
+   ======================================== */
+
+.bg-vet-card {
+  background: white;
+  border-left: 4px solid #0A7EA4;
+  box-shadow: var(--shadow-card);
+}
+
+.vet-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  border-left: 4px solid #0A7EA4;
+}
+
+.vet-sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: white;
+  transition: background-color 0.15s;
+  border-radius: 0.5rem;
+}
+
+.vet-sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.vet-sidebar-item.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}

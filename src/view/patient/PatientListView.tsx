@@ -1,4 +1,3 @@
-// src/views/patients/PatientListView.tsx
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -171,8 +170,8 @@ export default function PatientListView() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-vet-muted text-sm">Cargando...</p>
+          <div className="w-10 h-10 mx-auto border-3 border-[var(--color-vet-accent)] border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-[var(--color-vet-muted)] text-sm">Cargando...</p>
         </div>
       </div>
     );
@@ -187,15 +186,15 @@ export default function PatientListView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-vet-text">Pacientes</h1>
-          <p className="text-sm text-vet-muted">
+          <h1 className="text-xl font-semibold text-[var(--color-vet-text)]">Pacientes</h1>
+          <p className="text-sm text-[var(--color-vet-muted)]">
             {patients.length} registrado{patients.length !== 1 ? "s" : ""}
           </p>
         </div>
 
         <Link
           to="/owners"
-          className="inline-flex items-center justify-center px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
+          className="inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] text-white text-sm font-medium rounded-lg transition-colors"
         >
           Nuevo Paciente
         </Link>
@@ -204,20 +203,20 @@ export default function PatientListView() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-vet-muted)]" />
           <input
             type="text"
             placeholder="Buscar paciente, raza, propietario..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-10 pr-8 py-2.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-[var(--color-hover)] rounded transition-colors"
             >
-              <X className="w-4 h-4 text-vet-muted" />
+              <X className="w-4 h-4 text-[var(--color-vet-muted)]" />
             </button>
           )}
         </div>
@@ -225,7 +224,7 @@ export default function PatientListView() {
         <select
           value={speciesFilter}
           onChange={(e) => setSpeciesFilter(e.target.value)}
-          className="w-full sm:w-40 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          className="w-full sm:w-40 px-3 py-2.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-colors"
         >
           <option value="all">Todas las especies</option>
           <option value="canino">Canino</option>
@@ -235,7 +234,7 @@ export default function PatientListView() {
         <select
           value={ownerFilter}
           onChange={(e) => setOwnerFilter(e.target.value)}
-          className="w-full sm:w-48 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          className="w-full sm:w-48 px-3 py-2.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-colors"
         >
           <option value="all">Todos los propietarios</option>
           {owners.map((owner) => (
@@ -248,7 +247,7 @@ export default function PatientListView() {
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="px-3 py-2.5 text-sm text-vet-muted hover:text-vet-primary transition-colors"
+            className="px-3 py-2.5 text-sm text-[var(--color-vet-muted)] hover:text-[var(--color-vet-accent)] transition-colors"
           >
             Limpiar
           </button>
@@ -260,14 +259,14 @@ export default function PatientListView() {
         <>
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-3 px-1">
-            <p className="text-sm text-vet-muted">
+            <p className="text-sm text-[var(--color-vet-muted)]">
               {selectedIds.size > 0
                 ? `${selectedIds.size} seleccionado${selectedIds.size !== 1 ? "s" : ""}`
                 : `${filteredPatients.length} resultado${filteredPatients.length !== 1 ? "s" : ""}`}
             </p>
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-vet-text hover:bg-gray-100 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-[var(--color-vet-text)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
             >
               <Download className="w-4 h-4" />
               Exportar {selectedIds.size > 0 ? `(${selectedIds.size})` : "todos"}
@@ -329,23 +328,23 @@ export default function PatientListView() {
 function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
   return (
     <div className="text-center py-16">
-      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-xl flex items-center justify-center">
-        <PawPrint className="w-8 h-8 text-gray-400" />
+      <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-hover)] rounded-xl flex items-center justify-center border border-[var(--color-border)]">
+        <PawPrint className="w-8 h-8 text-[var(--color-vet-muted)]" />
       </div>
-      <h3 className="text-lg font-medium text-vet-text mb-1">
+      <h3 className="text-lg font-medium text-[var(--color-vet-text)] mb-1">
         {hasFilters ? "Sin resultados" : "Sin pacientes"}
       </h3>
-      <p className="text-sm text-vet-muted mb-4">
+      <p className="text-sm text-[var(--color-vet-muted)] mb-4">
         {hasFilters ? "No hay pacientes con esos criterios" : "Registra tu primer paciente"}
       </p>
       {hasFilters ? (
-        <button onClick={onClear} className="text-sm text-vet-primary hover:underline">
+        <button onClick={onClear} className="text-sm text-[var(--color-vet-accent)] hover:underline">
           Limpiar filtros
         </button>
       ) : (
         <Link
           to="/owners"
-          className="inline-flex px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
+          className="inline-flex px-4 py-2 bg-[var(--color-vet-primary)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-vet-secondary)] transition-colors"
         >
           Registrar Paciente
         </Link>

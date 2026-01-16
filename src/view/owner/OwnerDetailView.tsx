@@ -1,8 +1,8 @@
-// src/views/owner/OwnerDetailView.tsx
+// src/views/owners/OwnerDetailView.tsx
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { PawPrint, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { PawPrint, ArrowLeft, Plus, Trash2, Receipt, Sparkles } from "lucide-react";
 
 import { getOwnersById, deleteOwners, getOwnerAppointments, getOwnerGroomingServices } from "../../api/OwnerAPI";
 import { getInvoices } from "../../api/invoiceAPI";
@@ -11,7 +11,7 @@ import { getPatientsByOwner } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
 import { showPaymentToast, showPaymentErrorToast } from "../../utils/paymentToasts";
 import PatientListView from "./PatientListOwnerView";
-import { getOwnerId} from "../../types/invoice";
+import { getOwnerId } from "../../types/invoice";
 import { OwnerAccountHeader } from "../../components/owners/OwnerAccountHeader";
 import { TransactionHistory } from "../../components/owners/TransactionHistory";
 import { PaymentModal } from "../../components/payment/PaymentModal";
@@ -142,7 +142,6 @@ export default function OwnerDetailView() {
 
   // ==================== HELPERS PARA EL MODAL ====================
 
-  // Convertir items de invoice a PaymentServiceItem
   const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
     return invoice.items.map((item) => ({
       description: item.description,
@@ -152,9 +151,7 @@ export default function OwnerDetailView() {
     }));
   };
 
-  // Obtener info del paciente de una factura
   const getPatientInfo = (invoice: Invoice): PaymentPatientInfo | undefined => {
-    // Buscar el paciente en la lista de pacientes del owner
     const patient = patientsData.find((p) => {
       if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
       return p._id === invoice.patientId?._id;
@@ -167,7 +164,6 @@ export default function OwnerDetailView() {
       };
     }
 
-    // Fallback al nombre del patientId poblado
     if (typeof invoice.patientId === "object" && invoice.patientId) {
       return { name: invoice.patientId.name };
     }
@@ -175,7 +171,6 @@ export default function OwnerDetailView() {
     return undefined;
   };
 
-  // Descripción de factura para mostrar
   const getInvoiceDescription = (invoice: Invoice): string => {
     if (!invoice.items || invoice.items.length === 0) return "Factura";
     const descriptions = invoice.items.map((i) => i.description);
@@ -183,7 +178,6 @@ export default function OwnerDetailView() {
     return `${descriptions.slice(0, 2).join(", ")} +${descriptions.length - 2}`;
   };
 
-  // Monto pendiente de la factura seleccionada
   const getSelectedInvoicePending = (): number => {
     if (!selectedInvoice) return 0;
     return selectedInvoice.total - (selectedInvoice.amountPaid || 0);
@@ -231,7 +225,6 @@ export default function OwnerDetailView() {
 
       await createPaymentMutation(payload);
 
-      // Toast personalizado
       showPaymentToast({
         amountPaid: amount,
         currency,
@@ -341,16 +334,6 @@ export default function OwnerDetailView() {
   };
 
   const handleOpenSinglePay = (invoice: Invoice) => {
-    console.log("🧾 Invoice seleccionada:", invoice);
-    console.log("🐾 Pacientes disponibles:", patientsData);
-    console.log("👤 Owner:", owner);
-
-    const services = getInvoiceServices(invoice);
-    const patientInfo = getPatientInfo(invoice);
-    
-    console.log("📋 Services calculados:", services);
-    console.log("🐕 Patient info:", patientInfo);
-
     setSelectedInvoice(invoice);
     setShowSinglePayModal(true);
   };
@@ -360,7 +343,10 @@ export default function OwnerDetailView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[70vh]">
-        <div className="w-8 h-8 border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto border-3 border-vet-accent border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-slate-400 text-sm">Cargando información...</p>
+        </div>
       </div>
     );
   }
@@ -369,16 +355,19 @@ export default function OwnerDetailView() {
     return (
       <div className="flex items-center justify-center h-[70vh]">
         <div className="text-center max-w-sm mx-auto p-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <PawPrint className="w-8 h-8 text-gray-400" />
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-500/10 rounded-full blur-xl"></div>
+            <div className="relative w-16 h-16 rounded-full bg-slate-800/60 backdrop-blur-sm flex items-center justify-center border border-white/10">
+              <PawPrint className="w-8 h-8 text-slate-500" />
+            </div>
           </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">Propietario no encontrado</h2>
-          <p className="text-gray-500 text-sm mb-4">
+          <h2 className="text-lg font-bold text-white mb-2">Propietario no encontrado</h2>
+          <p className="text-slate-400 text-sm mb-6">
             El propietario que buscas no existe o fue eliminado.
           </p>
           <Link
             to="/owners"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-vet-primary text-white text-sm font-medium hover:bg-vet-secondary transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 text-sm font-semibold hover:shadow-lg hover:shadow-vet-accent/25 transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a propietarios
@@ -415,13 +404,13 @@ export default function OwnerDetailView() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Tabs para móvil */}
         <div className="lg:hidden mb-4">
-          <div className="flex bg-gray-100 rounded-xl p-1">
+          <div className="flex bg-slate-800/60 backdrop-blur-sm rounded-xl p-1 border border-white/10">
             <button
               onClick={() => setActiveTab("pets")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 activeTab === "pets"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
               <PawPrint className="w-4 h-4" />
@@ -429,25 +418,13 @@ export default function OwnerDetailView() {
             </button>
             <button
               onClick={() => setActiveTab("transactions")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 activeTab === "transactions"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
+              <Receipt className="w-4 h-4" />
               Transacciones
             </button>
           </div>
@@ -457,22 +434,47 @@ export default function OwnerDetailView() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Mascotas */}
           <div className={`lg:col-span-2 ${activeTab !== "pets" ? "hidden lg:block" : ""}`}>
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 bg-gradient-to-r from-vet-primary/5 to-vet-secondary/5 border-b border-gray-100 flex items-center justify-between">
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden shadow-xl">
+              {/* Header de la sección */}
+              <div className="px-4 py-3 bg-gradient-to-r from-vet-accent/10 via-slate-800/40 to-cyan-500/10 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <PawPrint className="w-5 h-5 text-vet-primary" />
-                  <h3 className="font-semibold text-gray-900">Mascotas</h3>
+                  <div className="p-1.5 bg-vet-accent/20 rounded-lg border border-vet-accent/30">
+                    <PawPrint className="w-4 h-4 text-vet-accent" />
+                  </div>
+                  <h3 className="font-semibold text-white">Mascotas</h3>
+                  <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-300 rounded-full">
+                    {patientsData.length}
+                  </span>
                 </div>
                 <Link
                   to={`/owners/${owner._id}/patients/new`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white text-xs font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-vet-accent to-cyan-400 hover:shadow-lg hover:shadow-vet-accent/20 text-slate-900 text-xs font-semibold transition-all duration-300"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Nueva
                 </Link>
               </div>
+              
+              {/* Lista de mascotas */}
               <div className="p-4">
-                <PatientListView ownerId={ownerId!} ownerName={owner.name} />
+                {patientsData.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 mx-auto mb-3 bg-slate-800/60 rounded-full flex items-center justify-center border border-white/10">
+                      <PawPrint className="w-6 h-6 text-slate-500" />
+                    </div>
+                    <p className="text-white text-sm font-medium mb-1">Sin mascotas registradas</p>
+                    <p className="text-slate-500 text-xs mb-4">Registra la primera mascota de este propietario</p>
+                    <Link
+                      to={`/owners/${owner._id}/patients/new`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-vet-accent hover:text-white bg-vet-accent/10 hover:bg-vet-accent/20 rounded-lg border border-vet-accent/30 transition-all duration-300"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Agregar mascota
+                    </Link>
+                  </div>
+                ) : (
+                  <PatientListView ownerId={ownerId!} ownerName={owner.name} />
+                )}
               </div>
             </div>
           </div>
@@ -502,11 +504,11 @@ export default function OwnerDetailView() {
         title="Confirmar eliminación"
         message={
           <>
-            <p className="text-vet-text mb-2 font-inter">
+            <p className="text-white mb-2">
               ¿Estás seguro de que deseas eliminar a{" "}
-              <span className="font-bold text-vet-primary">{owner.name}</span>?
+              <span className="font-bold text-vet-accent">{owner.name}</span>?
             </p>
-            <p className="text-vet-muted text-sm font-inter">
+            <p className="text-slate-400 text-sm">
               Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a este propietario.
             </p>
           </>

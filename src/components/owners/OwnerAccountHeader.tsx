@@ -205,7 +205,7 @@ export function OwnerAccountHeader({
           width: `${Math.max(dropdownPosition.width, 320)}px`,
         }}
       >
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-slate-900 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-vet-primary to-vet-accent px-4 py-3">
             <p className="text-sm font-bold text-white">Opciones de Pago</p>
             <p className="text-xs text-white/80">Selecciona una factura o paga todo</p>
@@ -223,25 +223,25 @@ export function OwnerAccountHeader({
                     setShowPaymentDropdown(false);
                     onPayInvoice(invoice);
                   }}
-                  className="w-full text-left px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100"
+                  className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/10"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isParcial ? "bg-blue-100" : "bg-amber-100"}`}>
-                      <FileText className={`w-5 h-5 ${isParcial ? "text-blue-600" : "text-amber-600"}`} />
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isParcial ? "bg-blue-500/20" : "bg-amber-500/20"}`}>
+                      <FileText className={`w-5 h-5 ${isParcial ? "text-blue-400" : "text-amber-400"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 text-sm truncate">
+                      <p className="font-medium text-white text-sm truncate">
                         {getInvoiceDescription(invoice)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-slate-400">
                         {formatDateShort(invoice.date)}
                         {isParcial && (
-                          <span className="ml-2 text-blue-600 font-medium">Parcial</span>
+                          <span className="ml-2 text-blue-400 font-medium">Parcial</span>
                         )}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-sm font-bold ${isParcial ? "text-blue-600" : "text-amber-600"}`}>
+                      <p className={`text-sm font-bold ${isParcial ? "text-blue-400" : "text-amber-400"}`}>
                         ${pending.toFixed(2)}
                       </p>
                     </div>
@@ -251,16 +251,16 @@ export function OwnerAccountHeader({
             })}
           </div>
 
-          <div className="border-t-2 border-gray-200" />
+          <div className="border-t-2 border-white/10" />
 
           {pendingInvoices.length > 1 && onOpenPayAll && (
-            <div className="p-3 bg-gradient-to-br from-emerald-50 to-vet-light">
+            <div className="p-3 bg-emerald-500/10">
               <button
                 onClick={() => {
                   setShowPaymentDropdown(false);
                   onOpenPayAll();
                 }}
-                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg"
+                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-emerald-500/25"
               >
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-white/20 rounded-lg">
@@ -285,20 +285,19 @@ export function OwnerAccountHeader({
   return (
     <div className="mt-3 lg:mt-0">
       {/* Barra superior */}
-      <div className="bg-vet-secondary">
+      <div className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
-            {/* Lado izquierdo: Botón volver + título en móvil/tablet */}
+            {/* Lado izquierdo: Botón volver + título */}
             <div className="flex items-center gap-3">
               <button
                 onClick={onBack}
-                className="flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
+                className="flex items-center gap-2 text-slate-400 hover:text-vet-accent transition-colors duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span className="text-sm font-medium hidden lg:inline">Propietarios</span>
               </button>
               
-              {/* Título en móvil y tablet */}
               <span className="text-white font-medium text-sm lg:hidden">Propietario</span>
             </div>
 
@@ -312,22 +311,22 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasPets) setShowPetsDropdown(true);
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-vet-accent transition-all duration-200 group"
                 >
                   <PawPrint className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasPets && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-slate-900 bg-vet-accent rounded-full border-2 border-slate-900 shadow-lg shadow-vet-accent/30">
                       {patients.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block border border-white/10">
                     Mascotas
                   </span>
                 </button>
 
                 {showPetsDropdown && hasPets && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
+                  <div className="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                    <div className="bg-gradient-to-r from-vet-primary to-vet-accent px-4 py-3">
                       <p className="text-sm font-bold text-white">Mascotas</p>
                       <p className="text-xs text-white/80">{patients.length} registrada{patients.length !== 1 ? "s" : ""}</p>
                     </div>
@@ -336,21 +335,21 @@ export function OwnerAccountHeader({
                         <Link
                           key={pet._id}
                           to={`/patients/${pet._id}`}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100 last:border-0"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/10 last:border-0"
                           onClick={() => setShowPetsDropdown(false)}
                         >
                           {pet.photo ? (
-                            <img src={pet.photo} alt={pet.name} className="w-10 h-10 rounded-xl object-cover" />
+                            <img src={pet.photo} alt={pet.name} className="w-10 h-10 rounded-xl object-cover border border-white/10" />
                           ) : (
-                            <div className="w-10 h-10 rounded-xl bg-vet-light flex items-center justify-center">
-                              <PawPrint className="w-5 h-5 text-vet-primary" />
+                            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-white/10">
+                              <PawPrint className="w-5 h-5 text-vet-accent" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm truncate">{pet.name}</p>
-                            <p className="text-xs text-gray-500">{pet.species} {pet.breed ? `• ${pet.breed}` : ""}</p>
+                            <p className="font-medium text-white text-sm truncate">{pet.name}</p>
+                            <p className="text-xs text-slate-400">{pet.species} {pet.breed ? `• ${pet.breed}` : ""}</p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                          <ChevronRight className="w-4 h-4 text-slate-500" />
                         </Link>
                       ))}
                     </div>
@@ -366,22 +365,22 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasAppointments) setShowAppointmentsDropdown(true);
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-blue-400 transition-all duration-200 group"
                 >
                   <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasAppointments && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-blue-500 rounded-full border-2 border-slate-900 shadow-lg shadow-blue-500/30">
                       {appointments.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block border border-white/10">
                     Citas
                   </span>
                 </button>
 
                 {showAppointmentsDropdown && hasAppointments && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-slate-900 border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3">
                       <p className="text-sm font-bold text-white">Citas Activas</p>
                       <p className="text-xs text-white/80">{appointments.length} programada{appointments.length !== 1 ? "s" : ""}</p>
                     </div>
@@ -390,18 +389,18 @@ export function OwnerAccountHeader({
                         <Link
                           key={appt._id}
                           to={`/patients/${appt.patient._id}/appointments/${appt._id}`}
-                          className="block px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100 last:border-0"
+                          className="block px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/10 last:border-0"
                           onClick={() => setShowAppointmentsDropdown(false)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-vet-light flex items-center justify-center">
-                              <Calendar className="w-5 h-5 text-vet-primary" />
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                              <Calendar className="w-5 h-5 text-blue-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 text-sm">{appt.type}</p>
-                              <p className="text-xs text-gray-500">{appt.patient.name} • {formatDate(appt.date)}</p>
+                              <p className="font-medium text-white text-sm">{appt.type}</p>
+                              <p className="text-xs text-slate-400">{appt.patient.name} • {formatDate(appt.date)}</p>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                            <ChevronRight className="w-4 h-4 text-slate-500" />
                           </div>
                         </Link>
                       ))}
@@ -418,22 +417,22 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasGrooming) setShowGroomingDropdown(true);
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-purple-400 transition-all duration-200 group"
                 >
                   <Scissors className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasGrooming && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-purple-500 rounded-full border-2 border-slate-900 shadow-lg shadow-purple-500/30">
                       {groomingServices.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block border border-white/10">
                     Servicios Hoy
                   </span>
                 </button>
 
                 {showGroomingDropdown && hasGrooming && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-slate-900 border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                    <div className="bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3">
                       <p className="text-sm font-bold text-white">Servicios de Hoy</p>
                       <p className="text-xs text-white/80">{groomingServices.length} servicio{groomingServices.length !== 1 ? "s" : ""}</p>
                     </div>
@@ -442,18 +441,18 @@ export function OwnerAccountHeader({
                         <Link
                           key={service._id}
                           to={`/patients/${getPatientId(service)}/grooming-services/${service._id}`}
-                          className="block px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100 last:border-0"
+                          className="block px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/10 last:border-0"
                           onClick={() => setShowGroomingDropdown(false)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-vet-light flex items-center justify-center">
-                              <Scissors className="w-5 h-5 text-vet-primary" />
+                            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+                              <Scissors className="w-5 h-5 text-purple-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 text-sm">{service.service}</p>
-                              <p className="text-xs text-gray-500">{getPatientName(service)} • {formatDate(service.date)}</p>
+                              <p className="font-medium text-white text-sm">{service.service}</p>
+                              <p className="text-xs text-slate-400">{getPatientName(service)} • {formatDate(service.date)}</p>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                            <ChevronRight className="w-4 h-4 text-slate-500" />
                           </div>
                         </Link>
                       ))}
@@ -470,21 +469,21 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     if (hasInvoices) setShowInvoicesDropdown(true);
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-amber-400 transition-all duration-200 group"
                 >
                   <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
                   {hasInvoices && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-vet-secondary shadow-sm">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-slate-900 shadow-lg shadow-red-500/30">
                       {pendingInvoices.length}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden lg:block border border-white/10">
                     Facturas
                   </span>
                 </button>
 
                 {showInvoicesDropdown && hasInvoices && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-slate-900 border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
                     <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3">
                       <p className="text-sm font-bold text-white">Facturas Pendientes</p>
                       <p className="text-xs text-white/80">
@@ -500,32 +499,31 @@ export function OwnerAccountHeader({
                           <button
                             key={invoice._id}
                             onClick={() => {
-                              console.log("🔴 CLICK en factura:", invoice);
                               setShowInvoicesDropdown(false);
                               onPayInvoice(invoice);
                             }}
-                            className="w-full text-left px-4 py-3 hover:bg-amber-50 transition-colors border-b border-gray-100 last:border-0"
+                            className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/10 last:border-0"
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isParcial ? "bg-blue-100" : "bg-amber-100"}`}>
-                                <FileText className={`w-5 h-5 ${isParcial ? "text-blue-600" : "text-amber-600"}`} />
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isParcial ? "bg-blue-500/20 border border-blue-500/30" : "bg-amber-500/20 border border-amber-500/30"}`}>
+                                <FileText className={`w-5 h-5 ${isParcial ? "text-blue-400" : "text-amber-400"}`} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-900 text-sm truncate">
+                                <p className="font-medium text-white text-sm truncate">
                                   {getInvoiceDescription(invoice)}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-slate-400">
                                   {formatDateShort(invoice.date)}
                                   {isParcial && (
-                                    <span className="ml-2 text-blue-600 font-medium">Parcial</span>
+                                    <span className="ml-2 text-blue-400 font-medium">Parcial</span>
                                   )}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className={`text-sm font-bold ${isParcial ? "text-blue-600" : "text-amber-600"}`}>
+                                <p className={`text-sm font-bold ${isParcial ? "text-blue-400" : "text-amber-400"}`}>
                                   ${pending.toFixed(2)}
                                 </p>
-                                <p className="text-[10px] text-gray-400">Pendiente</p>
+                                <p className="text-[10px] text-slate-500">Pendiente</p>
                               </div>
                             </div>
                           </button>
@@ -534,13 +532,13 @@ export function OwnerAccountHeader({
                     </div>
 
                     {pendingInvoices.length > 1 && onOpenPayAll && (
-                      <div className="p-3 border-t border-gray-100 bg-gray-50">
+                      <div className="p-3 border-t border-white/10 bg-slate-800/50">
                         <button
                           onClick={() => {
                             setShowInvoicesDropdown(false);
                             onOpenPayAll();
                           }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-vet-primary to-vet-accent hover:from-vet-secondary hover:to-vet-primary text-white text-sm font-semibold rounded-xl transition-all"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-vet-accent to-cyan-400 hover:shadow-lg hover:shadow-vet-accent/25 text-slate-900 text-sm font-semibold rounded-xl transition-all"
                         >
                           <CreditCard className="w-4 h-4" />
                           Pagar Todo (${totalPending.toFixed(2)})
@@ -554,25 +552,25 @@ export function OwnerAccountHeader({
               {/* Separador */}
               <div className="w-px h-6 bg-white/20 mx-0.5 sm:mx-1" />
 
-              {/* Acciones - Desktop (solo lg+) */}
+              {/* Acciones - Desktop */}
               <div className="hidden lg:flex items-center gap-1">
                 <button
                   onClick={onEdit}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-vet-accent transition-colors duration-200"
+                  className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-vet-accent transition-colors duration-200"
                   title="Editar"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
                   onClick={onDelete}
-                  className="p-2 rounded-lg hover:bg-red-500/20 text-white/80 hover:text-red-300 transition-colors duration-200"
+                  className="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors duration-200"
                   title="Eliminar"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Acciones - Mobile y Tablet (menú desplegable) */}
+              {/* Acciones - Mobile */}
               <div className="relative lg:hidden" ref={actionsRef}>
                 <button
                   onClick={(e) => {
@@ -580,19 +578,19 @@ export function OwnerAccountHeader({
                     closeAllDropdowns();
                     setShowActionsMenu(true);
                   }}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-all duration-200"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
 
                 {showActionsMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 top-full mt-2 w-40 bg-slate-900 border border-white/20 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
                     <button
                       onClick={() => {
                         setShowActionsMenu(false);
                         onEdit();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-white/5 transition-colors"
                     >
                       <Edit className="w-4 h-4" />
                       Editar
@@ -602,7 +600,7 @@ export function OwnerAccountHeader({
                         setShowActionsMenu(false);
                         onDelete();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
                     >
                       <Trash2 className="w-4 h-4" />
                       Eliminar
@@ -616,17 +614,17 @@ export function OwnerAccountHeader({
       </div>
 
       {/* Info del propietario */}
-      <div className="bg-white border-b-2 border-vet-primary shadow-sm">
+      <div className="bg-slate-900/60 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-vet-primary to-vet-accent flex items-center justify-center text-white font-bold text-xl shadow-md">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-vet-accent to-cyan-400 flex items-center justify-center text-slate-900 font-bold text-xl shadow-lg shadow-vet-accent/30">
                 {getInitials(owner.name)}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-vet-text">{owner.name}</h1>
+                <h1 className="text-xl font-bold text-white">{owner.name}</h1>
                 {owner.nationalId && (
-                  <div className="flex items-center gap-1.5 text-vet-muted text-sm mt-0.5">
+                  <div className="flex items-center gap-1.5 text-slate-400 text-sm mt-0.5">
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>{owner.nationalId}</span>
                   </div>
@@ -634,7 +632,7 @@ export function OwnerAccountHeader({
               </div>
             </div>
 
-            <div className="hidden lg:block w-px h-12 bg-gray-200" />
+            <div className="hidden lg:block w-px h-12 bg-white/10" />
 
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               {owner.contact && (
@@ -642,7 +640,7 @@ export function OwnerAccountHeader({
                   href={`https://wa.me/${owner.contact.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-vet-muted hover:text-vet-primary transition-colors duration-200"
+                  className="flex items-center gap-2 text-slate-400 hover:text-green-400 transition-colors duration-200"
                 >
                   <Phone className="w-4 h-4" />
                   <span>{owner.contact}</span>
@@ -651,14 +649,14 @@ export function OwnerAccountHeader({
               {owner.email && (
                 <a
                   href={`mailto:${owner.email}`}
-                  className="flex items-center gap-2 text-vet-muted hover:text-vet-primary transition-colors duration-200"
+                  className="flex items-center gap-2 text-slate-400 hover:text-vet-accent transition-colors duration-200"
                 >
                   <Mail className="w-4 h-4" />
                   <span className="truncate max-w-[200px]">{owner.email}</span>
                 </a>
               )}
               {owner.address && (
-                <div className="flex items-center gap-2 text-vet-muted">
+                <div className="flex items-center gap-2 text-slate-400">
                   <MapPin className="w-4 h-4" />
                   <span className="truncate max-w-[200px]">{owner.address}</span>
                 </div>
@@ -669,69 +667,74 @@ export function OwnerAccountHeader({
       </div>
 
       {/* Balance */}
-      <div className="bg-sky-soft">
+      <div className="bg-slate-800/40 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           {isLoadingFinancial ? (
             <div className="flex items-center justify-center py-6">
-              <div className="w-6 h-6 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-vet-accent border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="col-span-2 lg:col-span-1 bg-vet-light rounded-xl p-4 border border-vet-muted/20 hover:border-vet-primary hover:shadow-md transition-all duration-200 cursor-default">
+              {/* Crédito */}
+              <div className="col-span-2 lg:col-span-1 bg-slate-900/60 backdrop-blur-sm rounded-xl p-4 border border-blue-500/20 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-default">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 bg-blue-100 rounded-lg">
-                    <Wallet className="w-4 h-4 text-vet-primary" />
+                  <div className="p-1.5 bg-blue-500/20 rounded-lg">
+                    <Wallet className="w-4 h-4 text-blue-400" />
                   </div>
-                  <span className="text-xs text-vet-muted uppercase tracking-wide font-semibold">Crédito</span>
+                  <span className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Crédito</span>
                 </div>
-                <p className="text-2xl font-bold text-vet-primary">${creditBalance.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-blue-400">${creditBalance.toFixed(2)}</p>
               </div>
 
-              <div className="bg-vet-light rounded-xl p-4 border border-vet-muted/20 hover:border-vet-primary hover:shadow-md transition-all duration-200 cursor-default">
+              {/* Consumido */}
+              <div className="bg-slate-900/60 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-vet-accent/40 hover:shadow-lg hover:shadow-vet-accent/10 transition-all duration-300 cursor-default">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-vet-accent/20 rounded-lg">
                     <TrendingUp className="w-4 h-4 text-vet-accent" />
                   </div>
-                  <span className="text-xs text-vet-muted uppercase tracking-wide font-semibold">Consumido</span>
+                  <span className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Consumido</span>
                 </div>
-                <p className="text-xl font-bold text-vet-text">${totalConsumed.toFixed(2)}</p>
+                <p className="text-xl font-bold text-white">${totalConsumed.toFixed(2)}</p>
               </div>
 
-              <div className="bg-vet-light rounded-xl p-4 border border-vet-muted/20 hover:border-emerald-400 hover:shadow-md transition-all duration-200 cursor-default">
+              {/* Pagado */}
+              <div className="bg-slate-900/60 backdrop-blur-sm rounded-xl p-4 border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 cursor-default">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 bg-emerald-100 rounded-lg">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <div className="p-1.5 bg-emerald-500/20 rounded-lg">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <span className="text-xs text-vet-muted uppercase tracking-wide font-semibold">Pagado</span>
+                  <span className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Pagado</span>
                 </div>
-                <p className="text-xl font-bold text-emerald-600">${totalPaid.toFixed(2)}</p>
+                <p className="text-xl font-bold text-emerald-400">${totalPaid.toFixed(2)}</p>
               </div>
 
-              <div className={`rounded-xl p-4 border transition-all duration-200 cursor-default ${
+              {/* Pendiente */}
+              <div className={`bg-slate-900/60 backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 cursor-default ${
                 totalPending > 0
-                  ? "bg-amber-50 border-amber-200 hover:border-amber-400 hover:shadow-md"
-                  : "bg-vet-light border-vet-muted/20 hover:border-vet-primary hover:shadow-md"
+                  ? "border-amber-500/30 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10"
+                  : "border-white/10 hover:border-white/20"
               }`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`p-1.5 rounded-lg ${totalPending > 0 ? "bg-amber-100" : "bg-gray-100"}`}>
+                  <div className={`p-1.5 rounded-lg ${totalPending > 0 ? "bg-amber-500/20" : "bg-slate-700"}`}>
                     {totalPending > 0 ? (
-                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                      <AlertCircle className="w-4 h-4 text-amber-400" />
                     ) : (
-                      <TrendingDown className="w-4 h-4 text-vet-muted" />
+                      <TrendingDown className="w-4 h-4 text-slate-500" />
                     )}
                   </div>
-                  <span className={`text-xs uppercase tracking-wide font-semibold ${totalPending > 0 ? "text-amber-700" : "text-vet-muted"}`}>
+                  <span className={`text-xs uppercase tracking-wide font-semibold ${totalPending > 0 ? "text-amber-400" : "text-slate-400"}`}>
                     Pendiente
                   </span>
                 </div>
-                <p className={`text-xl font-bold ${totalPending > 0 ? "text-amber-600" : "text-vet-muted"}`}>
+                <p className={`text-xl font-bold ${totalPending > 0 ? "text-amber-400" : "text-slate-500"}`}>
                   ${totalPending.toFixed(2)}
                 </p>
                 {pendingInvoices.length > 0 && (
-                  <p className="text-xs text-amber-600/80 mt-1">{pendingInvoices.length} factura{pendingInvoices.length > 1 ? "s" : ""}</p>
+                  <p className="text-xs text-amber-500/80 mt-1">{pendingInvoices.length} factura{pendingInvoices.length > 1 ? "s" : ""}</p>
                 )}
               </div>
 
+              {/* Botón Pagar */}
               {totalPending > 0 && (
                 <div className="col-span-2 lg:col-span-1 flex items-center" ref={paymentRef}>
                   <button
@@ -741,7 +744,7 @@ export function OwnerAccountHeader({
                       closeAllDropdowns();
                       setShowPaymentDropdown(true);
                     }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-vet-primary to-vet-accent hover:from-vet-secondary hover:to-vet-primary text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-vet-accent to-cyan-400 hover:from-cyan-400 hover:to-vet-accent text-slate-900 font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-vet-accent/30 transform hover:-translate-y-0.5"
                   >
                     <CreditCard className="w-5 h-5" />
                     <span>Pagar</span>

@@ -52,7 +52,7 @@ const PatientAvatar = ({
       <img
         src={patient.photo!}
         alt={patient.name}
-        className={`${sizeClasses[size]} rounded-lg object-cover flex-shrink-0 border border-gray-200`}
+        className={`${sizeClasses[size]} rounded-lg object-cover flex-shrink-0 border border-slate-700`}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.onerror = null;
@@ -65,7 +65,7 @@ const PatientAvatar = ({
   
   return (
     <div className={`${sizeClasses[size]} rounded-lg flex items-center justify-center flex-shrink-0 ${
-      patient.species === 'felino' ? 'bg-purple-100' : 'bg-blue-100'
+      patient.species === 'felino' ? 'bg-purple-900/30' : 'bg-blue-900/30'
     }`}>
       <span className={size === "lg" ? "text-xl" : "text-lg"}>
         {patient.species === 'felino' ? '🐱' : '🐕'}
@@ -243,25 +243,25 @@ export function PatientSelectionTab({
           </div>
 
           {/* Card del paciente pre-cargado */}
-          <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
+          <div className="p-4 bg-emerald-900/20 border-2 border-emerald-700/50 rounded-xl">
             <div className="flex items-center gap-4">
               <PatientAvatar patient={preloadedPatient} size="lg" />
               <div className="flex-1 min-w-0">
-                <p className="text-lg font-bold text-emerald-800">
+                <p className="text-lg font-bold text-emerald-400">
                   {preloadedPatient.name}
                 </p>
-                <p className="text-sm text-emerald-600">
+                <p className="text-sm text-emerald-300">
                   {preloadedPatient.species === 'canino' ? '🐕' : '🐱'} {preloadedPatient.species} 
                   {preloadedPatient.breed && ` • ${preloadedPatient.breed}`}
                 </p>
                 {getOwnerName(preloadedPatient.owner) && (
-                  <p className="text-xs text-emerald-500 mt-1">
+                  <p className="text-xs text-emerald-400 mt-1">
                     <User className="w-3 h-3 inline mr-1" />
                     Dueño: {getOwnerName(preloadedPatient.owner)}
                   </p>
                 )}
               </div>
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 flex-shrink-0" />
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 flex-shrink-0" />
             </div>
           </div>
 
@@ -281,7 +281,7 @@ export function PatientSelectionTab({
     }
   }
 
-  // 🎯 CASO 2: Formulario manual para paciente referido (sin cambios)
+  // 🎯 CASO 2: Formulario manual para paciente referido
   if (isManual) {
     return (
       <div className="space-y-5">
@@ -298,7 +298,7 @@ export function PatientSelectionTab({
         </div>
 
         {/* Datos del Paciente */}
-        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+        <div className="p-4 rounded-xl bg-slate-800 border border-slate-700">
           <h4 className="text-xs font-bold text-vet-text uppercase tracking-wide mb-3 flex items-center gap-2">
             <PawPrint className="w-4 h-4 text-vet-primary" />
             Datos del Paciente
@@ -306,25 +306,25 @@ export function PatientSelectionTab({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="col-span-2 sm:col-span-1">
               <label className="block text-vet-text font-semibold text-xs mb-1">
-                Nombre <span className="text-red-500">*</span>
+                Nombre <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 text-vet-text"
                 placeholder="Ej: Max"
               />
             </div>
 
             <div>
               <label className="block text-vet-text font-semibold text-xs mb-1">
-                Especie <span className="text-red-500">*</span>
+                Especie <span className="text-red-400">*</span>
               </label>
               <select
                 value={species}
                 onChange={(e) => setSpecies(e.target.value as "canino" | "felino")}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary text-vet-text"
               >
                 <option value="canino"> Canino</option>
                 <option value="felino"> Felino</option>
@@ -337,7 +337,7 @@ export function PatientSelectionTab({
                 type="text"
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary text-vet-text"
                 placeholder="Ej: Labrador"
               />
             </div>
@@ -347,7 +347,7 @@ export function PatientSelectionTab({
               <select
                 value={sex}
                 onChange={(e) => setSex(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary text-vet-text"
               >
                 <option value="">Seleccionar</option>
                 <option value="Macho">Macho</option>
@@ -361,7 +361,7 @@ export function PatientSelectionTab({
                 type="text"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary text-vet-text"
                 placeholder="Ej: 2 años"
               />
             </div>
@@ -373,7 +373,7 @@ export function PatientSelectionTab({
                 step="0.1"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value === "" ? "" : Number(e.target.value))}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vet-primary text-vet-text"
                 placeholder="12.5"
               />
             </div>
@@ -381,20 +381,20 @@ export function PatientSelectionTab({
         </div>
 
         {/* Datos del Dueño */}
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
-          <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-3 flex items-center gap-2">
-            <User className="w-4 h-4 text-amber-600" />
-            Datos del Dueño <span className="text-red-500">*</span>
+        <div className="p-4 rounded-xl bg-amber-900/20 border border-amber-700/30">
+          <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <User className="w-4 h-4 text-amber-400" />
+            Datos del Dueño <span className="text-red-400">*</span>
           </h4>
           <div>
-            <label className="block text-amber-800 font-semibold text-xs mb-1">
+            <label className="block text-amber-400 font-semibold text-xs mb-1">
               Nombre del Dueño
             </label>
             <input
               type="text"
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
-              className="w-full bg-white border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
+              className="w-full bg-slate-800 border border-amber-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-700/30 text-vet-text"
               placeholder="Nombre completo"
             />
           </div>
@@ -405,7 +405,7 @@ export function PatientSelectionTab({
           <button
             type="button"
             onClick={() => setIsManual(false)}
-            className="px-4 py-2.5 text-sm text-vet-text bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+            className="px-4 py-2.5 text-sm text-vet-text bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-colors"
           >
             Volver
           </button>
@@ -416,7 +416,7 @@ export function PatientSelectionTab({
             className={`px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 transition-all ${
               patientName && ownerName
                 ? "bg-vet-primary text-white hover:bg-vet-secondary shadow-lg shadow-vet-primary/25"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-slate-700 text-slate-500 cursor-not-allowed"
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
@@ -427,7 +427,7 @@ export function PatientSelectionTab({
     );
   }
 
-  // 🎯 CASO 3: Selección de paciente desde dashboard (sin cambios)
+  // 🎯 CASO 3: Selección de paciente desde dashboard
   return (
     <div className="space-y-5">
       <div className="text-center">
@@ -447,7 +447,7 @@ export function PatientSelectionTab({
         <button
           type="button"
           onClick={handleUseManual}
-          className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-vet-primary/30 bg-vet-primary/5 text-vet-primary font-medium hover:border-vet-primary hover:bg-vet-primary/10 transition-all"
+          className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-vet-primary/30 bg-vet-primary/10 text-vet-primary font-medium hover:border-vet-primary hover:bg-vet-primary/20 transition-all"
         >
           <UserPlus className="w-5 h-5" />
           <span>Paciente Referido</span>
@@ -459,7 +459,7 @@ export function PatientSelectionTab({
           className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium transition-all ${
             selectedPatient
               ? "bg-vet-primary text-white shadow-lg shadow-vet-primary/25 hover:bg-vet-secondary"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-slate-700 text-slate-500 cursor-not-allowed"
           }`}
         >
           <CheckCircle2 className="w-5 h-5" />
@@ -469,13 +469,13 @@ export function PatientSelectionTab({
 
       {/* Buscador */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar por nombre, raza o dueño..."
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20"
+          className="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 bg-slate-800 text-vet-text"
           autoFocus
         />
       </div>
@@ -487,7 +487,7 @@ export function PatientSelectionTab({
           <span className="ml-2 text-sm text-vet-muted">Cargando pacientes...</span>
         </div>
       ) : (
-        <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-700 divide-y divide-slate-700">
           {filteredPatients.length > 0 ? (
             filteredPatients.map((patient) => {
               const ownerDisplayName = getOwnerName(patient.owner);
@@ -499,8 +499,8 @@ export function PatientSelectionTab({
                   onClick={() => setSelectedPatient(patient)}
                   className={`p-3 cursor-pointer transition-all flex items-center gap-3 ${
                     isSelected
-                      ? "bg-vet-primary/10 border-l-4 border-l-vet-primary"
-                      : "hover:bg-gray-50 border-l-4 border-l-transparent"
+                      ? "bg-vet-primary/20 border-l-4 border-l-vet-primary"
+                      : "hover:bg-slate-700/50 border-l-4 border-l-transparent"
                   }`}
                 >
                   <PatientAvatar patient={patient} size="md" />
@@ -516,7 +516,7 @@ export function PatientSelectionTab({
                     <CheckCircle2 className="w-5 h-5 text-vet-primary flex-shrink-0" />
                   )}
                   <ChevronRight className={`w-4 h-4 flex-shrink-0 ${
-                    isSelected ? 'text-vet-primary' : 'text-gray-300'
+                    isSelected ? 'text-vet-primary' : 'text-slate-400'
                   }`} />
                 </div>
               );
@@ -534,7 +534,7 @@ export function PatientSelectionTab({
             </div>
           ) : (
             <div className="p-6 text-center text-vet-muted">
-              <Search className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <Search className="w-8 h-8 mx-auto mb-2 text-slate-500" />
               <p className="text-sm">Escriba para buscar pacientes...</p>
             </div>
           )}
@@ -543,18 +543,18 @@ export function PatientSelectionTab({
 
       {/* Paciente seleccionado preview */}
       {selectedPatient && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+        <div className="p-3 bg-emerald-900/20 border border-emerald-700/50 rounded-xl flex items-center gap-3">
           <PatientAvatar patient={selectedPatient} size="lg" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-emerald-800">
+            <p className="text-sm font-semibold text-emerald-400">
               Paciente seleccionado: {selectedPatient.name}
             </p>
-            <p className="text-xs text-emerald-600 truncate">
+            <p className="text-xs text-emerald-300 truncate">
               {selectedPatient.species} • {selectedPatient.breed || "Sin raza"} 
               {getOwnerName(selectedPatient.owner) && ` • Dueño: ${getOwnerName(selectedPatient.owner)}`}
             </p>
           </div>
-          <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0" />
+          <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
         </div>
       )}
     </div>

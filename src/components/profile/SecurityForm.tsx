@@ -71,11 +71,11 @@ const SecurityForm: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-vet-text flex items-center gap-2">
           <Shield className="w-5 h-5 text-vet-primary" />
           Cambiar Contraseña
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-vet-muted mt-1">
           Asegúrate de usar una contraseña segura que no uses en otros sitios
         </p>
       </div>
@@ -83,8 +83,8 @@ const SecurityForm: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Contraseña actual */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <Lock className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-text mb-2">
+            <Lock className="w-4 h-4 text-vet-muted" />
             Contraseña Actual
           </label>
           <div className="relative">
@@ -95,15 +95,15 @@ const SecurityForm: React.FC = () => {
               })}
               className={`
                 w-full px-4 py-3 pr-12 rounded-xl border transition-all
-                border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20
-                ${errors.currentPassword ? "border-red-300 focus:border-red-500" : ""}
+                border-slate-700 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 bg-slate-800 text-vet-text
+                ${errors.currentPassword ? "border-red-700/50 focus:border-red-500" : ""}
               `}
               placeholder="Ingresa tu contraseña actual"
             />
             <button
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-vet-text"
             >
               {showCurrentPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -113,7 +113,7 @@ const SecurityForm: React.FC = () => {
             </button>
           </div>
           {errors.currentPassword && (
-            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               {errors.currentPassword.message}
             </p>
@@ -122,8 +122,8 @@ const SecurityForm: React.FC = () => {
 
         {/* Nueva contraseña */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <Lock className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-text mb-2">
+            <Lock className="w-4 h-4 text-vet-muted" />
             Nueva Contraseña
           </label>
           <div className="relative">
@@ -138,15 +138,15 @@ const SecurityForm: React.FC = () => {
               })}
               className={`
                 w-full px-4 py-3 pr-12 rounded-xl border transition-all
-                border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20
-                ${errors.password ? "border-red-300 focus:border-red-500" : ""}
+                border-slate-700 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 bg-slate-800 text-vet-text
+                ${errors.password ? "border-red-700/50 focus:border-red-500" : ""}
               `}
               placeholder="Ingresa tu nueva contraseña"
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-vet-text"
             >
               {showNewPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -156,7 +156,7 @@ const SecurityForm: React.FC = () => {
             </button>
           </div>
           {errors.password && (
-            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               {errors.password.message}
             </p>
@@ -166,7 +166,7 @@ const SecurityForm: React.FC = () => {
           {password && (
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${getStrengthColor()}`}
                     style={{ width: `${(passwordStrength / 4) * 100}%` }}
@@ -180,7 +180,7 @@ const SecurityForm: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div
                   className={`flex items-center gap-1 ${
-                    passwordChecks.minLength ? "text-green-600" : "text-gray-400"
+                    passwordChecks.minLength ? "text-green-400" : "text-vet-muted"
                   }`}
                 >
                   <CheckCircle className="w-3 h-3" />
@@ -188,7 +188,7 @@ const SecurityForm: React.FC = () => {
                 </div>
                 <div
                   className={`flex items-center gap-1 ${
-                    passwordChecks.hasUppercase ? "text-green-600" : "text-gray-400"
+                    passwordChecks.hasUppercase ? "text-green-400" : "text-vet-muted"
                   }`}
                 >
                   <CheckCircle className="w-3 h-3" />
@@ -196,7 +196,7 @@ const SecurityForm: React.FC = () => {
                 </div>
                 <div
                   className={`flex items-center gap-1 ${
-                    passwordChecks.hasLowercase ? "text-green-600" : "text-gray-400"
+                    passwordChecks.hasLowercase ? "text-green-400" : "text-vet-muted"
                   }`}
                 >
                   <CheckCircle className="w-3 h-3" />
@@ -204,7 +204,7 @@ const SecurityForm: React.FC = () => {
                 </div>
                 <div
                   className={`flex items-center gap-1 ${
-                    passwordChecks.hasNumber ? "text-green-600" : "text-gray-400"
+                    passwordChecks.hasNumber ? "text-green-400" : "text-vet-muted"
                   }`}
                 >
                   <CheckCircle className="w-3 h-3" />
@@ -217,8 +217,8 @@ const SecurityForm: React.FC = () => {
 
         {/* Confirmar nueva contraseña */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <Lock className="w-4 h-4 text-gray-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-vet-text mb-2">
+            <Lock className="w-4 h-4 text-vet-muted" />
             Confirmar Nueva Contraseña
           </label>
           <div className="relative">
@@ -231,15 +231,15 @@ const SecurityForm: React.FC = () => {
               })}
               className={`
                 w-full px-4 py-3 pr-12 rounded-xl border transition-all
-                border-gray-300 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20
-                ${errors.confirmPassword ? "border-red-300 focus:border-red-500" : ""}
+                border-slate-700 focus:border-vet-primary focus:ring-2 focus:ring-vet-primary/20 bg-slate-800 text-vet-text
+                ${errors.confirmPassword ? "border-red-700/50 focus:border-red-500" : ""}
               `}
               placeholder="Confirma tu nueva contraseña"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-vet-text"
             >
               {showConfirmPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -249,7 +249,7 @@ const SecurityForm: React.FC = () => {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               {errors.confirmPassword.message}
             </p>
@@ -277,8 +277,8 @@ const SecurityForm: React.FC = () => {
       </form>
 
       {/* Link a recuperar contraseña */}
-      <div className="pt-4 border-t border-gray-100 text-center">
-        <p className="text-sm text-gray-500">
+      <div className="pt-4 border-t border-slate-700 text-center">
+        <p className="text-sm text-vet-muted">
           ¿Olvidaste tu contraseña actual?{" "}
           <Link
             to="/auth/forgot-password"

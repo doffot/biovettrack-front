@@ -1,4 +1,3 @@
-// src/components/patients/PatientList.tsx
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Patient, Owner } from "../../types";
 import PatientCard from "./PatientCard";
@@ -51,8 +50,8 @@ export default function PatientList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <p className="text-sm text-vet-muted">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--color-border)]">
+          <p className="text-sm text-[var(--color-vet-muted)]">
             {startIndex + 1}-{Math.min(startIndex + itemsPerPage, patients.length)} de {patients.length}
           </p>
 
@@ -60,14 +59,14 @@ export default function PatientList({
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[var(--color-vet-text)]"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
             {generatePageNumbers(currentPage, totalPages).map((page, idx) =>
               page === "..." ? (
-                <span key={`ellipsis-${idx}`} className="px-2 text-vet-muted text-sm">
+                <span key={`ellipsis-${idx}`} className="px-2 text-[var(--color-vet-muted)] text-sm">
                   ...
                 </span>
               ) : (
@@ -76,8 +75,8 @@ export default function PatientList({
                   onClick={() => onPageChange(page as number)}
                   className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-colors ${
                     currentPage === page
-                      ? "bg-vet-primary text-white"
-                      : "hover:bg-gray-100 text-vet-text"
+                      ? "bg-[var(--color-vet-primary)] text-white"
+                      : "hover:bg-[var(--color-hover)] text-[var(--color-vet-text)]"
                   }`}
                 >
                   {page}
@@ -88,7 +87,7 @@ export default function PatientList({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[var(--color-vet-text)]"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

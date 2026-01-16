@@ -1,4 +1,3 @@
-// src/components/consultations/form-fields/TextArea.tsx
 interface TextAreaProps {
   label: string;
   name: string;
@@ -20,7 +19,7 @@ export default function TextArea({
 }: TextAreaProps) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-600 mb-1">
+      <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
         {label}
       </label>
       <textarea
@@ -29,7 +28,7 @@ export default function TextArea({
         onChange={onChange}
         rows={rows}
         maxLength={maxLength}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary resize-none"
+        className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] resize-none bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
         placeholder={placeholder}
       />
     </div>

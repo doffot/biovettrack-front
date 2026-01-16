@@ -106,7 +106,7 @@ export default function LoginView() {
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 md:p-8">
           <div className="w-full max-w-md">
             {/* Logo SVG centrado */}
-            <div className="flex justify-center mb-6 md:mb-8">
+            <div className="flex justify-center mb-6 md:mb-4">
               <img
                 src="/logo_main.svg"
                 alt="BioVetTrack Logo"

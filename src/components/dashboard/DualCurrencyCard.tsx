@@ -1,4 +1,4 @@
-// src/views/dashboard/components/DualCurrencyCard.tsx
+// src/components/dashboard/DualCurrencyCard.tsx
 import type { LucideIcon } from "lucide-react";
 import type { CurrencyAmounts } from "../../constants/dashboardConstants";
 import type { RevenueAmounts } from "../../hooks/useDashboardData";
@@ -10,6 +10,7 @@ interface DualCurrencyCardProps {
   icon: LucideIcon;
   color: string;
   bgColor: string;
+  iconBgColor?: string; // 👈 NUEVA PROP
   onClick?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function DualCurrencyCard({
   icon: Icon,
   color,
   bgColor,
+  iconBgColor = "bg-slate-800/80", 
   onClick,
 }: DualCurrencyCardProps) {
   const formatUSD = (amount: number) => `$${amount.toFixed(2)}`;
@@ -40,11 +42,11 @@ export function DualCurrencyCard({
   return (
     <div
       className={`
-        ${bgColor} rounded-xl p-3 border border-vet-light shadow-soft 
-        transition-all duration-200 animate-scale-in group
+        ${bgColor} rounded-xl p-4 shadow-lg
+        transition-all duration-300 animate-scale-in group
         ${isClickable
-          ? "cursor-pointer hover:shadow-card hover:scale-[1.02] active:scale-[0.98] hover:border-orange-200"
-          : "hover:shadow-card"
+          ? "cursor-pointer hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+          : "hover:shadow-xl"
         }
       `}
       onClick={onClick}
@@ -59,21 +61,22 @@ export function DualCurrencyCard({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-[10px] font-semibold text-vet-muted uppercase tracking-wide">
+          {/* Título */}
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
             {title}
           </p>
 
           {/* Total en USD (si tiene) */}
           {hasTotal ? (
             <>
-              <p className={`text-xl font-bold ${color} mt-0.5`}>
+              <p className={`text-2xl font-bold ${color} mb-1`}>
                 {formatUSD(amounts.totalUSD)}
               </p>
-              <div className="text-[10px] text-vet-muted mt-0.5 space-y-0.5">
-                <p>{formatUSD(amounts.USD)} USD</p>
+              <div className="text-xs text-slate-500 space-y-1">
+                <p className="font-medium">{formatUSD(amounts.USD)} USD</p>
                 {hasBs && (
-                  <p>
-                    {formatUSD(amounts.bsInUSD)} ({formatBs(amounts.Bs)})
+                  <p className="font-medium">
+                    {formatUSD(amounts.bsInUSD)} <span className="text-slate-600">({formatBs(amounts.Bs)})</span>
                   </p>
                 )}
               </div>
@@ -81,11 +84,11 @@ export function DualCurrencyCard({
           ) : (
             <>
               {/* USD */}
-              <p className={`text-lg font-bold ${color} mt-0.5`}>
+              <p className={`text-2xl font-bold ${color} mb-1`}>
                 {formatUSD(amounts.USD)}
               </p>
               {/* Bolívares */}
-              <p className="text-xs font-semibold text-vet-muted">
+              <p className="text-sm font-semibold text-slate-500">
                 {formatBs(amounts.Bs)}
               </p>
             </>
@@ -93,19 +96,27 @@ export function DualCurrencyCard({
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="text-[10px] text-vet-muted mt-0.5 flex items-center gap-1">
+            <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-600"></span>
               {subtitle}
               {isClickable && (
-                <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  • Ver detalles
+                <span className="text-vet-accent opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                  → Ver detalles
                 </span>
               )}
             </p>
           )}
         </div>
         
-        <div className={`p-2 rounded-lg bg-white/50 group-hover:bg-white/70 transition-colors`}>
-          <Icon className={`w-5 h-5 ${color}`} />
+        {/* Icono con fondo personalizable */}
+        <div className={`
+          ${iconBgColor} 
+          p-3 rounded-xl 
+          group-hover:scale-110 
+          transition-all duration-300
+          shadow-lg
+        `}>
+          <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
     </div>

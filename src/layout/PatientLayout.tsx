@@ -1,4 +1,3 @@
-// src/layouts/PatientLayout.tsx
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -15,10 +14,10 @@ import {
   Activity,
   FileText,
   Bug,
-  ChevronRight,
-  Heart,
-  Sparkles,
+  ChevronDown,
   DollarSign,
+  Menu,
+  X,
 } from "lucide-react";
 import { useParams, Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -34,18 +33,22 @@ export default function PatientLayout() {
   const { patientId } = useParams<{ patientId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showAppointmentsDropdown, setShowAppointmentsDropdown] = useState(false);
   const [showGroomingDropdown, setShowGroomingDropdown] = useState(false);
   const [showDebtDropdown, setShowDebtDropdown] = useState(false);
+  const [showPatientInfo, setShowPatientInfo] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const appointmentsRef = useRef<HTMLDivElement>(null);
   const groomingRef = useRef<HTMLDivElement>(null);
   const debtRef = useRef<HTMLDivElement>(null);
-
-  const queryClient = useQueryClient();
+  const patientInfoRef = useRef<HTMLDivElement>(null);
+  const navScrollRef = useRef<HTMLDivElement>(null);
 
   // Queries
   const { data: patient, isLoading } = useQuery({
@@ -105,18 +108,39 @@ export default function PatientLayout() {
       if (debtRef.current && !debtRef.current.contains(event.target as Node)) {
         setShowDebtDropdown(false);
       }
+      if (patientInfoRef.current && !patientInfoRef.current.contains(event.target as Node)) {
+        setShowPatientInfo(false);
+      }
     };
 
-    if (showAppointmentsDropdown || showGroomingDropdown || showDebtDropdown) {
-      document.addEventListener("click", handleClickOutside);
-      return () => document.removeEventListener("click", handleClickOutside);
-    }
-  }, [showAppointmentsDropdown, showGroomingDropdown, showDebtDropdown]);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setShowAppointmentsDropdown(false);
     setShowGroomingDropdown(false);
     setShowDebtDropdown(false);
+    setShowPatientInfo(false);
+    setShowMobileMenu(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (navScrollRef.current) {
+      const activeItem = navScrollRef.current.querySelector('[data-active="true"]');
+      if (activeItem) {
+        activeItem.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
   }, [location.pathname]);
 
   const { mutate: removePatient, isPending: isDeleting } = useMutation({
@@ -126,7 +150,7 @@ export default function PatientLayout() {
       setShowDeleteModal(false);
     },
     onSuccess: () => {
-      toast.warning('Mascota eliminada',' ha sido retirada cliente.');
+      toast.warning("Mascota eliminada", " ha sido retirada del cliente.");
       queryClient.invalidateQueries({ queryKey: ["patients"] });
       navigate("/patients");
     },
@@ -140,40 +164,6 @@ export default function PatientLayout() {
     setShowDeleteModal(true);
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [location.pathname]);
-
-  const getActiveSectionName = () => {
-    const sections = [
-      { path: "", label: "Datos de la Mascota" },
-      { path: "consultations", label: "Consultas" },
-      { path: "recipes", label: "Recetas" },
-      { path: "vaccinations", label: "Vacunas" },
-      { path: "dewormings", label: "Desparasitación" },
-      { path: "lab-exams", label: "Hematología" },
-      { path: "studies", label: "Estudios" },
-      { path: "grooming-services", label: "Peluquería" },
-      { path: "appointments", label: "Citas" },
-    ];
-
-    for (const section of sections) {
-      const baseUrl = section.path
-        ? `/patients/${patientId}/${section.path}`
-        : `/patients/${patientId}`;
-
-      if (section.path ? location.pathname.includes(section.path) : location.pathname === baseUrl) {
-        return section.label;
-      }
-    }
-    return "Expediente";
-  };
-
   const formatTime = (date: Date) =>
     date.toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
 
@@ -181,7 +171,7 @@ export default function PatientLayout() {
     date.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const calculateAge = () => {
-    if (!patient?.birthDate) return "";
+    if (!patient?.birthDate) return "—";
     const birth = new Date(patient.birthDate);
     const today = new Date();
     const months = (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth());
@@ -190,18 +180,34 @@ export default function PatientLayout() {
     if (months < 12) return `${months} ${months === 1 ? "mes" : "meses"}`;
 
     const years = Math.floor(months / 12);
-    return `${years} ${years === 1 ? "año" : "años"}`;
+    const remainingMonths = months % 12;
+    if (remainingMonths === 0) return `${years} ${years === 1 ? "año" : "años"}`;
+    return `${years}a ${remainingMonths}m`;
   };
+
+  const isCanino = patient?.species?.toLowerCase() === "canino";
+
+  const menuItems = [
+    { id: "datos", label: "Información", icon: PawPrint, path: "", description: "Datos básicos" },
+    { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
+    { id: "recetas", label: "Recetas", icon: FileText, path: "recipes", description: "Prescripciones" },
+    { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
+    { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings", description: "Control de parásitos" },
+    { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams", description: "Exámenes de sangre" },
+    { id: "estudios", label: "Estudios", icon: FileText, path: "studies", description: "Rayos X, ecografías" },
+    { id: "peluqueria", label: "Peluquería", icon: Scissors, path: "grooming-services", description: "Servicios estéticos" },
+    { id: "citas", label: "Nueva Cita", icon: Calendar, path: "appointments/create", description: "Agendar consulta" },
+  ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-vet-gradient">
+      <div className="patient-loading">
         <div className="text-center">
           <div className="relative">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-vet-light border-t-vet-primary rounded-full animate-spin" />
-            <PawPrint className="w-6 h-6 text-vet-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <div className="patient-loading-spinner" />
+            <PawPrint className="patient-loading-icon" />
           </div>
-          <p className="text-vet-text font-medium text-lg">Cargando expediente...</p>
+          <p className="patient-loading-text">Cargando expediente...</p>
         </div>
       </div>
     );
@@ -209,18 +215,15 @@ export default function PatientLayout() {
 
   if (!patient) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-vet-gradient">
-        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-card text-center max-w-md w-full">
-          <div className="w-20 h-20 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
-            <PawPrint className="w-10 h-10 text-red-400" />
+      <div className="patient-not-found">
+        <div className="patient-not-found-card">
+          <div className="patient-not-found-icon-wrapper">
+            <PawPrint className="patient-not-found-icon" />
           </div>
-          <h2 className="text-2xl font-bold text-vet-text mb-2">Paciente no encontrado</h2>
-          <p className="text-vet-muted mb-6">El expediente que buscas no existe o fue eliminado.</p>
-          <button
-            onClick={() => navigate("/patients")}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 shadow-soft hover:shadow-lg"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <h2 className="patient-not-found-title">Paciente no encontrado</h2>
+          <p className="patient-not-found-text">El expediente que buscas no existe o fue eliminado.</p>
+          <button onClick={() => navigate("/patients")} className="patient-not-found-button">
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             Volver a pacientes
           </button>
         </div>
@@ -228,54 +231,178 @@ export default function PatientLayout() {
     );
   }
 
-  const isCanino = patient.species?.toLowerCase() === "canino";
-
-  const menuItems = [
-    { id: "datos", label: "Información", icon: PawPrint, path: "", description: "Datos básicos" },
-    { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
-    { id: "recetas", label: "Recetas", icon: FileText, path: "recipes", description: "Prescripciones médicas" },
-    { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
-    { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings", description: "Control de parásitos" },
-    { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams", description: "Exámenes de sangre" },
-    { id: "estudios", label: "Estudios", icon: FileText, path: "studies", description: "Rayos X, ecografías" },
-    { id: "peluqueria", label: "Peluquería", icon: Scissors, path: "grooming-services", description: "Servicios estéticos" },
-    { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create", description: "Agendar consulta" },
-  ];
+  const ownerName = typeof patient.owner === "object" && patient.owner?.name ? patient.owner.name : "Propietario";
+  const ownerId = typeof patient.owner === "string" ? patient.owner : patient.owner?._id;
 
   return (
     <>
-      {/* Header - Solo navegación e indicadores */}
-      <div className="fixed top-14 left-0 right-0 lg:top-16 lg:left-64 z-40 bg-vet-secondary mt-3 lg:mt-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between">
-            {/* Botón volver + Info */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex-shrink-0 flex items-center gap-2 text-white/80 hover:text-vet-accent transition-colors duration-200"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="text-sm font-medium hidden lg:inline">Volver</span>
+      {/* HEADER NIVEL 1: Info del Paciente + Indicadores */}
+      <div className="patient-header-level-1">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="patient-header-level-1-inner">
+            {/* Lado Izquierdo */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <button onClick={() => navigate("/patients")} className="back-button" title="Volver a pacientes">
+                <ArrowLeft className="back-button-icon" />
               </button>
 
-              <div className="hidden sm:block w-px h-6 bg-white/20 flex-shrink-0" />
+              <div className="header-divider" />
 
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="p-1.5 bg-white/10 rounded-lg flex-shrink-0">
-                  <PawPrint className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-sm font-bold text-white leading-tight truncate">
-                    {getActiveSectionName()}
-                  </h1>
-                  <p className="text-xs text-white/60 truncate hidden sm:block">{patient.name}</p>
-                </div>
+              {/* Info del Paciente */}
+              <div className="relative flex-1 min-w-0" ref={patientInfoRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPatientInfo(!showPatientInfo);
+                  }}
+                  className="patient-info-trigger w-full"
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className={`patient-photo-header ${isCanino ? "patient-photo-header-canino" : "patient-photo-header-felino"}`}>
+                      {patient.photo ? (
+                        <img src={patient.photo} alt={patient.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl">
+                          {isCanino ? "🐕" : "🐱"}
+                        </div>
+                      )}
+                    </div>
+                    <div className={`patient-sex-badge ${patient.sex === "Macho" ? "patient-sex-badge-macho" : "patient-sex-badge-hembra"}`}>
+                      {patient.sex === "Macho" ? "♂" : "♀"}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center gap-1.5">
+                      <h1 className="patient-name-header">{patient.name}</h1>
+                      <ChevronDown className={`w-3.5 h-3.5 text-[var(--color-vet-muted)] transition-transform flex-shrink-0 ${showPatientInfo ? "rotate-180" : ""}`} />
+                    </div>
+                    <div className="patient-meta-header">
+                      <span className="truncate max-w-[80px] sm:max-w-none">{patient.breed || patient.species}</span>
+                      <span className="text-[var(--color-vet-muted)]">•</span>
+                      <span className="flex-shrink-0">{calculateAge()}</span>
+                      {patient.weight && (
+                        <>
+                          <span className="text-[var(--color-vet-muted)] show-sm">•</span>
+                          <span className="show-sm flex-shrink-0">{patient.weight} kg</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {/* Dropdown Info del Paciente */}
+                {showPatientInfo && (
+                  <div className="patient-dropdown">
+                    <div className={`patient-dropdown-header ${isCanino ? "patient-dropdown-header-canino" : "patient-dropdown-header-felino"}`}>
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="relative group">
+                          <div className="patient-dropdown-photo">
+                            {patient.photo ? (
+                              <img src={patient.photo} alt={patient.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-3xl sm:text-4xl">
+                                {isCanino ? "🐕" : "🐱"}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowPatientInfo(false);
+                              setShowPhotoModal(true);
+                            }}
+                            className="absolute -bottom-1 -right-1 p-1 sm:p-1.5 bg-[var(--color-card)] rounded-lg shadow-md hover:shadow-lg transition-all"
+                          >
+                            <Camera className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--color-vet-muted)]" />
+                          </button>
+                        </div>
+                        <div className="flex-1 text-white min-w-0">
+                          <h3 className="patient-dropdown-name truncate">{patient.name}</h3>
+                          <p className="patient-dropdown-breed truncate">{patient.breed || patient.species}</p>
+                          <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 flex-wrap">
+                            <span className={`patient-dropdown-badge ${patient.sex === "Macho" ? "bg-blue-400/30" : "bg-pink-400/30"}`}>
+                              {patient.sex}
+                            </span>
+                            <span className="patient-dropdown-badge bg-white/20">{patient.species}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+                      <div className="patient-dropdown-stats">
+                        <div className="patient-dropdown-stat">
+                          <Clock className="patient-dropdown-stat-icon" />
+                          <div className="min-w-0">
+                            <p className="patient-dropdown-stat-label">Edad</p>
+                            <p className="patient-dropdown-stat-value truncate">{calculateAge()}</p>
+                          </div>
+                        </div>
+                        <div className="patient-dropdown-stat">
+                          <Activity className="patient-dropdown-stat-icon" />
+                          <div className="min-w-0">
+                            <p className="patient-dropdown-stat-label">Peso</p>
+                            <p className="patient-dropdown-stat-value">{patient.weight ? `${patient.weight} kg` : "—"}</p>
+                          </div>
+                        </div>
+                        <div className="patient-dropdown-stat">
+                          <PawPrint className="patient-dropdown-stat-icon" />
+                          <div className="min-w-0">
+                            <p className="patient-dropdown-stat-label">Color</p>
+                            <p className="patient-dropdown-stat-value truncate">{patient.color || "—"}</p>
+                          </div>
+                        </div>
+                        <div className="patient-dropdown-stat">
+                          <Stethoscope className="patient-dropdown-stat-icon" />
+                          <div className="min-w-0">
+                            <p className="patient-dropdown-stat-label">Estado</p>
+                            <p className="patient-dropdown-stat-value text-green-500">Activo</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Propietario */}
+                      <Link to={`/owners/${ownerId}`} onClick={() => setShowPatientInfo(false)} className="owner-link">
+                        <div className="owner-link-icon">
+                          <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-vet-accent)]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="owner-link-label">Propietario</p>
+                          <p className="owner-link-name">{ownerName}</p>
+                        </div>
+                      </Link>
+
+                      {/* Acciones */}
+                      <div className="patient-dropdown-actions">
+                        <Link
+                          to={`/patients/${patientId}/edit`}
+                          onClick={() => setShowPatientInfo(false)}
+                          className="patient-dropdown-edit"
+                        >
+                          <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          Editar
+                        </Link>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPatientInfo(false);
+                            handleDeleteClick();
+                          }}
+                          className="patient-dropdown-delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Indicadores */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-              {/* Indicador: Deuda */}
+            {/* Lado Derecho: Indicadores + Menú Mobile */}
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+              {/* Indicador Deuda */}
               <div className="relative" ref={debtRef}>
                 <button
                   onClick={(e) => {
@@ -286,39 +413,28 @@ export default function PatientLayout() {
                       setShowGroomingDropdown(false);
                     }
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className={`indicator-button ${hasDebt ? "indicator-button-debt" : "indicator-button-inactive"}`}
                   title={hasDebt ? `$${debtSummary?.totalDebt.toFixed(2)} pendiente` : "Sin deudas"}
                 >
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
-                  {hasDebt && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
-                      {debtCount}
-                    </span>
-                  )}
+                  <DollarSign className="indicator-icon" />
+                  {hasDebt && <span className="indicator-badge indicator-badge-debt">{debtCount}</span>}
                 </button>
 
-                {/* Dropdown Deuda */}
                 {showDebtDropdown && hasDebt && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
-                      <p className="text-sm font-bold text-white">Pagos Pendientes</p>
-                      <p className="text-xs text-white/80">
-                        {debtCount} factura{debtCount !== 1 ? "s" : ""}
-                      </p>
+                  <div className="indicator-dropdown indicator-dropdown-sm">
+                    <div className="indicator-dropdown-header indicator-dropdown-header-debt">
+                      <p className="indicator-dropdown-title">Pagos Pendientes</p>
+                      <p className="indicator-dropdown-subtitle">{debtCount} factura{debtCount !== 1 ? "s" : ""}</p>
                     </div>
-                    <div className="p-4">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-vet-primary">
-                          ${debtSummary?.totalDebt.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-vet-muted mt-1">Total pendiente</p>
-                      </div>
+                    <div className="p-3 sm:p-4 text-center">
+                      <p className="debt-amount">${debtSummary?.totalDebt.toFixed(2)}</p>
+                      <p className="text-[10px] sm:text-xs text-[var(--color-vet-muted)] mt-1">Total pendiente</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Indicador: Citas */}
+              {/* Indicador Citas */}
               <div className="relative" ref={appointmentsRef}>
                 <button
                   onClick={(e) => {
@@ -329,37 +445,35 @@ export default function PatientLayout() {
                       setShowDebtDropdown(false);
                     }
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
-                  title={hasActiveAppointments ? `${activeAppointments?.length} cita(s)` : "Sin citas"}
+                  className={`indicator-button ${hasActiveAppointments ? "indicator-button-appointments" : "indicator-button-inactive"}`}
+                  title={hasActiveAppointments ? `${activeAppointments?.length} cita(s) activas` : "Sin citas activas"}
                 >
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Calendar className="indicator-icon" />
                   {hasActiveAppointments && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
-                      {activeAppointments?.length || 0}
-                    </span>
+                    <span className="indicator-badge indicator-badge-appointments">{activeAppointments?.length}</span>
                   )}
                 </button>
 
-                {/* Dropdown Citas */}
                 {showAppointmentsDropdown && hasActiveAppointments && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
-                      <p className="text-sm font-bold text-white">Citas Activas</p>
-                      <p className="text-xs text-white/80">
+                  <div className="indicator-dropdown indicator-dropdown-md">
+                    <div className="indicator-dropdown-header indicator-dropdown-header-appointments">
+                      <p className="indicator-dropdown-title">Citas Activas</p>
+                      <p className="indicator-dropdown-subtitle">
                         {activeAppointments?.length} programada{activeAppointments?.length !== 1 ? "s" : ""}
                       </p>
                     </div>
-                    <div className="max-h-64 overflow-y-auto">
+                    <div className="indicator-dropdown-content">
                       {activeAppointments?.map((appt) => (
                         <Link
                           key={appt._id}
                           to={`/patients/${patient._id}/appointments/${appt._id}`}
-                          className="block px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100 last:border-0"
+                          className="indicator-dropdown-item"
                           onClick={() => setShowAppointmentsDropdown(false)}
                         >
-                          <p className="font-medium text-gray-900 text-sm">{appt.type}</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="indicator-dropdown-item-title">{appt.type}</p>
+                          <p className="indicator-dropdown-item-meta">
                             {new Date(appt.date).toLocaleDateString("es-ES", {
+                              weekday: "short",
                               day: "2-digit",
                               month: "short",
                               hour: "2-digit",
@@ -373,7 +487,7 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador: Peluquería */}
+              {/* Indicador Peluquería */}
               <div className="relative" ref={groomingRef}>
                 <button
                   onClick={(e) => {
@@ -384,42 +498,35 @@ export default function PatientLayout() {
                       setShowDebtDropdown(false);
                     }
                   }}
-                  className="relative p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+                  className={`indicator-button ${hasTodaysGrooming ? "indicator-button-grooming" : "indicator-button-inactive"}`}
                   title={hasTodaysGrooming ? `${todaysGroomingCount} servicio(s) hoy` : "Sin servicios hoy"}
                 >
-                  <Scissors className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Scissors className="indicator-icon" />
                   {hasTodaysGrooming && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-1 text-[9px] sm:text-[10px] font-bold text-white bg-vet-accent rounded-full border-2 border-vet-secondary shadow-sm">
-                      {todaysGroomingCount}
-                    </span>
+                    <span className="indicator-badge indicator-badge-grooming">{todaysGroomingCount}</span>
                   )}
                 </button>
 
-                {/* Dropdown Peluquería */}
                 {showGroomingDropdown && hasTodaysGrooming && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="bg-gradient-to-r from-vet-primary to-vet-secondary px-4 py-3">
-                      <p className="text-sm font-bold text-white">Servicios de Hoy</p>
-                      <p className="text-xs text-white/80">
+                  <div className="indicator-dropdown indicator-dropdown-md">
+                    <div className="indicator-dropdown-header indicator-dropdown-header-grooming">
+                      <p className="indicator-dropdown-title">Servicios de Hoy</p>
+                      <p className="indicator-dropdown-subtitle">
                         {todaysGroomingCount} servicio{todaysGroomingCount !== 1 ? "s" : ""}
                       </p>
                     </div>
-                    <div className="max-h-64 overflow-y-auto">
+                    <div className="indicator-dropdown-content">
                       {todaysGroomingServices.map((service) => (
                         <Link
                           key={service._id}
                           to={`/patients/${patient._id}/grooming-services/${service._id}`}
-                          className="block px-4 py-3 hover:bg-vet-light transition-colors border-b border-gray-100 last:border-0"
+                          className="indicator-dropdown-item"
                           onClick={() => setShowGroomingDropdown(false)}
                         >
-                          <p className="font-medium text-gray-900 text-sm">{service.service}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(service.date).toLocaleDateString("es-ES", {
-                              day: "2-digit",
-                              month: "short",
-                            })}
-                            {service.specifications && ` • ${service.specifications}`}
-                          </p>
+                          <p className="indicator-dropdown-item-title">{service.service}</p>
+                          {service.specifications && (
+                            <p className="indicator-dropdown-item-meta">{service.specifications}</p>
+                          )}
                         </Link>
                       ))}
                     </div>
@@ -427,217 +534,119 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Reloj - Solo en desktop */}
-              <div className="relative group hidden lg:block">
-                <button className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200">
-                  <Clock className="w-5 h-5" />
-                </button>
-                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                  <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl min-w-[200px]">
-                    <div className="font-mono font-bold text-center">{formatTime(currentTime)}</div>
-                    <div className="text-xs text-gray-400 text-center mt-1">{formatDate(currentTime)}</div>
-                  </div>
+              {/* Reloj - Solo desktop */}
+              <div className="header-clock">
+                <div className="text-right">
+                  <p className="header-clock-time">{formatTime(currentTime)}</p>
+                  <p className="header-clock-date">{formatDate(currentTime).split(",")[0]}</p>
                 </div>
+                <Clock className="header-clock-icon" />
               </div>
+
+              {/* Botón menú hamburguesa - Solo mobile y tablet */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="lg:hidden p-2 rounded-lg text-[var(--color-vet-text)] hover:bg-[var(--color-hover)] transition-colors ml-1"
+                title="Menú"
+              >
+                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contenido */}
-      <div className="pt-14 mt-14 lg:mt-10 lg:pt-16 px-4 lg:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sidebar */}
-            <aside className="w-full lg:w-80 flex-shrink-0">
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden sticky top-36 lg:top-32">
-                {/* Header con foto y datos principales */}
-                <div className="relative">
-                  {/* Fondo decorativo */}
-                  <div
-                    className={`h-20 bg-gradient-to-br ${
-                      isCanino ? "from-blue-400 via-blue-500 to-blue-600" : "from-purple-400 via-purple-500 to-purple-600"
+      {/* MENÚ MÓVIL/TABLET - Drawer lateral */}
+      {showMobileMenu && (
+        <>
+          {/* Overlay */}
+          <div
+            className="lg:hidden fixed inset-0 bg-black/70 z-40 animate-fadeIn"
+            onClick={() => setShowMobileMenu(false)}
+            style={{ top: "7rem" }}
+          />
+
+          {/* Drawer */}
+          <div className="lg:hidden fixed right-0 top-0 bottom-0 w-72 mobile-menu-drawer" style={{ top: "7rem" }}>
+            <div className="p-4">
+              <h3 className="text-sm font-bold text-[var(--color-vet-muted)] uppercase tracking-wider mb-3">Expediente Médico</h3>
+              <nav className="space-y-1">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const basePath = `/patients/${patientId}`;
+                  const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
+                  const isActive = item.path ? location.pathname.includes(item.path) : location.pathname === basePath;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      to={fullPath}
+                      onClick={() => setShowMobileMenu(false)}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                        isActive
+                          ? "bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] text-white shadow-md"
+                          : "text-[var(--color-vet-text)] hover:bg-[var(--color-hover)]"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${isActive ? "bg-white/20" : "bg-[var(--color-hover)]"}`}>
+                        <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-[var(--color-vet-accent)]"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium text-sm ${isActive ? "text-white" : "text-[var(--color-vet-text)]"}`}>{item.label}</p>
+                        <p className={`text-xs truncate ${isActive ? "text-white/70" : "text-[var(--color-vet-muted)]"}`}>{item.description}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* NAVEGACIÓN DESKTOP - Horizontal */}
+      <div className="patient-header-level-2 hidden lg:block">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center">
+            <nav className="flex items-center gap-2 py-3">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const basePath = `/patients/${patientId}`;
+                const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
+                const isActive = item.path ? location.pathname.includes(item.path) : location.pathname === basePath;
+
+                return (
+                  <Link
+                    key={item.id}
+                    to={fullPath}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+                      isActive
+                        ? "bg-[var(--color-vet-primary)] text-white shadow-md"
+                        : "bg-[var(--color-card)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-vet-text)] border border-[var(--color-border)]"
                     }`}
                   >
-                    <div className="absolute inset-0 opacity-20">
-                      <div className="absolute top-2 left-4">
-                        <PawPrint className="w-8 h-8 text-white rotate-[-15deg]" />
-                      </div>
-                      <div className="absolute top-6 right-8">
-                        <Heart className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="absolute bottom-2 right-4">
-                        <Sparkles className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Foto de perfil */}
-                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-12">
-                    <div className="relative group">
-                      <div
-                        className={`w-24 h-24 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br ${
-                          isCanino ? "from-blue-100 to-blue-50" : "from-purple-100 to-purple-50"
-                        }`}
-                      >
-                        {patient.photo ? (
-                          <img src={patient.photo} alt={patient.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-4xl">{isCanino ? "🐕" : "🐱"}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Botón de cambiar foto */}
-                      <button
-                        onClick={() => setShowPhotoModal(true)}
-                        className="absolute -bottom-1 -right-1 p-1.5 bg-white rounded-lg shadow-md hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 border border-gray-100"
-                      >
-                        <Camera className="w-3.5 h-3.5 text-vet-primary" />
-                      </button>
-
-                      {/* Badge de especie */}
-                      <div
-                        className={`absolute -top-1 -right-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md ${
-                          isCanino ? "bg-blue-500" : "bg-purple-500"
-                        }`}
-                      >
-                        {patient.sex === "Macho" ? "♂" : "♀"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Info del paciente */}
-                <div className="pt-14 pb-4 px-4 text-center border-b border-gray-100">
-                  <h2 className="text-xl font-bold text-vet-text">{patient.name}</h2>
-                  <p className="text-sm text-vet-muted mt-0.5">{patient.breed || patient.species}</p>
-
-                  {/* Stats */}
-                  <div className="flex items-center justify-center gap-4 mt-3">
-                    <div className="text-center">
-                      <p className="text-xs text-vet-muted">Edad</p>
-                      <p className="text-sm font-semibold text-vet-text">{calculateAge()}</p>
-                    </div>
-                    <div className="w-px h-8 bg-gray-200" />
-                    <div className="text-center">
-                      <p className="text-xs text-vet-muted">Peso</p>
-                      <p className="text-sm font-semibold text-vet-text">{patient.weight ? `${patient.weight} kg` : "—"}</p>
-                    </div>
-                    <div className="w-px h-8 bg-gray-200" />
-                    <div className="text-center">
-                      <p className="text-xs text-vet-muted">Color</p>
-                      <p className="text-sm font-semibold text-vet-text truncate max-w-[60px]">{patient.color || "—"}</p>
-                    </div>
-                  </div>
-
-                  {/* ✅ BOTONES DE EDITAR Y ELIMINAR - MOVIDOS AQUÍ */}
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <Link
-                      to={`/patients/${patientId}/edit`}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-vet-light hover:bg-vet-primary hover:text-white text-vet-primary transition-all duration-200 text-sm font-medium"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
-                    </Link>
-                    <button
-                      onClick={handleDeleteClick}
-                      disabled={isDeleting}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all duration-200 text-sm font-medium disabled:opacity-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Navegación */}
-                <nav className="p-3">
-                  <p className="px-3 mb-2 text-[10px] font-semibold text-vet-muted uppercase tracking-wider">
-                    Expediente Médico
-                  </p>
-                  <ul className="space-y-1">
-                    {menuItems.map((item) => {
-                      const Icon = item.icon;
-                      const basePath = `/patients/${patientId}`;
-                      const isActive = item.path
-                        ? location.pathname.includes(item.path)
-                        : location.pathname === basePath;
-
-                      return (
-                        <li key={item.id}>
-                          <Link
-                            to={item.path}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                              isActive
-                                ? "bg-gradient-to-r from-vet-primary to-vet-secondary text-white shadow-soft"
-                                : "hover:bg-vet-light/60 text-vet-text"
-                            }`}
-                          >
-                            <div
-                              className={`p-2 rounded-lg transition-colors ${
-                                isActive ? "bg-white/20" : "bg-vet-light group-hover:bg-vet-primary/10"
-                              }`}
-                            >
-                              <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-vet-primary"}`} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium ${isActive ? "text-white" : "text-vet-text"}`}>
-                                {item.label}
-                              </p>
-                              <p className={`text-[10px] truncate ${isActive ? "text-white/70" : "text-vet-muted"}`}>
-                                {item.description}
-                              </p>
-                            </div>
-                            <ChevronRight
-                              className={`w-4 h-4 transition-transform ${
-                                isActive
-                                  ? "text-white/70 translate-x-0"
-                                  : "text-gray-300 group-hover:translate-x-1 group-hover:text-vet-primary"
-                              }`}
-                            />
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-
-                {/* Footer del sidebar */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                  <Link
-                    to={`/owners/${typeof patient.owner === "string" ? patient.owner : patient.owner?._id}`}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-100 hover:border-vet-primary/30 hover:shadow-soft transition-all group"
-                  >
-                    <div className="p-2 rounded-lg bg-vet-light">
-                      <User className="w-4 h-4 text-vet-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-vet-muted">Propietario</p>
-                      <p className="text-sm font-medium text-vet-text truncate">
-                        {typeof patient.owner === "object" && patient.owner?.name ? patient.owner.name : "Ver propietario"}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-vet-primary transition-colors" />
+                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[var(--color-vet-muted)]"}`} />
+                    {item.label}
                   </Link>
-                </div>
-              </div>
-            </aside>
-
-            {/* Contenido principal */}
-            <main className="flex-1 min-w-0">
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden">
-                <div className="p-6">
-                  <Outlet />
-                </div>
-              </div>
-            </main>
+                );
+              })}
+            </nav>
           </div>
         </div>
       </div>
 
-      {/* Modales */}
+      {/* CONTENIDO PRINCIPAL */}
+      <div className="patient-layout-content">
+        <div className="max-w-7xl mx-auto">
+          <div className="patient-layout-card">
+            <div className="patient-layout-card-inner">
+              <Outlet />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MODALES */}
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
