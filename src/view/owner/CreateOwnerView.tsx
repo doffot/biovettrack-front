@@ -36,7 +36,7 @@ export default function CreateOwnerView() {
   const { mutate, isPending } = useMutation({
     mutationFn: createOwner,
     onSuccess: (data) => {
-      toast.success("Propietario registrado correctamente");
+      toast.success('Propietario registrado', `El perfil de "${data.owner.name}" ha sido creado.`);
       queryClient.invalidateQueries({ queryKey: ["owners"] });
        navigate(`/owners/${data.owner._id}`);
     },
@@ -96,14 +96,14 @@ export default function CreateOwnerView() {
   const isValid = formData.name.trim() !== "" && formData.contact.length >= 10;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-vet-light via-white to-purple-50/30 p-4 lg:p-6">
+    <div className="min-h-[calc(100vh-4rem)] bg-vet-light p-4 lg:p-6">
       <div className="max-w-5xl mx-auto">
         
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="p-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-500 transition-all shadow-sm"
+            className="p-2.5 rounded-xl bg-sky-soft border border-vet-border hover:bg-vet-hover hover:border-vet-primary/30 text-vet-muted transition-all shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -120,7 +120,7 @@ export default function CreateOwnerView() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
+          <div className="bg-sky-soft rounded-2xl border border-vet-border shadow-card overflow-hidden">
             
             {/* Grid de campos */}
             <div className="p-6">
@@ -141,7 +141,7 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="Juan Pérez"
                     maxLength={100}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-vet-text placeholder:text-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
@@ -158,8 +158,8 @@ export default function CreateOwnerView() {
                 {/* Cédula/RIF */}
                 <div className="lg:col-span-1">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-purple-100 rounded">
-                      <CreditCard className="w-3.5 h-3.5 text-purple-600" />
+                    <div className="p-1 bg-purple-100 dark:bg-purple-900/20 rounded">
+                      <CreditCard className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                     </div>
                     Cédula / RIF
                   </label>
@@ -168,17 +168,17 @@ export default function CreateOwnerView() {
                     name="nationalId"
                     value={formData.nationalId || ""}
                     onChange={handleChange}
-                    placeholder="V-12345678"
+                    placeholder="12345678"
                     maxLength={20}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-vet-text placeholder:text-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
                 {/* Email */}
                 <div className="lg:col-span-1">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-blue-100 rounded">
-                      <Mail className="w-3.5 h-3.5 text-blue-600" />
+                    <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded">
+                      <Mail className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     </div>
                     Correo electrónico
                   </label>
@@ -189,15 +189,15 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="juan@email.com"
                     maxLength={100}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-vet-text placeholder:text-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
                 {/* Dirección - Ocupa 2 columnas */}
                 <div className="lg:col-span-2">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-amber-100 rounded">
-                      <MapPin className="w-3.5 h-3.5 text-amber-600" />
+                    <div className="p-1 bg-amber-100 dark:bg-amber-900/20 rounded">
+                      <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     </div>
                     Dirección
                   </label>
@@ -208,14 +208,14 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="Av. Principal, Edificio Centro, Piso 2, Apto 5"
                     maxLength={200}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-vet-text placeholder:text-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
               </div>
             </div>
 
             {/* Footer con botones */}
-            <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-4 bg-vet-light/50 border-t border-vet-border flex items-center justify-between">
               <p className="text-xs text-vet-muted">
                 <span className="text-red-500">*</span> Campos obligatorios
               </p>
@@ -224,7 +224,7 @@ export default function CreateOwnerView() {
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm text-gray-600 font-medium rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm text-vet-muted font-medium rounded-xl border border-vet-border bg-sky-soft hover:bg-vet-hover hover:border-vet-primary/30 transition-all"
                 >
                   <X className="w-4 h-4" />
                   Cancelar
@@ -235,7 +235,7 @@ export default function CreateOwnerView() {
                   className={`flex items-center gap-2 px-6 py-2.5 text-sm rounded-xl font-semibold transition-all ${
                     isValid && !isPending
                       ? "bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white shadow-soft hover:shadow-md"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-vet-light border border-vet-border text-vet-muted/50 cursor-not-allowed"
                   }`}
                 >
                   {isPending ? (

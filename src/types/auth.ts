@@ -78,7 +78,9 @@ export type confirmToken = Pick<Auth, "token">;
 // ✅ USUARIOS Y PERFIL
 // =====================================================
 
-// User básico (para el header/sidebar)
+const planTypeEnum = z.enum(['trial', 'basic', 'premium']);
+
+// User básico (para el header/sidebar) — ahora incluye campos del plan
 export const userSchema = authSchema
   .pick({
     name: true,
@@ -87,11 +89,16 @@ export const userSchema = authSchema
   })
   .extend({
     _id: z.string(),
+    isLegacyUser: z.boolean().optional(),
+    planType: planTypeEnum.optional(),
+    trialEndedAt: z.string().nullable().optional(),
+    patientCount: z.number().optional(),
+    isActive: z.boolean().optional(),
   });
 
 export type User = z.infer<typeof userSchema>;
 
-// Perfil completo del veterinario
+// Perfil completo del veterinario — también incluye campos del plan
 export const userProfileSchema = z.object({
   _id: z.string(),
   name: z.string(),
@@ -107,6 +114,12 @@ export const userProfileSchema = z.object({
   confirmed: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  // 👇 Nuevos campos del plan
+  isLegacyUser: z.boolean().optional(),
+  planType: planTypeEnum.optional(),
+  trialEndedAt: z.string().nullable().optional(),
+  patientCount: z.number().optional(),
+  isActive: z.boolean().optional(),
 });
 
 export type UserProfile = z.infer<typeof userProfileSchema>;

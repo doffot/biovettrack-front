@@ -40,7 +40,16 @@ export default function DashboardView() {
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <DashboardHeader userName={displayName} />
+     <DashboardHeader 
+  userName={displayName} 
+  authData={{
+    isLegacyUser: authData?.isLegacyUser,
+    planType: authData?.planType,
+    trialEndedAt: authData?.trialEndedAt ?? undefined,
+    patientCount: authData?.patientCount,
+    // isActive?: authData?.isActive
+  }}
+/>
 
       {/* Métricas Financieras (solo 3 cards) */}
       <MetricsGrid

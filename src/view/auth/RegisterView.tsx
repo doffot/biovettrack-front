@@ -51,8 +51,11 @@ export default function RegisterView() {
     onError: (error) => {
       toast.error(error.message);
     },
-    onSuccess: (data) => {
-      toast.success(data || "Registro exitoso");
+    onSuccess: () => {
+      toast.success(
+  '¡Bienvenido/a!',
+  'Te hemos enviado un correo para confirmar tu cuenta. ¡No olvides revisar la bandeja de spam!'
+);
       reset();
       navigate('/auth/confirm-account')
     }
