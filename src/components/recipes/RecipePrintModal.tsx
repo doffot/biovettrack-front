@@ -1,7 +1,8 @@
 // src/components/recipes/RecipePrintModal.tsx
 import { X, Download, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useRef, useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "../../api/AuthAPI";
 import html2pdf from "html2pdf.js";
 import { toast } from "../Toast";
 import type { Recipe } from "../../types/recipe";
@@ -26,7 +27,38 @@ export default function RecipePrintModal({
 }: RecipePrintModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { data: authUser } = useAuth();
+  const [signatureBase64, setSignatureBase64] = useState<string>("");
+  
+  // Obtener perfil completo del veterinario
+  const { data: vetProfile } = useQuery({
+    queryKey: ["vetProfile"],
+    queryFn: getProfile,
+  });
+
+  // Cargar firma como Base64
+  useEffect(() => {
+    const loadSignature = async () => {
+      if (!vetProfile?.signature) return;
+      
+      try {
+        const response = await fetch(vetProfile.signature);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        reader.onloadend = () => {
+          setSignatureBase64(reader.result as string);
+        };
+        
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error("Error cargando firma:", error);
+      }
+    };
+
+    if (isOpen && vetProfile?.signature) {
+      loadSignature();
+    }
+  }, [isOpen, vetProfile?.signature]);
 
   if (!isOpen) return null;
 
@@ -37,8 +69,8 @@ export default function RecipePrintModal({
   });
 
   const getVetFullName = (): string => {
-    if (!authUser) return "Médico Veterinario";
-    return `Dr(a). ${authUser.name || ""} ${authUser.lastName || ""}`.trim();
+    if (!vetProfile) return "Médico Veterinario";
+    return `Dr(a). ${vetProfile.name} ${vetProfile.lastName}`.trim();
   };
 
   const handleDownloadPDF = async () => {
@@ -55,7 +87,13 @@ export default function RecipePrintModal({
           margin: [8, 8, 8, 8],
           filename,
           image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, width: 794, windowWidth: 794 },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            allowTaint: true,
+            width: 794, 
+            windowWidth: 794 
+          },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         })
         .from(element)
@@ -101,7 +139,7 @@ export default function RecipePrintModal({
           {getVetFullName()}
         </p>
         <p style={{ fontSize: "9pt", margin: "2px 0 0 0", color: "#666" }}>
-          Médico Veterinario | CMV: 1833
+          Médico Veterinario | COLVET-{vetProfile?.estado || ""}: {vetProfile?.cmv || ""}
         </p>
       </div>
 
@@ -133,9 +171,9 @@ export default function RecipePrintModal({
       {/* Separador */}
       <div style={{ borderTop: "1px solid #ccc", margin: "15px 0" }} />
 
-      {/* Título Rp/ (símbolo de receta) */}
+      {/* Título Rp. (símbolo de receta) */}
       <div style={{ marginBottom: "15px" }}>
-        <p style={{ fontSize: "14pt", fontWeight: "bold", margin: 0 }}>Rp/</p>
+        <p style={{ fontSize: "14pt", fontWeight: "bold", margin: 0 }}>Rp.</p>
       </div>
 
       {/* Medicamentos */}
@@ -149,10 +187,16 @@ export default function RecipePrintModal({
               borderBottom: index < recipe.medications.length - 1 ? "1px dashed #ddd" : "none"
             }}
           >
-            {/* Nombre y presentación */}
+            {/* Nombre con source */}
             <div style={{ marginBottom: "8px" }}>
-              <p style={{ margin: 0, fontSize: "11pt", fontWeight: "bold" }}>
-                {index + 1}. {med.name}
+              <p style={{ margin: 0, fontSize: "11pt" }}>
+                <span style={{ fontWeight: "bold", color: "#000" }}>
+                  {index + 1}. {med.name}
+                </span>
+                {" "}
+                <span style={{ color: "#777", fontWeight: "normal" }}>
+                  ({med.source === "veterinario" ? "Uso veterinario" : "Farmacia"})
+                </span>
               </p>
               <p style={{ margin: "2px 0 0 0", fontSize: "10pt", color: "#555", fontStyle: "italic" }}>
                 {med.presentation}
@@ -163,10 +207,7 @@ export default function RecipePrintModal({
             {/* Indicaciones */}
             <div style={{ marginLeft: "15px", fontSize: "10pt" }}>
               <p style={{ margin: "5px 0 0 0" }}>
-                <strong>Sig.:</strong> {med.instructions}
-              </p>
-              <p style={{ margin: "3px 0 0 0", fontSize: "9pt", color: "#666" }}>
-                {med.source === "veterinario" ? "Dispensar en consultorio veterinario" : "Adquirir en farmacia"}
+                <strong>Indicaciones:</strong> {med.instructions}
               </p>
             </div>
           </div>
@@ -191,9 +232,33 @@ export default function RecipePrintModal({
       {/* Footer con firma */}
       <div style={{ marginTop: "40px", textAlign: "right" }}>
         <div style={{ display: "inline-block", textAlign: "center", minWidth: "200px" }}>
+          
+          {/* Firma Digital */}
+          {signatureBase64 && (
+            <div style={{ 
+              marginBottom: "5px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+              <img 
+                src={signatureBase64} 
+                alt="Firma del veterinario"
+                crossOrigin="anonymous"
+                style={{ 
+                  height: "50px", 
+                  width: "auto",
+                  maxWidth: "180px",
+                  objectFit: "contain",
+                  display: "block"
+                }}
+              />
+            </div>
+          )}
+          
           <div style={{ borderTop: "1px solid #000", paddingTop: "8px", marginBottom: "5px" }}>
             <p style={{ margin: 0, fontSize: "10pt", fontWeight: "bold" }}>{getVetFullName()}</p>
-            <p style={{ margin: "2px 0 0 0", fontSize: "9pt", color: "#666" }}>CMV: 1833</p>
+            <p style={{ margin: "2px 0 0 0", fontSize: "9pt", color: "#666" }}>C.I: {vetProfile?.ci || ""}</p>
           </div>
         </div>
       </div>
@@ -208,7 +273,7 @@ export default function RecipePrintModal({
         textAlign: "center"
       }}>
         <p style={{ margin: "0 0 3px 0" }}>
-          C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642
+          C.I: {vetProfile?.ci || ""} | COLVET-{vetProfile?.estado || ""}: {vetProfile?.cmv || ""} | INSAI: {vetProfile?.runsai || "N/A"} | MSDS: {vetProfile?.msds || "N/A"}
         </p>
         <p style={{ margin: 0, fontStyle: "italic" }}>
           Esta receta es válida únicamente para el paciente indicado
@@ -222,7 +287,7 @@ export default function RecipePrintModal({
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal GRANDE - VERSIÓN VISUAL (con Tailwind) */}
+      {/* Modal */}
       <div className="relative z-10 w-full max-w-3xl max-h-[95vh] overflow-hidden rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl flex flex-col">
         
         {/* Header */}
@@ -233,7 +298,7 @@ export default function RecipePrintModal({
           </button>
         </div>
 
-        {/* Contenido VISUAL (Tailwind CSS) */}
+        {/* Contenido VISUAL */}
         <div className="flex-1 overflow-y-auto bg-slate-900 p-6">
           <div className="bg-slate-800 mx-auto p-8 rounded-xl border border-slate-700" style={{ maxWidth: "210mm" }}>
             
@@ -291,9 +356,18 @@ export default function RecipePrintModal({
             )}
 
             <div className="mt-8 pt-4 border-t-2 border-slate-700 text-center">
+              {/* Vista previa de la firma */}
+              {signatureBase64 && (
+                <div className="flex justify-center mb-2">
+                  <img 
+                    src={signatureBase64} 
+                    alt="Firma"
+                    className="h-12 w-auto max-w-[180px] object-contain"
+                  />
+                </div>
+              )}
               <p className="font-bold text-vet-accent text-lg">{getVetFullName()}</p>
-              <p className="text-sm text-vet-muted">Médico Veterinario</p>
-              <p className="text-xs text-vet-muted mt-2">C.I: 15.261.220 | CMV: 1833 | INSAI: 733116117279 | MSDS: 7642</p>
+              <p className="text-sm text-vet-muted">C.I: {vetProfile?.ci || ""}</p>
               <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
                 <p className="text-xs text-vet-muted italic">
                   Esta receta es válida únicamente para el paciente indicado.
@@ -328,7 +402,7 @@ export default function RecipePrintModal({
         </div>
       </div>
 
-      {/* PDF Oculto - VERSIÓN PARA GENERAR (inline styles) */}
+      {/* PDF Oculto */}
       <div style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
         <div ref={printRef}>
           <RecipeContent />

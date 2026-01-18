@@ -1,21 +1,28 @@
-/* ========================================
-   📝 INPUTS - Formularios y autocompletado
-   ======================================== */
-
-/* Forzar transparencia en autocompletado (Chrome/Edge) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-  box-shadow: 0 0 0 1000px transparent inset !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  color: white !important;
-  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0 1000px #0F172A inset !important;
+  box-shadow: 0 0 0 1000px #0F172A inset !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  color: #F1F5F9 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px #0F172A inset !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+}
+
+input {
+  caret-color: #36BCD4;
+}
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+input::placeholder {
+  color: rgba(241, 245, 249, 0.4);
 }

@@ -1,15 +1,16 @@
 import React from "react";
-import { User, Lock } from "lucide-react";
+import { User, Lock, FileSignature } from "lucide-react";
 
 interface ProfileTabsProps {
-  activeTab: "personal" | "security";
-  setActiveTab: (tab: "personal" | "security") => void;
+  activeTab: "personal" | "security" | "signature";
+  setActiveTab: (tab: "personal" | "security" | "signature") => void;
 }
 
 const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: "personal" as const, label: "Información Personal", icon: User },
     { id: "security" as const, label: "Seguridad", icon: Lock },
+    { id: "signature" as const, label: "Firma Digital", icon: FileSignature },
   ];
 
   return (
@@ -35,7 +36,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, setActiveTab }) =>
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{tab.label}</span>
             <span className="sm:hidden">
-              {tab.id === "personal" ? "Personal" : "Seguridad"}
+              {tab.id === "personal" ? "Personal" : tab.id === "security" ? "Seguridad" : "Firma"}
             </span>
           </button>
         );

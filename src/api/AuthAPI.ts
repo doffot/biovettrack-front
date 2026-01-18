@@ -199,3 +199,40 @@ export async function changePassword(formData: ChangePasswordForm): Promise<stri
     throw error;
   }
 }
+
+/**
+ * Subir firma del veterinario
+ */
+export async function uploadSignature(file: File): Promise<{ signature: string; message: string }> {
+  try {
+    const formData = new FormData();
+    formData.append('signature', file);
+
+    const { data } = await api.post("/auth/profile/signature", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Error al subir firma");
+    }
+    throw error;
+  }
+}
+
+/**
+ * Eliminar firma del veterinario
+ */
+export async function deleteSignature(): Promise<string> {
+  try {
+    const { data } = await api.delete("/auth/profile/signature");
+    return data.message;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Error al eliminar firma");
+    }
+    throw error;
+  }
+}

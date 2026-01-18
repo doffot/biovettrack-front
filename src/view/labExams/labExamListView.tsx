@@ -18,8 +18,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { toast } from "../../components/Toast";
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 
 export default function LabExamListView() {
   const navigate = useNavigate();
@@ -540,16 +540,29 @@ export default function LabExamListView() {
         </div>
       </main>
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setExamToDelete(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        petName={examToDelete?.name || "este examen"}
-        isDeleting={isDeleting}
-      />
+    <ConfirmationModal
+  isOpen={isDeleteModalOpen}
+  onClose={() => {
+    setIsDeleteModalOpen(false);
+    setExamToDelete(null);
+  }}
+  onConfirm={handleConfirmDelete}
+  title="Eliminar Examen"
+  message={
+    <p className="text-[var(--color-vet-text)]">
+      ¿Estás seguro de que deseas eliminar el examen de{" "}
+      <span className="font-bold text-red-400">
+        {examToDelete?.name}
+      </span>? 
+      Esta acción no se puede deshacer.
+    </p>
+  }
+  variant="danger"
+  confirmText="Eliminar Examen"
+  confirmIcon={Trash2}
+  isLoading={isDeleting}
+  loadingText="Eliminando..."
+/>
     </div>
   );
 }

@@ -237,7 +237,7 @@ export default function CreateProductView() {
 
                       <div>
                         <label className="block text-sm font-medium text-vet-text mb-1">
-                          Precio unidad <span className="text-red-500">*</span>
+                          Precio de Venta<span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-vet-muted text-sm">

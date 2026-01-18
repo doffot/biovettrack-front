@@ -99,6 +99,7 @@ import InventoryMovementsView from "./view/inventory/InventoryMovementsView";
 import InventoryLowStockView from "./view/inventory/InventoryLowStockView";
 import CreateSaleView from "./view/sales/CreateSaleView";
 import ProtectedLanding from "./components/ProtectedLanding";
+import BuildingView from "./view/BuildingView";
 
 export default function Router() {
   return (
@@ -144,6 +145,7 @@ export default function Router() {
             <Route index element={<LabExamListView />} />
             <Route path="create" element={<CreateLabExamView />} />
             <Route path=":id" element={<LabExamDetailView />} />
+            <Route path=":id/edit" element={<EditLabExamView />} />
           </Route>
 
           {/* OWNERS */}
@@ -217,6 +219,12 @@ export default function Router() {
             <Route path="new" element={<CreateProductView />} />
             <Route path=":productId/edit" element={<EditProductView />} />
           </Route>
+
+
+{/* NUEVA RUTA EN CONSTRUCCIÓN */}
+          <Route path="/inventory/report" element={<BuildingView />} />
+          <Route path="purchases/report" element={<BuildingView />} />
+
 
           {/* VENTAS */}
           <Route path="/sales" element={<CreateSaleView />} />

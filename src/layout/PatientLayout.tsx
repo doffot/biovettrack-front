@@ -604,7 +604,7 @@ export default function PatientLayout() {
         </>
       )}
 
-      {/* NAVEGACIÓN DESKTOP - Horizontal */}
+      {/* NAVEGACIÓN  */}
       <div className="patient-header-level-2 hidden lg:block">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center">

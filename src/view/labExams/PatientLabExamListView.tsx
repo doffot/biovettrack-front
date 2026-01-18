@@ -1,4 +1,3 @@
-// src/views/labExams/PatientLabExamListView.tsx
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,160 +6,158 @@ import {
   FlaskConical,
   Plus,
   Calendar,
-  AlertCircle,
   Eye,
   Trash2,
+  Printer,
+  Loader2,
+  FileSearch,
 } from "lucide-react";
 import { toast } from "../../components/Toast";
-import type { LabExam } from "../../types/labExam";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+
+// TUS COMPONENTES
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 import LabExamModal from "../../components/labexam/LabExamModal";
+import ShareResultsModal from "../../components/ShareResultsModal";
+import type { LabExam } from "../../types/labExam";
+import { getPatientById } from "../../api/patientAPI";
 
 export default function PatientLabExamListView() {
   const { patientId } = useParams<{ patientId: string }>();
   const queryClient = useQueryClient();
 
+  // Estados para controlar los 3 modales
   const [selectedExam, setSelectedExam] = useState<LabExam | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [examToDelete, setExamToDelete] = useState<LabExam | null>(null);
 
-  const {  data:exams = [], isLoading, isError } = useQuery({
+  // Queries
+  const { data: exams = [], isLoading: examsLoading } = useQuery({
     queryKey: ["labExams", "patient", patientId],
     queryFn: () => getLabExamsByPatient(patientId!),
     enabled: !!patientId,
   });
 
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: () => getPatientById(patientId!),
+    enabled: !!patientId,
+  });
+
+  // Mutación de borrado
   const { mutate: removeExam, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => deleteLabExam(id),
     onSuccess: () => {
-      toast.success("Examen eliminado");
+      toast.success("Registro Eliminado", "El hemograma ha sido removido del historial.");
       queryClient.invalidateQueries({ queryKey: ["labExams", "patient", patientId] });
-      setShowDeleteModal(false);
+      setIsDeleteModalOpen(false);
       setExamToDelete(null);
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
+    onError: (error: Error) => toast.error("Error", error.message),
   });
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    new Date(date).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 
-  if (isLoading) {
+  if (examsLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="w-8 h-8 border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-vet-muted">
-        <AlertCircle className="w-8 h-8 mb-2" />
-        <p className="text-sm">Error al cargar exámenes</p>
+      <div className="flex flex-col items-center justify-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800/50">
+        <Loader2 className="w-10 h-10 text-cyan-500 animate-spin mb-4" />
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sincronizando Laboratorio...</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-lg font-bold text-vet-text">Exámenes de Laboratorio</h2>
-          <p className="text-sm text-vet-muted">
-            {exams.length} registrado{exams.length !== 1 ? "s" : ""}
-          </p>
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-8 bg-cyan-500 rounded-full" />
+          <div>
+            <h2 className="text-xl font-black text-white tracking-tight uppercase">Laboratorio</h2>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              {exams.length} Analíticas registradas
+            </p>
+          </div>
         </div>
         <Link
           to="create"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-cyan-900/20 uppercase tracking-widest"
         >
-          <Plus className="w-4 h-4" />
-          Nuevo
+          <Plus size={16} /> Nuevo Registro
         </Link>
       </div>
 
       {/* Lista */}
       {exams.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-3">
           {exams.map((exam) => (
             <div
               key={exam._id}
-              className="flex items-center gap-4 p-4 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
+              className="group flex items-center gap-4 p-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl hover:border-slate-500 hover:bg-slate-800 transition-all duration-300"
             >
-              {/* Icono */}
-              <div className="w-10 h-10 rounded-lg bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                <FlaskConical className="w-5 h-5 text-purple-400" />
+              <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center flex-shrink-0 border border-slate-700">
+                <FlaskConical className="w-6 h-6 text-slate-400 group-hover:text-cyan-500" />
               </div>
 
-              {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-vet-text">Hemograma</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-vet-muted">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatDate(exam.date)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    Hct: {exam.hematocrit}%
-                  </span>
-                  <span className="flex items-center gap-1">
-                    WBC: {exam.whiteBloodCells}
-                  </span>
+                <p className="font-bold text-slate-200 uppercase text-xs tracking-wider mb-1">Hemograma Automatizado</p>
+                <div className="flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                  <span className="flex items-center gap-1.5"><Calendar size={14} className="text-cyan-600"/> {formatDate(exam.date)}</span>
+                  {exam._id && (
+                    <span className="pl-3 border-l border-slate-700 font-black text-white">Ref: {exam._id.slice(-5)}</span>
+                  )}
                 </div>
               </div>
 
-              {/* Precio */}
-              <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-vet-text">${exam.cost.toFixed(2)}</p>
-              </div>
+              <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/50">
+                {/* BOTÓN PARA IMPRIMIR (ShareResultsModal) */}
+                <button
+                  onClick={() => {
+                    setSelectedExam(exam);
+                    setShowShareModal(true);
+                  }}
+                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-700 transition-all"
+                  title="Generar PDF"
+                >
+                  <Printer size={18} />
+                </button>
 
-              {/* Acciones */}
-              <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   onClick={() => {
                     setSelectedExam(exam);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
+                  className="p-2 rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                  title="Ver Detalle"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye size={18} />
                 </button>
+
                 <button
                   onClick={() => {
                     setExamToDelete(exam);
-                    setShowDeleteModal(true);
+                    setIsDeleteModalOpen(true);
                   }}
-                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+                  className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                  title="Eliminar"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 size={18} />
                 </button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-700">
-          <FlaskConical className="w-12 h-12 mx-auto text-slate-600 mb-3" />
-          <p className="text-vet-muted mb-4">Sin exámenes registrados</p>
-          <Link
-            to="create"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Registrar primer examen
-          </Link>
+        <div className="text-center py-20 bg-slate-900/20 rounded-[2.5rem] border-2 border-dashed border-slate-800/50">
+          <FileSearch className="w-12 h-12 text-slate-800 mx-auto mb-4" />
+          <h3 className="text-slate-500 font-black uppercase tracking-widest text-xs">Sin Historial</h3>
         </div>
       )}
 
-      {/* Modal Ver */}
+      {/* 1. MODAL DE VISTA RÁPIDA */}
       {selectedExam && (
         <LabExamModal
           isOpen={showViewModal}
@@ -172,16 +169,42 @@ export default function PatientLabExamListView() {
         />
       )}
 
-      {/* Modal Eliminar */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
+      {/* 2. MODAL DE IMPRESIÓN (PDF) */}
+      {selectedExam && patient && (
+        <ShareResultsModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedExam(null);
+          }}
+          examData={selectedExam}
+          patientData={{
+            name: patient.name,
+            species: patient.species,
+            breed: patient.breed || '',
+            owner: { 
+              name: selectedExam.ownerName || (typeof patient.owner === 'object' ? patient.owner.name : ''),
+              contact: selectedExam.ownerPhone || ''
+            },
+            mainVet: selectedExam.treatingVet || patient.mainVet
+          }}
+        />
+      )}
+
+      {/* 3. MODAL DE BORRADO (ConfirmationModal Variant Danger) */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
         onClose={() => {
-          setShowDeleteModal(false);
+          setIsDeleteModalOpen(false);
           setExamToDelete(null);
         }}
         onConfirm={() => examToDelete?._id && removeExam(examToDelete._id)}
-        petName={`el examen de ${examToDelete?.patientName || ""}`}
-        isDeleting={isDeleting}
+        variant="danger"
+        title="¿Eliminar Registro?"
+        message={`¿Estás seguro de que deseas eliminar el hemograma del ${examToDelete ? formatDate(examToDelete.date) : ""}? Esta acción es permanente.`}
+        confirmText="Sí, Eliminar"
+        confirmIcon={Trash2}
+        isLoading={isDeleting}
       />
     </div>
   );

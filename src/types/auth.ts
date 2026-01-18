@@ -111,10 +111,11 @@ export const userProfileSchema = z.object({
   runsai: z.string().nullable().optional(),
   msds: z.string().nullable().optional(),
   somevepa: z.string().nullable().optional(),
+  signature: z.string().nullable().optional(), //  firma
   confirmed: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  // 👇 Nuevos campos del plan
+  // Campos del plan
   isLegacyUser: z.boolean().optional(),
   planType: planTypeEnum.optional(),
   trialEndedAt: z.string().nullable().optional(),

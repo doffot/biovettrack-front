@@ -349,7 +349,7 @@ export default function CreateRecipeView() {
                 {/* Fila 3: Instrucciones */}
                 <div>
                   <label className="block text-xs font-medium text-vet-muted mb-1">
-                    Modo de uso *
+                   Indicaciones *
                   </label>
                   <textarea
                     value={medication.instructions}
