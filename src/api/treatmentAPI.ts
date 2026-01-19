@@ -11,7 +11,9 @@ import {
 type CreateResponse = { msg: string; treatment: Treatment };
 type ListResponse = { treatments: Treatment[] };
 type SingleResponse = { treatment: Treatment };
+type UpdateResponse = { msg: string; treatment: Treatment };
 
+// Crear
 export async function createTreatment(
   patientId: string,
   data: TreatmentFormData
@@ -32,6 +34,7 @@ export async function createTreatment(
   }
 }
 
+// Obtener todos
 export async function getAllTreatments(): Promise<Treatment[]> {
   try {
     const { data } = await api.get<ListResponse>("/treatments");
@@ -51,6 +54,7 @@ export async function getAllTreatments(): Promise<Treatment[]> {
   }
 }
 
+// Obtener por paciente
 export async function getTreatmentsByPatient(
   patientId: string
 ): Promise<Treatment[]> {
@@ -69,6 +73,7 @@ export async function getTreatmentsByPatient(
   }
 }
 
+// Obtener por ID
 export async function getTreatmentById(id: string): Promise<Treatment> {
   try {
     const { data } = await api.get<SingleResponse>(`/treatments/${id}`);
@@ -83,16 +88,19 @@ export async function getTreatmentById(id: string): Promise<Treatment> {
   }
 }
 
+// Actualizar
 export async function updateTreatment(
   id: string,
   data: Partial<TreatmentFormData>
 ): Promise<Treatment> {
   try {
-    const { data: response } = await api.put<{
-      msg: string;
-      treatment: Treatment;
-    }>(`/treatments/${id}`, data);
-    return response.treatment;
+    const { data: response } = await api.put<UpdateResponse>(
+      `/treatments/${id}`,
+      data
+    );
+    const parsed = treatmentSchema.safeParse(response.treatment);
+    if (!parsed.success) throw new Error("Datos inválidos");
+    return parsed.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw new Error(error.response.data.msg || "Error al actualizar");
@@ -101,6 +109,7 @@ export async function updateTreatment(
   }
 }
 
+// Eliminar
 export async function deleteTreatment(id: string): Promise<void> {
   try {
     await api.delete(`/treatments/${id}`);

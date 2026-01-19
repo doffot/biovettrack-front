@@ -104,6 +104,8 @@ import InventoryLowStockView from "./view/inventory/InventoryLowStockView";
 import CreateSaleView from "./view/sales/CreateSaleView";
 import ProtectedLanding from "./components/ProtectedLanding";
 import BuildingView from "./view/BuildingView";
+import TreatmentDetailView from "./view/treatments/TreatmentDetailView";
+import EditTreatmentView from "./view/treatments/EditTreatmentView";
 
 export default function Router() {
   return (
@@ -188,10 +190,12 @@ export default function Router() {
               </Route>
 
               {/* ✅ TREATMENTS (NUEVO) */}
-              <Route path="treatments">
-                <Route index element={<TreatmentListView />} />
-                <Route path="create" element={<CreateTreatmentView />} />
-              </Route>
+             <Route path="treatments">
+  <Route index element={<TreatmentListView />} />
+  <Route path="create" element={<CreateTreatmentView />} />
+  <Route path=":treatmentId" element={<TreatmentDetailView />} />
+  <Route path=":treatmentId/edit" element={<EditTreatmentView />} />
+</Route>
 
               <Route path="consultations">
                 <Route index element={<ConsultationListView />} />

@@ -18,7 +18,7 @@ import {
   DollarSign,
   Menu,
   X,
-  Pill, // ✅ NUEVO ICONO
+  Pill,
 } from "lucide-react";
 import { useParams, Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -186,18 +186,17 @@ export default function PatientLayout() {
 
   const isCanino = patient?.species?.toLowerCase() === "canino";
 
-  // ✅ MENÚ ACTUALIZADO CON TRATAMIENTOS
   const menuItems = [
-    { id: "datos", label: "Información", icon: PawPrint, path: "", description: "Datos básicos" },
+    { id: "datos", label: "Info", icon: PawPrint, path: "", description: "Datos básicos" },
     { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
-    { id: "tratamientos", label: "Tratamientos", icon: Pill, path: "treatments", description: "Medicamentos activos" }, // ✅ NUEVO
+    { id: "tratamientos", label: "Tratamientos", icon: Pill, path: "treatments", description: "Medicamentos activos" },
     { id: "recetas", label: "Recetas", icon: FileText, path: "recipes", description: "Prescripciones" },
     { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
-    { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings", description: "Control de parásitos" },
-    { id: "hematologia", label: "Hematología", icon: Activity, path: "lab-exams", description: "Exámenes de sangre" },
+    { id: "desparasitacion", label: "Antiparasit.", icon: Bug, path: "dewormings", description: "Control de parásitos" },
+    { id: "hematologia", label: "Exámenes", icon: Activity, path: "lab-exams", description: "Exámenes de sangre" },
     { id: "estudios", label: "Estudios", icon: FileText, path: "studies", description: "Rayos X, ecografías" },
-    { id: "peluqueria", label: "Peluquería", icon: Scissors, path: "grooming-services", description: "Servicios estéticos" },
-    { id: "citas", label: "Nueva Cita", icon: Calendar, path: "appointments/create", description: "Agendar consulta" },
+    { id: "peluqueria", label: "Estética", icon: Scissors, path: "grooming-services", description: "Servicios estéticos" },
+    { id: "citas", label: "Citas", icon: Calendar, path: "appointments/create", description: "Agendar consulta" },
   ];
 
   if (isLoading) {
@@ -237,11 +236,10 @@ export default function PatientLayout() {
 
   return (
     <>
-      {/* HEADER NIVEL 1: Info del Paciente + Indicadores */}
+      {/* HEADER NIVEL 1 */}
       <div className="patient-header-level-1">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="patient-header-level-1-inner">
-            {/* Lado Izquierdo */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <button onClick={() => navigate("/patients")} className="back-button" title="Volver a pacientes">
                 <ArrowLeft className="back-button-icon" />
@@ -249,7 +247,6 @@ export default function PatientLayout() {
 
               <div className="header-divider" />
 
-              {/* Info del Paciente */}
               <div className="relative flex-1 min-w-0" ref={patientInfoRef}>
                 <button
                   onClick={(e) => {
@@ -292,7 +289,6 @@ export default function PatientLayout() {
                   </div>
                 </button>
 
-                {/* Dropdown Info del Paciente */}
                 {showPatientInfo && (
                   <div className="patient-dropdown">
                     <div className={`patient-dropdown-header ${isCanino ? "patient-dropdown-header-canino" : "patient-dropdown-header-felino"}`}>
@@ -363,7 +359,6 @@ export default function PatientLayout() {
                         </div>
                       </div>
 
-                      {/* Propietario */}
                       <Link to={`/owners/${ownerId}`} onClick={() => setShowPatientInfo(false)} className="owner-link">
                         <div className="owner-link-icon">
                           <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-vet-accent)]" />
@@ -374,7 +369,6 @@ export default function PatientLayout() {
                         </div>
                       </Link>
 
-                      {/* Acciones */}
                       <div className="patient-dropdown-actions">
                         <Link
                           to={`/patients/${patientId}/edit`}
@@ -401,9 +395,7 @@ export default function PatientLayout() {
               </div>
             </div>
 
-            {/* Lado Derecho: Indicadores + Menú Mobile */}
             <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-              {/* Indicador Deuda */}
               <div className="relative" ref={debtRef}>
                 <button
                   onClick={(e) => {
@@ -435,7 +427,6 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador Citas */}
               <div className="relative" ref={appointmentsRef}>
                 <button
                   onClick={(e) => {
@@ -488,7 +479,6 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Indicador Peluquería */}
               <div className="relative" ref={groomingRef}>
                 <button
                   onClick={(e) => {
@@ -535,7 +525,6 @@ export default function PatientLayout() {
                 )}
               </div>
 
-              {/* Reloj - Solo desktop */}
               <div className="header-clock">
                 <div className="text-right">
                   <p className="header-clock-time">{formatTime(currentTime)}</p>
@@ -544,7 +533,6 @@ export default function PatientLayout() {
                 <Clock className="header-clock-icon" />
               </div>
 
-              {/* Botón menú hamburguesa - Solo mobile y tablet */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="lg:hidden p-2 rounded-lg text-[var(--color-vet-text)] hover:bg-[var(--color-hover)] transition-colors ml-1"
@@ -557,7 +545,7 @@ export default function PatientLayout() {
         </div>
       </div>
 
-      {/* MENÚ MÓVIL/TABLET - Drawer lateral */}
+      {/* MENÚ MÓVIL */}
       {showMobileMenu && (
         <>
           <div
@@ -612,38 +600,41 @@ export default function PatientLayout() {
         </>
       )}
 
-      {/* NAVEGACIÓN */}
-      <div className="patient-header-level-2 hidden lg:block">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-center">
-            <nav className="flex items-center gap-2 py-3">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const basePath = `/patients/${patientId}`;
-                const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
-                const isActive = item.path ? location.pathname.includes(item.path) : location.pathname === basePath;
+      {/* ✅ NAVEGACIÓN DESKTOP - CON SCROLL OCULTO */}
+     <div className="patient-header-level-2 hidden lg:block">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="flex items-center justify-center">
+      <nav 
+        className="flex items-center gap-1.5 py-3 overflow-x-auto scrollbar-invisible" 
+        ref={navScrollRef}
+      >
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const basePath = `/patients/${patientId}`;
+          const fullPath = item.path ? `${basePath}/${item.path}` : basePath;
+          const isActive = item.path ? location.pathname.includes(item.path) : location.pathname === basePath;
 
-                return (
-                  <Link
-                    key={item.id}
-                    to={fullPath}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-                      isActive
-                        ? "bg-[var(--color-vet-primary)] text-white shadow-md"
-                        : "bg-[var(--color-card)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-vet-text)] border border-[var(--color-border)]"
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[var(--color-vet-muted)]"}`} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-      </div>
+          return (
+            <Link
+              key={item.id}
+              to={fullPath}
+              data-active={isActive}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all whitespace-nowrap flex-shrink-0 ${
+                isActive
+                  ? "bg-[var(--color-vet-primary)] text-white shadow-md"
+                  : "bg-[var(--color-card)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-vet-text)] border border-[var(--color-border)]"
+              }`}
+            >
+              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-white" : "text-[var(--color-vet-muted)]"}`} />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  </div>
+</div>
 
-      {/* CONTENIDO PRINCIPAL */}
       <div className="patient-layout-content">
         <div className="max-w-7xl mx-auto">
           <div className="patient-layout-card">
@@ -654,7 +645,6 @@ export default function PatientLayout() {
         </div>
       </div>
 
-      {/* MODALES */}
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
