@@ -1,7 +1,7 @@
 // src/views/treatments/TreatmentListView.tsx
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Plus, Pill, Calendar, Clock, AlertCircle, Edit, Trash2, Eye } from "lucide-react";
 import { getTreatmentsByPatient, deleteTreatment } from "../../api/treatmentAPI";
 import { toast } from "../../components/Toast";
@@ -9,7 +9,6 @@ import ConfirmationModal from "../../components/modal/ConfirmationModal";
 
 export default function TreatmentListView() {
   const { patientId } = useParams<{ patientId: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; treatmentId: string | null; treatmentName: string }>({
