@@ -1,5 +1,3 @@
-// src/components/invoices/ReportSummary.tsx
-
 interface ReportSummaryProps {
   totalCobradoUSD: number;
   totalCobradoBs: number;
@@ -44,9 +42,9 @@ export function ReportSummary({
   const hasCobradoBs = totalCobradoBs > 0;
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-md p-6">
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
       {/* Total General */}
-      <div className="mb-6 pb-6 border-b border-slate-700">
+      <div className="mb-6 pb-6 border-b border-border">
         <p className="text-xs font-medium text-vet-muted uppercase tracking-wide mb-1">
           Total Cobrado
         </p>
@@ -85,7 +83,7 @@ export function ReportSummary({
               </p>
             </>
           ) : (
-            <p className="text-2xl font-bold text-slate-500">—</p>
+            <p className="text-2xl font-bold text-vet-muted">—</p>
           )}
         </div>
 
@@ -94,7 +92,7 @@ export function ReportSummary({
           <p className="text-xs font-medium text-vet-muted uppercase tracking-wide mb-1">
             Pendiente USD
           </p>
-          <p className={`text-2xl font-bold ${hasPendingUSD ? "text-amber-400" : "text-slate-500"}`}>
+          <p className={`text-2xl font-bold ${hasPendingUSD ? "text-amber-500" : "text-vet-muted"}`}>
             {hasPendingUSD ? formatUSD(pendienteUSD) : "—"}
           </p>
         </div>
@@ -104,7 +102,7 @@ export function ReportSummary({
           <p className="text-xs font-medium text-vet-muted uppercase tracking-wide mb-1">
             Pendiente Bolívares
           </p>
-          <p className={`text-2xl font-bold ${hasPendingBs ? "text-amber-400" : "text-slate-500"}`}>
+          <p className={`text-2xl font-bold ${hasPendingBs ? "text-amber-500" : "text-vet-muted"}`}>
             {hasPendingBs ? formatBs(pendienteBs) : "—"}
           </p>
         </div>
@@ -118,7 +116,7 @@ export function ReportSummary({
             {porcentajeCobrado}%
           </span>
         </div>
-        <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div className="h-2 bg-vet-light rounded-full overflow-hidden border border-border/50">
           <div
             className="h-full bg-vet-primary rounded-full transition-all duration-500"
             style={{ width: `${Math.min(porcentajeCobrado, 100)}%` }}

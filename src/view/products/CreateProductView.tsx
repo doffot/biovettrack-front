@@ -1,4 +1,3 @@
-// src/views/products/CreateProductView.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,6 +33,9 @@ export default function CreateProductView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
+
+  // Estilo para el fondo de inputs (similar a sidebar)
+  const inputStyle = { backgroundColor: "var(--color-vet-sidebar)" };
 
   const { mutate, isPending } = useMutation({
     mutationFn: createProduct,
@@ -95,7 +97,7 @@ export default function CreateProductView() {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
+          className="p-2 rounded-lg hover:bg-hover text-vet-muted transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -104,7 +106,7 @@ export default function CreateProductView() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit}>
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-card">
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
               {/* ====== COLUMNA IZQUIERDA ====== */}
@@ -126,7 +128,8 @@ export default function CreateProductView() {
                         onChange={handleChange}
                         placeholder="Ej: Bravecto Oral"
                         maxLength={100}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                     </div>
 
@@ -138,7 +141,8 @@ export default function CreateProductView() {
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       >
                         {categoryOptions.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -150,7 +154,7 @@ export default function CreateProductView() {
 
                     <div>
                       <label className="block text-sm font-medium text-vet-text mb-1">
-                        Descripción <span className="text-gray-400 font-normal">(opcional)</span>
+                        Descripción <span className="text-vet-muted font-normal">(opcional)</span>
                       </label>
                       <input
                         type="text"
@@ -159,7 +163,8 @@ export default function CreateProductView() {
                         onChange={handleChange}
                         placeholder="Notas internas, presentación, etc."
                         maxLength={200}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                     </div>
                   </div>
@@ -182,7 +187,8 @@ export default function CreateProductView() {
                         onChange={handleChange}
                         placeholder="tableta, frasco"
                         maxLength={30}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                     </div>
 
@@ -198,7 +204,8 @@ export default function CreateProductView() {
                         min="1"
                         step="1"
                         placeholder="1"
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                     </div>
                   </div>
@@ -216,7 +223,7 @@ export default function CreateProductView() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-vet-text mb-1">
-                          Costo <span className="text-gray-400 font-normal">(opcional)</span>
+                          Costo <span className="text-vet-muted font-normal">(opcional)</span>
                         </label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-vet-muted text-sm">
@@ -230,7 +237,8 @@ export default function CreateProductView() {
                             min="0"
                             step="0.01"
                             placeholder="0.00"
-                            className="w-full pl-7 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                            style={inputStyle}
+                            className="w-full pl-7 pr-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                           />
                         </div>
                       </div>
@@ -251,21 +259,22 @@ export default function CreateProductView() {
                             min="0"
                             step="0.01"
                             placeholder="0.00"
-                            className="w-full pl-7 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                            style={inputStyle}
+                            className="w-full pl-7 pr-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Vender por dosis */}
-                    <div className="p-4 bg-slate-900 rounded-xl border border-slate-700">
+                    <div className="p-4 bg-vet-light/50 rounded-xl border border-border">
                       <label className="flex items-start gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           name="divisible"
                           checked={formData.divisible}
                           onChange={handleChange}
-                          className="mt-0.5 w-4 h-4 text-vet-primary border-slate-600 rounded focus:ring-vet-primary focus:ring-offset-0 bg-slate-800"
+                          className="mt-0.5 w-4 h-4 text-vet-primary border-border rounded focus:ring-vet-primary focus:ring-offset-0 bg-card"
                         />
                         <div className="flex-1">
                           <span className="text-sm font-medium text-vet-text">
@@ -278,7 +287,7 @@ export default function CreateProductView() {
                       </label>
 
                       {formData.divisible && (
-                        <div className="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-4">
+                        <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-vet-text mb-1">
                               Unidad de dosis
@@ -290,7 +299,8 @@ export default function CreateProductView() {
                               onChange={handleChange}
                               placeholder="dosis, ml"
                               maxLength={10}
-                              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                              style={inputStyle}
+                              className="w-full px-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                             />
                           </div>
                           <div>
@@ -309,7 +319,8 @@ export default function CreateProductView() {
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
-                                className="w-full pl-7 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                                style={inputStyle}
+                                className="w-full pl-7 pr-3 py-2 border border-border rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                               />
                             </div>
                           </div>
@@ -324,7 +335,7 @@ export default function CreateProductView() {
                         name="active"
                         checked={formData.active}
                         onChange={handleChange}
-                        className="w-4 h-4 text-vet-primary border-slate-600 rounded focus:ring-vet-primary focus:ring-offset-0 bg-slate-800"
+                        className="w-4 h-4 text-vet-primary border-border rounded focus:ring-vet-primary focus:ring-offset-0 bg-card"
                       />
                       <span className="text-sm text-vet-text">Producto activo</span>
                     </label>
@@ -333,7 +344,7 @@ export default function CreateProductView() {
 
                 {/* Resumen */}
                 {formData.salePrice !== undefined && formData.salePrice > 0 && (
-                  <div className="p-4 bg-slate-900 rounded-xl">
+                  <div className="p-4 bg-vet-light rounded-xl border border-border">
                     <h4 className="text-xs font-semibold text-vet-muted uppercase tracking-wider mb-2">
                       Resumen
                     </h4>
@@ -356,11 +367,11 @@ export default function CreateProductView() {
           </div>
 
           {/* Footer con botones */}
-          <div className="px-6 py-4 bg-slate-900 border-t border-slate-700 flex items-center justify-end gap-3">
+          <div className="px-6 py-4 bg-vet-light border-t border-border flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm text-vet-text font-medium rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors"
+              className="px-4 py-2 text-sm text-vet-text font-medium rounded-lg border border-border hover:bg-hover transition-colors"
             >
               Cancelar
             </button>
@@ -370,7 +381,7 @@ export default function CreateProductView() {
               className={`px-5 py-2 text-sm rounded-lg font-semibold transition-all flex items-center gap-2 ${
                 isValid && !isPending
                   ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                  : "bg-slate-700 text-slate-500 cursor-not-allowed"
+                  : "bg-card border border-border text-vet-muted cursor-not-allowed"
               }`}
             >
               {isPending ? (

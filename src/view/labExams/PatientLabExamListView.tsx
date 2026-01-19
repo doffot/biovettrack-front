@@ -62,9 +62,9 @@ export default function PatientLabExamListView() {
 
   if (examsLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800/50">
-        <Loader2 className="w-10 h-10 text-cyan-500 animate-spin mb-4" />
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sincronizando Laboratorio...</p>
+      <div className="flex flex-col items-center justify-center py-20 bg-card/40 rounded-3xl border border-border">
+        <Loader2 className="w-10 h-10 text-vet-primary animate-spin mb-4" />
+        <p className="text-xs font-bold text-vet-muted uppercase tracking-widest">Sincronizando Laboratorio...</p>
       </div>
     );
   }
@@ -74,17 +74,17 @@ export default function PatientLabExamListView() {
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-3">
-          <div className="w-1.5 h-8 bg-cyan-500 rounded-full" />
+          <div className="w-1.5 h-8 bg-vet-primary rounded-full" />
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight uppercase">Laboratorio</h2>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <h2 className="text-xl font-black text-vet-text tracking-tight uppercase">Laboratorio</h2>
+            <p className="text-[10px] font-bold text-vet-muted uppercase tracking-widest">
               {exams.length} Analíticas registradas
             </p>
           </div>
         </div>
         <Link
           to="create"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-cyan-900/20 uppercase tracking-widest"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-xs font-black rounded-xl transition-all shadow-soft uppercase tracking-widest"
         >
           <Plus size={16} /> Nuevo Registro
         </Link>
@@ -96,30 +96,30 @@ export default function PatientLabExamListView() {
           {exams.map((exam) => (
             <div
               key={exam._id}
-              className="group flex items-center gap-4 p-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl hover:border-slate-500 hover:bg-slate-800 transition-all duration-300"
+              className="group flex items-center gap-4 p-4 bg-card border border-border rounded-2xl hover:border-vet-primary/50 hover:shadow-soft transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center flex-shrink-0 border border-slate-700">
-                <FlaskConical className="w-6 h-6 text-slate-400 group-hover:text-cyan-500" />
+              <div className="w-12 h-12 rounded-2xl bg-vet-light flex items-center justify-center flex-shrink-0 border border-border group-hover:border-vet-primary/20">
+                <FlaskConical className="w-6 h-6 text-vet-muted group-hover:text-vet-primary transition-colors" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-slate-200 uppercase text-xs tracking-wider mb-1">Hemograma Automatizado</p>
-                <div className="flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
-                  <span className="flex items-center gap-1.5"><Calendar size={14} className="text-cyan-600"/> {formatDate(exam.date)}</span>
+                <p className="font-bold text-vet-text uppercase text-xs tracking-wider mb-1">Hemograma Automatizado</p>
+                <div className="flex items-center gap-3 text-[10px] font-bold tracking-widest text-vet-muted uppercase">
+                  <span className="flex items-center gap-1.5"><Calendar size={14} className="text-vet-primary"/> {formatDate(exam.date)}</span>
                   {exam._id && (
-                    <span className="pl-3 border-l border-slate-700 font-black text-white">Ref: {exam._id.slice(-5)}</span>
+                    <span className="pl-3 border-l border-border font-black text-vet-text">Ref: {exam._id.slice(-5)}</span>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/50">
+              <div className="flex items-center gap-1.5 bg-vet-light/80 p-1.5 rounded-xl border border-border">
                 {/* BOTÓN PARA IMPRIMIR (ShareResultsModal) */}
                 <button
                   onClick={() => {
                     setSelectedExam(exam);
                     setShowShareModal(true);
                   }}
-                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-700 transition-all"
+                  className="p-2 rounded-lg text-vet-muted hover:text-vet-text hover:bg-hover transition-all"
                   title="Generar PDF"
                 >
                   <Printer size={18} />
@@ -130,7 +130,7 @@ export default function PatientLabExamListView() {
                     setSelectedExam(exam);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                  className="p-2 rounded-lg text-vet-muted hover:text-vet-primary hover:bg-vet-primary/10 transition-all"
                   title="Ver Detalle"
                 >
                   <Eye size={18} />
@@ -141,7 +141,7 @@ export default function PatientLabExamListView() {
                     setExamToDelete(exam);
                     setIsDeleteModalOpen(true);
                   }}
-                  className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                  className="p-2 rounded-lg text-vet-muted hover:text-red-500 hover:bg-red-500/10 transition-all"
                   title="Eliminar"
                 >
                   <Trash2 size={18} />
@@ -151,9 +151,9 @@ export default function PatientLabExamListView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 bg-slate-900/20 rounded-[2.5rem] border-2 border-dashed border-slate-800/50">
-          <FileSearch className="w-12 h-12 text-slate-800 mx-auto mb-4" />
-          <h3 className="text-slate-500 font-black uppercase tracking-widest text-xs">Sin Historial</h3>
+        <div className="text-center py-20 bg-vet-light/50 rounded-[2.5rem] border-2 border-dashed border-border">
+          <FileSearch className="w-12 h-12 text-vet-muted mx-auto mb-4" />
+          <h3 className="text-vet-muted font-black uppercase tracking-widest text-xs">Sin Historial</h3>
         </div>
       )}
 

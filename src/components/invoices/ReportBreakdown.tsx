@@ -1,4 +1,3 @@
-// src/components/invoices/ReportBreakdown.tsx
 import { getItemTypeLabel } from "../../utils/reportUtils";
 
 interface ReportBreakdownProps {
@@ -19,8 +18,8 @@ function BreakdownList({ title, items }: BreakdownListProps) {
   const maxValue = Math.max(...items.map((item) => item.value));
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-md">
-      <div className="px-4 py-3 border-b border-slate-700">
+    <div className="bg-card border border-border rounded-lg shadow-sm">
+      <div className="px-4 py-3 border-b border-border bg-vet-light/50">
         <h3 className="text-sm font-semibold text-vet-text">{title}</h3>
       </div>
       <div className="p-4 space-y-3">
@@ -33,16 +32,16 @@ function BreakdownList({ title, items }: BreakdownListProps) {
                 <span className="text-sm text-vet-muted">{item.label}</span>
                 <div className="flex items-center gap-2">
                   {item.secondary && (
-                    <span className="text-xs text-slate-500">{item.secondary}</span>
+                    <span className="text-xs text-vet-muted/70">{item.secondary}</span>
                   )}
                   <span className="text-sm font-semibold text-vet-text tabular-nums">
                     {item.value}
                   </span>
                 </div>
               </div>
-              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-vet-light rounded-full overflow-hidden border border-border/50">
                 <div
-                  className="h-full bg-vet-primary/20 rounded-full"
+                  className="h-full bg-vet-primary/50 rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>

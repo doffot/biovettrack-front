@@ -1,4 +1,3 @@
-// src/components/dashboard/DualCurrencyCard.tsx
 import type { LucideIcon } from "lucide-react";
 import type { CurrencyAmounts } from "../../constants/dashboardConstants";
 import type { RevenueAmounts } from "../../hooks/useDashboardData";
@@ -10,7 +9,7 @@ interface DualCurrencyCardProps {
   icon: LucideIcon;
   color: string;
   bgColor: string;
-  iconBgColor?: string; // 👈 NUEVA PROP
+  iconBgColor?: string; 
   onClick?: () => void;
 }
 
@@ -25,7 +24,7 @@ export function DualCurrencyCard({
   icon: Icon,
   color,
   bgColor,
-  iconBgColor = "bg-slate-800/80", 
+  iconBgColor = "bg-vet-light",
   onClick,
 }: DualCurrencyCardProps) {
   const formatUSD = (amount: number) => `$${amount.toFixed(2)}`;
@@ -42,11 +41,11 @@ export function DualCurrencyCard({
   return (
     <div
       className={`
-        ${bgColor} rounded-xl p-4 shadow-lg
+        ${bgColor} rounded-xl p-4 shadow-soft border border-border
         transition-all duration-300 animate-scale-in group
         ${isClickable
-          ? "cursor-pointer hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-          : "hover:shadow-xl"
+          ? "cursor-pointer hover:shadow-card hover:scale-[1.02] active:scale-[0.98]"
+          : "hover:shadow-card"
         }
       `}
       onClick={onClick}
@@ -62,7 +61,7 @@ export function DualCurrencyCard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* Título */}
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-vet-muted uppercase tracking-wide mb-2">
             {title}
           </p>
 
@@ -72,11 +71,11 @@ export function DualCurrencyCard({
               <p className={`text-2xl font-bold ${color} mb-1`}>
                 {formatUSD(amounts.totalUSD)}
               </p>
-              <div className="text-xs text-slate-500 space-y-1">
+              <div className="text-xs text-vet-muted space-y-1">
                 <p className="font-medium">{formatUSD(amounts.USD)} USD</p>
                 {hasBs && (
                   <p className="font-medium">
-                    {formatUSD(amounts.bsInUSD)} <span className="text-slate-600">({formatBs(amounts.Bs)})</span>
+                    {formatUSD(amounts.bsInUSD)} <span className="opacity-70">({formatBs(amounts.Bs)})</span>
                   </p>
                 )}
               </div>
@@ -88,7 +87,7 @@ export function DualCurrencyCard({
                 {formatUSD(amounts.USD)}
               </p>
               {/* Bolívares */}
-              <p className="text-sm font-semibold text-slate-500">
+              <p className="text-sm font-semibold text-vet-muted">
                 {formatBs(amounts.Bs)}
               </p>
             </>
@@ -96,8 +95,8 @@ export function DualCurrencyCard({
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+            <p className="text-xs text-vet-muted mt-2 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-vet-muted/50"></span>
               {subtitle}
               {isClickable && (
                 <span className="text-vet-accent opacity-0 group-hover:opacity-100 transition-opacity ml-1">
@@ -114,7 +113,8 @@ export function DualCurrencyCard({
           p-3 rounded-xl 
           group-hover:scale-110 
           transition-all duration-300
-          shadow-lg
+          shadow-soft
+          border border-border
         `}>
           <Icon className={`w-6 h-6 ${color}`} />
         </div>

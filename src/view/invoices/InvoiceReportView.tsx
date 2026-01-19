@@ -1,4 +1,3 @@
-// src/views/invoices/InvoiceReportView.tsx
 import { ReportHeader } from "../../components/invoices/ReportHeader";
 import { ReportSummary } from "../../components/invoices/ReportSummary";
 import { ReportMetrics } from "../../components/invoices/ReportMetrics";
@@ -8,9 +7,9 @@ import { useInvoiceReport } from "../../hooks/useInvoiceReport";
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-vet-light">
       <div className="text-center">
-        <div className="w-8 h-8 mx-auto mb-3 border-2 border-slate-700 border-t-vet-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-vet-muted/30 border-t-vet-primary rounded-full animate-spin" />
         <p className="text-sm text-vet-muted">Cargando reporte...</p>
       </div>
     </div>
@@ -33,7 +32,7 @@ export default function InvoiceReportView() {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-3 lg:pt-0">
+    <div className="min-h-screen bg-vet-light pt-3 lg:pt-0 transition-colors duration-300">
       <ReportHeader
         periodLabel={periodLabel}
         isFetching={isFetching}

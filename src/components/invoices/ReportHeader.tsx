@@ -1,4 +1,3 @@
-// src/components/invoices/ReportHeader.tsx
 import { Link } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 
@@ -14,7 +13,7 @@ export function ReportHeader({
   onRefetch,
 }: ReportHeaderProps) {
   return (
-    <header className="bg-slate-800 border-b border-slate-700">
+    <header className="bg-card border-b border-border shadow-sm transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-4">
@@ -35,7 +34,7 @@ export function ReportHeader({
           <button
             onClick={onRefetch}
             disabled={isFetching}
-            className="p-2 text-vet-muted hover:text-vet-text hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50"
+            className="p-2 text-vet-muted hover:text-vet-text hover:bg-hover rounded-md transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           </button>

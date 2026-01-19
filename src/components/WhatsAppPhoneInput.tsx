@@ -1,4 +1,3 @@
-// src/components/WhatsAppPhoneInput.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Phone } from "lucide-react";
 
@@ -9,24 +8,22 @@ type Country = {
 };
 
 const countries: Country[] = [
+  { name: "Venezuela", code: "VE", dialCode: "+58" },
   { name: "Colombia", code: "CO", dialCode: "+57" },
   { name: "México", code: "MX", dialCode: "+52" },
   { name: "Argentina", code: "AR", dialCode: "+54" },
   { name: "España", code: "ES", dialCode: "+34" },
   { name: "Estados Unidos", code: "US", dialCode: "+1" },
-  { name: "Brasil", code: "BR", dialCode: "+55" },
-  { name: "Perú", code: "PE", dialCode: "+51" },
   { name: "Chile", code: "CL", dialCode: "+56" },
+  { name: "Perú", code: "PE", dialCode: "+51" },
   { name: "Ecuador", code: "EC", dialCode: "+593" },
-  { name: "Venezuela", code: "VE", dialCode: "+58" },
+  { name: "Brasil", code: "BR", dialCode: "+55" },
   { name: "Panamá", code: "PA", dialCode: "+507" },
   { name: "Costa Rica", code: "CR", dialCode: "+506" },
   { name: "Guatemala", code: "GT", dialCode: "+502" },
   { name: "Bolivia", code: "BO", dialCode: "+591" },
   { name: "Paraguay", code: "PY", dialCode: "+595" },
   { name: "Uruguay", code: "UY", dialCode: "+598" },
-  { name: "República Dominicana", code: "DO", dialCode: "+1-809" },
-  { name: "Puerto Rico", code: "PR", dialCode: "+1-787" },
 ];
 
 interface WhatsAppPhoneInputProps {
@@ -45,22 +42,10 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const isUserTyping = useRef(false);
 
-  // Función para validación visual
-  const getValidationMessage = (phone: string, countryCode: string) => {
-    if (!phone) return "Ingrese el número de teléfono";
-    
-    const fullNumber = countryCode + phone;
-    if (!/^\+[0-9]{10,15}$/.test(fullNumber)) {
-      return "Número incompleto o inválido";
-    }
-    
-    return null;
-  };
+  const inputStyle = { backgroundColor: "var(--color-vet-sidebar)" };
 
   useEffect(() => {
-    if (isUserTyping.current) {
-      return;
-    }
+    if (isUserTyping.current) return;
 
     if (!value) {
       setSelectedCountry(countries[0]);
@@ -100,78 +85,51 @@ export const WhatsAppPhoneInput: React.FC<WhatsAppPhoneInputProps> = ({
     setTimeout(() => { isUserTyping.current = false; }, 100);
   };
 
-  const validationMessage = getValidationMessage(phoneNumber, selectedCountry.dialCode);
-
   return (
     <div>
-      <label className="block text-vet-text font-semibold mb-2 text-sm">
-        WhatsApp <span className="text-red-500">*</span>
+      <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
+        <div className="p-1 bg-emerald-500/10 rounded">
+          <Phone className="w-3.5 h-3.5 text-emerald-500" />
+        </div>
+        WhatsApp <span className="text-vet-danger">*</span>
       </label>
 
-      <div className={`
-        flex items-center gap-3 px-3 py-2 rounded-lg border transition-all duration-200
-        ${error 
-          ? 'bg-red-50 border-red-300' 
-          : 'bg-vet-light border-gray-300 hover:border-gray-400 focus-within:border-vet-primary'
-        }
-      `}>
-        <div className={`p-1.5 rounded ${error ? 'bg-red-100 text-red-500' : 'bg-vet-primary/10 text-vet-primary'}`}>
-          <Phone className="w-4 h-4" />
-        </div>
-
+      <div className="flex gap-2">
+        {/* Selector de país - Solo muestra el código */}
         <select
           value={selectedCountry.dialCode}
           onChange={handleCountryChange}
-          className="bg-transparent text-vet-text focus:outline-none text-sm font-medium pr-2 cursor-pointer appearance-none"
-          style={{ width: '70px' }}
+          style={inputStyle}
+          className="w-20 px-2 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all cursor-pointer"
         >
           {countries.map((country) => (
-            <option key={country.code} value={country.dialCode} className="bg-white text-vet-text">
+            <option 
+              key={country.code} 
+              value={country.dialCode}
+              style={{ 
+                backgroundColor: "var(--color-card)", 
+                color: "var(--color-vet-text)" 
+              }}
+            >
               {country.dialCode}
             </option>
           ))}
         </select>
 
-        <div className="h-6 w-px bg-gray-300" />
-
+        {/* Input de teléfono */}
         <input
           type="tel"
-          placeholder="Número de teléfono"
+          placeholder="412 123 4567"
           value={phoneNumber}
           onChange={handlePhoneChange}
-          className="flex-1 bg-transparent text-vet-text placeholder-vet-muted focus:outline-none text-sm"
+          maxLength={15}
+          style={inputStyle}
+          className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
         />
       </div>
 
       {error && (
-        <p className="mt-1 text-red-600 text-xs flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-          {error}
-        </p>
-      )}
-
-      {/* Información visual del número y validación */}
-      {!error && phoneNumber && (
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-vet-muted text-xs">
-            Número completo:
-          </span>
-          <span className="font-mono text-xs text-green-600">
-            {selectedCountry.dialCode}{phoneNumber}
-          </span>
-          {validationMessage && (
-            <span className="text-xs text-amber-600 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-amber-600 rounded-full" />
-              {validationMessage}
-            </span>
-          )}
-        </div>
-      )}
-
-      {!error && !phoneNumber && (
-        <p className="text-vet-muted text-xs mt-1">
-          Ej: <span className="font-mono text-vet-text">3001234567</span> → se convierte en <span className="font-mono text-vet-primary">{selectedCountry.dialCode}3001234567</span>
-        </p>
+        <p className="mt-1 text-sm text-vet-danger">{error}</p>
       )}
     </div>
   );

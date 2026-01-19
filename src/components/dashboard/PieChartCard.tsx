@@ -1,4 +1,3 @@
-// src/components/dashboard/PieChartCard.tsx
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import type { LucideIcon } from "lucide-react";
 
@@ -10,16 +9,16 @@ interface PieChartCardProps {
   emptyMessage?: string;
 }
 
-// Colores adaptados para dark mode (más brillantes)
-const DARK_CHART_COLORS = [
-  "#36BCD4", // vet-accent (cyan)
-  "#10B981", // emerald-500
-  "#8B5CF6", // violet-500
-  "#F59E0B", // amber-500
-  "#EC4899", // pink-500
-  "#6366F1", // indigo-500
-  "#14B8A6", // teal-500
-  "#F97316", // orange-500
+// Colores modernos que funcionan bien en ambos modos
+const CHART_COLORS = [
+  "#36BCD4", // Cyan (Accent)
+  "#10B981", // Emerald
+  "#8B5CF6", // Violet
+  "#F59E0B", // Amber
+  "#EC4899", // Pink
+  "#6366F1", // Indigo
+  "#14B8A6", // Teal
+  "#F97316", // Orange
 ];
 
 export function PieChartCard({
@@ -31,13 +30,13 @@ export function PieChartCard({
 }: PieChartCardProps) {
   const isEmpty = data.length === 0;
 
-  // Tooltip personalizado para dark mode
+  // Tooltip personalizado adaptable
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-800 border border-white/20 rounded-lg px-3 py-2 shadow-xl">
-          <p className="text-white font-medium text-sm">{payload[0].name}</p>
-          <p className="text-slate-300 text-xs">
+        <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
+          <p className="text-vet-text font-medium text-sm">{payload[0].name}</p>
+          <p className="text-vet-muted text-xs">
             {tooltipLabel}: <span className="text-vet-accent font-semibold">{payload[0].value}</span>
           </p>
         </div>
@@ -46,7 +45,7 @@ export function PieChartCard({
     return null;
   };
 
-  // Legend personalizada para dark mode
+  // Legend personalizada adaptable
   const CustomLegend = ({ payload }: any) => {
     return (
       <div className="flex flex-wrap justify-center gap-3 mt-4">
@@ -56,7 +55,7 @@ export function PieChartCard({
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-xs text-slate-400">{entry.value}</span>
+            <span className="text-xs text-vet-muted font-medium">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -64,10 +63,10 @@ export function PieChartCard({
   };
 
   return (
-    <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 p-4 lg:p-6 shadow-xl">
+    <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border p-4 lg:p-6 shadow-card">
       {/* Header */}
-      <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-        <div className="p-1.5 bg-vet-accent/20 rounded-lg border border-vet-accent/30">
+      <h2 className="font-semibold text-vet-text mb-4 flex items-center gap-2">
+        <div className="p-1.5 bg-vet-accent/10 rounded-lg border border-vet-accent/20">
           <Icon className="w-4 h-4 text-vet-accent" />
         </div>
         {title}
@@ -77,26 +76,14 @@ export function PieChartCard({
       <div className="h-64">
         {isEmpty ? (
           <div className="h-full flex flex-col items-center justify-center">
-            <div className="w-12 h-12 bg-slate-800/60 rounded-full flex items-center justify-center mb-3 border border-white/10">
-              <Icon className="w-6 h-6 text-slate-500" />
+            <div className="w-12 h-12 bg-vet-light rounded-full flex items-center justify-center mb-3 border border-border">
+              <Icon className="w-6 h-6 text-vet-muted" />
             </div>
-            <p className="text-slate-500 text-sm">{emptyMessage}</p>
+            <p className="text-vet-muted text-sm">{emptyMessage}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <defs>
-                {/* Glow effect para cada color */}
-                {DARK_CHART_COLORS.map(( index) => (
-                  <filter key={`glow-${index}`} id={`glow-${index}`}>
-                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                ))}
-              </defs>
               <Pie
                 data={[...data]}
                 cx="50%"
@@ -106,15 +93,15 @@ export function PieChartCard({
                 paddingAngle={3}
                 dataKey="value"
                 nameKey="name"
-                stroke="rgba(15, 23, 42, 0.8)"
+                stroke="transparent" // Borde transparente para limpieza en ambos modos
                 strokeWidth={2}
               >
                 {data.map((entry, index) => (
                   <Cell
                     key={`cell-${entry.name}-${index}`}
-                    fill={DARK_CHART_COLORS[index % DARK_CHART_COLORS.length]}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
                     style={{
-                      filter: `drop-shadow(0 0 6px ${DARK_CHART_COLORS[index % DARK_CHART_COLORS.length]}40)`,
+                      filter: `drop-shadow(0 0 2px ${CHART_COLORS[index % CHART_COLORS.length]}40)`,
                     }}
                   />
                 ))}

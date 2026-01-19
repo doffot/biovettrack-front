@@ -1,4 +1,3 @@
-// src/components/dashboard/MetricCard.tsx
 import type { LucideIcon } from "lucide-react";
 
 interface MetricCardProps {
@@ -18,15 +17,15 @@ export function MetricCard({
   icon: Icon,
   color,
   bgColor,
-  iconBgColor = "bg-slate-800/80",
+  iconBgColor = "bg-vet-light",
 }: MetricCardProps) {
   return (
     <div 
       className={`
         ${bgColor} 
         rounded-xl p-4 
-        shadow-lg
-        hover:shadow-xl
+        shadow-soft border border-border
+        hover:shadow-card
         transition-all duration-300 
         animate-scale-in 
         group
@@ -35,15 +34,15 @@ export function MetricCard({
       <div className="flex items-center justify-between">
         {/* Contenido */}
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
+          <p className="text-xs font-semibold text-vet-muted uppercase tracking-wide mb-1">
             {title}
           </p>
           <p className={`text-2xl font-bold ${color}`}>
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <span className="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
+            <p className="text-xs text-vet-muted mt-1 flex items-center gap-1">
+              <span className="inline-block w-1 h-1 rounded-full bg-vet-muted/50"></span>
               {subtitle}
             </p>
           )}
@@ -56,7 +55,7 @@ export function MetricCard({
             p-3 rounded-xl 
             group-hover:scale-110 
             transition-all duration-300
-            shadow-lg
+            shadow-soft border border-border
           `}
         >
           <Icon className={`w-6 h-6 ${color}`} />

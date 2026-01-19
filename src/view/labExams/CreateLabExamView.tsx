@@ -1,4 +1,3 @@
-// src/views/labExams/CreateLabExamView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -459,7 +458,7 @@ export default function CreateLabExamView() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-vet-light text-vet-text transition-colors duration-300">
       <div className="px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-5xl mx-auto">
           <div
@@ -471,7 +470,7 @@ export default function CreateLabExamView() {
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => navigate(-1)}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800 hover:bg-vet-primary hover:text-white text-vet-muted transition-all duration-200 border border-slate-700 group"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-card hover:bg-vet-primary hover:text-white text-vet-muted transition-all duration-200 border border-border group"
                 >
                   <ArrowLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </button>
@@ -495,7 +494,7 @@ export default function CreateLabExamView() {
                 <button
                   type="button"
                   onClick={handleClearPatient}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-400 hover:text-red-300 border border-red-900/30 hover:border-red-700 rounded-lg hover:bg-red-900/20 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-500 hover:text-red-400 border border-red-500/30 hover:border-red-500/50 rounded-lg hover:bg-red-500/10 transition-colors"
                 >
                   <X className="w-4 h-4" />
                   Cambiar paciente
@@ -506,9 +505,9 @@ export default function CreateLabExamView() {
             {isPatientSelected && (
               <div className="space-y-3 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
+                  <div className="bg-card rounded-xl p-3 shadow-soft border border-border">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-vet-primary/20 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-lg bg-vet-primary/10 flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-vet-accent" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -522,10 +521,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
+                  <div className="bg-card rounded-xl p-3 shadow-soft border border-border">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-cyan-400" />
+                      <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-cyan-500" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -538,10 +537,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
+                  <div className="bg-card rounded-xl p-3 shadow-soft border border-border">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                        <Stethoscope className="w-4 h-4 text-emerald-400" />
+                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                        <Stethoscope className="w-4 h-4 text-emerald-500" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -554,10 +553,10 @@ export default function CreateLabExamView() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-800 rounded-xl p-3 shadow-soft border border-slate-700">
+                  <div className="bg-card rounded-xl p-3 shadow-soft border border-border">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-                        <Calendar className="w-4 h-4 text-amber-400" />
+                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="w-4 h-4 text-amber-500" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] text-vet-muted uppercase tracking-wide font-medium">
@@ -579,7 +578,7 @@ export default function CreateLabExamView() {
               mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
-            <div className="bg-slate-800 rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden border border-slate-700">
+            <div className="bg-card rounded-2xl shadow-xl shadow-vet-primary/5 overflow-hidden border border-border">
               <TabNavigation
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
@@ -611,12 +610,12 @@ export default function CreateLabExamView() {
                           key={tab}
                           className={`transition-all duration-300 ${
                             isLocked
-                              ? "w-2 h-2 rounded-full bg-slate-600"
+                              ? "w-2 h-2 rounded-full bg-vet-muted/30"
                               : isCompleted
                               ? "w-6 h-2 rounded-full bg-emerald-500"
                               : isCurrent
                               ? "w-6 h-2 rounded-full bg-vet-primary animate-pulse"
-                              : "w-2 h-2 rounded-full bg-slate-500"
+                              : "w-2 h-2 rounded-full bg-vet-muted/50"
                           }`}
                         />
                       );
@@ -638,13 +637,13 @@ export default function CreateLabExamView() {
               </div>
 
               {totalCells > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 shadow-soft border border-slate-700">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card shadow-soft border border-border">
                   <span className="text-sm text-vet-muted">Células:</span>
                   <div className="flex items-center gap-1">
                     <span
                       className={`text-lg font-bold ${
                         totalCells === 100
-                          ? "text-emerald-400"
+                          ? "text-emerald-500"
                           : "text-vet-accent"
                       }`}
                     >
@@ -653,7 +652,7 @@ export default function CreateLabExamView() {
                     <span className="text-sm text-vet-muted">/100</span>
                   </div>
                   {totalCells === 100 && (
-                    <span className="text-xs bg-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded-full font-semibold border border-emerald-700">
+                    <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-semibold border border-emerald-500/20">
                       ✓ Completo
                     </span>
                   )}

@@ -1,4 +1,3 @@
-// src/components/layout/SidebarDesktop.tsx
 import React, { useState, useEffect } from "react";
 import { ChevronDown, LogOut, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -46,17 +45,21 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
   const isSubmenuExpanded = (label: string) => expandedMenus.includes(label);
 
   return (
-    <aside className="hidden lg:flex lg:flex-col fixed top-0 left-0 z-50 w-64 h-full bg-gradient-to-b from-vet-light via-sky-soft to-vet-light border-r border-border shadow-card">
-      {/* Logo con overlay oscuro y efecto de fondo */}
+    // CAMBIO IMPORTANTE: Usamos un style inline para el background-color
+    // Esto asegura que use la variable --color-vet-sidebar del tema
+    <aside 
+      className="hidden lg:flex lg:flex-col fixed top-0 left-0 z-50 w-64 h-full border-r border-border shadow-card transition-colors duration-300"
+      style={{ backgroundColor: 'var(--color-vet-sidebar)' }}
+    >
+      {/* Logo con overlay y efecto de fondo */}
       <div className="relative flex flex-col items-center justify-center px-4 py-6 border-b border-border">
-        {/* Overlay oscuro para mejorar legibilidad */}
-        <div className="absolute inset-0 bg-vet-light/50 backdrop-blur-sm" />
-
-        {/* Efecto de partícula suave */}
-        <div className="absolute -top-8 -right-8 w-40 h-40 bg-vet-accent/10 rounded-full blur-xl animate-pulse" />
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-vet-primary/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        {/* Efecto de partícula suave (adaptado al tema) */}
+        <div className="absolute -top-8 -right-8 w-40 h-40 bg-vet-accent/5 rounded-full blur-xl animate-pulse" />
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-vet-primary/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
 
         <Link to="/" className="flex flex-col items-center gap-2 relative z-10">
+          {/* Logo adaptable - Asegúrate de que tu logo se vea bien en ambos fondos o usa filter invert */}
           <img
             src="/logo_menu.svg"
             alt="BioVetTrack"
@@ -83,17 +86,17 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
                       group flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 w-full
                       ${
                         hasActiveSubItem
-                          ? "bg-vet-primary/20 text-vet-accent font-medium border border-vet-primary/30"
-                          : "text-vet-muted hover:bg-hover hover:text-vet-text"
+                          ? "bg-vet-primary/10 text-vet-primary font-bold border border-vet-primary/20"
+                          : "text-vet-muted hover:bg-hover hover:text-vet-text font-medium"
                       }
                     `}
                   >
                     <item.icon
                       className={`w-[18px] h-[18px] flex-shrink-0 transition-transform duration-200 ${
-                        hasActiveSubItem ? "scale-110 text-vet-accent" : "group-hover:scale-105 group-hover:text-vet-accent"
+                        hasActiveSubItem ? "scale-110 text-vet-primary" : "group-hover:scale-105 group-hover:text-vet-accent"
                       }`}
                     />
-                    <span className="text-[13px] flex-1 text-left font-medium">
+                    <span className="text-[13px] flex-1 text-left">
                       {item.label}
                     </span>
                     <ChevronDown
@@ -133,8 +136,8 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
                                 group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md transition-all duration-200
                                 ${
                                   activeItem === subItem.to
-                                    ? "bg-vet-primary text-white shadow-soft font-medium"
-                                    : "text-vet-muted hover:bg-hover hover:text-vet-text"
+                                    ? "bg-vet-primary text-white shadow-soft font-semibold"
+                                    : "text-vet-muted hover:bg-hover hover:text-vet-text font-medium"
                                 }
                               `}
                             >
@@ -168,8 +171,8 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
                   group flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200
                   ${
                     activeItem === item.to
-                      ? "bg-vet-primary text-white shadow-soft font-medium"
-                      : "text-vet-muted hover:bg-hover hover:text-vet-text"
+                      ? "bg-vet-primary text-white shadow-soft font-semibold"
+                      : "text-vet-muted hover:bg-hover hover:text-vet-text font-medium"
                   }
                 `}
               >
@@ -178,7 +181,7 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
                     activeItem === item.to ? "scale-110" : "group-hover:scale-105 group-hover:text-vet-accent"
                   }`}
                 />
-                <span className="text-[13px] font-medium">{item.label}</span>
+                <span className="text-[13px]">{item.label}</span>
                 {activeItem === item.to && (
                   <div className="ml-auto w-1 h-1 rounded-full bg-white animate-pulse" />
                 )}
@@ -189,7 +192,7 @@ const SidebarDesktop: React.FC<SidebarDesktopProps> = ({
       </nav>
 
       {/* Logout Button */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border bg-vet-light/5">
         <button
           onClick={logout}
           className="w-full flex items-center justify-center gap-2.5 px-3 py-2 rounded-lg text-vet-muted hover:text-vet-danger hover:bg-vet-danger/10 transition-all duration-200 group"

@@ -1,20 +1,19 @@
-// src/views/products/ProductListView.tsx
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
-  Package, 
   Search, 
   X, 
   Plus, 
   Edit3, 
   Trash2,
-  Tag
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "../../components/Toast";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { getAllProducts, deleteProduct } from "../../api/productAPI";
 import type { Product } from "../../types/product";
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,12 +26,11 @@ export default function ProductListView() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const {  data:products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
   });
 
-  // Filtros
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
       const matchesSearch = 
@@ -46,24 +44,21 @@ export default function ProductListView() {
     });
   }, [products, searchTerm, categoryFilter]);
 
-  // Paginación
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
 
-  // Reset page on filter change
   const handleFilterChange = (filter: string) => {
     setCategoryFilter(filter);
     setCurrentPage(1);
   };
 
-  // Mutación para eliminar
   const { mutate: removeProduct, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => deleteProduct(id),
     onSuccess: () => {
-      toast.success("Producto eliminado correctamente");
+      toast.success("Producto eliminado");
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setShowDeleteModal(false);
       setProductToDelete(null);
@@ -80,223 +75,237 @@ export default function ProductListView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-vet-muted text-sm">Cargando productos...</p>
-        </div>
+      <div className="min-h-[60vh] flex items-center justify-center bg-vet-light">
+        <div className="w-8 h-8 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 lg:px-8 bg-vet-light min-h-screen transition-colors duration-300">
+      {/* Header y Acciones */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-xl font-semibold text-vet-text">Catálogo de Productos</h1>
-          <p className="text-sm text-vet-muted">
-            {products.length} producto{products.length !== 1 ? "s" : ""} registrados
+          <h1 className="text-2xl font-bold text-vet-text tracking-tight">Inventario</h1>
+          <p className="text-sm text-vet-muted mt-1">
+            Gestión de productos y servicios
           </p>
         </div>
+        
         <Link
           to="/products/new"
-          className="inline-flex items-center justify-center px-4 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
+          className="inline-flex items-center justify-center px-5 py-2.5 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-semibold rounded-xl shadow-soft transition-all"
         >
-          <Plus className="w-4 h-4 mr-1.5" />
+          <Plus className="w-4 h-4 mr-2" />
           Nuevo Producto
         </Link>
       </div>
 
-      {/* Filtros y búsqueda */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        {/* Búsqueda */}
-        <div className="relative flex-1 max-w-md">
+      {/* Barra de Filtros Unificada */}
+      <div className="bg-card border border-border rounded-xl p-1.5 mb-6 flex flex-col sm:flex-row gap-2 shadow-sm">
+        {/* Buscador */}
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
           <input
             type="text"
-            placeholder="Buscar por nombre o descripción..."
+            placeholder="Buscar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+            className="w-full pl-9 pr-8 py-2 bg-vet-light border border-transparent hover:border-border rounded-lg text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-slate-700 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-vet-muted"
             >
-              <X className="w-4 h-4 text-vet-muted" />
+              <X className="w-3 h-3" />
             </button>
           )}
         </div>
 
-        {/* Filtro por categoría */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleFilterChange("all")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              categoryFilter === "all"
-                ? "bg-vet-primary text-white"
-                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => handleFilterChange("vacuna")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              categoryFilter === "vacuna"
-                ? "bg-vet-primary text-white"
-                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
-            }`}
-          >
-            Vacunas
-          </button>
-          <button
-            onClick={() => handleFilterChange("desparasitante")}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              categoryFilter === "desparasitante"
-                ? "bg-vet-primary text-white"
-                : "bg-slate-800 text-vet-text border border-slate-700 hover:bg-slate-700"
-            }`}
-          >
-            Desparasitantes
-          </button>
+        {/* Tabs de Categoría */}
+        <div className="flex p-1 bg-vet-light rounded-lg">
+          {[
+            { id: 'all', label: 'Todos' },
+            { id: 'vacuna', label: 'Vacunas' },
+            { id: 'desparasitante', label: 'Desparasitantes' }
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleFilterChange(cat.id)}
+              className={`
+                px-4 py-1.5 text-xs font-medium rounded-md transition-all
+                ${categoryFilter === cat.id
+                  ? "bg-card text-vet-text shadow-sm font-semibold"
+                  : "text-vet-muted hover:text-vet-text hover:bg-black/5 dark:hover:bg-white/5"
+                }
+              `}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Lista de productos */}
-      {paginatedProducts.length > 0 ? (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-700">
-              <thead className="bg-slate-900">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Producto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Categoría</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Precio Venta</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Unidad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-vet-muted uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-slate-800 divide-y divide-slate-700">
-                {paginatedProducts.map((product) => (
-                  <tr key={product._id} className="hover:bg-slate-700/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="p-2 bg-vet-primary/20 rounded-lg">
-                          <Tag className="w-4 h-4 text-vet-primary" />
-                        </div>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium text-vet-text">{product.name}</div>
-                          {product.description && (
-                            <div className="text-xs text-vet-muted">{product.description}</div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-vet-primary/20 text-vet-primary capitalize">
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-vet-text">
-                      ${product.salePrice.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-vet-muted">
-                      {product.unit}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.active 
-                          ? "bg-green-900/30 text-green-400" 
-                          : "bg-red-900/30 text-red-400"
-                      }`}>
-                        {product.active ? "Activo" : "Inactivo"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        to={`/products/${product._id}/edit`}
-                        className="text-vet-primary hover:text-vet-secondary mr-3"
-                        title="Editar"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(product)}
-                        className="text-red-400 hover:text-red-300"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+      {/* Tabla Profesional */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
+        {paginatedProducts.length > 0 ? (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-vet-light/50 border-b border-border text-xs uppercase tracking-wider text-vet-muted font-semibold">
+                    <th className="px-6 py-4">Producto</th>
+                    <th className="px-6 py-4">Categoría</th>
+                    <th className="px-6 py-4 text-right">Precio</th>
+                    <th className="px-6 py-4">Stock</th>
+                    <th className="px-6 py-4 text-center">Estado</th>
+                    <th className="px-6 py-4 text-center">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {paginatedProducts.map((product) => {
+                    // Cálculo de stock usando las propiedades directas (seguro y compatible)
+                    const stockUnits = product.stockUnits ?? 0;
+                    const stockDoses = product.stockDoses ?? 0;
 
-          {/* Paginación */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
-              <p className="text-sm text-vet-muted">
-                Página {currentPage} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Anterior
-                </button>
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Siguiente
-                </button>
-              </div>
+                    const stock = product.divisible 
+                      ? `${stockUnits * product.dosesPerUnit + stockDoses} dosis`
+                      : `${stockUnits} ${product.unit}`;
+
+                    return (
+                      <tr 
+                        key={product._id} 
+                        className="group hover:bg-hover transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-vet-text group-hover:text-vet-primary transition-colors">
+                              {product.name}
+                            </span>
+                            {product.description && (
+                              <span className="text-xs text-vet-muted truncate max-w-[250px]">
+                                {product.description}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        
+                        <td className="px-6 py-4">
+                          <span className={`
+                            inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium border capitalize
+                            ${product.category === 'vacuna' 
+                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                              : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                            }
+                          `}>
+                            {product.category}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="text-sm font-bold text-vet-text font-mono">
+                              ${product.salePrice.toFixed(2)}
+                            </span>
+                            <span className="text-[10px] text-vet-muted">
+                              / {product.unit}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-vet-text">
+                          {stock}
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${product.active ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <span className={`text-xs font-medium ${product.active ? 'text-vet-text' : 'text-vet-muted'}`}>
+                              {product.active ? "Activo" : "Inactivo"}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link
+                              to={`/products/${product._id}/edit`}
+                              className="p-2 rounded-lg text-vet-muted hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
+                              title="Editar"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(product)}
+                              className="p-2 rounded-lg text-vet-muted hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-xl flex items-center justify-center">
-            <Package className="w-8 h-8 text-vet-muted" />
-          </div>
-          <h3 className="text-lg font-medium text-vet-text mb-1">
-            {searchTerm || categoryFilter !== "all" ? "Sin resultados" : "Sin productos"}
-          </h3>
-          <p className="text-sm text-vet-muted mb-4">
-            {searchTerm || categoryFilter !== "all"
-              ? "No hay productos con esos criterios"
-              : "Registra tu primer producto"}
-          </p>
-          <Link
-            to="/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Crear Producto
-          </Link>
-        </div>
-      )}
 
-      {/* Modal de confirmación */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setProductToDelete(null);
-        }}
-        onConfirm={() => productToDelete?._id && removeProduct(productToDelete._id)}
-        petName={`el producto "${productToDelete?.name || ""}"`}
-        isDeleting={isDeleting}
-      />
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between bg-vet-light/30">
+                <span className="text-xs text-vet-muted">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg border border-border bg-card text-vet-muted hover:text-vet-text hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg border border-border bg-card text-vet-muted hover:text-vet-text hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="py-20 text-center">
+            <p className="text-vet-text font-medium mb-1">
+              {searchTerm ? "No se encontraron resultados" : "Inventario vacío"}
+            </p>
+            <p className="text-sm text-vet-muted">
+              {searchTerm 
+                ? "Intenta con otro término de búsqueda" 
+                : "Agrega productos para comenzar"}
+            </p>
+          </div>
+        )}
+      </div>
+
+     <ConfirmationModal
+  isOpen={showDeleteModal}
+  onClose={() => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+  }}
+  onConfirm={() => productToDelete?._id && removeProduct(productToDelete._id)}
+  title="¿Eliminar producto?"
+  message={`¿Estás seguro de que deseas eliminar el producto "${productToDelete?.name || ""}"? Esta acción no se puede deshacer.`}
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  variant="danger"
+  isLoading={isDeleting}
+  loadingText="Eliminando..."
+/>
     </div>
   );
 }

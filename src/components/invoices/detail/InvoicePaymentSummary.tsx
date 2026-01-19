@@ -21,16 +21,16 @@ export function InvoicePaymentSummary({ invoice }: InvoicePaymentSummaryProps) {
   const isCanceled = invoice.paymentStatus === "Cancelado";
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md p-4">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">
+    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-md p-4">
+      <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-4">
         Resumen de Pago
       </h3>
 
       <div className="space-y-3">
         {/* Total factura */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Total factura</span>
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm text-[var(--color-vet-muted)]">Total factura</span>
+          <span className="text-sm font-medium text-[var(--color-vet-text)]">
             {formatCurrency(total, invoice.currency)}
           </span>
         </div>
@@ -38,8 +38,8 @@ export function InvoicePaymentSummary({ invoice }: InvoicePaymentSummaryProps) {
         {/* Pagado USD */}
         {paidUSD > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Pagado en USD</span>
-            <span className="text-sm font-medium text-emerald-600">
+            <span className="text-sm text-[var(--color-vet-muted)]">Pagado en USD</span>
+            <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
               {formatCurrency(paidUSD, "USD")}
             </span>
           </div>
@@ -48,8 +48,8 @@ export function InvoicePaymentSummary({ invoice }: InvoicePaymentSummaryProps) {
         {/* Pagado Bs */}
         {paidBs > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Pagado en Bs</span>
-            <span className="text-sm font-medium text-[#0A7EA4]">
+            <span className="text-sm text-[var(--color-vet-muted)]">Pagado en Bs</span>
+            <span className="text-sm font-medium text-[var(--color-vet-primary)]">
               {formatCurrency(paidBs, "Bs")}
             </span>
           </div>
@@ -57,29 +57,29 @@ export function InvoicePaymentSummary({ invoice }: InvoicePaymentSummaryProps) {
 
         {/* Tasa de cambio si pagó en Bs */}
         {paidBs > 0 && (
-          <div className="flex items-center justify-between text-xs text-gray-400">
+          <div className="flex items-center justify-between text-xs text-[var(--color-vet-muted)]">
             <span>Tasa aplicada</span>
             <span>Bs. {exchangeRate.toFixed(2)} / USD</span>
           </div>
         )}
 
         {/* Separador */}
-        <div className="border-t border-gray-200 pt-3">
+        <div className="border-t border-[var(--color-border)] pt-3">
           {/* Pendiente o Pagado */}
           {isCanceled ? (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-600">Estado</span>
-              <span className="text-sm font-bold text-gray-500">Cancelado</span>
+              <span className="text-sm font-semibold text-[var(--color-vet-muted)]">Estado</span>
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">Cancelado</span>
             </div>
           ) : isPaid ? (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-900">Estado</span>
-              <span className="text-sm font-bold text-emerald-600">Pagado ✓</span>
+              <span className="text-sm font-semibold text-[var(--color-vet-text)]">Estado</span>
+              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Pagado ✓</span>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-900">Pendiente</span>
-              <span className="text-lg font-bold text-red-600">
+              <span className="text-sm font-semibold text-[var(--color-vet-text)]">Pendiente</span>
+              <span className="text-lg font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(remaining, invoice.currency)}
               </span>
             </div>

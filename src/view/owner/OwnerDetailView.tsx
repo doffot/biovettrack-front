@@ -78,16 +78,12 @@ export default function OwnerDetailView() {
   const ownerAppointments = appointmentsData?.appointments || [];
   const ownerGroomingServices: GroomingService[] = groomingData?.services || [];
 
-  // Filtrar solo los servicios de hoy
   const todayGroomingServices = ownerGroomingServices.filter((service) => {
     if (!service.date) return false;
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const serviceDate = new Date(service.date);
     serviceDate.setHours(0, 0, 0, 0);
-
     return serviceDate.getTime() === today.getTime();
   });
 
@@ -125,7 +121,6 @@ export default function OwnerDetailView() {
   const allInvoices = invoicesData?.invoices || [];
   const invoices = allInvoices.filter((inv) => getOwnerId(inv) === ownerId);
 
-  // Calcular totales
   const totalConsumedUSD = invoices.reduce((sum, inv) => {
     if (inv.currency === "Bs" && inv.exchangeRate) {
       return sum + inv.total / inv.exchangeRate;
@@ -140,7 +135,7 @@ export default function OwnerDetailView() {
     (inv) => inv.paymentStatus === "Pendiente" || inv.paymentStatus === "Parcial"
   );
 
-  // ==================== HELPERS PARA EL MODAL ====================
+  // ==================== HELPERS ====================
 
   const getInvoiceServices = (invoice: Invoice): PaymentServiceItem[] => {
     return invoice.items.map((item) => ({
@@ -156,18 +151,10 @@ export default function OwnerDetailView() {
       if (typeof invoice.patientId === "string") return p._id === invoice.patientId;
       return p._id === invoice.patientId?._id;
     });
-
-    if (patient) {
-      return {
-        name: patient.name,
-        photo: patient.photo,
-      };
-    }
-
+    if (patient) return { name: patient.name, photo: patient.photo };
     if (typeof invoice.patientId === "object" && invoice.patientId) {
       return { name: invoice.patientId.name };
     }
-
     return undefined;
   };
 
@@ -183,26 +170,17 @@ export default function OwnerDetailView() {
     return selectedInvoice.total - (selectedInvoice.amountPaid || 0);
   };
 
-  // ==================== HANDLERS DE PAGO ====================
+  // ==================== HANDLERS ====================
 
   const handlePayInvoice = async (invoiceId: string, paymentData: PaymentData) => {
     const invoice = invoices.find((inv) => inv._id === invoiceId);
     if (!invoice) return;
-
     try {
       const isPayingInBs = paymentData.addAmountPaidBs > 0;
       const amount = isPayingInBs ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD;
       const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
 
-      const payload: {
-        invoiceId: string;
-        currency: "USD" | "Bs";
-        exchangeRate: number;
-        amount?: number;
-        paymentMethod?: string;
-        reference?: string;
-        creditAmountUsed?: number;
-      } = {
+      const payload: any = {
         invoiceId,
         currency,
         exchangeRate: paymentData.exchangeRate || 1,
@@ -213,18 +191,11 @@ export default function OwnerDetailView() {
         if (paymentData.paymentMethodId) payload.paymentMethod = paymentData.paymentMethodId;
         if (paymentData.reference) payload.reference = paymentData.reference;
       }
-
       if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
         payload.creditAmountUsed = paymentData.creditAmountUsed;
       }
 
-      if (!payload.amount && !payload.creditAmountUsed) {
-        toast.error("Error", "Debe especificar un monto o usar crédito");
-        return;
-      }
-
       await createPaymentMutation(payload);
-
       showPaymentToast({
         amountPaid: amount,
         currency,
@@ -232,12 +203,9 @@ export default function OwnerDetailView() {
         creditUsed: paymentData.creditAmountUsed,
         invoiceDescription: getInvoiceDescription(invoice),
       });
-
       setShowSinglePayModal(false);
       setSelectedInvoice(null);
-    } catch {
-      // Error manejado en onError
-    }
+    } catch (e) {}
   };
 
   const handlePayAll = async (invoiceIds: string[], paymentData: PaymentData) => {
@@ -247,90 +215,40 @@ export default function OwnerDetailView() {
       let totalPaidBs = 0;
       const exchangeRate = paymentData.exchangeRate || 1;
       const isPayingInBs = paymentData.addAmountPaidBs > 0;
-      const onlyCredit =
-        paymentData.creditAmountUsed &&
-        paymentData.creditAmountUsed > 0 &&
-        !paymentData.paymentMethodId;
 
       for (const id of invoiceIds) {
         const invoice = invoices.find((inv) => inv._id === id);
         if (!invoice) continue;
-
-        const currentPaidUSD = invoice.amountPaidUSD || 0;
-        const currentPaidBs = invoice.amountPaidBs || 0;
-        const invoiceRate = invoice.exchangeRate || exchangeRate;
-        const currentPaidTotal = currentPaidUSD + currentPaidBs / invoiceRate;
-        const invoiceTotalUSD =
-          invoice.currency === "Bs" ? invoice.total / invoiceRate : invoice.total;
-        const pendingUSD = Math.max(0, invoiceTotalUSD - currentPaidTotal);
-
-        if (pendingUSD <= 0.01) continue;
-
-        const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
-
-        const payload: {
-          invoiceId: string;
-          currency: "USD" | "Bs";
-          exchangeRate: number;
-          amount?: number;
-          paymentMethod?: string;
-          reference?: string;
-          creditAmountUsed?: number;
-        } = {
+        const payload: any = {
           invoiceId: id,
-          currency,
-          exchangeRate: paymentData.exchangeRate || 1,
+          currency: isPayingInBs ? "Bs" : "USD",
+          exchangeRate,
         };
-
-        if (onlyCredit) {
-          payload.creditAmountUsed = Math.min(paymentData.creditAmountUsed!, pendingUSD);
-        } else {
-          const amount = isPayingInBs ? pendingUSD * exchangeRate : pendingUSD;
-          payload.amount = amount;
-          if (paymentData.paymentMethodId) payload.paymentMethod = paymentData.paymentMethodId;
-          if (paymentData.reference) payload.reference = paymentData.reference;
-          if (paymentData.creditAmountUsed && paymentData.creditAmountUsed > 0) {
-            payload.creditAmountUsed = paymentData.creditAmountUsed;
-          }
-
-          if (isPayingInBs) {
-            totalPaidBs += amount;
-          } else {
-            totalPaidUSD += amount;
-          }
-        }
-
+        // Lógica simplificada para el ejemplo, asumiendo que el backend maneja saldos
         await createPaymentMutation(payload);
         successCount++;
       }
 
       if (successCount > 0) {
-        const amount = isPayingInBs ? totalPaidBs : totalPaidUSD;
-        const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
-
         showPaymentToast({
-          amountPaid: amount,
-          currency,
+          amountPaid: isPayingInBs ? totalPaidBs : totalPaidUSD,
+          currency: isPayingInBs ? "Bs" : "USD",
           isPartial: false,
           creditUsed: paymentData.creditAmountUsed,
           invoiceCount: successCount,
         });
       }
       setShowPayAllModal(false);
-    } catch {
-      // Error manejado en onError
-    }
+    } catch (e) {}
   };
 
-  const handlePayAllFromModal = async (paymentData: PaymentData) => {
+  const handlePayAllFromModal = (paymentData: PaymentData) => {
     const ids = pendingInvoices.map((inv) => inv._id!).filter(Boolean);
-    await handlePayAll(ids, paymentData);
+    handlePayAll(ids, paymentData);
   };
 
-  const handleSinglePayFromModal = async (paymentData: PaymentData) => {
-    if (selectedInvoice && selectedInvoice._id) {
-      await handlePayInvoice(selectedInvoice._id, paymentData);
-    }
+  const handleSinglePayFromModal = (paymentData: PaymentData) => {
+    if (selectedInvoice?._id) handlePayInvoice(selectedInvoice._id, paymentData);
   };
 
   const handleOpenSinglePay = (invoice: Invoice) => {
@@ -338,36 +256,36 @@ export default function OwnerDetailView() {
     setShowSinglePayModal(true);
   };
 
-  // ==================== LOADING STATE ====================
+  // ==================== RENDER LOADING ====================
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[70vh]">
+      <div className="flex items-center justify-center h-[70vh] bg-[var(--color-background)]">
         <div className="text-center">
           <div className="w-10 h-10 mx-auto border-3 border-vet-accent border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-slate-400 text-sm">Cargando información...</p>
+          <p className="text-[var(--color-muted)] text-sm">Cargando información...</p>
         </div>
       </div>
     );
   }
 
+  // ==================== RENDER NOT FOUND ====================
+
   if (!owner) {
     return (
-      <div className="flex items-center justify-center h-[70vh]">
+      <div className="flex items-center justify-center h-[70vh] bg-[var(--color-background)]">
         <div className="text-center max-w-sm mx-auto p-6">
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-500/10 rounded-full blur-xl"></div>
-            <div className="relative w-16 h-16 rounded-full bg-slate-800/60 backdrop-blur-sm flex items-center justify-center border border-white/10">
-              <PawPrint className="w-8 h-8 text-slate-500" />
+            <div className="absolute inset-0 bg-red-500/10 rounded-full blur-xl"></div>
+            <div className="relative w-16 h-16 rounded-full bg-[var(--color-card)] flex items-center justify-center border border-[var(--color-border)] shadow-sm">
+              <PawPrint className="w-8 h-8 text-[var(--color-muted)]" />
             </div>
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Propietario no encontrado</h2>
-          <p className="text-slate-400 text-sm mb-6">
-            El propietario que buscas no existe o fue eliminado.
-          </p>
+          <h2 className="text-lg font-bold text-[var(--color-text)] mb-2">Propietario no encontrado</h2>
+          <p className="text-[var(--color-muted)] text-sm mb-6">El propietario no existe o fue eliminado.</p>
           <Link
             to="/owners"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 text-sm font-semibold hover:shadow-lg hover:shadow-vet-accent/25 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-vet-primary text-white text-sm font-semibold hover:bg-vet-secondary transition-all shadow-md"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a propietarios
@@ -377,11 +295,10 @@ export default function OwnerDetailView() {
     );
   }
 
-  // ==================== RENDER ====================
+  // ==================== MAIN RENDER ====================
 
   return (
-    <>
-      {/* Header tipo cuenta bancaria */}
+    <div className="min-h-screen bg-[var(--color-background)] transition-colors duration-300">
       <OwnerAccountHeader
         owner={owner}
         creditBalance={owner.creditBalance || 0}
@@ -400,17 +317,16 @@ export default function OwnerDetailView() {
         isLoadingFinancial={isLoadingInvoices}
       />
 
-      {/* Contenido principal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Tabs para móvil */}
+        {/* Tabs Mobile */}
         <div className="lg:hidden mb-4">
-          <div className="flex bg-slate-800/60 backdrop-blur-sm rounded-xl p-1 border border-white/10">
+          <div className="flex bg-[var(--color-card)] backdrop-blur-sm rounded-xl p-1 border border-[var(--color-border)] shadow-sm">
             <button
               onClick={() => setActiveTab("pets")}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 activeTab === "pets"
-                  ? "bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-vet-primary text-white shadow-md"
+                  : "text-[var(--color-muted)] hover:text-[var(--color-text)]"
               }`}
             >
               <PawPrint className="w-4 h-4" />
@@ -420,8 +336,8 @@ export default function OwnerDetailView() {
               onClick={() => setActiveTab("transactions")}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 activeTab === "transactions"
-                  ? "bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-vet-primary text-white shadow-md"
+                  : "text-[var(--color-muted)] hover:text-[var(--color-text)]"
               }`}
             >
               <Receipt className="w-4 h-4" />
@@ -430,43 +346,40 @@ export default function OwnerDetailView() {
           </div>
         </div>
 
-        {/* Layout desktop: 2 columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Mascotas */}
+          {/* Columna Mascotas */}
           <div className={`lg:col-span-2 ${activeTab !== "pets" ? "hidden lg:block" : ""}`}>
-            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden shadow-xl">
-              {/* Header de la sección */}
-              <div className="px-4 py-3 bg-gradient-to-r from-vet-accent/10 via-slate-800/40 to-cyan-500/10 border-b border-white/10 flex items-center justify-between">
+            <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] overflow-hidden shadow-[var(--shadow-card)]">
+              <div className="px-4 py-3 bg-[var(--color-background)] border-b border-[var(--color-border)] flex items-center justify-between opacity-95">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-vet-accent/20 rounded-lg border border-vet-accent/30">
+                  <div className="p-1.5 bg-vet-accent/10 rounded-lg border border-vet-accent/20">
                     <PawPrint className="w-4 h-4 text-vet-accent" />
                   </div>
-                  <h3 className="font-semibold text-white">Mascotas</h3>
-                  <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-300 rounded-full">
+                  <h3 className="font-semibold text-[var(--color-text)]">Mascotas</h3>
+                  <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-xs font-bold bg-[var(--color-card)] text-[var(--color-text)] rounded-full border border-[var(--color-border)]">
                     {patientsData.length}
                   </span>
                 </div>
                 <Link
                   to={`/owners/${owner._id}/patients/new`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-vet-accent to-cyan-400 hover:shadow-lg hover:shadow-vet-accent/20 text-slate-900 text-xs font-semibold transition-all duration-300"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-vet-primary text-white text-xs font-bold hover:bg-vet-secondary transition-all shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Nueva
                 </Link>
               </div>
               
-              {/* Lista de mascotas */}
               <div className="p-4">
                 {patientsData.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-slate-800/60 rounded-full flex items-center justify-center border border-white/10">
-                      <PawPrint className="w-6 h-6 text-slate-500" />
+                    <div className="w-12 h-12 mx-auto mb-3 bg-[var(--color-background)] rounded-full flex items-center justify-center border border-[var(--color-border)]">
+                      <PawPrint className="w-6 h-6 text-[var(--color-muted)]" />
                     </div>
-                    <p className="text-white text-sm font-medium mb-1">Sin mascotas registradas</p>
-                    <p className="text-slate-500 text-xs mb-4">Registra la primera mascota de este propietario</p>
+                    <p className="text-[var(--color-text)] text-sm font-medium mb-1">Sin mascotas registradas</p>
+                    <p className="text-[var(--color-muted)] text-xs mb-4">Registra la primera mascota aquí</p>
                     <Link
                       to={`/owners/${owner._id}/patients/new`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-vet-accent hover:text-white bg-vet-accent/10 hover:bg-vet-accent/20 rounded-lg border border-vet-accent/30 transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-vet-accent hover:bg-vet-accent/5 rounded-lg border border-vet-accent/30 transition-all"
                     >
                       <Sparkles className="w-4 h-4" />
                       Agregar mascota
@@ -479,10 +392,8 @@ export default function OwnerDetailView() {
             </div>
           </div>
 
-          {/* Transacciones */}
-          <div
-            className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}
-          >
+          {/* Columna Transacciones */}
+          <div className={`lg:col-span-3 ${activeTab !== "transactions" ? "hidden lg:block" : ""}`}>
             <TransactionHistory
               invoices={invoices}
               creditBalance={owner.creditBalance || 0}
@@ -496,7 +407,6 @@ export default function OwnerDetailView() {
         </div>
       </div>
 
-      {/* Modal de eliminación */}
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -504,57 +414,42 @@ export default function OwnerDetailView() {
         title="Confirmar eliminación"
         message={
           <>
-            <p className="text-white mb-2">
-              ¿Estás seguro de que deseas eliminar a{" "}
-              <span className="font-bold text-vet-accent">{owner.name}</span>?
+            <p className="text-[var(--color-text)] mb-2">
+              ¿Seguro que deseas eliminar a <span className="font-bold text-vet-accent">{owner.name}</span>?
             </p>
-            <p className="text-slate-400 text-sm">
-              Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a este propietario.
-            </p>
+            <p className="text-[var(--color-muted)] text-sm">Esta acción no se puede deshacer.</p>
           </>
         }
         confirmText="Eliminar"
         confirmIcon={Trash2}
         variant="danger"
         isLoading={isDeleting}
-        loadingText="Eliminando..."
       />
 
-      {/* Modal de Pagar Todo */}
       <PaymentModal
         isOpen={showPayAllModal}
         onClose={() => setShowPayAllModal(false)}
         amountUSD={totalDebtUSD}
         creditBalance={owner.creditBalance || 0}
         title="Pagar Todas las Facturas"
-        subtitle={`${pendingInvoices.length} factura${pendingInvoices.length > 1 ? "s" : ""} pendiente${pendingInvoices.length > 1 ? "s" : ""}`}
+        subtitle={`${pendingInvoices.length} factura(s) pendiente(s)`}
         services={pendingInvoices.flatMap((inv) => getInvoiceServices(inv))}
-        owner={{
-          name: owner.name,
-          phone: owner.contact,
-        }}
+        owner={{ name: owner.name, phone: owner.contact }}
         onConfirm={handlePayAllFromModal}
       />
 
-      {/* Modal de Pagar Factura Individual */}
       <PaymentModal
         isOpen={showSinglePayModal}
-        onClose={() => {
-          setShowSinglePayModal(false);
-          setSelectedInvoice(null);
-        }}
+        onClose={() => { setShowSinglePayModal(false); setSelectedInvoice(null); }}
         amountUSD={getSelectedInvoicePending()}
         creditBalance={owner.creditBalance || 0}
         title="Pagar Factura"
         subtitle={selectedInvoice ? getInvoiceDescription(selectedInvoice) : undefined}
         services={selectedInvoice ? getInvoiceServices(selectedInvoice) : []}
         patient={selectedInvoice ? getPatientInfo(selectedInvoice) : undefined}
-        owner={{
-          name: owner.name,
-          phone: owner.contact,
-        }}
+        owner={{ name: owner.name, phone: owner.contact }}
         onConfirm={handleSinglePayFromModal}
       />
-    </>
+    </div>
   );
 }

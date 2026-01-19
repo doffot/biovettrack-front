@@ -1,43 +1,80 @@
 /* ========================================
-   📜 SCROLLBARS - Estilos personalizados
+   📜 SCROLLBARS - Estilos personalizados (Light/Dark)
    ======================================== */
 
-/* Scrollbar veterinario azul */
+/* ===== SCROLLBAR VETERINARIO AZUL ===== */
+.scrollbar-thumb-vet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-primary) transparent;
+}
+
+.scrollbar-thumb-vet::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thumb-vet::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .scrollbar-thumb-vet::-webkit-scrollbar-thumb {
   background: rgba(10, 126, 164, 0.3);
   border-radius: 999px;
+  transition: background 0.2s ease;
 }
 
 .scrollbar-thumb-vet:hover::-webkit-scrollbar-thumb {
   background: rgba(10, 126, 164, 0.5);
 }
 
-/* Scrollbar para tablas - Azul océano */
+.scrollbar-thumb-vet::-webkit-scrollbar-thumb:active {
+  background: var(--color-vet-primary);
+}
+
+/* ===== SCROLLBAR PARA TABLAS - AZUL OCÉANO ===== */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-primary) var(--color-hover);
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #E0F4F8;
+  background: var(--color-hover);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, #0A7EA4, #36BCD4);
+  background: linear-gradient(
+    to right,
+    var(--color-vet-primary),
+    var(--color-vet-accent)
+  );
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right, #085F7A, #0A7EA4);
+  background: linear-gradient(
+    to right,
+    var(--color-vet-secondary),
+    var(--color-vet-primary)
+  );
 }
 
-/* Para Firefox */
-.custom-scrollbar {
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: var(--color-vet-secondary);
+}
+
+/* ===== SCROLLBAR PARA SIDEBAR ===== */
+.scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #0A7EA4 #E0F4F8;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.1);
 }
 
-/* Scrollbar para sidebar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
@@ -50,8 +87,299 @@
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* ===== SCROLLBAR DARK (para contenedores claros en modo light) ===== */
+.scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-card);
+}
+
+.scrollbar-dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: var(--color-card);
+  border-radius: 4px;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-dark:hover::-webkit-scrollbar-thumb {
+  background: var(--color-vet-muted);
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb:active {
+  background: var(--color-vet-primary);
+}
+
+/* ===== SCROLLBAR INVISIBLE (solo funcional) ===== */
+.scrollbar-invisible {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-invisible::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== SCROLLBAR CON PADDING (evita que el thumb toque los bordes) ===== */
+.scrollbar-padded::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.scrollbar-padded::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 6px;
+}
+
+.scrollbar-padded::-webkit-scrollbar-thumb {
+  background: var(--color-vet-primary);
+  border-radius: 6px;
+  border: 3px solid var(--color-card);
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-padded::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-accent);
+  border: 3px solid var(--color-card);
+  background-clip: padding-box;
+}
+
+/* ===== SCROLLBAR PARA MODALES ===== */
+.scrollbar-modal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-primary) var(--color-card);
+}
+
+.scrollbar-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-track {
+  background: var(--color-card);
+  border-radius: 4px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb {
+  background: var(--color-vet-primary);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-accent);
+}
+
+/* ===== SCROLLBAR ACCENT (color de acento) ===== */
+.scrollbar-accent {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-accent) var(--color-hover);
+}
+
+.scrollbar-accent::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-accent::-webkit-scrollbar-track {
+  background: var(--color-hover);
+  border-radius: 3px;
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb {
+  background: var(--color-vet-accent);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-primary);
+}
+
+/* ===== SCROLLBAR DANGER (para secciones de error/deuda) ===== */
+.scrollbar-danger {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-danger) var(--color-hover);
+}
+
+.scrollbar-danger::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-danger::-webkit-scrollbar-track {
+  background: var(--color-hover);
+  border-radius: 3px;
+}
+
+.scrollbar-danger::-webkit-scrollbar-thumb {
+  background: var(--color-vet-danger);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-danger::-webkit-scrollbar-thumb:hover {
+  background: #dc2626;
+}
+
+/* ===== SCROLLBAR HORIZONTAL DELGADA ===== */
+.scrollbar-horizontal-thin::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scrollbar-horizontal-thin::-webkit-scrollbar-track {
+  background: var(--color-hover);
+  border-radius: 2px;
+}
+
+.scrollbar-horizontal-thin::-webkit-scrollbar-thumb {
+  background: var(--color-vet-primary);
+  border-radius: 2px;
+}
+
+.scrollbar-horizontal-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-accent);
+}
+
+/* ===== SCROLLBAR PARA DROPDOWNS ===== */
+.scrollbar-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-vet-muted) transparent;
+}
+
+.scrollbar-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-dropdown::-webkit-scrollbar-thumb {
+  background: var(--color-vet-muted);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-dropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-text);
+}
+
+/* ===== SCROLLBAR OVERLAY (se muestra solo al hacer scroll) ===== */
+.scrollbar-overlay::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.scrollbar-overlay:hover::-webkit-scrollbar-thumb {
+  background: var(--color-vet-primary);
+}
+
+.scrollbar-overlay::-webkit-scrollbar-thumb:hover {
+  background: var(--color-vet-accent);
+}
+
+/* ===== SCROLLBAR PARA CÓDIGO (monospace content) ===== */
+.scrollbar-code {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b var(--color-card);
+}
+
+.scrollbar-code::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-code::-webkit-scrollbar-track {
+  background: var(--color-card);
+  border-radius: 4px;
+}
+
+.scrollbar-code::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 4px;
+}
+
+.scrollbar-code::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ===== ESQUINAS DEL SCROLLBAR (cuando hay dos scrollbars) ===== */
+.custom-scrollbar::-webkit-scrollbar-corner,
+.scrollbar-modal::-webkit-scrollbar-corner,
+.scrollbar-code::-webkit-scrollbar-corner {
+  background: var(--color-card);
+}
+
+/* ===== RESPONSIVE - Mobile scrollbars más sutiles ===== */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar,
+  .scrollbar-modal::-webkit-scrollbar,
+  .scrollbar-accent::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-padded::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-padded::-webkit-scrollbar-thumb {
+    border: 2px solid var(--color-card);
+  }
+}
+
+/* ===== SMOOTH SCROLLING ===== */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* ===== SNAP SCROLLING ===== */
+.scroll-snap-y {
+  scroll-snap-type: y mandatory;
+}
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.scroll-snap-start {
+  scroll-snap-align: start;
+}
+
+.scroll-snap-center {
+  scroll-snap-align: center;
+}
+
+.scroll-snap-end {
+  scroll-snap-align: end;
 }

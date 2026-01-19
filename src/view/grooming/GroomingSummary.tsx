@@ -1,4 +1,3 @@
-// src/components/grooming/GroomingReportSummary.tsx
 import { useMemo } from "react";
 import type { EnrichedGroomingService } from "./GroomingReportView";
 
@@ -57,9 +56,9 @@ export function GroomingReportSummary({ services }: GroomingReportSummaryProps) 
   const hasPending = stats.pendingUSD > 0;
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-md p-6">
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
       {/* Total General */}
-      <div className="mb-6 pb-6 border-b border-slate-700">
+      <div className="mb-6 pb-6 border-b border-border">
         <p className="text-xs font-medium text-vet-muted uppercase tracking-wide mb-1">
           Total Cobrado
         </p>
@@ -92,7 +91,7 @@ export function GroomingReportSummary({ services }: GroomingReportSummaryProps) 
               <p className="text-sm text-vet-muted">{formatBs(stats.paidBs)}</p>
             </>
           ) : (
-            <p className="text-2xl font-bold text-slate-500">—</p>
+            <p className="text-2xl font-bold text-vet-muted">—</p>
           )}
         </div>
 
@@ -101,7 +100,7 @@ export function GroomingReportSummary({ services }: GroomingReportSummaryProps) 
             Pendiente
           </p>
           <p
-            className={`text-2xl font-bold ${hasPending ? "text-amber-400" : "text-slate-500"}`}
+            className={`text-2xl font-bold ${hasPending ? "text-amber-500" : "text-vet-muted"}`}
           >
             {hasPending ? formatUSD(stats.pendingUSD) : "—"}
           </p>

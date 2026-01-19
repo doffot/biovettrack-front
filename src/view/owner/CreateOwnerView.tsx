@@ -1,4 +1,3 @@
-// src/views/owners/CreateOwnerView.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -33,12 +32,15 @@ export default function CreateOwnerView() {
   const [formData, setFormData] = useState<OwnerFormData>(initialFormData);
   const [phoneError, setPhoneError] = useState<string>("");
 
+  // Estilo para inputs
+  const inputStyle = { backgroundColor: "var(--color-vet-sidebar)" };
+
   const { mutate, isPending } = useMutation({
     mutationFn: createOwner,
     onSuccess: (data) => {
       toast.success('Propietario registrado', `El perfil de "${data.owner.name}" ha sido creado.`);
       queryClient.invalidateQueries({ queryKey: ["owners"] });
-       navigate(`/owners/${data.owner._id}`);
+      navigate(`/owners/${data.owner._id}`);
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -60,13 +62,6 @@ export default function CreateOwnerView() {
       setPhoneError("El número de teléfono es obligatorio");
       return false;
     }
-    
-    const phoneRegex = /^\+[0-9]{10,15}$/;
-    if (!phoneRegex.test(phone)) {
-      setPhoneError("Número de teléfono inválido");
-      return false;
-    }
-    
     return true;
   };
 
@@ -96,14 +91,14 @@ export default function CreateOwnerView() {
   const isValid = formData.name.trim() !== "" && formData.contact.length >= 10;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-vet-light p-4 lg:p-6">
+    <div className="min-h-[calc(100vh-4rem)] bg-vet-light p-4 lg:p-6 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="p-2.5 rounded-xl bg-sky-soft border border-vet-border hover:bg-vet-hover hover:border-vet-primary/30 text-vet-muted transition-all shadow-sm"
+            className="p-2.5 rounded-xl bg-card border border-border hover:bg-hover hover:border-vet-primary/30 text-vet-muted transition-all shadow-soft"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -120,19 +115,19 @@ export default function CreateOwnerView() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit}>
-          <div className="bg-sky-soft rounded-2xl border border-vet-border shadow-card overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden transition-colors duration-300">
             
             {/* Grid de campos */}
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 
-                {/* Nombre - Ocupa más espacio */}
+                {/* Nombre */}
                 <div className="lg:col-span-1">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
                     <div className="p-1 bg-vet-primary/10 rounded">
                       <User className="w-3.5 h-3.5 text-vet-primary" />
                     </div>
-                    Nombre completo <span className="text-red-500">*</span>
+                    Nombre completo <span className="text-vet-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -141,7 +136,8 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="Juan Pérez"
                     maxLength={100}
-                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    style={inputStyle}
+                    className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
@@ -158,8 +154,8 @@ export default function CreateOwnerView() {
                 {/* Cédula/RIF */}
                 <div className="lg:col-span-1">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-purple-100 dark:bg-purple-900/20 rounded">
-                      <CreditCard className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <div className="p-1 bg-purple-500/10 rounded">
+                      <CreditCard className="w-3.5 h-3.5 text-purple-500" />
                     </div>
                     Cédula / RIF
                   </label>
@@ -170,15 +166,16 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="12345678"
                     maxLength={20}
-                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    style={inputStyle}
+                    className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
                 {/* Email */}
                 <div className="lg:col-span-1">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded">
-                      <Mail className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-1 bg-blue-500/10 rounded">
+                      <Mail className="w-3.5 h-3.5 text-blue-500" />
                     </div>
                     Correo electrónico
                   </label>
@@ -189,15 +186,16 @@ export default function CreateOwnerView() {
                     onChange={handleChange}
                     placeholder="juan@email.com"
                     maxLength={100}
-                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    style={inputStyle}
+                    className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
 
-                {/* Dirección - Ocupa 2 columnas */}
+                {/* Dirección */}
                 <div className="lg:col-span-2">
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <div className="p-1 bg-amber-100 dark:bg-amber-900/20 rounded">
-                      <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <div className="p-1 bg-amber-500/10 rounded">
+                      <MapPin className="w-3.5 h-3.5 text-amber-500" />
                     </div>
                     Dirección
                   </label>
@@ -206,25 +204,29 @@ export default function CreateOwnerView() {
                     name="address"
                     value={formData.address || ""}
                     onChange={handleChange}
-                    placeholder="Av. Principal, Edificio Centro, Piso 2, Apto 5"
+                    placeholder="Av. Principal, Edificio Centro, Piso 2"
                     maxLength={200}
-                    className="w-full px-4 py-2.5 bg-vet-light border border-vet-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted/50 focus:outline-none focus:bg-vet-light focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
+                    style={inputStyle}
+                    className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary transition-all"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Footer con botones */}
-            <div className="px-6 py-4 bg-vet-light/50 border-t border-vet-border flex items-center justify-between">
+            {/* Footer */}
+            <div 
+              className="px-6 py-4 border-t border-border flex items-center justify-between"
+              style={{ backgroundColor: "var(--color-hover)" }}
+            >
               <p className="text-xs text-vet-muted">
-                <span className="text-red-500">*</span> Campos obligatorios
+                <span className="text-vet-danger">*</span> Campos obligatorios
               </p>
               
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm text-vet-muted font-medium rounded-xl border border-vet-border bg-sky-soft hover:bg-vet-hover hover:border-vet-primary/30 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm text-vet-muted font-medium rounded-xl border border-border bg-card hover:bg-hover transition-all"
                 >
                   <X className="w-4 h-4" />
                   Cancelar
@@ -234,8 +236,8 @@ export default function CreateOwnerView() {
                   disabled={!isValid || isPending}
                   className={`flex items-center gap-2 px-6 py-2.5 text-sm rounded-xl font-semibold transition-all ${
                     isValid && !isPending
-                      ? "bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white shadow-soft hover:shadow-md"
-                      : "bg-vet-light border border-vet-border text-vet-muted/50 cursor-not-allowed"
+                      ? "bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white shadow-soft"
+                      : "bg-hover border border-border text-vet-muted cursor-not-allowed"
                   }`}
                 >
                   {isPending ? (
@@ -246,7 +248,7 @@ export default function CreateOwnerView() {
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      Guardar Propietario
+                      Guardar
                     </>
                   )}
                 </button>

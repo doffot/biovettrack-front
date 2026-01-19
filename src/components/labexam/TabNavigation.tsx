@@ -1,4 +1,3 @@
-// src/components/labexam/TabNavigation.tsx
 import { 
   User, 
   ClipboardList, 
@@ -52,7 +51,7 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
   const currentIndex = getTabIndex(activeTab);
 
   return (
-    <div className="border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-900">
+    <div className="border-b border-border bg-vet-light">
       <nav className="flex">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -73,10 +72,10 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
                 transition-all duration-200
                 group
                 ${isActive 
-                  ? 'text-vet-accent bg-slate-800' 
+                  ? 'text-vet-primary bg-card font-bold border-b-2 border-vet-primary' 
                   : isEnabled
-                    ? 'text-slate-400 hover:text-vet-accent hover:bg-slate-800/80'
-                    : 'text-slate-600 cursor-not-allowed bg-slate-800/50'
+                    ? 'text-vet-muted hover:text-vet-text hover:bg-hover'
+                    : 'text-vet-muted/50 cursor-not-allowed bg-vet-light'
                 }
               `}
             >
@@ -88,10 +87,10 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
                 ${isCompleted
                   ? 'bg-emerald-500 text-white'
                   : isActive 
-                    ? 'bg-vet-primary text-white shadow-sm shadow-vet-primary/30' 
+                    ? 'bg-vet-primary text-white shadow-soft' 
                     : isEnabled
-                      ? 'bg-slate-700 text-slate-400 group-hover:bg-vet-primary/20 group-hover:text-vet-primary'
-                      : 'bg-slate-700/50 text-slate-600'
+                      ? 'bg-vet-light border border-border text-vet-muted group-hover:border-vet-primary group-hover:text-vet-primary'
+                      : 'bg-vet-light border border-border text-vet-muted/30'
                 }
               `}>
                 {isCompleted ? (
@@ -105,21 +104,16 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
               
               {/* Icono en móvil */}
               <Icon className={`w-4 h-4 sm:hidden ${
-                isActive ? 'text-vet-accent' : isEnabled ? 'text-slate-500' : 'text-slate-600'
+                isActive ? 'text-vet-primary' : isEnabled ? 'text-vet-muted' : 'text-vet-muted/50'
               }`} />
               
               <span className="hidden sm:inline truncate">{tab.label}</span>
               
               <span className="sm:hidden text-[10px]">{tab.shortLabel}</span>
               
-              {/* Línea activa inferior */}
-              {isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-vet-accent rounded-full" />
-              )}
-              
-              {/* Línea completada */}
+              {/* Línea completada (decorativa) */}
               {isCompleted && !isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-400 rounded-full" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500/50 rounded-full" />
               )}
             </button>
           );
@@ -128,8 +122,8 @@ export function TabNavigation({ activeTab, onTabChange, isPatientSelected = fals
       
       {/* Mensaje si no hay paciente */}
       {!isPatientSelected && activeTab === 'patient' && (
-        <div className="px-4 py-2 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-t border-amber-700/30">
-          <p className="text-xs text-amber-400 text-center flex items-center justify-center gap-1.5">
+        <div className="px-4 py-2 bg-amber-500/10 border-t border-amber-500/20">
+          <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center justify-center gap-1.5">
             <Lock className="w-3 h-3" />
             <span>Selecciona un paciente para desbloquear las siguientes secciones</span>
           </p>

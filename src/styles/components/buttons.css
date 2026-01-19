@@ -1,17 +1,592 @@
 /* ========================================
-   🔘 BUTTONS - Botones veterinarios
+   🔘 BUTTONS - Botones veterinarios (Light/Dark)
    ======================================== */
 
+/* ===== BOTÓN PRIMARY ===== */
 .vet-button-primary {
-  background-color: #0A7EA4;
+  background-color: var(--color-vet-primary);
   color: white;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .vet-button-primary:hover {
-  background-color: #36BCD4;
+  background-color: var(--color-vet-accent);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.vet-button-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-primary:disabled {
+  background-color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+/* ===== BOTÓN SECONDARY ===== */
+.vet-button-secondary {
+  background-color: var(--color-vet-secondary);
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-secondary:hover {
+  background-color: var(--color-vet-primary);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.vet-button-secondary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-secondary:disabled {
+  background-color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+/* ===== BOTÓN OUTLINE ===== */
+.vet-button-outline {
+  background-color: transparent;
+  color: var(--color-vet-primary);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: 2px solid var(--color-vet-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-outline:hover {
+  background-color: var(--color-vet-primary);
+  color: white;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.vet-button-outline:active {
+  transform: translateY(0);
+}
+
+.vet-button-outline:disabled {
+  border-color: var(--color-vet-muted);
+  color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+/* ===== BOTÓN GHOST ===== */
+.vet-button-ghost {
+  background-color: transparent;
+  color: var(--color-vet-text);
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-ghost:hover {
+  background-color: var(--color-hover);
+  color: var(--color-vet-primary);
+}
+
+.vet-button-ghost:active {
+  background-color: var(--color-border);
+}
+
+.vet-button-ghost:disabled {
+  color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ===== BOTÓN DANGER ===== */
+.vet-button-danger {
+  background-color: var(--color-vet-danger);
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-danger:hover {
+  background-color: #dc2626;
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.vet-button-danger:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== BOTÓN DANGER OUTLINE ===== */
+.vet-button-danger-outline {
+  background-color: transparent;
+  color: var(--color-vet-danger);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: 2px solid var(--color-vet-danger);
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-danger-outline:hover {
+  background-color: var(--color-vet-danger);
+  color: white;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.vet-button-danger-outline:active {
+  transform: translateY(0);
+}
+
+.vet-button-danger-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== BOTÓN SUCCESS ===== */
+.vet-button-success {
+  background-color: #10b981;
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-success:hover {
+  background-color: #059669;
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.vet-button-success:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== BOTÓN WARNING ===== */
+.vet-button-warning {
+  background-color: #f59e0b;
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-warning:hover {
+  background-color: #d97706;
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.vet-button-warning:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-warning:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== BOTÓN LINK ===== */
+.vet-button-link {
+  background-color: transparent;
+  color: var(--color-vet-primary);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-link:hover {
+  color: var(--color-vet-accent);
+  text-decoration: none;
+}
+
+.vet-button-link:active {
+  color: var(--color-vet-secondary);
+}
+
+.vet-button-link:disabled {
+  color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ===== TAMAÑOS ===== */
+.vet-button-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.vet-button-md {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+}
+
+.vet-button-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+}
+
+.vet-button-xl {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  border-radius: 0.75rem;
+}
+
+/* ===== BOTÓN ICON ONLY ===== */
+.vet-button-icon {
+  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+}
+
+.vet-button-icon-sm {
+  padding: 0.375rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+}
+
+.vet-button-icon-lg {
+  padding: 0.75rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+}
+
+/* ===== BOTÓN FULL WIDTH ===== */
+.vet-button-block {
+  width: 100%;
+  display: flex;
+}
+
+/* ===== BOTÓN CON LOADING ===== */
+.vet-button-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.vet-button-loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.5rem;
+  margin-top: -0.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== GRUPO DE BOTONES ===== */
+.vet-button-group {
+  display: inline-flex;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.vet-button-group button {
+  border-radius: 0;
+  margin: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.vet-button-group button:first-child {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.vet-button-group button:last-child {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border-right: none;
+}
+
+/* ===== BOTÓN GRADIENT ===== */
+.vet-button-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-vet-primary),
+    var(--color-vet-accent)
+  );
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.vet-button-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.vet-button-gradient:hover::before {
+  left: 100%;
+}
+
+.vet-button-gradient:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+.vet-button-gradient:active {
+  transform: translateY(0);
+}
+
+/* ===== BOTÓN SOFT (colores suaves) ===== */
+.vet-button-soft {
+  background-color: rgba(10, 126, 164, 0.1);
+  color: var(--color-vet-primary);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.vet-button-soft:hover {
+  background-color: rgba(10, 126, 164, 0.2);
+  transform: translateY(-1px);
+}
+
+.vet-button-soft:active {
+  transform: translateY(0);
+}
+
+/* ===== BOTÓN FLOATING ACTION (FAB) ===== */
+.vet-button-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-vet-primary),
+    var(--color-vet-accent)
+  );
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(10, 126, 164, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.vet-button-fab:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 15px 30px rgba(10, 126, 164, 0.5);
+}
+
+.vet-button-fab:active {
+  transform: scale(1.05) translateY(-2px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .vet-button-primary,
+  .vet-button-secondary,
+  .vet-button-outline,
+  .vet-button-danger {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .vet-button-lg {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .vet-button-xl {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .vet-button-fab {
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+/* ===== FOCUS STATES (accesibilidad) ===== */
+.vet-button-primary:focus,
+.vet-button-secondary:focus,
+.vet-button-outline:focus,
+.vet-button-ghost:focus,
+.vet-button-danger:focus,
+.vet-button-success:focus,
+.vet-button-warning:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(54, 188, 212, 0.3);
+}
+
+/* ===== DARK MODE AJUSTES ESPECÍFICOS ===== */
+[data-theme="light"] .vet-button-ghost {
+  color: #0F172A;
+}
+
+[data-theme="light"] .vet-button-ghost:hover {
+  background-color: #F1F5F9;
+  color: var(--color-vet-primary);
+}
+
+[data-theme="light"] .vet-button-outline {
+  color: var(--color-vet-primary);
+  border-color: var(--color-vet-primary);
 }

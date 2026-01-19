@@ -1,4 +1,3 @@
-// src/views/products/EditProductView.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -48,6 +47,9 @@ export default function EditProductView() {
     minStock: undefined,
     active: true,
   });
+
+  // Estilo para el fondo de inputs (similar a sidebar)
+  const inputStyle = { backgroundColor: "var(--color-vet-sidebar)" };
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["product", productId],
@@ -161,7 +163,7 @@ export default function EditProductView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center bg-vet-light">
         <div className="text-center">
           <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
           <p className="text-vet-muted text-sm">Cargando producto...</p>
@@ -172,7 +174,7 @@ export default function EditProductView() {
 
   if (!product) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center bg-vet-light">
         <div className="text-center">
           <Package className="w-16 h-16 mx-auto text-vet-muted mb-4" />
           <h3 className="text-lg font-medium text-vet-text mb-2">Producto no encontrado</h3>
@@ -190,12 +192,12 @@ export default function EditProductView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 lg:px-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 lg:px-6 bg-vet-light transition-colors duration-300 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-vet-muted transition-all"
+          className="p-2.5 rounded-xl bg-card border border-border hover:bg-hover text-vet-muted transition-all"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -212,7 +214,7 @@ export default function EditProductView() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit}>
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-card">
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
@@ -229,7 +231,8 @@ export default function EditProductView() {
                   onChange={handleChange}
                   placeholder="Ej: Bravecto 20kg"
                   maxLength={100}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
               </div>
 
@@ -243,17 +246,20 @@ export default function EditProductView() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 >
                   {categoryOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value} className="bg-card text-vet-text">
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Divisible toggle */}
               <div className="md:col-span-2">
-                <div className="p-4 bg-slate-900 border border-slate-700 rounded-xl">
+                <div className="p-4 bg-vet-light rounded-xl border border-border">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -263,7 +269,7 @@ export default function EditProductView() {
                       className="sr-only"
                     />
                     <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                      formData.divisible ? "bg-blue-500" : "bg-slate-600"
+                      formData.divisible ? "bg-vet-primary" : "bg-vet-muted"
                     }`}>
                       <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
                         formData.divisible ? "translate-x-5" : ""
@@ -271,7 +277,7 @@ export default function EditProductView() {
                     </div>
                     <div className="ml-3">
                       <div className="flex items-center gap-2">
-                        <Scissors className="w-4 h-4 text-blue-400" />
+                        <Scissors className="w-4 h-4 text-blue-500" />
                         <span className="text-sm font-semibold text-vet-text">Producto divisible</span>
                       </div>
                       <p className="text-xs text-vet-muted mt-0.5">
@@ -297,7 +303,8 @@ export default function EditProductView() {
                   onChange={handleChange}
                   placeholder="Ej: tableta, frasco, sobre"
                   maxLength={30}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
                 <p className="text-xs text-vet-muted mt-1">Cómo viene el producto</p>
               </div>
@@ -305,7 +312,7 @@ export default function EditProductView() {
               {/* Unidad de dosis */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                  <Beaker className="w-4 h-4 text-blue-400" />
+                  <Beaker className="w-4 h-4 text-blue-500" />
                   Unidad de fracción <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -315,7 +322,8 @@ export default function EditProductView() {
                   onChange={handleChange}
                   placeholder={formData.divisible ? "Ej: parte, ml, gramos" : "Ej: dosis"}
                   maxLength={10}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
                 <p className="text-xs text-vet-muted mt-1">
                   {formData.divisible ? "Cómo se fracciona" : "Cómo se aplica/vende"}
@@ -325,7 +333,7 @@ export default function EditProductView() {
               {/* Dosis por unidad */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                  <Beaker className="w-4 h-4 text-blue-400" />
+                  <Beaker className="w-4 h-4 text-blue-500" />
                   {formData.divisible ? "Fracciones por unidad" : "Dosis por unidad"} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -336,7 +344,8 @@ export default function EditProductView() {
                   min="1"
                   step="0.1"
                   placeholder="1"
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
                 <p className="text-xs text-vet-muted mt-1">
                   {formData.divisible 
@@ -359,7 +368,8 @@ export default function EditProductView() {
                   min="0"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
                 <p className="text-xs text-vet-muted mt-1">Lo que te costó</p>
               </div>
@@ -367,7 +377,7 @@ export default function EditProductView() {
               {/* Precio de venta (unidad completa) */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                  <CreditCard className="w-4 h-4 text-green-400" />
+                  <CreditCard className="w-4 h-4 text-emerald-500" />
                   Precio venta (unidad) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -378,7 +388,8 @@ export default function EditProductView() {
                   min="0"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
                 <p className="text-xs text-vet-muted mt-1">
                   Precio de la {formData.unit || "unidad"} completa
@@ -389,7 +400,7 @@ export default function EditProductView() {
               {formData.divisible && (
                 <div>
                   <label className="flex items-center gap-2 text-sm font-semibold text-vet-text mb-2">
-                    <Beaker className="w-4 h-4 text-green-400" />
+                    <Beaker className="w-4 h-4 text-emerald-500" />
                     Precio por {formData.doseUnit || "fracción"} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -400,7 +411,8 @@ export default function EditProductView() {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                    style={inputStyle}
+                    className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                   />
                   <p className="text-xs text-vet-muted mt-1">
                     Precio por cada {formData.doseUnit || "fracción"}
@@ -410,7 +422,7 @@ export default function EditProductView() {
 
               {/* Sección de Stock */}
               <div className="md:col-span-2">
-                <div className="border-t border-slate-700 pt-6 mt-2">
+                <div className="border-t border-border pt-6 mt-2">
                   <h3 className="text-sm font-semibold text-vet-text mb-4 flex items-center gap-2">
                     <Package className="w-4 h-4" />
                     Stock actual
@@ -428,7 +440,8 @@ export default function EditProductView() {
                         onChange={handleChange}
                         min="0"
                         placeholder="0"
-                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                       <p className="text-xs text-vet-muted mt-1">
                         {formData.unit ? `${formData.unit}(s) cerradas` : "Unidades cerradas"}
@@ -449,7 +462,8 @@ export default function EditProductView() {
                           min="0"
                           step="0.1"
                           placeholder="0"
-                          className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                          style={inputStyle}
+                          className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                         />
                         <p className="text-xs text-vet-muted mt-1">
                           De unidad ya abierta
@@ -460,7 +474,7 @@ export default function EditProductView() {
                     {/* Stock mínimo */}
                     <div>
                       <label className="flex items-center gap-1 text-xs font-medium text-vet-muted mb-1">
-                        <AlertTriangle className="w-3 h-3 text-amber-400" />
+                        <AlertTriangle className="w-3 h-3 text-amber-500" />
                         Stock mínimo (alerta)
                       </label>
                       <input
@@ -470,7 +484,8 @@ export default function EditProductView() {
                         onChange={handleChange}
                         min="0"
                         placeholder="0"
-                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                        style={inputStyle}
+                        className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                       />
                       <p className="text-xs text-vet-muted mt-1">
                         Aviso cuando queden pocas
@@ -480,12 +495,12 @@ export default function EditProductView() {
 
                   {/* Mostrar stock total si es divisible */}
                   {formData.divisible && formData.dosesPerUnit && (
-                    <div className="mt-4 p-3 bg-slate-900 rounded-lg">
+                    <div className="mt-4 p-3 bg-vet-light rounded-lg">
                       <p className="text-xs text-vet-muted">
                         <span className="font-medium">Stock total:</span>{" "}
                         {((formData.stockUnits || 0) * formData.dosesPerUnit) + (formData.stockDoses || 0)} {formData.doseUnit || "fracciones"}
                         {" "}
-                        <span className="text-slate-400">
+                        <span className="text-vet-muted/70">
                           ({formData.stockUnits || 0} {formData.unit || "unidades"} × {formData.dosesPerUnit} + {formData.stockDoses || 0} sueltas)
                         </span>
                       </p>
@@ -507,7 +522,8 @@ export default function EditProductView() {
                   placeholder="Detalles adicionales..."
                   maxLength={200}
                   rows={2}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+                  style={inputStyle}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
                 />
               </div>
 
@@ -522,7 +538,7 @@ export default function EditProductView() {
                     className="sr-only"
                   />
                   <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                    formData.active ? "bg-vet-primary" : "bg-slate-600"
+                    formData.active ? "bg-vet-primary" : "bg-vet-muted"
                   }`}>
                     <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
                       formData.active ? "translate-x-5" : ""
@@ -535,24 +551,24 @@ export default function EditProductView() {
               {/* Preview del producto (si divisible) */}
               {formData.divisible && formData.dosesPerUnit && formData.salePrice !== undefined && formData.salePricePerDose !== undefined && (
                 <div className="md:col-span-2">
-                  <div className="p-4 bg-slate-900 border border-emerald-900/30 rounded-xl">
-                    <h4 className="text-sm font-semibold text-emerald-400 mb-2">Vista previa de precios</h4>
+                  <div className="p-4 bg-card border border-emerald-500/20 rounded-xl">
+                    <h4 className="text-sm font-semibold text-emerald-500 mb-2">Vista previa de precios</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-emerald-300">1 {formData.unit || "unidad"} completa:</span>
-                        <span className="font-bold text-emerald-200 ml-2">${formData.salePrice.toFixed(2)}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">1 {formData.unit || "unidad"} completa:</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-300 ml-2">${formData.salePrice.toFixed(2)}</span>
                       </div>
                       <div>
-                        <span className="text-emerald-300">1 {formData.doseUnit || "fracción"}:</span>
-                        <span className="font-bold text-emerald-200 ml-2">${formData.salePricePerDose.toFixed(2)}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">1 {formData.doseUnit || "fracción"}:</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-300 ml-2">${formData.salePricePerDose.toFixed(2)}</span>
                       </div>
-                      <div className="col-span-2 text-xs text-emerald-400">
+                      <div className="col-span-2 text-xs text-emerald-500">
                         Si vendes las {formData.dosesPerUnit} {formData.doseUnit || "fracciones"} por separado: 
                         <span className="font-bold ml-1">
                           ${(formData.dosesPerUnit * formData.salePricePerDose).toFixed(2)}
                         </span>
                         {formData.dosesPerUnit * formData.salePricePerDose > formData.salePrice && (
-                          <span className="text-emerald-300 ml-1">
+                          <span className="text-emerald-400 ml-1">
                             (+${((formData.dosesPerUnit * formData.salePricePerDose) - formData.salePrice).toFixed(2)} extra)
                           </span>
                         )}
@@ -565,7 +581,7 @@ export default function EditProductView() {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-slate-900 border-t border-slate-700 flex items-center justify-between">
+          <div className="px-6 py-4 bg-vet-light border-t border-border flex items-center justify-between">
             <p className="text-xs text-vet-muted">
               <span className="text-red-500">*</span> Campos obligatorios
             </p>
@@ -574,7 +590,7 @@ export default function EditProductView() {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 px-5 py-2.5 text-sm text-vet-text font-medium rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 text-sm text-vet-text font-medium rounded-xl border border-border bg-card hover:bg-hover transition-all"
               >
                 <X className="w-4 h-4" />
                 Cancelar
@@ -585,7 +601,7 @@ export default function EditProductView() {
                 className={`flex items-center gap-2 px-6 py-2.5 text-sm rounded-xl font-semibold transition-all ${
                   isValid && !isPending
                     ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                    : "bg-slate-700 text-slate-500 cursor-not-allowed"
+                    : "bg-card border border-border text-vet-muted cursor-not-allowed"
                 }`}
               >
                 {isPending ? (

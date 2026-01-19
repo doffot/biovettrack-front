@@ -64,6 +64,10 @@ import CreateVaccinationView from "./view/vaccinations/CreateVaccinationView";
 import DewormingListView from "./view/dewormings/DewormingListView";
 import CreateDewormingView from "./view/dewormings/CreateDewormingView";
 
+// Treatments
+import TreatmentListView from "./view/treatments/TreatmentListView";
+import CreateTreatmentView from "./view/treatments/CreateTreatmentView";
+
 // Consultations
 import ConsultationListView from "./view/consultations/ConsultationListView";
 import CreateConsultationView from "./view/consultations/CreateConsultationView";
@@ -132,10 +136,12 @@ export default function Router() {
           <Route path="/profile" element={<ProfileView />} />
           <Route path="/notifications" element={<NotificationsView />} />
 
-          {/* CITAS GLOBALES */}
+          {/* ✅ CITAS GLOBALES - CORREGIDO */}
           <Route path="/appointments">
             <Route index element={<AppointmentsView />} />
             <Route path="select-patient" element={<SelectPatientForAppointment />} />
+            {/* ✅ RUTA FALTANTE */}
+            <Route path="create/:patientId" element={<CreateAppointmentView />} />
           </Route>
 
           <Route path="/consultations" element={<AllConsultationsView />} />
@@ -181,6 +187,12 @@ export default function Router() {
                 <Route path="create" element={<CreateDewormingView />} />
               </Route>
 
+              {/* ✅ TREATMENTS (NUEVO) */}
+              <Route path="treatments">
+                <Route index element={<TreatmentListView />} />
+                <Route path="create" element={<CreateTreatmentView />} />
+              </Route>
+
               <Route path="consultations">
                 <Route index element={<ConsultationListView />} />
                 <Route path="create" element={<CreateConsultationView />} />
@@ -191,6 +203,7 @@ export default function Router() {
                 <Route path="create" element={<CreateRecipeView />} />
               </Route>
 
+              {/* ✅ CITAS DENTRO DE PACIENTE (sin select-patient) */}
               <Route path="appointments/create" element={<CreateAppointmentView />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailsView />} />
               <Route path="appointments/:appointmentId/edit" element={<EditAppointmentView />} />
@@ -220,11 +233,9 @@ export default function Router() {
             <Route path=":productId/edit" element={<EditProductView />} />
           </Route>
 
-
-{/* NUEVA RUTA EN CONSTRUCCIÓN */}
+          {/* NUEVA RUTA EN CONSTRUCCIÓN */}
           <Route path="/inventory/report" element={<BuildingView />} />
           <Route path="purchases/report" element={<BuildingView />} />
-
 
           {/* VENTAS */}
           <Route path="/sales" element={<CreateSaleView />} />

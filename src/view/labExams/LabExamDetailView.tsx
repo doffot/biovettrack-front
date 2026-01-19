@@ -1,4 +1,3 @@
-// src/views/labExams/LabExamDetailView.tsx
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getLabExamById } from "../../api/labExamAPI";
@@ -78,7 +77,7 @@ export default function LabExamDetailView() {
   // Loading
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-vet-light flex items-center justify-center">
         <div className="w-5 h-5 border-2 border-vet-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -87,8 +86,8 @@ export default function LabExamDetailView() {
   // Error
   if (isError || !exam) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <AlertCircle className="w-10 h-10 text-slate-500" />
+      <div className="min-h-screen bg-vet-light flex flex-col items-center justify-center gap-4">
+        <AlertCircle className="w-10 h-10 text-vet-muted" />
         <p className="text-sm text-vet-muted">Examen no encontrado</p>
         <Link to={backUrl} className="text-sm text-vet-accent hover:underline">
           Volver
@@ -119,12 +118,12 @@ export default function LabExamDetailView() {
   const outOfRangeCount = hemogramParams.filter((p) => isOutOfRange(p.value, p.range)).length;
 
   return (
-    <div className="min-h-screen bg-vet-light">
+    <div className="min-h-screen bg-vet-light transition-colors duration-300">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700">
+      <header className="sticky top-0 z-10 bg-card border-b border-border shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to={backUrl} className="p-1.5 -ml-1.5 hover:bg-slate-800 rounded-lg transition-colors">
+            <Link to={backUrl} className="p-1.5 -ml-1.5 hover:bg-hover rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-vet-muted" />
             </Link>
             <div>
@@ -132,7 +131,7 @@ export default function LabExamDetailView() {
                 <h1 className="text-sm font-semibold text-vet-text">Hemograma</h1>
                 {/* Badge de paciente referido */}
                 {isReferredPatient && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-900/30 text-amber-400 text-[10px] font-medium rounded">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-medium rounded border border-amber-500/20">
                     <User className="w-2.5 h-2.5" />
                     Referido
                   </span>
@@ -148,7 +147,7 @@ export default function LabExamDetailView() {
             {isReferredPatient && (
               <Link
                 to={`/lab-exams/${examId}/edit`}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-vet-text border border-slate-700 text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-vet-text border border-border text-sm font-medium rounded-lg hover:bg-hover transition-colors"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Editar</span>
@@ -158,7 +157,7 @@ export default function LabExamDetailView() {
             {/* Botón Imprimir */}
             <button
               onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors shadow-soft"
             >
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Imprimir</span>
@@ -169,9 +168,9 @@ export default function LabExamDetailView() {
 
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         {/* Paciente */}
-        <section className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-700">
+        <section className="flex items-center justify-between p-4 bg-card rounded-xl border border-border shadow-soft">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center border border-slate-700">
+            <div className="w-10 h-10 bg-vet-light rounded-full flex items-center justify-center border border-border">
               <FlaskConical className="w-4 h-4 text-vet-muted" />
             </div>
             <div>
@@ -189,21 +188,21 @@ export default function LabExamDetailView() {
 
         {/* Resumen rápido */}
         <section className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-emerald-900/20 rounded-xl border border-emerald-700/50">
+          <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-medium text-emerald-400">Normales</span>
+              <Check className="w-4 h-4 text-emerald-500" />
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Normales</span>
             </div>
-            <p className="text-2xl font-bold text-emerald-400 mt-1">
+            <p className="text-2xl font-bold text-emerald-500 mt-1">
               {4 - outOfRangeCount}
             </p>
           </div>
-          <div className="p-3 bg-red-900/20 rounded-xl border border-red-700/50">
+          <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400" />
-              <span className="text-xs font-medium text-red-400">Alterados</span>
+              <AlertCircle className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-medium text-red-600 dark:text-red-400">Alterados</span>
             </div>
-            <p className="text-2xl font-bold text-red-400 mt-1">
+            <p className="text-2xl font-bold text-red-500 mt-1">
               {outOfRangeCount}
             </p>
           </div>
@@ -221,7 +220,7 @@ export default function LabExamDetailView() {
                 <div
                   key={param.label}
                   className={`flex items-center justify-between p-3 rounded-xl border ${
-                    isOut ? "bg-red-900/20 border-red-700/50" : "bg-slate-800 border-slate-700"
+                    isOut ? "bg-red-500/5 border-red-500/20" : "bg-card border-border"
                   }`}
                 >
                   <div>
@@ -231,7 +230,7 @@ export default function LabExamDetailView() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-lg font-bold ${isOut ? "text-red-400" : "text-vet-text"}`}>
+                    <p className={`text-lg font-bold ${isOut ? "text-red-500" : "text-vet-text"}`}>
                       {param.value.toLocaleString()}
                     </p>
                     <p className="text-xs text-vet-muted">{param.unit}</p>
@@ -247,10 +246,10 @@ export default function LabExamDetailView() {
           <h2 className="text-xs font-medium text-vet-muted uppercase tracking-wide mb-3">
             Fórmula Leucocitaria
           </h2>
-          <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden shadow-soft">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700">
+                <tr className="border-b border-border bg-vet-light/50">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-vet-muted">Tipo</th>
                   <th className="px-4 py-2.5 text-right text-xs font-medium text-vet-muted">%</th>
                   <th className="px-4 py-2.5 text-right text-xs font-medium text-vet-muted">Abs.</th>
@@ -264,12 +263,12 @@ export default function LabExamDetailView() {
                   return (
                     <tr
                       key={cell.key}
-                      className={`border-b border-slate-700 last:border-0 ${
-                        isOut ? "bg-red-900/20" : ""
+                      className={`border-b border-border last:border-0 ${
+                        isOut ? "bg-red-500/5" : "hover:bg-hover"
                       }`}
                     >
                       <td className="px-4 py-2.5 text-vet-text">{cell.label}</td>
-                      <td className={`px-4 py-2.5 text-right font-semibold ${isOut ? "text-red-400" : "text-vet-text"}`}>
+                      <td className={`px-4 py-2.5 text-right font-semibold ${isOut ? "text-red-500" : "text-vet-text"}`}>
                         {cell.value}
                       </td>
                       <td className="px-4 py-2.5 text-right text-vet-muted">
@@ -297,13 +296,13 @@ export default function LabExamDetailView() {
             </h2>
             <div className="space-y-2">
               {exam.hemotropico && (
-                <div className="p-3 bg-blue-900/20 rounded-xl border border-blue-700/50">
-                  <p className="text-xs font-medium text-blue-400 mb-1">Hemotrópicos</p>
+                <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                  <p className="text-xs font-medium text-blue-500 mb-1">Hemotrópicos</p>
                   <p className="text-sm text-vet-text">{exam.hemotropico}</p>
                 </div>
               )}
               {exam.observacion && (
-                <div className="p-3 bg-slate-800 rounded-xl border border-slate-700">
+                <div className="p-3 bg-card rounded-xl border border-border">
                   <p className="text-xs font-medium text-vet-muted mb-1">General</p>
                   <p className="text-sm text-vet-text">{exam.observacion}</p>
                 </div>
@@ -314,7 +313,7 @@ export default function LabExamDetailView() {
 
         {/* Info adicional */}
         {(exam.treatingVet || exam.ownerName) && (
-          <section className="pt-4 border-t border-slate-700">
+          <section className="pt-4 border-t border-border">
             <div className="grid grid-cols-2 gap-4 text-sm">
               {exam.treatingVet && (
                 <div>

@@ -1,28 +1,261 @@
+/* ========================================
+   📝 INPUTS - Estilos para modo Light/Dark
+   ======================================== */
+
+/* ===== AUTOFILL - Compatible con ambos temas ===== */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #0F172A inset !important;
-  box-shadow: 0 0 0 1000px #0F172A inset !important;
-  -webkit-text-fill-color: #F1F5F9 !important;
-  color: #F1F5F9 !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-card) inset !important;
+  box-shadow: 0 0 0 1000px var(--color-card) inset !important;
+  -webkit-text-fill-color: var(--color-vet-text) !important;
+  color: var(--color-vet-text) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #0F172A inset !important;
-  -webkit-text-fill-color: #F1F5F9 !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-card) inset !important;
+  -webkit-text-fill-color: var(--color-vet-text) !important;
 }
 
-input {
-  caret-color: #36BCD4;
+/* ===== CARET (cursor parpadeante) ===== */
+input,
+textarea {
+  caret-color: var(--color-vet-accent);
 }
 
+/* ===== OCULTAR ICONOS DE REVEAL EN PASSWORDS ===== */
 input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
 
-input::placeholder {
-  color: rgba(241, 245, 249, 0.4);
+/* ===== PLACEHOLDER ===== */
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-vet-muted);
+  opacity: 0.6;
+}
+
+/* ===== FOCUS STATES ===== */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-vet-accent);
+  box-shadow: 0 0 0 3px rgba(54, 188, 212, 0.1);
+}
+
+/* ===== DISABLED STATES ===== */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: var(--color-hover);
+  color: var(--color-vet-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== INPUTS BASE ===== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-vet-text);
+  transition: all 0.2s ease;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+input[type="search"]:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--color-vet-primary);
+}
+
+/* ===== CHECKBOX Y RADIO ===== */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-vet-primary);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ===== FILE INPUTS ===== */
+input[type="file"]::file-selector-button {
+  background-color: var(--color-vet-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 1rem;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: var(--color-vet-secondary);
+}
+
+input[type="file"] {
+  color: var(--color-vet-text);
+}
+
+/* ===== RANGE INPUTS ===== */
+input[type="range"] {
+  accent-color: var(--color-vet-primary);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  background-color: var(--color-vet-primary);
+}
+
+input[type="range"]::-moz-range-thumb {
+  background-color: var(--color-vet-primary);
+}
+
+/* ===== SELECT CUSTOM ARROW ===== */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  padding-right: 2.5rem;
+}
+
+/* Arrow color changes with theme */
+[data-theme="light"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+/* ===== ERROR STATES ===== */
+input.error,
+textarea.error,
+select.error {
+  border-color: var(--color-vet-danger);
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+input.error:focus,
+textarea.error:focus,
+select.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ===== SUCCESS STATES ===== */
+input.success,
+textarea.success,
+select.success {
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+input.success:focus,
+textarea.success:focus,
+select.success:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* ===== NUMBER INPUT - Ocultar flechas ===== */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* 
+input[type="number"] {
+  -moz-appearance: textfield;
+} */
+
+/* ===== SEARCH INPUT - Limpiar estilos nativos ===== */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* ===== LABEL STYLES ===== */
+label {
+  color: var(--color-vet-text);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+label.required::after {
+  content: " *";
+  color: var(--color-vet-danger);
+}
+
+/* ===== TEXTAREA RESIZE ===== */
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+textarea.no-resize {
+  resize: none;
+}
+
+/* ===== INPUT GROUPS ===== */
+.input-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-group input {
+  border-radius: 0;
+}
+
+.input-group input:first-child {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.input-group input:last-child {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.input-group-addon {
+  background-color: var(--color-hover);
+  border: 1px solid var(--color-border);
+  color: var(--color-vet-muted);
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.input-group-addon:first-child {
+  border-right: none;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.input-group-addon:last-child {
+  border-left: none;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }

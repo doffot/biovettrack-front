@@ -1,4 +1,3 @@
-// src/views/owners/OwnerListView.tsx
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -263,7 +262,7 @@ export default function OwnerListView() {
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 mx-auto border-3 border-vet-accent border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-slate-400 text-sm">Cargando...</p>
+          <p className="text-vet-muted text-sm">Cargando...</p>
         </div>
       </div>
     );
@@ -276,15 +275,15 @@ export default function OwnerListView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Propietarios</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-vet-text">Propietarios</h1>
+          <p className="text-sm text-vet-muted">
             {owners.length} cliente{owners.length !== 1 ? "s" : ""} registrados
           </p>
         </div>
 
         <Link
           to="/owners/new"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-vet-accent to-cyan-400 hover:from-cyan-400 hover:to-vet-accent text-slate-900 text-sm font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-vet-accent/25"
+          className="vet-button-primary"
         >
           <UserPlus className="w-4 h-4" />
           Nuevo Propietario
@@ -295,20 +294,20 @@ export default function OwnerListView() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         {/* Búsqueda */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
           <input
             type="text"
             placeholder="Buscar por nombre, teléfono, email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-slate-800/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-vet-accent/50 focus:border-vet-accent/50 transition-all"
+            className="w-full pl-10 pr-8 py-2.5 bg-card/60 backdrop-blur-sm border border-border rounded-xl text-vet-text placeholder:text-vet-muted text-sm focus:outline-none focus:ring-2 focus:ring-vet-accent/50 focus:border-vet-accent/50 transition-all"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/10 rounded-lg transition-colors"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-hover rounded-lg transition-colors"
             >
-              <X className="w-4 h-4 text-slate-400" />
+              <X className="w-4 h-4 text-vet-muted" />
             </button>
           )}
         </div>
@@ -319,8 +318,8 @@ export default function OwnerListView() {
             onClick={() => setActiveFilter("all")}
             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "all"
-                ? "bg-vet-accent text-slate-900 shadow-lg shadow-vet-accent/20"
-                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
+                ? "bg-vet-accent text-white shadow-lg shadow-vet-accent/20"
+                : "bg-card/60 text-vet-muted border border-border hover:bg-hover hover:text-vet-text"
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -331,8 +330,8 @@ export default function OwnerListView() {
             onClick={() => setActiveFilter("withDebt")}
             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "withDebt"
-                ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
-                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
+                ? "bg-vet-danger text-white shadow-lg shadow-vet-danger/20"
+                : "bg-card/60 text-vet-muted border border-border hover:bg-hover hover:text-vet-text"
             }`}
           >
             <CreditCard className="w-3.5 h-3.5" />
@@ -343,8 +342,8 @@ export default function OwnerListView() {
             onClick={() => setActiveFilter("noRecentVisit")}
             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               activeFilter === "noRecentVisit"
-                ? "bg-amber-500 text-slate-900 shadow-lg shadow-amber-500/20"
-                : "bg-slate-800/60 text-slate-300 border border-white/10 hover:bg-white/10"
+                ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20"
+                : "bg-card/60 text-vet-muted border border-border hover:bg-hover hover:text-vet-text"
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -358,9 +357,9 @@ export default function OwnerListView() {
         <>
           {/* Toolbar de exportación */}
           <div className="flex items-center justify-between mb-3 px-1">
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-vet-muted">
               {selectedIds.size > 0 ? (
-                <span className="font-medium">
+                <span className="font-medium text-vet-text">
                   {selectedIds.size} seleccionado{selectedIds.size !== 1 ? "s" : ""}
                 </span>
               ) : (
@@ -372,7 +371,7 @@ export default function OwnerListView() {
             
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-300 hover:text-white bg-slate-800/60 hover:bg-white/10 border border-white/10 rounded-lg transition-all duration-300"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-vet-muted hover:text-vet-text bg-card/60 hover:bg-hover border border-border rounded-lg transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Exportar {selectedIds.size > 0 ? `(${selectedIds.size})` : "todos"}
@@ -445,15 +444,15 @@ export default function OwnerListView() {
 function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
   return (
     <div className="text-center py-16">
-      <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10">
-        <Users className="w-8 h-8 text-slate-500" />
+      <div className="w-16 h-16 mx-auto mb-4 bg-card/60 backdrop-blur-sm rounded-xl flex items-center justify-center border border-border shadow-soft">
+        <Users className="w-8 h-8 text-vet-muted" />
       </div>
       
-      <h3 className="text-lg font-semibold text-white mb-1">
+      <h3 className="text-lg font-semibold text-vet-text mb-1">
         {hasFilters ? "Sin resultados" : "Sin propietarios"}
       </h3>
       
-      <p className="text-sm text-slate-400 mb-6">
+      <p className="text-sm text-vet-muted mb-6">
         {hasFilters
           ? "No hay propietarios con esos criterios"
           : "Registra tu primer cliente"}
@@ -462,14 +461,14 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
       {hasFilters ? (
         <button
           onClick={onClear}
-          className="text-sm text-vet-accent hover:text-white transition-colors font-medium"
+          className="text-sm text-vet-accent hover:text-vet-text transition-colors font-medium"
         >
           Limpiar filtros
         </button>
       ) : (
         <Link
           to="/owners/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-vet-accent to-cyan-400 text-slate-900 text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-vet-accent/25 transition-all duration-300"
+          className="vet-button-primary"
         >
           <UserPlus className="w-4 h-4" />
           Registrar Propietario

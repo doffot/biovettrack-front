@@ -18,6 +18,7 @@ import {
   DollarSign,
   Menu,
   X,
+  Pill, // ✅ NUEVO ICONO
 } from "lucide-react";
 import { useParams, Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -50,7 +51,6 @@ export default function PatientLayout() {
   const patientInfoRef = useRef<HTMLDivElement>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
 
-  // Queries
   const { data: patient, isLoading } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => getPatientById(patientId!),
@@ -96,7 +96,6 @@ export default function PatientLayout() {
   const hasDebt = (debtSummary?.totalDebt || 0) > 0;
   const debtCount = debtSummary?.invoicesCount || 0;
 
-  // Cerrar dropdowns al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (appointmentsRef.current && !appointmentsRef.current.contains(event.target as Node)) {
@@ -187,9 +186,11 @@ export default function PatientLayout() {
 
   const isCanino = patient?.species?.toLowerCase() === "canino";
 
+  // ✅ MENÚ ACTUALIZADO CON TRATAMIENTOS
   const menuItems = [
     { id: "datos", label: "Información", icon: PawPrint, path: "", description: "Datos básicos" },
     { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
+    { id: "tratamientos", label: "Tratamientos", icon: Pill, path: "treatments", description: "Medicamentos activos" }, // ✅ NUEVO
     { id: "recetas", label: "Recetas", icon: FileText, path: "recipes", description: "Prescripciones" },
     { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
     { id: "desparasitacion", label: "Desparasitación", icon: Bug, path: "dewormings", description: "Control de parásitos" },
@@ -559,17 +560,20 @@ export default function PatientLayout() {
       {/* MENÚ MÓVIL/TABLET - Drawer lateral */}
       {showMobileMenu && (
         <>
-          {/* Overlay */}
           <div
             className="lg:hidden fixed inset-0 bg-black/70 z-40 animate-fadeIn"
             onClick={() => setShowMobileMenu(false)}
             style={{ top: "7rem" }}
           />
 
-          {/* Drawer */}
-          <div className="lg:hidden fixed right-0 top-0 bottom-0 w-72 mobile-menu-drawer" style={{ top: "7rem" }}>
+          <div 
+            className="lg:hidden fixed right-0 top-0 bottom-0 w-72 mobile-menu-drawer z-50" 
+            style={{ top: "7rem" }}
+          >
             <div className="p-4">
-              <h3 className="text-sm font-bold text-[var(--color-vet-muted)] uppercase tracking-wider mb-3">Expediente Médico</h3>
+              <h3 className="text-sm font-bold text-[var(--color-vet-muted)] uppercase tracking-wider mb-3">
+                Expediente Médico
+              </h3>
               <nav className="space-y-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
@@ -592,8 +596,12 @@ export default function PatientLayout() {
                         <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-[var(--color-vet-accent)]"}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-sm ${isActive ? "text-white" : "text-[var(--color-vet-text)]"}`}>{item.label}</p>
-                        <p className={`text-xs truncate ${isActive ? "text-white/70" : "text-[var(--color-vet-muted)]"}`}>{item.description}</p>
+                        <p className={`font-medium text-sm ${isActive ? "text-white" : "text-[var(--color-vet-text)]"}`}>
+                          {item.label}
+                        </p>
+                        <p className={`text-xs truncate ${isActive ? "text-white/70" : "text-[var(--color-vet-muted)]"}`}>
+                          {item.description}
+                        </p>
                       </div>
                     </Link>
                   );
@@ -604,7 +612,7 @@ export default function PatientLayout() {
         </>
       )}
 
-      {/* NAVEGACIÓN  */}
+      {/* NAVEGACIÓN */}
       <div className="patient-header-level-2 hidden lg:block">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center">

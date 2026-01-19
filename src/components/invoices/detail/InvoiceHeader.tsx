@@ -8,10 +8,10 @@ interface InvoiceHeaderProps {
 
 function StatusBadge({ status }: { status: InvoiceStatus }) {
   const config: Record<InvoiceStatus, { bg: string; label: string }> = {
-    Pagado: { bg: "bg-emerald-600", label: "Pagado" },
-    Pendiente: { bg: "bg-red-600", label: "Debe" },
-    Parcial: { bg: "bg-red-600", label: "Debe" },
-    Cancelado: { bg: "bg-gray-500", label: "Cancelado" },
+    Pagado: { bg: "bg-emerald-600 dark:bg-emerald-500", label: "Pagado" },
+    Pendiente: { bg: "bg-red-600 dark:bg-red-500", label: "Debe" },
+    Parcial: { bg: "bg-red-600 dark:bg-red-500", label: "Debe" },
+    Cancelado: { bg: "bg-gray-500 dark:bg-gray-600", label: "Cancelado" },
   };
 
   const { bg, label } = config[status] || config.Pendiente;
@@ -25,13 +25,13 @@ function StatusBadge({ status }: { status: InvoiceStatus }) {
 
 export function InvoiceHeader({ invoice }: InvoiceHeaderProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-md p-4">
+    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-md p-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+          <p className="text-xs text-[var(--color-vet-muted)] uppercase tracking-wide mb-1">
             Fecha de emisión
           </p>
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-[var(--color-vet-text)]">
             {formatDate(invoice.date)}
           </p>
         </div>

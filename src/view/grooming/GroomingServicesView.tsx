@@ -1,4 +1,3 @@
-// src/views/grooming/GroomingServicesView.tsx
 import { useState, useMemo, type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Scissors, AlertCircle, Plus, Search, ArrowLeft, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
@@ -138,23 +137,23 @@ export default function GroomingServicesView() {
 
   const getPaymentStatusBadge = (status: string): string => {
     const styles: Record<string, string> = {
-      'Pendiente': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-      'Pagado': 'bg-green-500/20 text-green-400 border border-green-500/30',
-      'Parcial': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-      'Cancelado': 'bg-red-500/20 text-red-400 border border-red-500/30',
-      'Sin facturar': 'bg-slate-700 text-slate-400 border border-slate-600'
+      'Pendiente': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+      'Pagado': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+      'Parcial': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+      'Cancelado': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+      'Sin facturar': 'bg-vet-light text-vet-muted border-border'
     };
-    return styles[status] || 'bg-slate-700 text-slate-400 border border-slate-600';
+    return styles[status] || 'bg-vet-light text-vet-muted border-border';
   };
 
   const getPaymentStatusIcon = (status: string): ReactElement => {
     switch (status) {
-      case 'Pagado': return <CheckCircle className="w-3 h-3 text-green-400" />;
-      case 'Pendiente': return <Clock className="w-3 h-3 text-orange-400" />;
-      case 'Parcial': return <AlertTriangle className="w-3 h-3 text-blue-400" />;
-      case 'Cancelado': return <XCircle className="w-3 h-3 text-red-400" />;
-      case 'Sin facturar': return <AlertCircle className="w-3 h-3 text-slate-500" />;
-      default: return <Clock className="w-3 h-3 text-slate-500" />;
+      case 'Pagado': return <CheckCircle className="w-3 h-3 text-emerald-500" />;
+      case 'Pendiente': return <Clock className="w-3 h-3 text-amber-500" />;
+      case 'Parcial': return <AlertTriangle className="w-3 h-3 text-blue-500" />;
+      case 'Cancelado': return <XCircle className="w-3 h-3 text-red-500" />;
+      case 'Sin facturar': return <AlertCircle className="w-3 h-3 text-vet-muted" />;
+      default: return <Clock className="w-3 h-3 text-vet-muted" />;
     }
   };
 
@@ -248,8 +247,6 @@ export default function GroomingServicesView() {
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState error={error as Error} />;
 
-  
-
   return (
     <>
       <Header 
@@ -260,7 +257,7 @@ export default function GroomingServicesView() {
       
       <div className="h-32 lg:h-28"></div>
 
-      <div className="px-4 mt-10 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
+      <div className="px-4 mt-10 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12 transition-colors duration-300">
         <ServiceStatsCards 
           filteredServices={filteredServices} 
           incomeStats={incomeStats}
@@ -317,13 +314,13 @@ function ErrorState({ error }: { error: Error }) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-center h-[70vh]">
-        <div className="bg-sky-soft p-8 rounded-2xl border border-red-500/30 text-center max-w-md mx-auto shadow-lg shadow-black/20">
-          <AlertCircle className="w-16 h-16 mx-auto text-red-400 mb-4" />
+        <div className="bg-card p-8 rounded-2xl border border-vet-danger/30 text-center max-w-md mx-auto shadow-card">
+          <AlertCircle className="w-16 h-16 mx-auto text-vet-danger mb-4" />
           <h2 className="text-2xl font-bold text-vet-text mb-3">Error al cargar servicios</h2>
           <p className="text-vet-muted mb-6">{error.message || 'Error desconocido'}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all shadow-lg shadow-vet-primary/20"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all shadow-soft"
           >
             Reintentar
           </button>
@@ -335,7 +332,7 @@ function ErrorState({ error }: { error: Error }) {
 
 function EmptyState({ searchTerm }: { searchTerm: string }) {
   return (
-    <div className="bg-sky-soft rounded-2xl p-12 text-center border border-slate-700/50 shadow-lg shadow-black/10">
+    <div className="bg-card rounded-2xl p-12 text-center border border-border shadow-card">
       <Scissors className="w-16 h-16 text-vet-muted mx-auto mb-4" />
       <h3 className="text-2xl font-bold text-vet-text mb-3">
         {searchTerm ? "No hay resultados" : "No hay servicios hoy"}
@@ -346,7 +343,7 @@ function EmptyState({ searchTerm }: { searchTerm: string }) {
       {!searchTerm && (
         <Link 
           to="/patients" 
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all shadow-lg shadow-vet-primary/20"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all shadow-soft"
         >
           <Plus className="w-5 h-5" />
           Crear Primer Servicio
@@ -362,19 +359,19 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
   setSearchTerm: (value: string) => void;
 }) {
   return (
-    <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-sky-soft border-b border-slate-700/50 shadow-lg shadow-black/10">
+    <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-card border-b border-border shadow-soft transition-colors duration-300">
       <div className="px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <Link 
               to="/" 
-              className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-vet-primary/20 text-vet-primary transition-colors flex-shrink-0 border border-slate-700"
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-vet-light hover:bg-hover text-vet-primary transition-colors flex-shrink-0 border border-border"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <div className="hidden sm:block p-2 bg-vet-primary/20 border border-vet-primary/30 rounded-lg">
+                <div className="hidden sm:block p-2 bg-vet-primary/10 border border-vet-primary/20 rounded-lg">
                   <Scissors className="w-5 h-5 text-vet-accent" />
                 </div>
                 <div>
@@ -391,14 +388,14 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
             {/* Versión móvil - solo icono */}
             <Link 
               to="/patients" 
-              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white transition-all shadow-lg shadow-vet-primary/30"
+              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white transition-all shadow-soft"
             >
               <Plus className="w-5 h-5" />
             </Link>
             {/* Versión desktop - icono + texto */}
             <Link 
               to="/patients" 
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-medium text-sm transition-all shadow-lg shadow-vet-primary/30"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-vet-primary hover:bg-vet-secondary text-white font-medium text-sm transition-all shadow-soft"
             >
               <Plus className="w-4 h-4" />
               <span>Nuevo Servicio</span>
@@ -416,7 +413,7 @@ function Header({ totalsCount, searchTerm, setSearchTerm }: {
               placeholder="Buscar servicios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-vet-light border border-slate-700 rounded-lg text-vet-text placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors text-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-vet-light border border-border rounded-lg text-vet-text placeholder:text-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors text-sm"
             />
           </div>
         </div>

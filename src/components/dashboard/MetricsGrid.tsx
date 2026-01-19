@@ -1,4 +1,3 @@
-// src/components/dashboard/MetricsGrid.tsx
 import {
   DollarSign,
   CreditCard,
@@ -35,9 +34,9 @@ export function MetricsGrid({
         title="Ingresos Hoy"
         amounts={todayRevenue}
         icon={DollarSign}
-        iconBgColor="bg-slate-800/80"
-        color="text-emerald-400"
-        bgColor="bg-gradient-to-br from-slate-900/80 to-emerald-950/40 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300"
+        iconBgColor="bg-emerald-500/10"
+        color="text-emerald-500"
+        bgColor="bg-card border-emerald-500/20 hover:border-emerald-500/50 shadow-soft hover:shadow-emerald-500/10"
       />
       
       {/* Por Cobrar - Ámbar con alerta */}
@@ -46,9 +45,9 @@ export function MetricsGrid({
         amounts={pendingDebt}
         subtitle={`${pendingInvoicesCount} facturas pendientes`}
         icon={CreditCard}
-        iconBgColor="bg-slate-800/80"
-        color="text-amber-400"
-        bgColor="bg-gradient-to-br from-slate-900/80 to-amber-950/40 border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300"
+        iconBgColor="bg-amber-500/10"
+        color="text-amber-500"
+        bgColor="bg-card border-amber-500/20 hover:border-amber-500/50 shadow-soft hover:shadow-amber-500/10"
         onClick={onPendingDebtClick}
       />
       
@@ -57,9 +56,9 @@ export function MetricsGrid({
         title="Ingresos del Mes"
         amounts={monthRevenue}
         icon={TrendingUp}
-        iconBgColor="bg-slate-800/80"
+        iconBgColor="bg-vet-primary/10"
         color="text-vet-accent"
-        bgColor="bg-gradient-to-br from-slate-900/80 to-vet-primary/30 border border-vet-accent/20 hover:border-vet-accent/40 transition-all duration-300"
+        bgColor="bg-card border-vet-accent/20 hover:border-vet-accent/50 shadow-soft hover:shadow-vet-accent/10"
       />
     </div>
   );

@@ -1,4 +1,3 @@
-// src/components/grooming/ServiceTable.tsx
 import { Calendar, User, CheckCircle, Edit, Eye, AlertCircle } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -43,27 +42,27 @@ export default function ServiceTable({
   };
 
   return (
-    <div className="hidden lg:block bg-sky-soft rounded-xl border border-slate-700/50 shadow-lg shadow-black/10 overflow-hidden">
+    <div className="hidden lg:block bg-card rounded-xl border border-border shadow-card overflow-hidden">
       {/* Header de la tabla */}
-      <div className="px-4 py-3 bg-gradient-to-r from-vet-primary/10 to-vet-secondary/10 border-b border-slate-700/50">
+      <div className="px-4 py-3 bg-vet-light/50 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="text-sm font-semibold text-vet-text">Servicios</h3>
-            <span className="px-2 py-1 bg-vet-primary/20 border border-vet-primary/30 text-vet-accent text-xs font-medium rounded-md">
+            <span className="px-2 py-1 bg-vet-primary/10 border border-vet-primary/20 text-vet-primary text-xs font-medium rounded-md">
               {filteredServices.length}
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-vet-muted">
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               <span>Pagado</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
               <span>Parcial</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-vet-muted rounded-full"></div>
               <span>Pendiente</span>
             </div>
           </div>
@@ -72,7 +71,7 @@ export default function ServiceTable({
 
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full">
-          <thead className="bg-vet-light text-xs">
+          <thead className="bg-vet-light text-xs border-b border-border">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-vet-muted uppercase tracking-wider">
                 <div className="flex items-center gap-1.5">
@@ -97,8 +96,8 @@ export default function ServiceTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/30">
-            {filteredServices.map((service, index) => {
+          <tbody className="divide-y divide-border">
+            {filteredServices.map((service) => {
               const patientId = service.patientId as PatientIdType;
               const paymentInfo = service.paymentInfo || {};
               const serviceCost = Number(service.cost) || 0;
@@ -106,9 +105,7 @@ export default function ServiceTable({
               return (
                 <tr 
                   key={service._id} 
-                  className={`hover:bg-slate-700/30 transition-colors duration-150 ${
-                    index % 2 === 0 ? 'bg-transparent' : 'bg-slate-800/20'
-                  }`}
+                  className={`hover:bg-hover transition-colors duration-150`}
                 >
                   {/* Fecha */}
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -122,7 +119,7 @@ export default function ServiceTable({
                   {/* Paciente */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-lg flex items-center justify-center border border-vet-primary/30 shadow-lg shadow-vet-primary/20">
+                      <div className="w-8 h-8 bg-gradient-to-br from-vet-primary to-vet-secondary rounded-lg flex items-center justify-center border border-vet-primary/30 shadow-soft">
                         <User className="w-3.5 h-3.5 text-white" />
                       </div>
                       <div className="flex flex-col min-w-0">
@@ -145,7 +142,7 @@ export default function ServiceTable({
                   {/* Servicio */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 bg-vet-primary/20 border border-vet-primary/30 rounded-md flex items-center justify-center">
+                      <div className="w-7 h-7 bg-vet-primary/10 border border-vet-primary/20 rounded-md flex items-center justify-center">
                         <span className="text-sm">{getServiceIcon(service.service)}</span>
                       </div>
                       <div className="flex flex-col min-w-0">
@@ -170,7 +167,7 @@ export default function ServiceTable({
                       </span>
                       {paymentInfo.amountPaid > 0 && (
                         <div className="flex items-center gap-1 text-[10px]">
-                          <CheckCircle className="w-2.5 h-2.5 text-green-400" />
+                          <CheckCircle className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-vet-muted">
                             {formatCurrency(paymentInfo.amountPaid, paymentInfo.currency || 'USD')}
                           </span>
@@ -182,22 +179,22 @@ export default function ServiceTable({
                   {/* Montos */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-col items-end gap-1">
-                      <span className="text-sm font-bold text-vet-accent">
+                      <span className="text-sm font-bold text-vet-primary">
                         ${serviceCost.toFixed(2)}
                       </span>
                       
                       {paymentInfo.paymentStatus === 'Pendiente' ? (
                         <div className="flex flex-col items-end gap-0.5">
-                          <span className="text-[10px] font-medium text-orange-400">
+                          <span className="text-[10px] font-medium text-amber-500">
                             Por cobrar
                           </span>
                         </div>
                       ) : paymentInfo.paymentStatus === 'Parcial' ? (
                         <div className="flex flex-col items-end gap-0.5">
-                          <span className="text-[10px] font-medium text-blue-400">
+                          <span className="text-[10px] font-medium text-blue-500">
                             Pendiente: ${(serviceCost - paymentInfo.amountPaid).toFixed(2)}
                           </span>
-                          <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
+                          <div className="w-16 h-1 bg-vet-light rounded-full overflow-hidden border border-border">
                             <div 
                               className="h-full bg-blue-500 rounded-full transition-all duration-300"
                               style={{ width: `${(paymentInfo.amountPaid / serviceCost) * 100}%` }}
@@ -205,12 +202,12 @@ export default function ServiceTable({
                           </div>
                         </div>
                       ) : paymentInfo.paymentStatus === 'Pagado' ? (
-                        <div className="flex items-center gap-1 text-[10px] text-green-400">
+                        <div className="flex items-center gap-1 text-[10px] text-emerald-500">
                           <CheckCircle className="w-2.5 h-2.5" />
                           <span>Completado</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                        <div className="flex items-center gap-1 text-[10px] text-vet-muted">
                           <AlertCircle className="w-2.5 h-2.5" />
                           <span>Sin facturar</span>
                         </div>
@@ -223,7 +220,7 @@ export default function ServiceTable({
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         to={`/patients/${getPatientId(patientId)}/grooming-services/${service._id}`}
-                        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-slate-700 border border-slate-600 hover:bg-slate-600 text-vet-muted hover:text-vet-text text-xs font-medium transition-colors duration-150"
+                        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-vet-light border border-border hover:bg-hover text-vet-muted hover:text-vet-text text-xs font-medium transition-colors duration-150"
                         title="Ver detalles"
                       >
                         <Eye className="w-3 h-3" />
@@ -231,7 +228,7 @@ export default function ServiceTable({
                       
                       <Link
                         to={`/patients/${getPatientId(patientId)}/grooming-services/${service._id}/edit`}
-                        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors duration-150"
+                        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-medium transition-colors duration-150"
                         title="Editar servicio"
                       >
                         <Edit className="w-3 h-3" />
@@ -247,7 +244,7 @@ export default function ServiceTable({
         {/* Estado vacío */}
         {filteredServices.length === 0 && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-vet-light border border-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="w-16 h-16 bg-vet-light border border-border rounded-full flex items-center justify-center mx-auto mb-3">
               <User className="w-6 h-6 text-vet-muted" />
             </div>
             <h4 className="text-sm font-medium text-vet-text mb-1">No se encontraron servicios</h4>

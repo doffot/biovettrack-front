@@ -10,15 +10,32 @@
   --font-inter: "Inter", sans-serif;
   --font-yellowtail: "Yellowtail", cursive;
   
-  /*  Paleta Azul Océano Oscuro - Ultra Profesional */
+  /* ===== PALETA BASE (compartida) ===== */
   --color-vet-primary: #0A7EA4;
   --color-vet-secondary: #085F7A;
   --color-vet-accent: #36BCD4;
-  --color-vet-light: #0F172A;
+  
+  /* ===== MODO OSCURO (por defecto) - Se mantiene igual ===== */
+  --color-vet-light: #0F172A; /* Fondo principal oscuro */
+  --color-vet-sidebar: #0F172A; /* Fondo sidebar oscuro */
   --color-vet-text: #F1F5F9;
   --color-vet-muted: #94A3B8;
   --color-vet-danger: #FCA5A5;
   --color-sky-soft: #1E293B;
+  --color-card: #1E293B;
+  --color-border: #334155;
+  --color-hover: #334155;
+  --color-active: #0A7EA4;
+  --color-highlight: #36BCD4;
+
+  /* Sombras para oscuro */
+  --shadow-soft: 0 4px 6px -1px rgba(10, 126, 164, 0.2), 0 2px 4px -1px rgba(10, 126, 164, 0.1);
+  --shadow-card: 0 10px 15px -3px rgba(10, 126, 164, 0.15), 0 4px 6px -2px rgba(10, 126, 164, 0.1);
+
+  /* Gradientes */
+  --gradient-vet-from: #0A7EA4;
+  --gradient-vet-via: #085F7A;
+  --gradient-vet-to: #064454;
 
   /* Alias funcionales */
   --color-primary: var(--color-vet-primary);
@@ -26,19 +43,100 @@
   --color-text: var(--color-vet-text);
   --color-muted: var(--color-vet-muted);
   --color-danger: var(--color-vet-danger);
+}
 
-  /* Sombras adaptadas al oscuro */
-  --shadow-soft: 0 4px 6px -1px rgba(10, 126, 164, 0.2), 0 2px 4px -1px rgba(10, 126, 164, 0.1);
-  --shadow-card: 0 10px 15px -3px rgba(10, 126, 164, 0.15), 0 4px 6px -2px rgba(10, 126, 164, 0.1);
+/* ========================================
+   🌞 MODO CLARO - (Ajustado: Más Gris/Profesional)
+   ======================================== */
+[data-theme="light"] {
+  /* 
+     1. Fondo Principal (Outlet): 
+     Antes era casi blanco (#F8FAFC). Ahora es un gris azulado (#EEF2F6) 
+     que descansa la vista.
+  */
+  --color-vet-light: #EEF2F6; 
 
-  /* Variables para Dark Mode */
+  /* 
+     2. Sidebar Específico:
+     Creamos esta variable nueva para el sidebar en modo claro.
+     Un gris un poco más fuerte (#E2E8F0) para separar la navegación.
+  */
+  --color-vet-sidebar: #E2E8F0;
+
+  --color-vet-text: #1E293B; /* Texto gris oscuro (Slate-800) */
+  --color-vet-muted: #64748B; /* Texto secundario (Slate-500) */
+  --color-vet-danger: #DC2626;
+  --color-sky-soft: #E0F4F8;
+  
+  /* 3. Las Tarjetas se quedan blancas para resaltar sobre el fondo gris */
+  --color-card: #FFFFFF; 
+  
+  --color-border: #CBD5E1; /* Bordes un poco más visibles (Slate-300) */
+  --color-hover: #E2E8F0; /* Hover grisáceo */
+  --color-active: #0A7EA4;
+  --color-highlight: #36BCD4;
+
+  /* Sombras más marcadas para dar profundidad en fondo gris */
+  --shadow-soft: 0 2px 4px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+
+  /* Gradientes modo claro */
+  --gradient-vet-from: #E0F4F8;
+  --gradient-vet-via: #EEF9FC;
+  --gradient-vet-to: #FFFFFF;
+
+  /* Actualizar alias */
+  --color-background: var(--color-vet-light);
+  --color-text: var(--color-vet-text);
+  --color-muted: var(--color-vet-muted);
+  --color-danger: var(--color-vet-danger);
+}
+
+/* ========================================
+   🌙 MODO OSCURO (explícito)
+   ======================================== */
+[data-theme="dark"] {
+  --color-vet-light: #0F172A;
+  --color-vet-sidebar: #0F172A; /* En dark mode el sidebar se funde o es igual */
+  --color-vet-text: #F1F5F9;
+  --color-vet-muted: #94A3B8;
+  --color-vet-danger: #FCA5A5;
+  --color-sky-soft: #1E293B;
   --color-card: #1E293B;
   --color-border: #334155;
   --color-hover: #334155;
   --color-active: #0A7EA4;
   --color-highlight: #36BCD4;
 
-  /* Animaciones personalizadas */
+  --shadow-soft: 0 4px 6px -1px rgba(10, 126, 164, 0.2), 0 2px 4px -1px rgba(10, 126, 164, 0.1);
+  --shadow-card: 0 10px 15px -3px rgba(10, 126, 164, 0.15), 0 4px 6px -2px rgba(10, 126, 164, 0.1);
+
+  --gradient-vet-from: #0A7EA4;
+  --gradient-vet-via: #085F7A;
+  --gradient-vet-to: #064454;
+
+  --color-background: var(--color-vet-light);
+  --color-text: var(--color-vet-text);
+  --color-muted: var(--color-vet-muted);
+  --color-danger: var(--color-vet-danger);
+}
+
+/* ... (El resto de animaciones sigue igual) ... */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+/* ========================================
+   ANIMACIONES (sin cambios)
+   ======================================== */
+:root {
   --animate-gradient-shift: gradient-shift 3s ease infinite;
   --animate-spin-slow: spin-slow 20s linear infinite;
   --animate-reverse-spin: reverse-spin 15s linear infinite;
@@ -61,10 +159,4 @@
   --animate-progress-fill: progress-fill 0.7s ease-out forwards;
   --animate-ripple: ripple 1.5s ease-out infinite;
   --animate-morph: morph 8s ease-in-out infinite;
-}
-
-:root {
-  --gradient-vet-from: #E0F4F8;
-  --gradient-vet-via: #EEF9FC;
-  --gradient-vet-to: #ffffff;
 }

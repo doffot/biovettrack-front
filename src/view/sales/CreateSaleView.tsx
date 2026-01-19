@@ -1,4 +1,3 @@
-// src/views/sales/CreateSaleView.tsx
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -41,17 +40,13 @@ export default function CreateSaleView() {
   const [selectedOwner, setSelectedOwner] = useState<SelectedClient>(null);
   const [ownerError, setOwnerError] = useState("");
   const [discountTotal, setDiscountTotal] = useState(0);
-  
-  // Estado para modo de venta por producto
   const [productSaleMode, setProductSaleMode] = useState<{ [key: string]: boolean }>({});
 
-  // Cargar productos con inventario
   const { data: products = [], isLoading: loadingProducts } = useQuery({
     queryKey: ["products", "with-inventory"],
     queryFn: getProductsWithInventory,
   });
 
-  // Filtrar productos con stock
   const productsWithStock = useMemo(() => {
     return products.filter(product => {
       if (!product.divisible) {
@@ -62,7 +57,6 @@ export default function CreateSaleView() {
     });
   }, [products]);
 
-  // Filtrar por búsqueda
   const filteredProducts = useMemo(() => {
     return productsWithStock.filter(product => {
       return (
@@ -73,7 +67,6 @@ export default function CreateSaleView() {
     });
   }, [productsWithStock, searchTerm]);
 
-  // Calcular totales
   const cartTotals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
     const itemDiscounts = cart.reduce((sum, item) => sum + item.discount, 0);
@@ -81,23 +74,17 @@ export default function CreateSaleView() {
     return { subtotal, itemDiscounts, total };
   }, [cart, discountTotal]);
 
-  // Obtener stock disponible
   const getAvailableStock = useCallback((product: ProductWithInventory, isFullUnit: boolean): number => {
     if (!product.inventory) return 0;
     if (isFullUnit) return product.inventory.stockUnits;
     return product.inventory.stockUnits * product.dosesPerUnit + product.inventory.stockDoses;
   }, []);
 
-  // Agregar producto al carrito
   const addToCart = useCallback((product: ProductWithInventory) => {
     if (!product._id) return;
     
-    const productId = product._id; // Guardamos en variable para TypeScript
-    
-    const isFullUnit = product.divisible 
-      ? (productSaleMode[productId] ?? true) 
-      : true;
-    
+    const productId = product._id;
+    const isFullUnit = product.divisible ? (productSaleMode[productId] ?? true) : true;
     const availableStock = getAvailableStock(product, isFullUnit);
 
     if (availableStock <= 0) {
@@ -151,7 +138,6 @@ export default function CreateSaleView() {
     });
   }, [productSaleMode, getAvailableStock]);
 
-  // Actualizar cantidad
   const updateQuantity = useCallback((productId: string, newQuantity: number) => {
     setCart((prev) => {
       const index = prev.findIndex(item => item.productId === productId);
@@ -178,7 +164,6 @@ export default function CreateSaleView() {
     });
   }, []);
 
-  // Cambiar modo en carrito
   const toggleUnitMode = useCallback((productId: string) => {
     setCart((prev) => {
       const index = prev.findIndex(item => item.productId === productId);
@@ -199,12 +184,10 @@ export default function CreateSaleView() {
     });
   }, []);
 
-  // Eliminar del carrito
   const removeFromCart = useCallback((productId: string) => {
     setCart((prev) => prev.filter(item => item.productId !== productId));
   }, []);
 
-  // Validar venta
   const validateSale = (): boolean => {
     if (!selectedOwner) {
       setOwnerError("Debes seleccionar un cliente para procesar la venta");
@@ -221,7 +204,6 @@ export default function CreateSaleView() {
     return true;
   };
 
-  // Mutación para crear venta
   const { mutate: createSaleMutation, isPending: isProcessing } = useMutation({
     mutationFn: createSale,
     onSuccess: () => {
@@ -234,7 +216,6 @@ export default function CreateSaleView() {
         queryClient.invalidateQueries({ queryKey: ["owners"] });
       }
       
-      // Limpiar estado
       setCart([]);
       setSelectedOwner(null);
       setDiscountTotal(0);
@@ -249,7 +230,6 @@ export default function CreateSaleView() {
     },
   });
 
-  // Procesar pago
   const handlePaymentConfirm = useCallback((paymentData: {
     paymentMethodId?: string;
     reference?: string;
@@ -276,7 +256,6 @@ export default function CreateSaleView() {
       ...(selectedOwner && { ownerId: selectedOwner.id }),
     };
 
-    // Toast personalizado
     const isPayingInBs = paymentData.addAmountPaidBs > 0;
     const amount = isPayingInBs ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD;
     const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
@@ -304,331 +283,443 @@ export default function CreateSaleView() {
 
   if (loadingProducts) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-vet-light)]">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-vet-muted text-sm">Cargando productos...</p>
+          <div className="relative w-12 h-12 mx-auto mb-3">
+            <div className="absolute inset-0 border-3 border-[var(--color-border)] rounded-full"></div>
+            <div className="absolute inset-0 border-3 border-[var(--color-vet-primary)] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-[var(--color-vet-muted)] text-sm">Cargando productos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-vet-light">
-      {/* Header Compacto */}
-      <div className="flex-shrink-0 px-6 py-2.5 bg-sky-soft border-b border-vet-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[var(--color-vet-light)]">
+      {/* Spacer para header mobile/desktop */}
+      <div className="h-4 lg:h-0" />
+
+      {/* Header Compacto - Sticky */}
+      <div className="sticky top-14 lg:top-0 z-30 bg-[var(--color-card)]/95 backdrop-blur-lg border-b border-[var(--color-border)] shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-3 h-14">
             <button
               onClick={() => navigate(-1)}
-              className="p-1.5 hover:bg-vet-hover rounded-lg transition-colors"
+              className="p-2 hover:bg-[var(--color-hover)] rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 text-vet-text" />
+              <ArrowLeft className="w-5 h-5 text-[var(--color-vet-text)]" />
             </button>
-            <div>
-              <h1 className="text-base font-semibold text-vet-text">Punto de Venta</h1>
-              <p className="text-xs text-vet-muted">
-                {filteredProducts.length} productos disponibles
-              </p>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] rounded-lg">
+                <ShoppingCart className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold text-[var(--color-vet-text)]">Punto de Venta</h1>
+                <p className="text-xs text-[var(--color-vet-muted)]">
+                  {filteredProducts.length} productos
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Contenido Principal */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3 p-3 overflow-hidden">
-        {/* Columna Izquierda: Productos */}
-        <div className="lg:col-span-2 flex flex-col bg-sky-soft rounded-xl border border-vet-border overflow-hidden">
-          {/* Búsqueda */}
-          <div className="flex-shrink-0 p-3 border-b border-vet-border">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-1.5 bg-vet-light border border-vet-border text-vet-text placeholder-vet-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
-              />
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          {/* Columna Izquierda: Productos */}
+          <div className="lg:col-span-2 bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-sm">
+            {/* Búsqueda */}
+            <div className="p-4 border-b border-[var(--color-border)]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-vet-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-vet-light)] border border-[var(--color-border)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] transition-all"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Tabla de Productos */}
-          <div className="flex-1 overflow-auto">
-            {filteredProducts.length > 0 ? (
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-vet-light border-b border-vet-border">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-vet-muted uppercase">Producto</th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-vet-muted uppercase">Precio</th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-vet-muted uppercase">Stock</th>
-                    <th className="px-3 py-2 text-center text-xs font-semibold text-vet-muted uppercase">Modo</th>
-                    <th className="px-3 py-2 text-center text-xs font-semibold text-vet-muted uppercase">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-vet-border">
-                  {filteredProducts.map((product) => {
-                    if (!product._id) return null;
-                    
-                    const inCart = cart.some(item => item.productId === product._id);
-                    const inventory = product.inventory;
-                    const stockUnits = inventory?.stockUnits || 0;
-                    const stockDoses = inventory?.stockDoses || 0;
-                    const totalDoses = (stockUnits * product.dosesPerUnit) + stockDoses;
-                    const isFullUnitMode = productSaleMode[product._id] ?? true;
+            {/* Tabla Desktop / Cards Mobile */}
+            <div className="max-h-[500px] lg:max-h-[600px] overflow-auto custom-scrollbar">
+              {filteredProducts.length > 0 ? (
+                <>
+                  {/* Desktop Table */}
+                  <table className="hidden md:table w-full text-sm">
+                    <thead className="sticky top-0 bg-[var(--color-hover)] border-b border-[var(--color-border)] z-10">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase">Producto</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase">Precio</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-vet-muted)] uppercase">Stock</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--color-vet-muted)] uppercase">Modo</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--color-vet-muted)] uppercase">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--color-border)]">
+                      {filteredProducts.map((product) => {
+                        if (!product._id) return null;
+                        
+                        const inCart = cart.some(item => item.productId === product._id);
+                        const inventory = product.inventory;
+                        const stockUnits = inventory?.stockUnits || 0;
+                        const stockDoses = inventory?.stockDoses || 0;
+                        const totalDoses = (stockUnits * product.dosesPerUnit) + stockDoses;
+                        const isFullUnitMode = productSaleMode[product._id] ?? true;
 
-                    return (
-                      <tr key={product._id} className="hover:bg-vet-light/50 transition-colors">
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-vet-light rounded-lg flex-shrink-0">
-                              <Package className="w-3.5 h-3.5 text-vet-primary" />
+                        return (
+                          <tr key={product._id} className="hover:bg-[var(--color-hover)] transition-colors">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-[var(--color-vet-light)] rounded-lg border border-[var(--color-border)]">
+                                  <Package className="w-4 h-4 text-[var(--color-vet-primary)]" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-[var(--color-vet-text)]">{product.name}</p>
+                                  <p className="text-xs text-[var(--color-vet-muted)] capitalize">{product.category}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              {product.divisible ? (
+                                <div>
+                                  <p className="text-sm font-medium text-[var(--color-vet-text)]">
+                                    ${isFullUnitMode 
+                                      ? product.salePrice.toFixed(2) 
+                                      : (product.salePricePerDose ?? product.salePrice).toFixed(2)
+                                    }
+                                  </p>
+                                  <p className="text-xs text-[var(--color-vet-muted)]">
+                                    {isFullUnitMode ? product.unit : product.doseUnit}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-sm font-medium text-[var(--color-vet-text)]">${product.salePrice.toFixed(2)}</p>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                                {product.divisible ? (
+                                  <span className="text-sm text-amber-600 dark:text-amber-400">
+                                    {totalDoses} {product.doseUnit}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-amber-600 dark:text-amber-400">
+                                    {stockUnits} {product.unit}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              {product.divisible ? (
+                                <div className="flex gap-1 justify-center">
+                                  <button
+                                    onClick={() => setProductSaleMode(prev => ({ ...prev, [product._id!]: true }))}
+                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                                      isFullUnitMode
+                                        ? "bg-[var(--color-vet-primary)] text-white shadow-sm"
+                                        : "bg-[var(--color-vet-light)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)] border border-[var(--color-border)]"
+                                    }`}
+                                  >
+                                    {product.unit}
+                                  </button>
+                                  <button
+                                    onClick={() => setProductSaleMode(prev => ({ ...prev, [product._id!]: false }))}
+                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                                      !isFullUnitMode
+                                        ? "bg-[var(--color-vet-primary)] text-white shadow-sm"
+                                        : "bg-[var(--color-vet-light)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)] border border-[var(--color-border)]"
+                                    }`}
+                                  >
+                                    {product.doseUnit}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-[var(--color-vet-muted)] text-center block">—</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => addToCart(product)}
+                                disabled={inCart}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                  inCart
+                                    ? "bg-[var(--color-vet-accent)]/10 text-[var(--color-vet-accent)] cursor-not-allowed border border-[var(--color-vet-accent)]/20"
+                                    : "bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-md text-white"
+                                }`}
+                              >
+                                {inCart ? (
+                                  <>
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    En carrito
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Agregar
+                                  </>
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* Mobile Cards */}
+                  <div className="md:hidden divide-y divide-[var(--color-border)]">
+                    {filteredProducts.map((product) => {
+                      if (!product._id) return null;
+                      
+                      const inCart = cart.some(item => item.productId === product._id);
+                      const inventory = product.inventory;
+                      const stockUnits = inventory?.stockUnits || 0;
+                      const stockDoses = inventory?.stockDoses || 0;
+                      const totalDoses = (stockUnits * product.dosesPerUnit) + stockDoses;
+                      const isFullUnitMode = productSaleMode[product._id] ?? true;
+
+                      return (
+                        <div key={product._id} className="p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                              <div className="p-2 bg-[var(--color-vet-light)] rounded-lg border border-[var(--color-border)] flex-shrink-0">
+                                <Package className="w-5 h-5 text-[var(--color-vet-primary)]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--color-vet-text)] truncate">{product.name}</p>
+                                <p className="text-xs text-[var(--color-vet-muted)] capitalize">{product.category}</p>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                                  <span className="text-xs text-amber-600 dark:text-amber-400">
+                                    {product.divisible 
+                                      ? `${totalDoses} ${product.doseUnit}` 
+                                      : `${stockUnits} ${product.unit}`
+                                    }
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-vet-text truncate">{product.name}</p>
-                              <p className="text-xs text-vet-muted capitalize">{product.category}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          {product.divisible ? (
-                            <div className="text-xs">
-                              <p className="text-vet-text font-medium">
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-sm font-bold text-[var(--color-vet-text)]">
                                 ${isFullUnitMode 
                                   ? product.salePrice.toFixed(2) 
                                   : (product.salePricePerDose ?? product.salePrice).toFixed(2)
                                 }
                               </p>
-                              <p className="text-vet-muted text-xs">
+                              <p className="text-xs text-[var(--color-vet-muted)]">
                                 {isFullUnitMode ? product.unit : product.doseUnit}
                               </p>
                             </div>
-                          ) : (
-                            <p className="text-xs font-medium text-vet-text">${product.salePrice.toFixed(2)}</p>
-                          )}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3 text-amber-600 flex-shrink-0" />
-                            {product.divisible ? (
-                              <span className="text-xs text-amber-600">
-                                {totalDoses} {product.doseUnit}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-amber-600">
-                                {stockUnits} {product.unit}
-                              </span>
-                            )}
                           </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          {product.divisible ? (
-                            <div className="flex gap-1 justify-center">
+
+                          {product.divisible && (
+                            <div className="flex gap-2">
                               <button
                                 onClick={() => setProductSaleMode(prev => ({ ...prev, [product._id!]: true }))}
-                                className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                                className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                                   isFullUnitMode
-                                    ? "bg-vet-primary text-white"
-                                    : "bg-vet-light text-vet-muted hover:bg-vet-hover"
+                                    ? "bg-[var(--color-vet-primary)] text-white shadow-sm"
+                                    : "bg-[var(--color-vet-light)] text-[var(--color-vet-muted)] border border-[var(--color-border)]"
                                 }`}
                               >
                                 {product.unit}
                               </button>
                               <button
                                 onClick={() => setProductSaleMode(prev => ({ ...prev, [product._id!]: false }))}
-                                className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                                className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                                   !isFullUnitMode
-                                    ? "bg-vet-primary text-white"
-                                    : "bg-vet-light text-vet-muted hover:bg-vet-hover"
+                                    ? "bg-[var(--color-vet-primary)] text-white shadow-sm"
+                                    : "bg-[var(--color-vet-light)] text-[var(--color-vet-muted)] border border-[var(--color-border)]"
                                 }`}
                               >
                                 {product.doseUnit}
                               </button>
                             </div>
-                          ) : (
-                            <span className="text-xs text-vet-muted text-center block">N/A</span>
                           )}
-                        </td>
-                        <td className="px-3 py-2 text-center">
+
                           <button
                             onClick={() => addToCart(product)}
                             disabled={inCart}
-                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                               inCart
-                                ? "bg-vet-accent/20 text-vet-accent cursor-not-allowed"
-                                : "bg-vet-primary hover:bg-vet-secondary text-white"
+                                ? "bg-[var(--color-vet-accent)]/10 text-[var(--color-vet-accent)] cursor-not-allowed border border-[var(--color-vet-accent)]/20"
+                                : "bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg text-white"
                             }`}
                           >
                             {inCart ? (
                               <>
-                                <CheckCircle2 className="w-3 h-3" />
+                                <CheckCircle2 className="w-4 h-4" />
                                 En carrito
                               </>
                             ) : (
                               <>
-                                <Plus className="w-3 h-3" />
-                                Agregar
+                                <Plus className="w-4 h-4" />
+                                Agregar al carrito
                               </>
                             )}
                           </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-vet-light rounded-xl flex items-center justify-center">
-                    <Package className="w-8 h-8 text-vet-muted" />
+                        </div>
+                      );
+                    })}
                   </div>
-                  <h3 className="text-lg font-medium text-vet-text mb-1">
-                    {searchTerm ? "Sin resultados" : "Sin productos disponibles"}
-                  </h3>
-                  <p className="text-sm text-vet-muted">
-                    {searchTerm 
-                      ? "No hay productos con esos criterios" 
-                      : "Registra productos para venderlos"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Columna Derecha: Carrito */}
-        <div className="lg:col-span-1 flex flex-col bg-sky-soft rounded-xl border border-vet-border overflow-hidden">
-          {/* Header del Carrito */}
-          <div className="flex-shrink-0 p-3 border-b border-vet-border">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-vet-text flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4" />
-                Carrito
-              </h2>
-              <span className="text-xs text-vet-muted">
-                {cart.length} item{cart.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-            
-            {/* Selector de Cliente */}
-            <OwnerSelector
-              selectedOwner={selectedOwner ? {id: selectedOwner.id, name: selectedOwner.name, phone: selectedOwner.phone} : null}
-              onSelectOwner={(owner) => setSelectedOwner(owner ? {
-                id: owner.id,
-                name: owner.name,
-                phone: owner.phone,
-                creditBalance: 0
-              } : null)}
-              required
-              error={ownerError}
-            />
-          </div>
-
-          {/* Items del Carrito */}
-          <div className="flex-1 overflow-auto p-1.5">
-            {cart.length > 0 ? (
-              <div className="space-y-1">
-                {cart.map((item) => (
-                  <div key={item.productId} className="bg-vet-light border border-vet-border rounded p-1.5">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1 flex-1 min-w-0 mr-1">
-                        <span className="text-xs font-medium text-vet-text truncate">
-                          {item.productName}
-                        </span>
-
-                        {item.isDivisible && (
-                          <button
-                            onClick={() => toggleUnitMode(item.productId)}
-                            className="text-[10px] px-1 py-0.5 rounded bg-vet-light text-vet-primary hover:bg-vet-hover flex-shrink-0 border border-vet-primary/20"
-                            title="Cambiar modo"
-                          >
-                            {item.isFullUnit ? "completo" : "dosis"}
-                          </button>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => removeFromCart(item.productId)}
-                        className="p-0.5 text-vet-danger hover:bg-vet-danger/10 rounded transition-colors flex-shrink-0"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                          className="p-0.5 rounded border border-vet-border hover:bg-vet-hover transition-colors"
-                        >
-                          <Minus className="w-2.5 h-2.5 text-vet-text" />
-                        </button>
-                        <span className="text-xs font-medium text-vet-text min-w-[24px] text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                          className="p-0.5 rounded border border-vet-border hover:bg-vet-hover transition-colors"
-                        >
-                          <Plus className="w-2.5 h-2.5 text-vet-text" />
-                        </button>
-                      </div>
-
-                      <span className="text-xs font-bold text-emerald-400">
-                        ${item.total.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <ShoppingCart className="w-8 h-8 mx-auto text-vet-muted/30 mb-2" />
-                  <p className="text-vet-muted text-xs">Carrito vacío</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer del Carrito */}
-          <div className="flex-shrink-0 p-3 border-t border-vet-border bg-vet-light">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-vet-muted">Total:</span>
-              <span className="text-3xl font-bold text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
-                ${cartTotals.total.toFixed(2)}
-              </span>
-            </div>
-
-            <button
-              onClick={handleCheckout}
-              disabled={!selectedOwner || cart.length === 0 || isProcessing}
-              className={`w-full py-2.5 px-4 rounded-lg font-medium text-white transition-colors flex items-center justify-center gap-2 ${
-                !selectedOwner || cart.length === 0 || isProcessing
-                  ? "bg-vet-muted/50 cursor-not-allowed"
-                  : "bg-vet-primary hover:bg-vet-secondary"
-              }`}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Procesando...
                 </>
               ) : (
-                <>
-                  <CreditCard className="w-4 h-4" />
-                  Procesar Venta
-                </>
+                <div className="flex items-center justify-center py-16">
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-vet-light)] rounded-xl flex items-center justify-center border border-[var(--color-border)]">
+                      <Package className="w-8 h-8 text-[var(--color-vet-muted)]" />
+                    </div>
+                    <h3 className="text-base font-medium text-[var(--color-vet-text)] mb-1">
+                      {searchTerm ? "Sin resultados" : "Sin productos disponibles"}
+                    </h3>
+                    <p className="text-sm text-[var(--color-vet-muted)]">
+                      {searchTerm 
+                        ? "No hay productos con esos criterios" 
+                        : "Registra productos para venderlos"}
+                    </p>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
+          </div>
 
-            {!selectedOwner && cart.length > 0 && (
-              <p className="mt-2 text-xs text-center text-amber-600 flex items-center justify-center gap-1">
-                <User className="w-3 h-3" />
-                Selecciona un cliente
-              </p>
-            )}
+          {/* Columna Derecha: Carrito */}
+          <div className="lg:col-span-1 bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-sm lg:sticky lg:top-28 lg:self-start">
+            {/* Header del Carrito */}
+            <div className="p-4 border-b border-[var(--color-border)]">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-[var(--color-vet-text)] flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4 text-[var(--color-vet-primary)]" />
+                  Carrito
+                </h2>
+                <span className="text-xs px-2 py-1 bg-[var(--color-vet-primary)]/10 text-[var(--color-vet-primary)] rounded-full font-medium">
+                  {cart.length}
+                </span>
+              </div>
+              
+              <OwnerSelector
+                selectedOwner={selectedOwner ? {id: selectedOwner.id, name: selectedOwner.name, phone: selectedOwner.phone} : null}
+                onSelectOwner={(owner) => setSelectedOwner(owner ? {
+                  id: owner.id,
+                  name: owner.name,
+                  phone: owner.phone,
+                  creditBalance: 0
+                } : null)}
+                required
+                error={ownerError}
+              />
+            </div>
+
+            {/* Items del Carrito */}
+            <div className="max-h-[300px] lg:max-h-[400px] overflow-auto p-3 custom-scrollbar bg-[var(--color-vet-light)]/30">
+              {cart.length > 0 ? (
+                <div className="space-y-2">
+                  {cart.map((item) => (
+                    <div key={item.productId} className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-3 shadow-sm">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                          <span className="text-sm font-medium text-[var(--color-vet-text)] truncate">
+                            {item.productName}
+                          </span>
+
+                          {item.isDivisible && (
+                            <button
+                              onClick={() => toggleUnitMode(item.productId)}
+                              className="text-xs px-1.5 py-0.5 rounded bg-[var(--color-vet-light)] text-[var(--color-vet-primary)] hover:bg-[var(--color-hover)] flex-shrink-0 border border-[var(--color-border)] transition-colors"
+                              title="Cambiar modo"
+                            >
+                              {item.isFullUnit ? item.unit : item.doseUnit}
+                            </button>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => removeFromCart(item.productId)}
+                          className="p-1 text-red-500 hover:bg-red-500/10 rounded transition-colors flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                            className="p-1 rounded border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-colors"
+                          >
+                            <Minus className="w-3.5 h-3.5 text-[var(--color-vet-text)]" />
+                          </button>
+                          <span className="text-sm font-medium text-[var(--color-vet-text)] min-w-[32px] text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            className="p-1 rounded border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5 text-[var(--color-vet-text)]" />
+                          </button>
+                        </div>
+
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                          ${item.total.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-40">
+                  <div className="text-center">
+                    <ShoppingCart className="w-12 h-12 mx-auto text-[var(--color-vet-muted)]/30 mb-2" />
+                    <p className="text-[var(--color-vet-muted)] text-sm">Carrito vacío</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer del Carrito */}
+            <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-vet-light)]/30">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm font-medium text-[var(--color-vet-muted)]">Total:</span>
+                <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  ${cartTotals.total.toFixed(2)}
+                </span>
+              </div>
+
+              <button
+                onClick={handleCheckout}
+                disabled={!selectedOwner || cart.length === 0 || isProcessing}
+                className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
+                  !selectedOwner || cart.length === 0 || isProcessing
+                    ? "bg-[var(--color-border)] cursor-not-allowed"
+                    : "bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    Procesar Venta
+                  </>
+                )}
+              </button>
+
+              {!selectedOwner && cart.length > 0 && (
+                <p className="mt-3 text-xs text-center text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                  <User className="w-3.5 h-3.5" />
+                  Selecciona un cliente para continuar
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

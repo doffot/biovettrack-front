@@ -1,4 +1,3 @@
-// src/views/grooming/GroomingReportView.tsx
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -30,9 +29,9 @@ export type GroomingDateRange = "today" | "week" | "month" | "year" | "all";
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-vet-light">
       <div className="text-center">
-        <div className="w-8 h-8 mx-auto mb-3 border-2 border-slate-700 border-t-vet-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 mx-auto mb-3 border-2 border-vet-muted/30 border-t-vet-primary rounded-full animate-spin" />
         <p className="text-sm text-vet-muted">Cargando reporte...</p>
       </div>
     </div>
@@ -136,7 +135,7 @@ export default function GroomingReportView() {
 
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-vet-light">
         <div className="text-center">
           <p className="text-vet-muted mb-4">Error al cargar el reporte</p>
           <button
@@ -151,9 +150,9 @@ export default function GroomingReportView() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-vet-light transition-colors duration-300">
       {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700">
+      <header className="bg-card border-b border-border shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-4">
@@ -176,7 +175,7 @@ export default function GroomingReportView() {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="p-2 text-vet-muted hover:text-vet-text hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50"
+              className="p-2 text-vet-muted hover:text-vet-text hover:bg-hover rounded-md transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
             </button>
