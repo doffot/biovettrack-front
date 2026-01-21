@@ -2,6 +2,7 @@
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Save } from "lucide-react";
 
 import { createGroomingService } from "../../api/groomingAPI";
 import { getStaffList } from "../../api/staffAPI";
@@ -10,7 +11,6 @@ import type { GroomingServiceFormData } from "../../types/grooming";
 import { toast } from "../../components/Toast";
 import GroomingServiceForm from "../../components/grooming/groomingForm";
 
-// ✅ Función helper para obtener fecha local en formato YYYY-MM-DD
 const getLocalDateString = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -35,7 +35,7 @@ export default function CreateGroomingServiceView() {
     formState: { errors },
   } = useForm<GroomingServiceFormData>({
     defaultValues: {
-      date: getLocalDateString(), // ✅ CORREGIDO: Ahora usa fecha local
+      date: getLocalDateString(), 
       service: undefined,
       specifications: "",
       observations: "",
@@ -72,47 +72,50 @@ export default function CreateGroomingServiceView() {
 
   if (isLoadingGroomers) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-6 h-6 border-2 border-vet-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-2 text-vet-text">Cargando peluqueros...</p>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-[var(--color-vet-primary)] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-[var(--color-vet-muted)] text-sm mt-3 font-medium">Cargando personal...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6">
-      <div className="max-w-4xl mx-auto">
-        <div>
-          <form id="grooming-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <GroomingServiceForm register={register} errors={errors} groomers={groomers} />
-            <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-slate-700/50">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-vet-muted hover:text-vet-text font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-vet-primary to-vet-secondary hover:from-vet-secondary hover:to-vet-primary text-white font-semibold transition-all duration-200 shadow-lg shadow-vet-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPending ? (
-                  <>
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Guardando...</span>
-                  </>
-                ) : (
-                  "Guardar Servicio"
-                )}
-              </button>
-            </div>
-          </form>
+    <div className="max-w-4xl mx-auto">
+      {/* ✅ Sin card, sin borde - solo el formulario */}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+        <GroomingServiceForm register={register} errors={errors} groomers={groomers} />
+        
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-[var(--color-border)]">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] font-medium transition-colors"
+          >
+            Cancelar
+          </button>
+          
+          <button
+            type="submit"
+            disabled={isPending}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isPending ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Guardando...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                <span>Guardar Servicio</span>
+              </>
+            )}
+          </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

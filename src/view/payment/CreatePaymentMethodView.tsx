@@ -39,10 +39,8 @@ export default function CreatePaymentMethodView() {
     },
     onSuccess: () => {
       toast.success("Método de pago creado correctamente");
-      // Invalida la caché de métodos de pago
       queryClient.invalidateQueries({ queryKey: ["paymentMethods"] });
-      // Navega de vuelta a la lista o donde corresponda
-      navigate("/"); // Ajusta esta ruta
+      navigate("/payment-methods"); // Ajustado para volver a la lista correcta
     },
   });
 
@@ -51,7 +49,6 @@ export default function CreatePaymentMethodView() {
   }, []);
 
   const onSubmit = (data: PaymentMethodFormData) => {
-    // Validación adicional antes de enviar
     if (!data.name.trim()) {
       toast.error("El nombre del método es obligatorio");
       return;
@@ -70,14 +67,15 @@ export default function CreatePaymentMethodView() {
 
   return (
     <>
-      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+      {/* Header Fijo */}
+      <div className="fixed top-14 lg:top-16 left-0 right-0 lg:left-64 z-30 bg-[var(--color-card)]/95 backdrop-blur-lg border-b border-[var(--color-border)] shadow-sm">
         <div className="px-6 lg:px-8 pt-6 pb-4">
           <div className="flex items-center justify-between gap-6 mb-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               {/* BackButton */}
               <Link
-                to="/" 
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                to="/payment-methods" 
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-vet-primary)]/10 text-[var(--color-vet-primary)] transition-colors flex-shrink-0"
                 title="Volver a métodos de pago"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -85,30 +83,30 @@ export default function CreatePaymentMethodView() {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-vet-primary/10 rounded-lg">
-                    <CreditCard className="w-6 h-6 text-vet-primary" />
+                  <div className="p-2 bg-[var(--color-vet-primary)]/10 rounded-lg">
+                    <CreditCard className="w-6 h-6 text-[var(--color-vet-primary)]" />
                   </div>
                   <div className="min-w-0">
-                    <h1 className="text-2xl font-bold text-vet-text truncate">
+                    <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-vet-text)] truncate">
                       Nuevo Método de Pago
                     </h1>
                     <div className="flex items-center gap-2 mt-1">
-                      <Plus className="w-4 h-4 text-vet-muted flex-shrink-0" />
-                      <span className="text-vet-primary font-semibold text-sm truncate">
+                      <Plus className="w-4 h-4 text-[var(--color-vet-muted)] flex-shrink-0" />
+                      <span className="text-[var(--color-vet-primary)] font-semibold text-sm truncate">
                         Configurar nuevo método de pago
                       </span>
                     </div>
                   </div>
                 </div>
-                <p className="text-vet-muted text-sm">
+                <p className="text-[var(--color-vet-muted)] text-sm truncate">
                   Agrega un nuevo método de pago para usar en servicios y ventas
                 </p>
               </div>
             </div>
 
             <div className="hidden sm:block flex-shrink-0">
-              <div className="w-16 h-16 rounded-xl bg-vet-primary/10 flex items-center justify-center border-2 border-vet-primary/20">
-                <CreditCard className="w-8 h-8 text-vet-primary" />
+              <div className="w-16 h-16 rounded-xl bg-[var(--color-vet-primary)]/10 flex items-center justify-center border-2 border-[var(--color-vet-primary)]/20">
+                <CreditCard className="w-8 h-8 text-[var(--color-vet-primary)]" />
               </div>
             </div>
           </div>
@@ -116,12 +114,12 @@ export default function CreatePaymentMethodView() {
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-40 lg:h-30"></div>
+      <div className="h-44 sm:h-48 lg:h-48"></div>
 
       {/* Formulario */}
-      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8 pb-10`}>
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <div className="bg-[var(--color-card)] rounded-2xl p-6 border border-[var(--color-border)] shadow-sm">
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               {/* Componente de Formulario */}
               <PaymentMethodForm 
@@ -130,11 +128,11 @@ export default function CreatePaymentMethodView() {
               />
 
               {/* Botones */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-[var(--color-border)]">
                 <button
                   type="button"
-                  onClick={() => navigate("payment-methods")} // Ajusta esta ruta
-                  className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                  onClick={() => navigate("/payment-methods")}
+                  className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -142,7 +140,7 @@ export default function CreatePaymentMethodView() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold transition-all duration-200 disabled:opacity-50"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white font-semibold transition-all duration-200 disabled:opacity-50"
                 >
                   {isPending ? (
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

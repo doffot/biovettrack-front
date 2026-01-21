@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, Plus, Trash2, Pill } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Pill } from "lucide-react";
 import { createRecipe } from "../../api/recipeAPI";
 import { getPatientById } from "../../api/patientAPI";
 import { toast } from "../../components/Toast";
@@ -23,7 +23,7 @@ const PRESENTATIONS = [
   "Gel",
   "Polvo",
   "Solución",
-  "Champu",
+  "Champú",
   "Jabón",
   "Solución jabonosa",
 ];
@@ -41,7 +41,6 @@ export default function CreateRecipeView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Estados para el modal de impresión
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [createdRecipe, setCreatedRecipe] = useState<Recipe | null>(null);
 
@@ -51,7 +50,6 @@ export default function CreateRecipeView() {
     notes: "",
   });
 
-  // Query para obtener datos del paciente
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => getPatientById(patientId!),
@@ -61,13 +59,19 @@ export default function CreateRecipeView() {
   const { mutate, isPending } = useMutation({
     mutationFn: (data: RecipeFormData) => createRecipe(patientId!, data),
     onSuccess: (recipe) => {
-      toast.success("Receta creada");
+      toast.success(
+        "Receta médica creada",
+        "La prescripción está lista para imprimir y entregar"
+      );
       queryClient.invalidateQueries({ queryKey: ["recipes", patientId] });
       setCreatedRecipe(recipe);
       setShowPrintModal(true);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(
+        "Error al crear receta",
+        error.message || "No se pudo guardar la prescripción médica"
+      );
     },
   });
 
@@ -95,7 +99,10 @@ export default function CreateRecipeView() {
 
   const removeMedication = (index: number) => {
     if (formData.medications.length === 1) {
-      toast.error("Debe haber al menos un medicamento");
+      toast.warning(
+        "Medicamento requerido",
+        "Debe haber al menos un medicamento en la receta"
+      );
       return;
     }
     setFormData((prev) => ({
@@ -112,7 +119,10 @@ export default function CreateRecipeView() {
     );
 
     if (invalidMed) {
-      toast.error("Completa todos los campos obligatorios de cada medicamento");
+      toast.warning(
+        "Campos incompletos",
+        "Completa todos los campos obligatorios de cada medicamento"
+      );
       return;
     }
 
@@ -129,7 +139,6 @@ export default function CreateRecipeView() {
     (med) => med.name && med.presentation && med.instructions
   );
 
-  // Preparar datos del paciente para el modal
   const patientDataForPrint = patient ? {
     name: patient.name,
     species: patient.species,
@@ -140,54 +149,27 @@ export default function CreateRecipeView() {
   } : null;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="max-w-6xl mx-auto">
+      {/* Header ultra compacto */}
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
+            className="p-1 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)] transition-colors"
+            title="Volver"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-vet-text">Nueva Receta</h1>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!isValid || isPending}
-            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
-              isValid && !isPending
-                ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-slate-800 text-slate-600 cursor-not-allowed"
-            }`}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              "Guardar"
-            )}
-          </button>
+          <h1 className="text-base font-bold text-[var(--color-vet-text)]">Nueva Receta</h1>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Fecha de emisión */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Fecha y Notas + Botones en UNA sola línea */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">
-              Fecha de emisión *
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Fecha <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -196,13 +178,13 @@ export default function CreateRecipeView() {
                 setFormData((prev) => ({ ...prev, issueDate: e.target.value }))
               }
               max={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-2.5 py-1.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">
-              Notas generales
+          <div className="lg:col-span-2">
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Notas
             </label>
             <input
               type="text"
@@ -212,53 +194,83 @@ export default function CreateRecipeView() {
               }
               placeholder="Indicaciones adicionales..."
               maxLength={500}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-2.5 py-1.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             />
+          </div>
+
+          <div className="flex items-end gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 px-3 py-1.5 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] text-sm font-medium transition-colors"
+            >
+              Cancelar
+            </button>
+            
+            <button
+              type="submit"
+              disabled={!isValid || isPending}
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              {isPending ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Guardar</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Medicamentos */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-vet-text flex items-center gap-2">
-              <Pill className="w-4 h-4 text-vet-primary" />
+        {/* Sección de Medicamentos ultra compacta */}
+        <div className="bg-[var(--color-vet-primary)]/5 border border-[var(--color-vet-primary)]/20 rounded-lg p-2.5">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold text-[var(--color-vet-text)] flex items-center gap-1.5">
+              <Pill className="w-3.5 h-3.5 text-[var(--color-vet-primary)]" />
               Medicamentos ({formData.medications.length})
             </label>
             <button
               type="button"
               onClick={addMedication}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-vet-primary bg-vet-primary/10 hover:bg-vet-primary/20 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white bg-[var(--color-vet-primary)] hover:bg-[var(--color-vet-secondary)] rounded-md transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
               Agregar
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {formData.medications.map((medication, index) => (
               <div
                 key={index}
-                className="p-4 bg-slate-800 rounded-xl border border-slate-700 relative"
+                className="p-2.5 bg-[var(--color-card)] rounded-lg border border-[var(--color-border)] relative"
               >
                 {formData.medications.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeMedication(index)}
-                    className="absolute top-2 right-2 p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+                    className="absolute top-1.5 right-1.5 p-0.5 rounded text-[var(--color-vet-muted)] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    title="Eliminar"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 )}
 
-                <p className="text-xs font-semibold text-vet-muted mb-3">
-                  Medicamento {index + 1}
+                <p className="text-[9px] font-semibold text-[var(--color-vet-muted)] uppercase mb-1.5">
+                  Med. {index + 1}
                 </p>
 
-                {/* Fila 1: Nombre + Presentación */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-xs font-medium text-vet-muted mb-1">
-                      Nombre *
+                {/* Todo en GRID compacto */}
+                <div className="grid grid-cols-1 lg:grid-cols-6 gap-2">
+                  {/* Nombre */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[10px] font-medium text-[var(--color-vet-text)] mb-0.5">
+                      Nombre <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -266,22 +278,23 @@ export default function CreateRecipeView() {
                       onChange={(e) =>
                         handleMedicationChange(index, "name", e.target.value)
                       }
-                      placeholder="Ej: Amoxicilina"
+                      placeholder="Amoxicilina"
                       maxLength={100}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+                      className="w-full px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
                     />
                   </div>
 
+                  {/* Presentación */}
                   <div>
-                    <label className="block text-xs font-medium text-vet-muted mb-1">
-                      Presentación *
+                    <label className="block text-[10px] font-medium text-[var(--color-vet-text)] mb-0.5">
+                      Presentación <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={medication.presentation}
                       onChange={(e) =>
                         handleMedicationChange(index, "presentation", e.target.value)
                       }
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+                      className="w-full px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
                     >
                       <option value="">Seleccionar</option>
                       {PRESENTATIONS.map((pres) => (
@@ -291,46 +304,45 @@ export default function CreateRecipeView() {
                       ))}
                     </select>
                   </div>
-                </div>
 
-                {/* Fila 2: Uso + Cantidad */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  {/* Origen */}
                   <div>
-                    <label className="block text-xs font-medium text-vet-muted mb-1">
-                      Adquirir en *
+                    <label className="block text-[10px] font-medium text-[var(--color-vet-text)] mb-0.5">
+                      Origen <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <button
                         type="button"
                         onClick={() =>
                           handleMedicationChange(index, "source", "farmacia")
                         }
-                        className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${
+                        className={`flex-1 px-2 py-1 text-[10px] rounded border transition-all ${
                           medication.source === "farmacia"
-                            ? "bg-blue-900/30 border-blue-700 text-blue-400 font-medium"
-                            : "bg-slate-800 border-slate-700 text-vet-muted hover:bg-slate-700"
+                            ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 font-medium"
+                            : "bg-[var(--color-card)] border-[var(--color-border)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)]"
                         }`}
                       >
-                        Farmacia
+                        Farm.
                       </button>
                       <button
                         type="button"
                         onClick={() =>
                           handleMedicationChange(index, "source", "veterinario")
                         }
-                        className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${
+                        className={`flex-1 px-2 py-1 text-[10px] rounded border transition-all ${
                           medication.source === "veterinario"
-                            ? "bg-emerald-900/30 border-emerald-700 text-emerald-400 font-medium"
-                            : "bg-slate-800 border-slate-700 text-vet-muted hover:bg-slate-700"
+                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-medium"
+                            : "bg-[var(--color-card)] border-[var(--color-border)] text-[var(--color-vet-muted)] hover:bg-[var(--color-hover)]"
                         }`}
                       >
-                        Veterinario
+                        Vet.
                       </button>
                     </div>
                   </div>
 
+                  {/* Cantidad */}
                   <div>
-                    <label className="block text-xs font-medium text-vet-muted mb-1">
+                    <label className="block text-[10px] font-medium text-[var(--color-vet-text)] mb-0.5">
                       Cantidad
                     </label>
                     <input
@@ -339,28 +351,28 @@ export default function CreateRecipeView() {
                       onChange={(e) =>
                         handleMedicationChange(index, "quantity", e.target.value)
                       }
-                      placeholder="Ej: 14 tabletas, 1 frasco"
+                      placeholder="14 tabletas"
                       maxLength={50}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+                      className="w-full px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
                     />
                   </div>
-                </div>
 
-                {/* Fila 3: Instrucciones */}
-                <div>
-                  <label className="block text-xs font-medium text-vet-muted mb-1">
-                   Indicaciones *
-                  </label>
-                  <textarea
-                    value={medication.instructions}
-                    onChange={(e) =>
-                      handleMedicationChange(index, "instructions", e.target.value)
-                    }
-                    placeholder="Ej: 1 tableta cada 12 horas por 7 días"
-                    maxLength={300}
-                    rows={2}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text resize-none"
-                  />
+                  {/* Indicaciones */}
+                  <div>
+                    <label className="block text-[10px] font-medium text-[var(--color-vet-text)] mb-0.5">
+                      Indicaciones <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={medication.instructions}
+                      onChange={(e) =>
+                        handleMedicationChange(index, "instructions", e.target.value)
+                      }
+                      placeholder="1 cada 12h por 7 días"
+                      maxLength={300}
+                      className="w-full px-2 py-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -368,7 +380,7 @@ export default function CreateRecipeView() {
         </div>
       </form>
 
-      {/* Modal de impresión después de crear */}
+      {/* Modal de impresión */}
       {showPrintModal && createdRecipe && patientDataForPrint && (
         <RecipePrintModal
           isOpen={showPrintModal}

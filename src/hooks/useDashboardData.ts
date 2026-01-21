@@ -31,12 +31,17 @@ import { getInvoices } from "../api/invoiceAPI";
 import { getPatients } from "../api/patientAPI";
 import { getOwners } from "../api/OwnerAPI";
 
+// Tipos enriquecidos con datos relacionados
 export interface VaccinationWithDaysLeft extends Vaccination {
   daysLeft: number;
+  patientData?: Patient;
+  ownerData?: Owner;
 }
 
 export interface DewormingWithDaysLeft extends Deworming {
   daysLeft: number;
+  patientData?: Patient;
+  ownerData?: Owner;
 }
 
 export interface ChartDataItem {
@@ -116,6 +121,15 @@ function calculatePendingDebt(invoices: Invoice[]): CurrencyAmounts {
     );
 }
 
+/**
+ * Helper para extraer ID de una referencia (puede ser string o objeto con _id)
+ */
+function extractId(ref: string | { _id: string } | undefined | null): string | undefined {
+  if (!ref) return undefined;
+  if (typeof ref === "string") return ref;
+  return ref._id;
+}
+
 export function useDashboardData() {
   // ========== QUERIES ==========
   const appointmentsQuery = useQuery<Appointment[]>({
@@ -150,7 +164,7 @@ export function useDashboardData() {
 
   const invoicesQuery = useQuery({
     queryKey: ["dashboard", "invoices"],
-     queryFn: () => getInvoices({ limit: 10000 }),
+    queryFn: () => getInvoices({ limit: 10000 }),
     ...QUERY_CONFIG,
   });
 
@@ -221,11 +235,11 @@ export function useDashboardData() {
 
   const weekRevenue = useMemo(() => calculateRevenue(weekInvoices), [weekInvoices]);
 
-const monthInvoices = useMemo(() => {
-  const now = new Date();
-  const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-  return invoices.filter((inv) => getDatePart(inv.date) >= firstDayOfMonth);
-}, [invoices]);
+  const monthInvoices = useMemo(() => {
+    const now = new Date();
+    const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    return invoices.filter((inv) => getDatePart(inv.date) >= firstDayOfMonth);
+  }, [invoices]);
 
   const monthRevenue = useMemo(() => calculateRevenue(monthInvoices), [monthInvoices]);
 
@@ -251,7 +265,20 @@ const monthInvoices = useMemo(() => {
     [invoices]
   );
 
-  // ========== ALERTAS (próximos 7 días) ==========
+  // ========== MAPAS PARA BÚSQUEDA RÁPIDA ==========
+  const patientsMap = useMemo(() => {
+    const map = new Map<string, Patient>();
+    patients.forEach((p) => map.set(p._id, p));
+    return map;
+  }, [patients]);
+
+  const ownersMap = useMemo(() => {
+    const map = new Map<string, Owner>();
+    owners.forEach((o) => map.set(o._id, o));
+    return map;
+  }, [owners]);
+
+  // ========== ALERTAS (próximos 7 días) - ENRIQUECIDAS ==========
   const upcomingVaccinations = useMemo((): VaccinationWithDaysLeft[] => {
     const nextWeek = getDaysFromNowString(7);
 
@@ -261,13 +288,25 @@ const monthInvoices = useMemo(() => {
         const nextDate = getDatePart(v.nextVaccinationDate);
         return nextDate >= todayStr && nextDate <= nextWeek;
       })
-      .map((v) => ({
-        ...v,
-        daysLeft: getDaysLeft(v.nextVaccinationDate!),
-      }))
+      .map((v) => {
+        // Buscar el paciente asociado
+        const patientId = extractId(v.patientId);
+        const patientData = patientId ? patientsMap.get(patientId) : undefined;
+
+        // Buscar el dueño del paciente
+        const ownerId = patientData ? extractId(patientData.owner) : undefined;
+        const ownerData = ownerId ? ownersMap.get(ownerId) : undefined;
+
+        return {
+          ...v,
+          daysLeft: getDaysLeft(v.nextVaccinationDate!),
+          patientData,
+          ownerData,
+        };
+      })
       .sort((a, b) => a.daysLeft - b.daysLeft)
-      .slice(0, 5);
-  }, [vaccinations, todayStr]);
+      .slice(0, 10); // Aumentado a 10 para mostrar más alertas
+  }, [vaccinations, patientsMap, ownersMap, todayStr]);
 
   const upcomingDewormings = useMemo((): DewormingWithDaysLeft[] => {
     const nextWeek = getDaysFromNowString(7);
@@ -278,13 +317,25 @@ const monthInvoices = useMemo(() => {
         const nextDate = getDatePart(d.nextApplicationDate);
         return nextDate >= todayStr && nextDate <= nextWeek;
       })
-      .map((d) => ({
-        ...d,
-        daysLeft: getDaysLeft(d.nextApplicationDate!),
-      }))
+      .map((d) => {
+        // Buscar el paciente asociado
+        const patientId = extractId(d.patientId);
+        const patientData = patientId ? patientsMap.get(patientId) : undefined;
+
+        // Buscar el dueño del paciente
+        const ownerId = patientData ? extractId(patientData.owner) : undefined;
+        const ownerData = ownerId ? ownersMap.get(ownerId) : undefined;
+
+        return {
+          ...d,
+          daysLeft: getDaysLeft(d.nextApplicationDate!),
+          patientData,
+          ownerData,
+        };
+      })
       .sort((a, b) => a.daysLeft - b.daysLeft)
-      .slice(0, 5);
-  }, [dewormings, todayStr]);
+      .slice(0, 10); // Aumentado a 10 para mostrar más alertas
+  }, [dewormings, patientsMap, ownersMap, todayStr]);
 
   // ========== DATOS PARA GRÁFICOS ==========
   const revenueChartData = useMemo((): RevenueChartItem[] => {
@@ -355,7 +406,7 @@ const monthInvoices = useMemo(() => {
     pendingInvoicesCount,
     pendingInvoices,
 
-    // Alertas
+    // Alertas (ahora con datos enriquecidos)
     upcomingVaccinations,
     upcomingDewormings,
 

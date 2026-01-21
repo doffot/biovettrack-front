@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, Package } from "lucide-react";
+import { ArrowLeft, Save, Package } from "lucide-react";
 import { createDeworming } from "../../api/dewormingAPI";
 import { getActiveProducts } from "../../api/productAPI";
 import { toast } from "../../components/Toast";
@@ -13,7 +13,6 @@ const DEWORMING_TYPES = ["Interna", "Externa", "Ambas"] as const;
 export default function CreateDewormingView() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
-  
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState<DewormingFormData>({
@@ -29,7 +28,6 @@ export default function CreateDewormingView() {
   const [doseAmount, setDoseAmount] = useState<number>(1);
   const [useFullUnit, setUseFullUnit] = useState<boolean>(false);
 
-  // Cargar productos activos
   const { data: products = [] } = useQuery({
     queryKey: ["products", "active"],
     queryFn: getActiveProducts,
@@ -46,16 +44,21 @@ export default function CreateDewormingView() {
       return createDeworming(patientId!, payload as DewormingFormData);
     },
     onSuccess: () => {
-      toast.success("Desparasitación registrada");
+      toast.success(
+        "Desparasitación registrada", 
+        "El tratamiento ha sido guardado exitosamente"
+      );
       queryClient.invalidateQueries({ queryKey: ["dewormings", patientId] });
       navigate(-1);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(
+        "Error al registrar", 
+        error.message || "No se pudo guardar la desparasitación"
+      );
     },
   });
 
-  // Al seleccionar un producto
   useEffect(() => {
     setDoseAmount(1);
     setUseFullUnit(false);
@@ -80,7 +83,6 @@ export default function CreateDewormingView() {
     }
   }, [selectedProduct, products]);
 
-  // Calcular costo total cuando cambia la dosis o el modo
   useEffect(() => {
     if (selectedProduct && selectedProduct !== "manual") {
       const product = products.find(p => p._id === selectedProduct);
@@ -127,7 +129,10 @@ export default function CreateDewormingView() {
     e.preventDefault();
     
     if (!formData.productName || !formData.dose || formData.cost <= 0) {
-      toast.error("Completa los campos obligatorios");
+      toast.warning(
+        "Campos incompletos", 
+        "Por favor completa todos los campos obligatorios"
+      );
       return;
     }
 
@@ -153,129 +158,102 @@ export default function CreateDewormingView() {
   const isDivisible = selectedProductData?.divisible;
 
   return (
-    <div>
-      {/* Header */}
+    <div className="max-w-5xl mx-auto">
+      {/* Header compacto */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-slate-700 text-vet-muted transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--color-hover)] text-[var(--color-vet-muted)] hover:text-[var(--color-vet-text)] transition-colors"
+            title="Volver"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-vet-text">Registrar Desparasitación</h1>
-        </div>
-        
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm text-vet-muted font-medium rounded-lg border border-slate-700 hover:bg-slate-800"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!isValid || isPending}
-            className={`px-4 py-2 text-sm rounded-lg font-medium flex items-center gap-2 transition-all ${
-              isValid && !isPending
-                ? "bg-vet-primary hover:bg-vet-secondary text-white"
-                : "bg-slate-800 text-slate-600 cursor-not-allowed"
-            }`}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              "Guardar"
-            )}
-          </button>
+          <h1 className="text-lg font-bold text-[var(--color-vet-text)]">Registrar Desparasitación</h1>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Selector de producto */}
-        <div>
-          <label className="block text-xs font-medium text-vet-muted mb-1">
+        {/* Selector de producto compacto */}
+        <div className="bg-[var(--color-vet-primary)]/5 border border-[var(--color-vet-primary)]/20 rounded-lg p-3">
+          <label className="flex items-center gap-2 text-xs font-semibold text-[var(--color-vet-text)] mb-2">
+            <Package className="w-3.5 h-3.5 text-[var(--color-vet-primary)]" />
             Producto del catálogo
           </label>
-          <div className="relative">
-            <select
-              value={selectedProduct}
-              onChange={handleProductChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text pr-8"
-            >
-              <option value="">-- Selecciona un producto --</option>
-              <option value="manual">📝 Ingresar manualmente</option>
-              {products.map((product) => (
-                <option key={product._id} value={product._id}>
-                  {product.name} — {product.salePricePerDose ? 
-                    `$${product.salePricePerDose}/${product.doseUnit}` : 
-                    `$${product.salePrice} (${product.unit})`
-                  }
-                </option>
-              ))}
-            </select>
-            <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          </div>
+          <select
+            value={selectedProduct}
+            onChange={handleProductChange}
+            className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
+          >
+            <option value="">-- Selecciona un producto --</option>
+            <option value="manual">📝 Ingresar manualmente</option>
+            {products.map((product) => (
+              <option key={product._id} value={product._id}>
+                {product.name} — {product.salePricePerDose ? 
+                  `$${product.salePricePerDose}/${product.doseUnit}` : 
+                  `$${product.salePrice} (${product.unit})`
+                }
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Selector de modo (solo si es divisible) */}
-        {isProductSelected && isDivisible && (
-          <div className="flex items-center gap-3">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useFullUnit}
-                onChange={toggleUseFullUnit}
-                className="sr-only"
-              />
-              <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                useFullUnit ? "bg-vet-primary" : "bg-slate-600"
-              }`}>
-                <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                  useFullUnit ? "translate-x-5" : ""
-                }`} />
-              </div>
-              <span className="ml-3 text-sm text-vet-text">
-                {useFullUnit ? "Usar unidad completa" : "Usar dosis/fracción"}
-              </span>
-            </label>
-          </div>
-        )}
-
-        {/* Cantidad */}
+        {/* Toggle y cantidad en línea */}
         {isProductSelected && (
-          <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">
-              Cantidad (
-              {useFullUnit 
-                ? selectedProductData?.unit || "unidad" 
-                : selectedProductData?.doseUnit || "dosis"
-              })
-            </label>
-            <input
-              type="number"
-              min={useFullUnit ? "1" : "0.1"}
-              step={useFullUnit ? "1" : "0.1"}
-              value={doseAmount}
-              onChange={handleDoseAmountChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {isDivisible && (
+              <div className="flex items-center p-2.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useFullUnit}
+                    onChange={toggleUseFullUnit}
+                    className="sr-only"
+                  />
+                  <div className={`relative w-9 h-5 rounded-full transition-colors ${
+                    useFullUnit ? "bg-[var(--color-vet-primary)]" : "bg-[var(--color-border)]"
+                  }`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                      useFullUnit ? "translate-x-4" : ""
+                    }`} />
+                  </div>
+                  <span className="ml-2 text-xs font-medium text-[var(--color-vet-text)]">
+                    {useFullUnit ? "Unidad completa" : "Dosis/fracción"}
+                  </span>
+                </label>
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+                Cantidad ({useFullUnit 
+                  ? selectedProductData?.unit || "unidad" 
+                  : selectedProductData?.doseUnit || "dosis"
+                })
+              </label>
+              <input
+                type="number"
+                min={useFullUnit ? "1" : "0.1"}
+                step={useFullUnit ? "1" : "0.1"}
+                value={doseAmount}
+                onChange={handleDoseAmountChange}
+                className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
+              />
+            </div>
           </div>
         )}
 
-        {/* Fila 1: Tipo + Fecha + Costo */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Grid compacto - TODO en una fila en desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Tipo *</label>
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Tipo <span className="text-red-500">*</span>
+            </label>
             <select
               name="dewormingType"
               value={formData.dewormingType}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             >
               {DEWORMING_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
@@ -284,19 +262,23 @@ export default function CreateDewormingView() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Fecha *</label>
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Fecha <span className="text-red-500">*</span>
+            </label>
             <input
               type="date"
               name="applicationDate"
               value={formData.applicationDate}
               onChange={handleChange}
               max={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Costo Total ($) *</label>
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Costo ($) <span className="text-red-500">*</span>
+            </label>
             <input
               type="number"
               name="cost"
@@ -306,15 +288,14 @@ export default function CreateDewormingView() {
               step="0.01"
               placeholder="0.00"
               disabled={isProductSelected}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
             />
           </div>
-        </div>
 
-        {/* Fila 2: Producto + Dosis */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Producto *</label>
+          <div className="lg:col-span-2">
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Producto <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name="productName"
@@ -323,12 +304,17 @@ export default function CreateDewormingView() {
               placeholder="Nombre del producto"
               maxLength={100}
               disabled={isProductSelected}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
             />
           </div>
+        </div>
 
+        {/* Segunda fila: Dosis y Próxima */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Dosis *</label>
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Dosis <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name="dose"
@@ -339,24 +325,52 @@ export default function CreateDewormingView() {
                 : selectedProductData?.doseUnit || "dosis"
               }`}
               maxLength={50}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             />
           </div>
-        </div>
 
-        {/* Fila 3: Próxima aplicación */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-vet-muted mb-1">Próxima aplicación</label>
+            <label className="block text-xs font-medium text-[var(--color-vet-text)] mb-1">
+              Próxima aplicación <span className="text-[var(--color-vet-muted)] text-[10px]">(opcional)</span>
+            </label>
             <input
               type="date"
               name="nextApplicationDate"
               value={formData.nextApplicationDate}
               onChange={handleChange}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary text-vet-text"
+              className="w-full px-3 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] text-[var(--color-vet-text)] transition-all"
             />
           </div>
+        </div>
+
+        {/* Botones compactos */}
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-[var(--color-border)]">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex-1 sm:flex-none px-5 py-2 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-border)] text-[var(--color-vet-text)] font-medium transition-colors"
+          >
+            Cancelar
+          </button>
+          
+          <button
+            type="submit"
+            disabled={!isValid || isPending}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {isPending ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Guardando...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Guardar</span>
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>

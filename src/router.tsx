@@ -106,6 +106,9 @@ import ProtectedLanding from "./components/ProtectedLanding";
 import BuildingView from "./view/BuildingView";
 import TreatmentDetailView from "./view/treatments/TreatmentDetailView";
 import EditTreatmentView from "./view/treatments/EditTreatmentView";
+import VeterinaryServiceListView from "./view/veterinaryServices/VeterinaryServiceListView";
+import CreateVeterinaryServiceView from "./view/veterinaryServices/CreateVeterinaryServiceView";
+import VeterinaryServiceDetailView from "./view/veterinaryServices/VeterinaryServiceDetailView";
 
 export default function Router() {
   return (
@@ -189,7 +192,12 @@ export default function Router() {
                 <Route path="create" element={<CreateDewormingView />} />
               </Route>
 
-              {/* ✅ TREATMENTS (NUEVO) */}
+ <Route path="veterinary-services">
+  <Route index element={<VeterinaryServiceListView />} />
+  <Route path="create" element={<CreateVeterinaryServiceView />} />
+  <Route path=":serviceId" element={<VeterinaryServiceDetailView />} />
+</Route>
+              {/*  TREATMENTS (NUEVO) */}
              <Route path="treatments">
   <Route index element={<TreatmentListView />} />
   <Route path="create" element={<CreateTreatmentView />} />

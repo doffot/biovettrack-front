@@ -26,17 +26,22 @@ export default function CreateTreatmentView() {
   const treatmentType = watch("treatmentType");
   const route = watch("route");
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (data: TreatmentFormData) => createTreatment(patientId!, data),
-    onSuccess: () => {
-      toast.success("Tratamiento registrado exitosamente");
-      queryClient.invalidateQueries({ queryKey: ["treatments", patientId] });
-      navigate(`/patients/${patientId}`);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
+const { mutate, isPending } = useMutation({
+  mutationFn: (data: TreatmentFormData) => createTreatment(patientId!, data),
+  onSuccess: () => {
+   toast.success(
+      "Tratamiento registrado",
+      "El tratamiento se creó correctamente y se generó su factura asociada"
+    );
+    queryClient.invalidateQueries({ queryKey: ["treatments", patientId] });
+    queryClient.invalidateQueries({ queryKey: ["invoices"] });              
+    queryClient.invalidateQueries({ queryKey: ["invoices", patientId] });   
+    navigate(`/patients/${patientId}`);
+  },
+  onError: (error: Error) => {
+    toast.error(error.message);
+  },
+});
 
   const onSubmit = (data: TreatmentFormData) => {
     if (data.treatmentType !== "Otro") {

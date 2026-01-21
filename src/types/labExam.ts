@@ -25,6 +25,7 @@ export const labExamSchema = z.object({
   weight: z.number().min(0).optional(),
 
   cost: z.number().min(0, "El costo debe ser un valor positivo"),
+  discount: z.number().min(0, "El descuento no puede ser negativo").optional(),
 
   date: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
     message: "La fecha del examen debe ser válida",
@@ -66,6 +67,7 @@ export type LabExamFormData = Pick<
   | "age"
   | "weight"
   | "cost"
+  | "discount"
   | "date"
   | "hematocrit"
   | "whiteBloodCells"

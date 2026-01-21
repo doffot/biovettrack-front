@@ -190,6 +190,7 @@ export default function PatientLayout() {
     { id: "datos", label: "Info", icon: PawPrint, path: "", description: "Datos básicos" },
     { id: "consultas", label: "Consultas", icon: Stethoscope, path: "consultations", description: "Historial médico" },
     { id: "tratamientos", label: "Tratamientos", icon: Pill, path: "treatments", description: "Medicamentos activos" },
+      { id: "servicios", label: "Servicios", icon: Stethoscope, path: "veterinary-services", description: "Procedimientos" },
     { id: "recetas", label: "Recetas", icon: FileText, path: "recipes", description: "Prescripciones" },
     { id: "vacunas", label: "Vacunas", icon: Syringe, path: "vaccinations", description: "Esquema de vacunación" },
     { id: "desparasitacion", label: "Antiparasit.", icon: Bug, path: "dewormings", description: "Control de parásitos" },
@@ -222,7 +223,8 @@ export default function PatientLayout() {
           </div>
           <h2 className="patient-not-found-title">Paciente no encontrado</h2>
           <p className="patient-not-found-text">El expediente que buscas no existe o fue eliminado.</p>
-          <button onClick={() => navigate("/patients")} className="patient-not-found-button">
+          <button onClick={() => navigate(-1)}
+          className="patient-not-found-button">
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             Volver a pacientes
           </button>
@@ -241,7 +243,7 @@ export default function PatientLayout() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="patient-header-level-1-inner">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <button onClick={() => navigate("/patients")} className="back-button" title="Volver a pacientes">
+              <button onClick={() => navigate(-1)} className="back-button" title="Volver a pacientes">
                 <ArrowLeft className="back-button-icon" />
               </button>
 
@@ -413,18 +415,69 @@ export default function PatientLayout() {
                   {hasDebt && <span className="indicator-badge indicator-badge-debt">{debtCount}</span>}
                 </button>
 
-                {showDebtDropdown && hasDebt && (
-                  <div className="indicator-dropdown indicator-dropdown-sm">
-                    <div className="indicator-dropdown-header indicator-dropdown-header-debt">
-                      <p className="indicator-dropdown-title">Pagos Pendientes</p>
-                      <p className="indicator-dropdown-subtitle">{debtCount} factura{debtCount !== 1 ? "s" : ""}</p>
-                    </div>
-                    <div className="p-3 sm:p-4 text-center">
-                      <p className="debt-amount">${debtSummary?.totalDebt.toFixed(2)}</p>
-                      <p className="text-[10px] sm:text-xs text-[var(--color-vet-muted)] mt-1">Total pendiente</p>
-                    </div>
-                  </div>
+               {showDebtDropdown && hasDebt && (
+  <div className="indicator-dropdown indicator-dropdown-md">
+    <div className="indicator-dropdown-header indicator-dropdown-header-debt">
+      <p className="indicator-dropdown-title">Pagos Pendientes</p>
+      <p className="indicator-dropdown-subtitle">
+        {debtCount} factura{debtCount !== 1 ? "s" : ""}
+      </p>
+    </div>
+    
+    <div className="px-3 sm:px-4 py-2 bg-red-500/5 border-b border-red-500/10">
+      <p className="text-xs text-[var(--color-vet-muted)] mb-0.5">Total Pendiente</p>
+      <p className="text-lg font-bold text-red-600 dark:text-red-400">
+        ${debtSummary?.totalDebt.toFixed(2)}
+      </p>
+    </div>
+
+    <div className="indicator-dropdown-content">
+      {debtSummary?.invoices.map((invoice) => {
+        const remaining = invoice.total - (invoice.amountPaid || 0);
+        const statusColor = invoice.paymentStatus === "Parcial" 
+          ? "text-orange-600 dark:text-orange-400" 
+          : "text-red-600 dark:text-red-400";
+        
+        return (
+          <Link
+            key={invoice._id}
+            to={`/invoices/${invoice._id}?action=pay`}  
+            className="indicator-dropdown-item"
+            onClick={() => setShowDebtDropdown(false)}
+          >
+            <div className="flex items-start justify-between gap-2 w-full">
+              <div className="flex-1 min-w-0">
+                <p className="indicator-dropdown-item-title truncate">
+                  Factura #{invoice._id?.slice(-6).toUpperCase()}
+                </p>
+                <p className="indicator-dropdown-item-meta">
+                  {new Date(invoice.date).toLocaleDateString("es-ES", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+                {invoice.items && invoice.items.length > 0 && (
+                  <p className="text-[9px] sm:text-[10px] text-[var(--color-vet-muted)] mt-0.5 truncate">
+                    {invoice.items[0].description}
+                  </p>
                 )}
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className={`text-xs sm:text-sm font-bold ${statusColor}`}>
+                  ${remaining.toFixed(2)}
+                </p>
+                <span className="text-[9px] sm:text-[10px] text-[var(--color-vet-muted)]">
+                  {invoice.paymentStatus}
+                </span>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  </div>
+)}
               </div>
 
               <div className="relative" ref={appointmentsRef}>
@@ -600,7 +653,7 @@ export default function PatientLayout() {
         </>
       )}
 
-      {/* ✅ NAVEGACIÓN DESKTOP - CON SCROLL OCULTO */}
+      
      <div className="patient-header-level-2 hidden lg:block">
   <div className="max-w-7xl mx-auto px-6">
     <div className="flex items-center justify-center">

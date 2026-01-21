@@ -11,6 +11,7 @@ import {
   FlaskConical,
   Pencil,
   User,
+  BadgeDollarSign,
 } from "lucide-react";
 
 export default function LabExamDetailView() {
@@ -22,7 +23,7 @@ export default function LabExamDetailView() {
   const examId = id || labExamId;
   const [showShareModal, setShowShareModal] = useState(false);
 
-  const {  data:exam, isLoading, isError } = useQuery({
+  const { data: exam, isLoading, isError } = useQuery({
     queryKey: ["labExam", examId],
     queryFn: () => getLabExamById(examId!),
     enabled: !!examId,
@@ -71,10 +72,6 @@ export default function LabExamDetailView() {
 
   const backUrl = patientId ? `/patients/${patientId}/lab-exams` : "/lab-exams";
 
-  // Verificar si es paciente referido (no tiene patientId)
-  const isReferredPatient = exam && !exam.patientId;
-
-  // Loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-vet-light flex items-center justify-center">
@@ -83,7 +80,6 @@ export default function LabExamDetailView() {
     );
   }
 
-  // Error
   if (isError || !exam) {
     return (
       <div className="min-h-screen bg-vet-light flex flex-col items-center justify-center gap-4">
@@ -98,6 +94,10 @@ export default function LabExamDetailView() {
 
   const speciesKey = exam.species.toLowerCase() === "felino" ? "felino" : "canino";
   const ranges = normalValues[speciesKey];
+  const isReferredPatient = !exam.patientId;
+  
+  // Cálculo de finanzas
+  const totalPaid = (exam.cost ?? 0) - (exam.discount ?? 0);
 
   const hemogramParams = [
     { label: "Hematocrito", value: exam.hematocrit, unit: "%", range: ranges.hematocrit },
@@ -119,7 +119,6 @@ export default function LabExamDetailView() {
 
   return (
     <div className="min-h-screen bg-vet-light transition-colors duration-300">
-      {/* Header */}
       <header className="sticky top-0 z-10 bg-card border-b border-border shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -129,11 +128,15 @@ export default function LabExamDetailView() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm font-semibold text-vet-text">Hemograma</h1>
-                {/* Badge de paciente referido */}
                 {isReferredPatient && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-medium rounded border border-amber-500/20">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/10 text-amber-600 text-[10px] font-medium rounded border border-amber-500/20">
                     <User className="w-2.5 h-2.5" />
                     Referido
+                  </span>
+                )}
+                {(exam?.discount ?? 0)> 0 && (
+                  <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 text-[10px] font-bold rounded border border-emerald-500/20">
+                    CON DESCUENTO
                   </span>
                 )}
               </div>
@@ -141,9 +144,7 @@ export default function LabExamDetailView() {
             </div>
           </div>
           
-          {/* Botones de acción */}
           <div className="flex items-center gap-2">
-            {/* Botón Editar - Solo para pacientes referidos */}
             {isReferredPatient && (
               <Link
                 to={`/lab-exams/${examId}/edit`}
@@ -154,7 +155,6 @@ export default function LabExamDetailView() {
               </Link>
             )}
             
-            {/* Botón Imprimir */}
             <button
               onClick={() => setShowShareModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors shadow-soft"
@@ -167,7 +167,7 @@ export default function LabExamDetailView() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        {/* Paciente */}
+        {/* Paciente y Finanzas */}
         <section className="flex items-center justify-between p-4 bg-card rounded-xl border border-border shadow-soft">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-vet-light rounded-full flex items-center justify-center border border-border">
@@ -180,9 +180,24 @@ export default function LabExamDetailView() {
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-vet-muted">Costo</p>
-            <p className="text-sm font-semibold text-vet-text">${exam.cost.toFixed(2)}</p>
+          
+          <div className="text-right flex flex-col items-end">
+            {(exam?.discount ?? 0)> 0 && (
+              <p className="text-[10px] font-medium text-red-400 line-through">
+                Base: ${exam.cost.toFixed(2)}
+              </p>
+            )}
+            <div className="flex flex-col items-end">
+              <p className="text-[10px] font-medium text-vet-muted uppercase tracking-wider">Total Pagado</p>
+              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                ${totalPaid.toFixed(2)}
+              </p>
+            </div>
+            {(exam?.discount ?? 0) > 0 && (
+              <span className="mt-1 px-1.5 py-0.5 bg-red-500/10 text-red-600 text-[10px] font-bold rounded">
+                Ahorro: -${exam.discount?.toFixed(2)}
+              </span>
+            )}
           </div>
         </section>
 
@@ -220,7 +235,7 @@ export default function LabExamDetailView() {
                 <div
                   key={param.label}
                   className={`flex items-center justify-between p-3 rounded-xl border ${
-                    isOut ? "bg-red-500/5 border-red-500/20" : "bg-card border-border"
+                    isOut ? "bg-red-500/5 border-red-500/20 shadow-[0_0_15px_-3px_rgba(239,68,68,0.1)]" : "bg-card border-border"
                   }`}
                 >
                   <div>
@@ -311,28 +326,39 @@ export default function LabExamDetailView() {
           </section>
         )}
 
-        {/* Info adicional */}
-        {(exam.treatingVet || exam.ownerName) && (
-          <section className="pt-4 border-t border-border">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              {exam.treatingVet && (
-                <div>
-                  <p className="text-xs text-vet-muted">Veterinario</p>
-                  <p className="text-vet-text">{exam.treatingVet}</p>
-                </div>
-              )}
-              {exam.ownerName && (
-                <div>
-                  <p className="text-xs text-vet-muted">Propietario</p>
-                  <p className="text-vet-text">{exam.ownerName}</p>
-                </div>
-              )}
+        {/* Info adicional y Resumen Financiero Final */}
+        <section className="pt-4 border-t border-border space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            {exam.treatingVet && (
+              <div>
+                <p className="text-xs text-vet-muted">Veterinario</p>
+                <p className="text-vet-text font-medium">{exam.treatingVet}</p>
+              </div>
+            )}
+            {exam.ownerName && (
+              <div>
+                <p className="text-xs text-vet-muted">Propietario</p>
+                <p className="text-vet-text font-medium">{exam.ownerName}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="p-3 bg-vet-light/30 rounded-lg flex justify-between items-center border border-dashed border-border">
+            <div className="flex items-center gap-2">
+              <BadgeDollarSign className="w-4 h-4 text-vet-muted" />
+              <span className="text-xs text-vet-muted font-medium uppercase tracking-wider">Recibo de examen</span>
             </div>
-          </section>
-        )}
+            <div className="text-right">
+              <p className="text-xs text-vet-muted">
+                Subtotal: ${exam.cost.toFixed(2)} 
+                {(exam?.discount ?? 0)> 0 && <span className="text-red-500 ml-1">(-${exam.discount?.toFixed(2)})</span>}
+              </p>
+              <p className="text-sm font-bold text-vet-text">Cobro Total: ${totalPaid.toFixed(2)}</p>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* Modal */}
       {showShareModal && (
         <ShareResultsModal
           isOpen={showShareModal}

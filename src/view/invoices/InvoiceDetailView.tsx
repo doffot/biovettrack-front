@@ -15,7 +15,8 @@ import {
   Ban,
   Trash2
 } from "lucide-react";
-import { getInvoiceById, updateInvoice, cancelInvoice, deleteInvoice } from "../../api/invoiceAPI";
+import { getInvoiceById, cancelInvoice, deleteInvoice } from "../../api/invoiceAPI";
+import { createPayment } from "../../api/paymentAPI"; // ← NUEVO
 import { PaymentModal } from "../../components/payment/PaymentModal";
 import { toast } from "../../components/Toast";
 import { printInvoice } from "../../utils/invoicePrintUtils";
@@ -85,12 +86,15 @@ export default function InvoiceDetailView() {
     enabled: !!id,
   });
 
-  const updateMutation = useMutation({
-    mutationFn: (data: Parameters<typeof updateInvoice>[1]) => updateInvoice(id!, data),
+  // ✅ NUEVA MUTACIÓN PARA CREAR PAGO
+  const paymentMutation = useMutation({
+    mutationFn: createPayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoice", id] });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
       toast.success("Pago registrado correctamente");
+      setShowPaymentModal(false);
     },
     onError: (err: Error) => {
       toast.error(err.message || "Error al registrar el pago");
@@ -122,21 +126,28 @@ export default function InvoiceDetailView() {
     },
   });
 
-  const handlePayment = async (paymentData: {
-    paymentMethodId?: string;
-    reference?: string;
-    addAmountPaidUSD: number;
-    addAmountPaidBs: number;
-    exchangeRate: number;
-  }) => {
-    await updateMutation.mutateAsync({
-      addAmountPaidUSD: paymentData.addAmountPaidUSD,
-      addAmountPaidBs: paymentData.addAmountPaidBs,
-      exchangeRate: paymentData.exchangeRate,
-      paymentMethod: paymentData.paymentMethodId,
-      paymentReference: paymentData.reference,
-    });
-  };
+  // ✅ HANDLER ACTUALIZADO
+ const handlePayment = async (paymentData: {
+  paymentMethodId?: string;
+  reference?: string;
+  addAmountPaidUSD: number;
+  addAmountPaidBs: number;
+  exchangeRate: number;
+  isPartial: boolean;
+  creditAmountUsed?: number;
+}) => {
+  const isBsPayment = paymentData.addAmountPaidBs > 0;
+  
+  await paymentMutation.mutateAsync({
+    invoiceId: id!,
+    paymentMethod: paymentData.paymentMethodId,  
+    amount: isBsPayment ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD,
+    currency: isBsPayment ? "Bs" : "USD",
+    exchangeRate: paymentData.exchangeRate,
+    reference: paymentData.reference,
+    creditAmountUsed: paymentData.creditAmountUsed,
+  });
+};
 
   const handlePrint = () => {
     if (invoice) {
@@ -204,11 +215,9 @@ export default function InvoiceDetailView() {
 
   return (
     <div className="min-h-screen bg-[var(--color-vet-light)]">
-      {/* Spacer para HeaderMobile/Desktop - Ajustado según AppLayout */}
       <div className="h-4 lg:h-0" />
 
-      {/* Header Compacto - Sticky debajo del header principal */}
-      <header className="sticky   z-30 bg-[var(--color-card)]/95 backdrop-blur-lg border-b border-[var(--color-border)] shadow-sm">
+      <header className="sticky z-30 bg-[var(--color-card)]/95 backdrop-blur-lg border-b border-[var(--color-border)] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
@@ -250,10 +259,8 @@ export default function InvoiceDetailView() {
         </div>
       </header>
 
-      {/* Content Compacto */}
       <main className="pb-6 lg:pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          {/* Stats Cards Compactas */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div className="bg-gradient-to-br from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] rounded-lg p-3 text-white shadow-md">
               <div className="flex items-center gap-2 mb-1">
@@ -286,9 +293,7 @@ export default function InvoiceDetailView() {
             </div>
           </div>
 
-          {/* Grid Layout 2 columnas */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Columna Izquierda */}
             <div className="lg:col-span-2 space-y-3">
               <InvoiceHeader invoice={invoice} />
               <InvoiceClientInfo
@@ -299,7 +304,6 @@ export default function InvoiceDetailView() {
               <InvoiceItemsTable items={invoice.items || []} currency={invoice.currency} />
             </div>
 
-            {/* Columna Derecha */}
             <div className="space-y-3">
               <InvoicePaymentSummary invoice={invoice} />
               <InvoiceActions
@@ -308,7 +312,7 @@ export default function InvoiceDetailView() {
                 onPay={() => setShowPaymentModal(true)}
                 onCancel={() => setShowCancelModal(true)}
                 onDelete={() => setShowDeleteModal(true)}
-                isPaying={updateMutation.isPending}
+                isPaying={paymentMutation.isPending}
                 isCanceling={cancelMutation.isPending}
                 isDeleting={deleteMutation.isPending}
               />
@@ -317,7 +321,6 @@ export default function InvoiceDetailView() {
         </div>
       </main>
 
-      {/* Payment Modal */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
@@ -330,7 +333,6 @@ export default function InvoiceDetailView() {
         allowPartial={true}
       />
 
-      {/* Cancel Confirmation Modal */}
       <ConfirmationModal
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
@@ -354,7 +356,6 @@ export default function InvoiceDetailView() {
         loadingText="Cancelando..."
       />
 
-      {/* Delete Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

@@ -1,3 +1,4 @@
+// src/views/labExams/CreateLabExamView.tsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +33,15 @@ import { DifferentialTab } from "../../components/labexam/DifferentialTab";
 import { ObservationsTab } from "../../components/labexam/ObservationsTab";
 import { TabNavigation } from "../../components/labexam/TabNavigation";
 import { PaymentModal } from "../../components/payment/PaymentModal";
+
+// Función para obtener fecha local
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 // Valores normales
 const normalValues = {
@@ -114,7 +124,8 @@ export default function CreateLabExamView() {
       age: "",
       weight: undefined,
       cost: 0,
-      date: new Date().toISOString().split("T")[0],
+      discount: 0,
+      date: getLocalDateString(),
       hematocrit: 0,
       whiteBloodCells: 0,
       totalProtein: 0,
@@ -346,13 +357,18 @@ export default function CreateLabExamView() {
       ownerPhone: data.ownerPhone?.trim() || undefined,
     };
 
-    if ((finalData.cost ?? 0) <= 0) {
+    // Calcular costo final con descuento
+    const cost = finalData.cost ?? 0;
+    const discount = finalData.discount ?? 0;
+    const totalCost = Math.max(0, cost - discount);
+
+    if (cost <= 0) {
       toast.error("El costo del examen debe ser mayor a 0");
       setActiveTab("general");
       return;
     }
 
-    setExamCostUSD(finalData.cost || 0);
+    setExamCostUSD(totalCost);
 
     if (finalData.patientId) {
       mutate(finalData);

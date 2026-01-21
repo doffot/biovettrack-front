@@ -83,13 +83,12 @@ const initialFormData: ConsultationFormData = {
   requestedTests: "",
   treatmentPlan: "",
   cost: "",
+  discount: "",
 };
 
-// ✅ Función helper para convertir Draft a FormData
 function draftToFormData(draft: Consultation): ConsultationFormData {
   return {
     consultationDate: draft.consultationDate?.split("T")[0] || new Date().toISOString().split("T")[0],
-    
     reasonForVisit: draft.reasonForVisit || "",
     symptomOnset: draft.symptomOnset || "",
     symptomEvolution: draft.symptomEvolution || "",
@@ -117,7 +116,6 @@ function draftToFormData(draft: Consultation): ConsultationFormData {
     lethargyOrWeakness: draft.lethargyOrWeakness ?? null,
     currentTreatment: draft.currentTreatment || "",
     medications: draft.medications || "",
-    
     parvovirusVaccine: draft.parvovirusVaccine || "",
     parvovirusVaccineDate: draft.parvovirusVaccineDate?.split("T")[0] || "",
     quintupleSextupleVaccine: draft.quintupleSextupleVaccine || "",
@@ -125,26 +123,22 @@ function draftToFormData(draft: Consultation): ConsultationFormData {
     rabiesVaccineDogs: draft.rabiesVaccineDogs || "",
     rabiesVaccineDateDogs: draft.rabiesVaccineDateDogs?.split("T")[0] || "",
     dewormingDogs: draft.dewormingDogs || "",
-    
     tripleQuintupleFelineVaccine: draft.tripleQuintupleFelineVaccine || "",
     tripleQuintupleFelineVaccineDate: draft.tripleQuintupleFelineVaccineDate?.split("T")[0] || "",
     rabiesVaccineCats: draft.rabiesVaccineCats || "",
     rabiesVaccineDateCats: draft.rabiesVaccineDateCats?.split("T")[0] || "",
     dewormingCats: draft.dewormingCats || "",
-    
     previousIllnesses: draft.previousIllnesses || "",
     previousSurgeries: draft.previousSurgeries || "",
     adverseReactions: draft.adverseReactions || "",
     lastHeatOrBirth: draft.lastHeatOrBirth || "",
     mounts: draft.mounts || "",
-    
     temperature: draft.temperature !== undefined && draft.temperature !== null ? draft.temperature : "",
     lymphNodes: draft.lymphNodes || "",
     heartRate: draft.heartRate !== undefined && draft.heartRate !== null ? draft.heartRate : "",
     respiratoryRate: draft.respiratoryRate !== undefined && draft.respiratoryRate !== null ? draft.respiratoryRate : "",
     capillaryRefillTime: draft.capillaryRefillTime || "",
     weight: draft.weight !== undefined && draft.weight !== null ? draft.weight : "",
-    
     integumentarySystem: draft.integumentarySystem || "",
     cardiovascularSystem: draft.cardiovascularSystem || "",
     ocularSystem: draft.ocularSystem || "",
@@ -152,12 +146,12 @@ function draftToFormData(draft: Consultation): ConsultationFormData {
     nervousSystem: draft.nervousSystem || "",
     musculoskeletalSystem: draft.musculoskeletalSystem || "",
     gastrointestinalSystem: draft.gastrointestinalSystem || "",
-    
     presumptiveDiagnosis: draft.presumptiveDiagnosis || "",
     definitiveDiagnosis: draft.definitiveDiagnosis || "",
     requestedTests: draft.requestedTests || "",
     treatmentPlan: draft.treatmentPlan || "",
     cost: draft.cost !== undefined && draft.cost !== null ? draft.cost : "",
+    discount: draft.discount !== undefined && draft.discount !== null ? draft.discount : "",
   };
 }
 
@@ -171,20 +165,17 @@ export default function CreateConsultationView() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [draftId, setDraftId] = useState<string | null>(null);
 
-  // Obtener datos del paciente
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => getPatientById(patientId!),
     enabled: !!patientId,
   });
 
-  // ✅ Cargar borrador al montar
   useEffect(() => {
     if (!patientId) return;
 
     getDraft(patientId).then((draft) => {
       if (draft) {
-        console.log("📄 Borrador encontrado, cargando...");
         setDraftId(draft._id);
         setFormData(draftToFormData(draft));
         toast.success("Borrador cargado");
@@ -192,7 +183,6 @@ export default function CreateConsultationView() {
     });
   }, [patientId]);
 
-  // ✅ Guardar borrador automático
   const { mutate: saveDraftMutation } = useMutation({
     mutationFn: (data: Partial<ConsultationFormData>) => saveDraft(patientId!, data),
     onMutate: () => {
@@ -211,13 +201,11 @@ export default function CreateConsultationView() {
     },
   });
 
-  // ✅ Auto-guardar cuando cambia de tab
   const handleTabChange = (newTab: TabId) => {
     saveDraftMutation(formData);
     setActiveTab(newTab);
   };
 
-  // ✅ Finalizar consulta
   const { mutate, isPending } = useMutation({
     mutationFn: (data: ConsultationFormData) => createConsultation(patientId!, data),
     onSuccess: () => {
@@ -232,7 +220,6 @@ export default function CreateConsultationView() {
     },
   });
 
-  // Validación por tab
   const isAnamnesisValid = () => {
     return (
       formData.reasonForVisit.trim() !== "" &&
@@ -269,12 +256,17 @@ export default function CreateConsultationView() {
   };
 
   const isDiagnosisValid = () => {
+    const cost = Number(formData.cost);
+    const discount = formData.discount !== "" ? Number(formData.discount) : 0;
+    
     return (
       formData.presumptiveDiagnosis.trim() !== "" &&
       formData.definitiveDiagnosis.trim() !== "" &&
       formData.treatmentPlan.trim() !== "" &&
       formData.cost !== "" &&
-      Number(formData.cost) > 0
+      cost >= 0 &&
+      discount >= 0 &&
+      discount <= cost
     );
   };
 
@@ -372,8 +364,9 @@ export default function CreateConsultationView() {
       presumptiveDiagnosis: formData.presumptiveDiagnosis,
       definitiveDiagnosis: formData.definitiveDiagnosis,
       treatmentPlan: formData.treatmentPlan,
-      cost: Number(formData.cost),
       requestedTests: cleanValue(formData.requestedTests),
+      cost: Number(formData.cost),
+      discount: formData.discount !== "" ? Number(formData.discount) : 0,
     };
 
     mutate(dataToSend);
@@ -411,7 +404,6 @@ export default function CreateConsultationView() {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <button
@@ -423,7 +415,6 @@ export default function CreateConsultationView() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-[var(--color-vet-text)]">Nueva Consulta</h1>
-              {/* ✅ Indicador de guardado */}
               {saveStatus === "saving" && (
                 <span className="flex items-center gap-1 text-xs text-[var(--color-vet-muted)]">
                   <Loader2 className="w-3 h-3 animate-spin" />
@@ -459,7 +450,6 @@ export default function CreateConsultationView() {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 mb-4 bg-[var(--color-hover)] p-1 rounded-xl">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -484,7 +474,6 @@ export default function CreateConsultationView() {
         })}
       </div>
 
-      {/* Tab Content */}
       <div className="bg-[var(--color-hover)] rounded-xl p-4 sm:p-6 max-h-[55vh] overflow-y-auto border border-[var(--color-border)]">
         {activeTab === "anamnesis" && (
           <AnamnesisTab
@@ -504,7 +493,6 @@ export default function CreateConsultationView() {
         )}
       </div>
 
-      {/* Navigation buttons */}
       <div className="flex justify-between mt-4">
         <button
           onClick={goToPreviousTab}

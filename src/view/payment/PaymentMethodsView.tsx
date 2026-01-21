@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  
   Edit,
   Trash2,
   CreditCard,
@@ -104,8 +103,8 @@ export default function PaymentMethodsView() {
       <div className="w-full">
         <div className="flex items-center justify-center h-[70vh]">
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-4 border-vet-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-vet-text font-medium">Cargando métodos de pago...</p>
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-[var(--color-vet-primary)] border-t-transparent rounded-full animate-spin" />
+            <p className="text-[var(--color-vet-text)] font-medium">Cargando métodos de pago...</p>
           </div>
         </div>
       </div>
@@ -114,8 +113,8 @@ export default function PaymentMethodsView() {
 
   return (
     <>
-      {/* Header Fijo - Mismo estilo que PatientListView */}
-      <div className="fixed top-15 left-0 right-0 lg:left-64 z-30 bg-white border-b border-vet-muted/20 shadow-sm">
+      {/* Header Fijo */}
+      <div className="fixed top-14 lg:top-16 left-0 right-0 lg:left-64 z-30 bg-[var(--color-card)]/95 backdrop-blur-lg border-b border-[var(--color-border)] shadow-sm">
         <div className="px-6 lg:px-8 pt-6 pb-4">
           {/* Línea principal: Título + Botón */}
           <div className="flex items-center justify-between gap-6 mb-6">
@@ -123,7 +122,7 @@ export default function PaymentMethodsView() {
               {/* BackButton siempre visible */}
               <Link
                 to="/"
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-primary transition-colors flex-shrink-0"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-vet-primary)]/10 text-[var(--color-vet-primary)] transition-colors flex-shrink-0"
                 title="Volver al dashboard"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -131,14 +130,14 @@ export default function PaymentMethodsView() {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-vet-primary/10 rounded-lg">
-                    <CreditCard className="w-6 h-6 text-vet-primary" />
+                  <div className="p-2 bg-[var(--color-vet-primary)]/10 rounded-lg">
+                    <CreditCard className="w-6 h-6 text-[var(--color-vet-primary)]" />
                   </div>
-                  <h1 className="text-2xl font-bold text-vet-text">
+                  <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-vet-text)] truncate">
                     Métodos de Pago
                   </h1>
                 </div>
-                <p className="text-vet-muted text-sm">
+                <p className="text-[var(--color-vet-muted)] text-sm truncate">
                   Gestiona todos los métodos de pago disponibles
                 </p>
               </div>
@@ -147,8 +146,8 @@ export default function PaymentMethodsView() {
             {/* Estadísticas */}
             <div className="hidden lg:flex items-center gap-4">
               <div className="text-right">
-                <p className="text-2xl font-bold text-vet-text">{paymentMethods?.length || 0}</p>
-                <p className="text-vet-muted text-sm">Total registrados</p>
+                <p className="text-2xl font-bold text-[var(--color-vet-text)]">{paymentMethods?.length || 0}</p>
+                <p className="text-[var(--color-vet-muted)] text-sm">Total registrados</p>
               </div>
             </div>
 
@@ -156,7 +155,7 @@ export default function PaymentMethodsView() {
             <div className="hidden sm:block flex-shrink-0">
               <Link
                 to="/payment-methods/new"
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white font-semibold transition-all"
               >
                 <Plus className="w-5 h-5" />
                 <span>Nuevo Método</span>
@@ -167,32 +166,32 @@ export default function PaymentMethodsView() {
           {/* Search Bar */}
           <div className="relative max-w-2xl">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-vet-muted" />
+              <Search className="w-5 h-5 text-[var(--color-vet-muted)]" />
             </div>
             <input
               type="text"
               placeholder="Buscar por nombre, moneda, modalidad..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-vet-light border border-vet-muted/30 rounded-xl text-vet-text placeholder-vet-muted focus:outline-none focus:ring-2 focus:ring-vet-primary/50 focus:border-vet-primary transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-[var(--color-vet-light)] border border-[var(--color-border)] rounded-xl text-[var(--color-vet-text)] placeholder-[var(--color-vet-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/50 focus:border-[var(--color-vet-primary)] transition-colors"
             />
           </div>
         </div>
       </div>
 
       {/* Espaciador para el header fijo */}
-      <div className="h-55 md:h-50 lg:h-45"></div>
+      <div className="h-48 sm:h-52 lg:h-56"></div>
 
       {/* Botón flotante móvil */}
       <Link
         to="/payment-methods/new"
-        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-vet-primary hover:bg-vet-secondary text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
+        className="sm:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] text-white shadow-lg hover:shadow-xl active:scale-95 transition-all"
       >
         <Plus className="w-6 h-6" />
       </Link>
 
       {/* Content con Cards Pro */}
-      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8`}>
+      <div className={`${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} transition-all duration-500 px-4 sm:px-6 lg:px-8 pb-10`}>
         {filteredMethods.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {filteredMethods.map((method, index) => {
@@ -201,7 +200,7 @@ export default function PaymentMethodsView() {
               return (
                 <div
                   key={method._id}
-                  className="bg-white rounded-2xl border border-gray-100 hover:border-vet-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                  className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-vet-primary)]/30 hover:shadow-xl transition-all duration-300 overflow-hidden group"
                   style={{ 
                     animationDelay: `${index * 50}ms`,
                   }}
@@ -212,18 +211,18 @@ export default function PaymentMethodsView() {
                     <div className="flex items-start justify-between mb-5">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vet-primary to-vet-secondary flex items-center justify-center shadow-md">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] flex items-center justify-center shadow-md">
                             <ModeIcon className="w-6 h-6 text-white" />
                           </div>
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-white flex items-center justify-center">
-                            <DollarSign className="w-2.5 h-2.5 text-vet-primary" />
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[var(--color-card)] rounded-full border-2 border-[var(--color-card)] flex items-center justify-center">
+                            <DollarSign className="w-2.5 h-2.5 text-[var(--color-vet-primary)]" />
                           </div>
                         </div>
                         <div className="min-w-0">
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-vet-primary transition-colors truncate">
+                          <h3 className="text-lg font-bold text-[var(--color-vet-text)] group-hover:text-[var(--color-vet-primary)] transition-colors truncate">
                             {method.name}
                           </h3>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-[var(--color-vet-muted)] mt-1">
                             {getPaymentModeLabel(method.paymentMode)} • {method.currency}
                           </p>
                         </div>
@@ -233,25 +232,25 @@ export default function PaymentMethodsView() {
                       <div className="relative hidden sm:block">
                         <button
                           onClick={() => toggleDropdown(method._id)}
-                          className="p-2 rounded-lg bg-vet-light hover:bg-vet-primary/10 text-vet-muted transition-colors"
+                          className="p-2 rounded-lg bg-[var(--color-hover)] hover:bg-[var(--color-vet-primary)]/10 text-[var(--color-vet-muted)] transition-colors"
                         >
                           <MoreVertical className="w-4 h-4" />
                         </button>
 
                         {activeDropdown === method._id && (
-                          <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-10">
+                          <div className="absolute right-0 top-10 w-40 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-xl z-20 overflow-hidden">
                             <Link
                               to={`/payment-methods/edit/${method._id}`}
-                              className="flex items-center gap-2 px-3 py-2.5 hover:bg-blue-50 text-blue-600 transition-colors first:rounded-t-xl text-sm"
+                              className="flex items-center gap-2 px-3 py-2.5 hover:bg-[var(--color-hover)] text-[var(--color-vet-text)] transition-colors text-sm"
                               onClick={() => setActiveDropdown(null)}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-4 h-4 text-blue-500" />
                               Editar
                             </Link>
                             
                             <button
                               onClick={() => handleDeleteClick(method._id, method.name)}
-                              className="flex items-center gap-2 px-3 py-2.5 hover:bg-red-50 text-red-600 transition-colors w-full text-left last:rounded-b-xl text-sm"
+                              className="flex items-center gap-2 px-3 py-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 w-full text-left text-sm"
                             >
                               <Trash2 className="w-4 h-4" />
                               Eliminar
@@ -265,46 +264,46 @@ export default function PaymentMethodsView() {
                     <div className="space-y-3 mb-6">
                       {/* Descripción */}
                       {method.description && (
-                        <div className="p-3 bg-vet-light rounded-lg">
-                          <p className="text-sm text-gray-700">{method.description}</p>
+                        <div className="p-3 bg-[var(--color-vet-light)] rounded-lg border border-[var(--color-border)]">
+                          <p className="text-sm text-[var(--color-vet-muted)] line-clamp-2">{method.description}</p>
                         </div>
                       )}
 
                       {/* Información adicional */}
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-                          <DollarSign className="w-4 h-4 text-gray-500 mb-1" />
-                          <p className="text-sm font-medium text-gray-900">{method.currency}</p>
-                          <p className="text-xs text-gray-500">Moneda</p>
+                        <div className="flex flex-col items-center p-3 bg-[var(--color-vet-light)] rounded-lg border border-[var(--color-border)]">
+                          <DollarSign className="w-4 h-4 text-[var(--color-vet-muted)] mb-1" />
+                          <p className="text-sm font-medium text-[var(--color-vet-text)]">{method.currency}</p>
+                          <p className="text-xs text-[var(--color-vet-muted)]">Moneda</p>
                         </div>
                         
-                        <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex flex-col items-center p-3 bg-[var(--color-vet-light)] rounded-lg border border-[var(--color-border)]">
                           {method.requiresReference ? (
                             <CheckCircle className="w-4 h-4 text-green-500 mb-1" />
                           ) : (
-                            <XCircle className="w-4 h-4 text-gray-400 mb-1" />
+                            <XCircle className="w-4 h-4 text-[var(--color-vet-muted)] mb-1" />
                           )}
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-[var(--color-vet-text)]">
                             {method.requiresReference ? 'Sí' : 'No'}
                           </p>
-                          <p className="text-xs text-gray-500">Requiere referencia</p>
+                          <p className="text-xs text-[var(--color-vet-muted)] text-center">Referencia</p>
                         </div>
                       </div>
 
                       {/* Estado */}
-                      <div className="flex items-center justify-center p-2 bg-green-50 rounded-lg border border-green-200">
-                        <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                        <span className="text-sm font-medium text-green-700">Activo</span>
+                      <div className="flex items-center justify-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                        <span className="text-sm font-medium text-green-600 dark:text-green-400">Activo</span>
                       </div>
                     </div>
 
                     {/* Acciones para móvil */}
-                    <div className="sm:hidden flex gap-2 pt-4 border-t border-gray-100">
+                    <div className="sm:hidden flex gap-2 pt-4 border-t border-[var(--color-border)]">
                       <Link
                         to={`/payment-methods/edit/${method._id}`}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 font-medium text-sm transition-all duration-200"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[var(--color-vet-light)] hover:bg-[var(--color-hover)] text-[var(--color-vet-text)] border border-[var(--color-border)] font-medium text-sm transition-all duration-200"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-4 h-4 text-blue-500" />
                         <span>Editar</span>
                       </Link>
 
@@ -312,7 +311,7 @@ export default function PaymentMethodsView() {
                         type="button"
                         onClick={() => handleDeleteClick(method._id, method.name)}
                         disabled={isDeleting}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 font-medium text-sm transition-all duration-200 disabled:opacity-50"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-medium text-sm transition-all duration-200 disabled:opacity-50"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span>Eliminar</span>
@@ -324,16 +323,16 @@ export default function PaymentMethodsView() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-vet-muted/20 p-12 text-center max-w-2xl mx-auto">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-vet-light flex items-center justify-center">
-              <CreditCard className="w-10 h-10 text-vet-muted" />
+          <div className="bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] p-12 text-center max-w-2xl mx-auto shadow-sm">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--color-vet-light)] border border-[var(--color-border)] flex items-center justify-center">
+              <CreditCard className="w-10 h-10 text-[var(--color-vet-muted)]" />
             </div>
 
-            <h3 className="text-2xl font-bold text-vet-text mb-3">
+            <h3 className="text-2xl font-bold text-[var(--color-vet-text)] mb-3">
               {searchTerm ? "No se encontraron resultados" : "No hay métodos de pago"}
             </h3>
 
-            <p className="text-vet-muted mb-8 max-w-md mx-auto">
+            <p className="text-[var(--color-vet-muted)] mb-8 max-w-md mx-auto">
               {searchTerm
                 ? `No encontramos coincidencias para "${searchTerm}". Intenta con otros términos.`
                 : "Comienza creando tu primer método de pago para usarlo en servicios y ventas."}
@@ -342,7 +341,7 @@ export default function PaymentMethodsView() {
             {!searchTerm && (
               <Link
                 to="/payment-methods/create"
-                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-vet-primary hover:bg-vet-secondary text-white font-semibold shadow-sm hover:shadow-md transition-all"
+                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-white font-semibold transition-all"
               >
                 <Plus className="w-5 h-5" />
                 Crear Primer Método
@@ -352,18 +351,18 @@ export default function PaymentMethodsView() {
         )}
       </div>
 
-     <DeleteConfirmationModal
-  isOpen={!!methodToDelete}
-  onClose={() => setMethodToDelete(null)}
-  onConfirm={confirmDelete}
-  petName={methodToDelete?.name || ''}
-  isDeleting={isDeleting}
-/>
+      <DeleteConfirmationModal
+        isOpen={!!methodToDelete}
+        onClose={() => setMethodToDelete(null)}
+        onConfirm={confirmDelete}
+        petName={methodToDelete?.name || ''}
+        isDeleting={isDeleting}
+      />
 
-      {/* Overlay para dropdown */}
+      {/* Overlay para dropdown en mobile */}
       {activeDropdown && (
         <div 
-          className="fixed inset-0 z-30 sm:hidden"
+          className="fixed inset-0 z-10"
           onClick={() => setActiveDropdown(null)}
         />
       )}

@@ -38,8 +38,8 @@ interface OwnerInvoiceHistoryProps {
   creditBalance?: number;
   isOpen: boolean;
   onClose: () => void;
-  owner?: Owner;           // ✅ NUEVO
-  patients?: Patient[];    // ✅ NUEVO
+  owner?: Owner;           
+  patients?: Patient[];    
   onPayInvoice?: (invoiceId: string, paymentData: PaymentData) => Promise<void>;
   onPayAll?: (invoiceIds: string[], paymentData: PaymentData) => Promise<void>;
 }
@@ -49,8 +49,8 @@ export function OwnerInvoiceHistory({
   creditBalance = 0,
   isOpen,
   onClose,
-  owner,           // ✅ NUEVO
-  patients = [],   // ✅ NUEVO
+  owner,          
+  patients = [],  
   onPayInvoice,
   onPayAll,
 }: OwnerInvoiceHistoryProps) {

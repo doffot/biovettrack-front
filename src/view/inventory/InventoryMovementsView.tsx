@@ -6,6 +6,8 @@ import {
   Search, 
   ArrowDown,
   ArrowUp,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -82,8 +84,8 @@ export default function InventoryMovementsView() {
 
   const getTypeColor = (type: string) => {
     return type === "entrada" 
-      ? "bg-green-900/30 text-green-400" 
-      : "bg-red-900/30 text-red-400";
+      ? "bg-green-600/20 dark:bg-green-600/30 text-green-700 dark:text-green-400 border border-green-600/20" 
+      : "bg-red-600/20 dark:bg-red-600/30 text-red-700 dark:text-red-400 border border-red-600/20";
   };
 
   const getTypeIcon = (type: string) => {
@@ -94,8 +96,11 @@ export default function InventoryMovementsView() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto border-3 border-vet-primary border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-vet-muted text-sm">Cargando movimientos...</p>
+          <div className="relative w-12 h-12 mx-auto mb-3">
+            <div className="absolute inset-0 border-3 border-[var(--color-border)] rounded-full"></div>
+            <div className="absolute inset-0 border-3 border-[var(--color-vet-primary)] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-[var(--color-vet-muted)] text-sm">Cargando movimientos...</p>
         </div>
       </div>
     );
@@ -105,54 +110,55 @@ export default function InventoryMovementsView() {
     <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-vet-text">Historial de Movimientos</h1>
-        <p className="text-sm text-vet-muted">
+        <h1 className="text-xl font-semibold text-[var(--color-vet-text)]">Historial de Movimientos</h1>
+        <p className="text-sm text-[var(--color-vet-muted)]">
           {movements.length} movimiento{movements.length !== 1 ? "s" : ""} registrados
         </p>
       </div>
 
       {/* Búsqueda */}
       <div className="relative max-w-md mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-vet-muted" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-vet-muted)]" />
         <input
           type="text"
           placeholder="Buscar por producto, tipo o razón..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-vet-text focus:outline-none focus:ring-2 focus:ring-vet-primary/20 focus:border-vet-primary"
+          className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] transition-all"
         />
       </div>
 
       {/* Lista de movimientos */}
       {paginatedMovements.length > 0 ? (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-card">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-700">
-              <thead className="bg-slate-900">
+        <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-sm">
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-[var(--color-border)]">
+              <thead className="bg-[var(--color-hover)]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Producto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Tipo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Cantidad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Razón</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-vet-muted uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-vet-muted)] uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-vet-muted)] uppercase tracking-wider">Tipo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-vet-muted)] uppercase tracking-wider">Cantidad</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-vet-muted)] uppercase tracking-wider">Razón</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-vet-muted)] uppercase tracking-wider">Fecha</th>
                 </tr>
               </thead>
-              <tbody className="bg-slate-800 divide-y divide-slate-700">
+              <tbody className="bg-[var(--color-card)] divide-y divide-[var(--color-border)]">
                 {paginatedMovements.map((movement) => (
-                  <tr key={movement._id} className="hover:bg-slate-700/50 transition-colors">
+                  <tr key={movement._id} className="hover:bg-[var(--color-hover)] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-vet-text">{movement.product?.name}</div>
-                      <div className="text-xs text-vet-muted">
+                      <div className="text-sm font-medium text-[var(--color-vet-text)]">{movement.product?.name}</div>
+                      <div className="text-xs text-[var(--color-vet-muted)]">
                         {movement.product?.category}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${getTypeColor(movement.type)}`}>
+                      <span className={`px-2 py-1 inline-flex items-center text-xs font-semibold rounded-full ${getTypeColor(movement.type)}`}>
                         {getTypeIcon(movement.type)}
-                        <span className="ml-1">{movement.type === "entrada" ? "Entrada" : "Salida"}</span>
+                        <span className="ml-1 capitalize">{movement.type}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-vet-text">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-vet-text)]">
                       {movement.quantityUnits > 0 && (
                         <div>{movement.quantityUnits} unidades</div>
                       )}
@@ -160,10 +166,10 @@ export default function InventoryMovementsView() {
                         <div>{movement.quantityDoses} dosis</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-vet-muted">
-                      {movement.reason}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-vet-muted)]">
+                      {movement.reason.replace(/_/g, " ")}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-vet-muted">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-vet-muted)]">
                       {format(new Date(movement.createdAt), "dd MMM yyyy HH:mm", { locale: es })}
                     </td>
                   </tr>
@@ -172,26 +178,66 @@ export default function InventoryMovementsView() {
             </table>
           </div>
 
+          {/* Mobile Cards */}
+          <div className="lg:hidden divide-y divide-[var(--color-border)]">
+            {paginatedMovements.map((movement) => (
+              <div key={movement._id} className="p-4 hover:bg-[var(--color-hover)] transition-colors">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <p className="text-sm font-medium text-[var(--color-vet-text)]">{movement.product?.name}</p>
+                    <p className="text-xs text-[var(--color-vet-muted)]">{movement.product?.category}</p>
+                  </div>
+                  <span className={`px-2 py-1 inline-flex items-center text-xs font-semibold rounded-full flex-shrink-0 ${getTypeColor(movement.type)}`}>
+                    {getTypeIcon(movement.type)}
+                    <span className="ml-1 capitalize">{movement.type}</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm mt-3">
+                  <div className="text-[var(--color-vet-text)]">
+                    {movement.quantityUnits > 0 && <span>{movement.quantityUnits} u</span>}
+                    {movement.quantityUnits > 0 && movement.quantityDoses > 0 && <span> + </span>}
+                    {movement.quantityDoses > 0 && <span>{movement.quantityDoses} dosis</span>}
+                  </div>
+                  <div className="text-xs text-[var(--color-vet-muted)]">
+                    {format(new Date(movement.createdAt), "dd MMM HH:mm", { locale: es })}
+                  </div>
+                </div>
+                <p className="text-xs text-[var(--color-vet-muted)] mt-1 capitalize">
+                  {movement.reason.replace(/_/g, " ")}
+                </p>
+              </div>
+            ))}
+          </div>
+
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
-              <p className="text-sm text-vet-muted">
+            <div className="px-4 py-4 border-t border-[var(--color-border)] flex justify-between items-center bg-[var(--color-vet-light)]/30">
+              <p className="text-sm text-[var(--color-vet-muted)] hidden sm:block">
                 Página {currentPage} de {totalPages}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto justify-between sm:justify-start">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-sm text-[var(--color-vet-text)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Anterior
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Anterior</span>
                 </button>
+                
+                {/* Mobile page indicator */}
+                <span className="text-sm text-[var(--color-vet-muted)] sm:hidden self-center">
+                  {currentPage} / {totalPages}
+                </span>
+
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg border border-slate-700 text-sm text-vet-text disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-sm text-[var(--color-vet-text)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Siguiente
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -199,13 +245,13 @@ export default function InventoryMovementsView() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-xl flex items-center justify-center">
-            <ClipboardList className="w-8 h-8 text-vet-muted" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center">
+            <ClipboardList className="w-8 h-8 text-[var(--color-vet-muted)]" />
           </div>
-          <h3 className="text-lg font-medium text-vet-text mb-1">
+          <h3 className="text-lg font-medium text-[var(--color-vet-text)] mb-1">
             {searchTerm ? "Sin resultados" : "Sin movimientos"}
           </h3>
-          <p className="text-sm text-vet-muted mb-4">
+          <p className="text-sm text-[var(--color-vet-muted)] mb-4">
             {searchTerm 
               ? "No hay movimientos con esos criterios" 
               : "Los movimientos se registrarán automáticamente al comprar o usar productos"}

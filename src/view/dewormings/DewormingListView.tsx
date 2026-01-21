@@ -14,13 +14,13 @@ import {
 import { getDewormingsByPatient, deleteDeworming } from "../../api/dewormingAPI";
 import { toast } from "../../components/Toast";
 import type { Deworming } from "../../types/deworming";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 import DewormingModal from "../../components/dewormings/DewormingModal";
 
 const typeColors: Record<string, string> = {
-  "Interna": "bg-purple-900/30 text-purple-400 border border-purple-700",
-  "Externa": "bg-blue-900/30 text-blue-400 border border-blue-700",
-  "Ambas": "bg-emerald-900/30 text-emerald-400 border border-emerald-700",
+  "Interna": "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  "Externa": "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  "Ambas": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
 };
 
 export default function DewormingListView() {
@@ -41,13 +41,19 @@ export default function DewormingListView() {
   const { mutate: removeDeworming, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => deleteDeworming(id),
     onSuccess: () => {
-      toast.success("Desparasitación eliminada");
+      toast.success(
+        "Desparasitación eliminada", 
+        "El registro ha sido removido exitosamente del historial"
+      );
       queryClient.invalidateQueries({ queryKey: ["dewormings", patientId] });
       setShowDeleteModal(false);
       setDewormingToDelete(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(
+        "Error al eliminar", 
+        error.message || "No se pudo eliminar la desparasitación"
+      );
     },
   });
 
@@ -75,7 +81,7 @@ export default function DewormingListView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-8 h-8 border-3 border-vet-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-3 border-[var(--color-vet-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -83,14 +89,16 @@ export default function DewormingListView() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-vet-text">Desparasitación</h2>
-          <p className="text-sm text-vet-muted">{dewormings.length} registro{dewormings.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-bold text-[var(--color-vet-text)]">Desparasitación</h2>
+          <p className="text-sm text-[var(--color-vet-muted)]">
+            {dewormings.length} registro{dewormings.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <Link
           to="create"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary hover:bg-vet-secondary text-white text-sm font-medium rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] hover:shadow-lg hover:scale-105 active:scale-95 text-white text-sm font-semibold rounded-lg transition-all"
         >
           <Plus className="w-4 h-4" />
           Nueva
@@ -103,22 +111,22 @@ export default function DewormingListView() {
           {dewormings.map((deworming) => (
             <div
               key={deworming._id}
-              className="flex items-center gap-4 p-4 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
+              className="flex items-center gap-4 p-4 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-vet-primary)] transition-all"
             >
               {/* Icono */}
-              <div className="w-10 h-10 rounded-lg bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                <Bug className="w-5 h-5 text-orange-400" />
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                <Bug className="w-5 h-5 text-orange-600 dark:text-orange-400" />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-semibold text-vet-text">{deworming.productName}</p>
+                  <p className="font-semibold text-[var(--color-vet-text)]">{deworming.productName}</p>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[deworming.dewormingType]}`}>
                     {deworming.dewormingType}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-vet-muted">
+                <div className="flex items-center gap-3 mt-1 text-xs text-[var(--color-vet-muted)] flex-wrap">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDate(deworming.applicationDate)}
@@ -127,10 +135,10 @@ export default function DewormingListView() {
                   {deworming.nextApplicationDate && (
                     <span className={`flex items-center gap-1 ${
                       isPastDue(deworming.nextApplicationDate)
-                        ? "text-red-400"
+                        ? "text-red-600 dark:text-red-400 font-medium"
                         : isUpcoming(deworming.nextApplicationDate)
-                        ? "text-amber-400"
-                        : "text-vet-muted"
+                        ? "text-amber-600 dark:text-amber-400 font-medium"
+                        : "text-[var(--color-vet-muted)]"
                     }`}>
                       <Clock className="w-3 h-3" />
                       Próxima: {formatDate(deworming.nextApplicationDate)}
@@ -144,7 +152,7 @@ export default function DewormingListView() {
 
               {/* Precio */}
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-vet-text">${deworming.cost.toFixed(2)}</p>
+                <p className="font-semibold text-[var(--color-vet-text)]">${deworming.cost.toFixed(2)}</p>
               </div>
 
               {/* Acciones */}
@@ -154,7 +162,8 @@ export default function DewormingListView() {
                     setSelectedDeworming(deworming);
                     setShowViewModal(true);
                   }}
-                  className="p-2 rounded-lg text-slate-400 hover:text-vet-accent hover:bg-vet-primary/10 transition-colors"
+                  className="p-2 rounded-lg text-[var(--color-vet-muted)] hover:text-[var(--color-vet-accent)] hover:bg-[var(--color-vet-primary)]/10 transition-colors"
+                  title="Ver detalles"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -163,7 +172,8 @@ export default function DewormingListView() {
                     setDewormingToDelete(deworming);
                     setShowDeleteModal(true);
                   }}
-                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+                  className="p-2 rounded-lg text-[var(--color-vet-muted)] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  title="Eliminar"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -172,12 +182,12 @@ export default function DewormingListView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-700">
-          <Bug className="w-12 h-12 mx-auto text-slate-600 mb-3" />
-          <p className="text-vet-muted mb-4">Sin registros de desparasitación</p>
+        <div className="text-center py-12 bg-[var(--color-card)] rounded-xl border-2 border-dashed border-[var(--color-border)]">
+          <Bug className="w-12 h-12 mx-auto text-[var(--color-vet-muted)] opacity-50 mb-3" />
+          <p className="text-[var(--color-vet-muted)] mb-4">Sin registros de desparasitación</p>
           <Link
             to="create"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-vet-primary text-white text-sm font-medium rounded-lg hover:bg-vet-secondary transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--color-vet-primary)] to-[var(--color-vet-secondary)] text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:scale-105 active:scale-95 transition-all"
           >
             <Plus className="w-4 h-4" />
             Registrar primera
@@ -197,16 +207,35 @@ export default function DewormingListView() {
         />
       )}
 
-      {/* Modal Eliminar */}
-      <DeleteConfirmationModal
+      {/* Modal Eliminar con ConfirmationModal */}
+      <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
           setDewormingToDelete(null);
         }}
         onConfirm={() => dewormingToDelete?._id && removeDeworming(dewormingToDelete._id)}
-        petName={`la desparasitación con ${dewormingToDelete?.productName || ""}`}
-        isDeleting={isDeleting}
+        title="¿Eliminar desparasitación?"
+        message={
+          <div className="space-y-2">
+            <p className="text-[var(--color-vet-text)]">
+              ¿Estás seguro de eliminar la desparasitación con{" "}
+              <strong className="text-[var(--color-vet-primary)]">
+                {dewormingToDelete?.productName}
+              </strong>
+              ?
+            </p>
+            <p className="text-sm text-[var(--color-vet-muted)]">
+              Esta acción no se puede deshacer y se perderá el registro del historial.
+            </p>
+          </div>
+        }
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        confirmIcon={Trash2}
+        variant="danger"
+        isLoading={isDeleting}
+        loadingText="Eliminando..."
       />
     </div>
   );

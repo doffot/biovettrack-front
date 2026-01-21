@@ -19,11 +19,12 @@ export default function DiagnosisTab({
     }));
   };
 
+  const cost = typeof formData.cost === "number" ? formData.cost : 0;
+  const discount = typeof formData.discount === "number" ? formData.discount : 0;
+  const total = Math.max(0, cost - discount);
+
   return (
     <div className="space-y-6">
-      {/* ===================== */}
-      {/* DIAGNÓSTICO */}
-      {/* ===================== */}
       <section>
         <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Diagnóstico
@@ -76,9 +77,6 @@ export default function DiagnosisTab({
         </div>
       </section>
 
-      {/* ===================== */}
-      {/* TRATAMIENTO */}
-      {/* ===================== */}
       <section>
         <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Plan de tratamiento
@@ -99,31 +97,55 @@ export default function DiagnosisTab({
         </div>
       </section>
 
-      {/* ===================== */}
-      {/* COSTO */}
-      {/* ===================== */}
       <section>
         <h3 className="text-sm font-semibold text-[var(--color-vet-text)] mb-3 pb-2 border-b border-[var(--color-border)]">
           Facturación
         </h3>
-        <div className="max-w-xs">
-          <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
-            Costo de la consulta ($) *
-          </label>
-          <input
-            type="number"
-            name="cost"
-            value={formData.cost}
-            onChange={handleChange}
-            min="0"
-            step="0.01"
-            placeholder="0.00"
-            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
-          />
-          <span className="text-[10px] text-[var(--color-vet-muted)] opacity-70">
-            Se generará factura automáticamente
-          </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
+              Costo ($) *
+            </label>
+            <input
+              type="number"
+              name="cost"
+              value={formData.cost}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
+              Descuento ($)
+            </label>
+            <input
+              type="number"
+              name="discount"
+              value={formData.discount}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-vet-primary)]/20 focus:border-[var(--color-vet-primary)] bg-[var(--color-card)] text-[var(--color-vet-text)] placeholder:text-[var(--color-vet-muted)] transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-vet-muted)] mb-1">
+              Total ($)
+            </label>
+            <div className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-hover)] text-[var(--color-vet-text)] font-medium">
+              ${total.toFixed(2)}
+            </div>
+          </div>
         </div>
+        <span className="text-[10px] text-[var(--color-vet-muted)] opacity-70 mt-1 block">
+          Se generará factura automáticamente
+        </span>
       </section>
     </div>
   );

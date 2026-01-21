@@ -1,3 +1,5 @@
+// src/views/sales/CreateSaleView.tsx
+
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -12,13 +14,14 @@ import {
   CheckCircle2,
   AlertTriangle,
   User,
-  ArrowLeft
+  ArrowLeft,
+  FileText,
 } from "lucide-react";
 import { getProductsWithInventory } from "../../api/productAPI";
 import { createSale } from "../../api/saleAPI";
 import { PaymentModal } from "../../components/payment/PaymentModal";
+import ConfirmationModal from "../../components/modal/ConfirmationModal";
 import { toast } from "../../components/Toast";
-import { showPaymentToast, showPaymentErrorToast } from "../../utils/paymentToasts";
 import type { CartItem, SaleFormData } from "../../types/sale";
 import type { ProductWithInventory } from "../../types/inventory";
 import { OwnerSelector } from "../../components/owners/OwnerSelector";
@@ -37,6 +40,7 @@ export default function CreateSaleView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCreditConfirmModal, setShowCreditConfirmModal] = useState(false); // ← NUEVO
   const [selectedOwner, setSelectedOwner] = useState<SelectedClient>(null);
   const [ownerError, setOwnerError] = useState("");
   const [discountTotal, setDiscountTotal] = useState(0);
@@ -88,7 +92,10 @@ export default function CreateSaleView() {
     const availableStock = getAvailableStock(product, isFullUnit);
 
     if (availableStock <= 0) {
-      toast.error(`No hay stock disponible de "${product.name}"`);
+      toast.error(
+        "Sin stock disponible",
+        `No hay unidades de "${product.name}" disponibles`
+      );
       return;
     }
 
@@ -100,7 +107,10 @@ export default function CreateSaleView() {
       if (existingIndex >= 0) {
         const existing = prev[existingIndex];
         if (existing.quantity >= availableStock) {
-          toast.error(`Stock máximo: ${availableStock}`);
+          toast.error(
+            "Stock máximo alcanzado",
+            `Solo hay ${availableStock} unidades disponibles`
+          );
           return prev;
         }
 
@@ -152,7 +162,10 @@ export default function CreateSaleView() {
       }
 
       if (newQuantity > item.availableStock) {
-        toast.error(`Stock máximo: ${item.availableStock}`);
+        toast.error(
+          "Stock insuficiente",
+          `Solo hay ${item.availableStock} unidades disponibles`
+        );
         return prev;
       }
 
@@ -191,12 +204,18 @@ export default function CreateSaleView() {
   const validateSale = (): boolean => {
     if (!selectedOwner) {
       setOwnerError("Debes seleccionar un cliente para procesar la venta");
-      toast.error("Selecciona un cliente para continuar");
+      toast.error(
+        "Cliente requerido",
+        "Selecciona un cliente para continuar"
+      );
       return false;
     }
     
     if (cart.length === 0) {
-      toast.error("Agrega productos al carrito primero");
+      toast.error(
+        "Carrito vacío",
+        "Agrega productos al carrito antes de continuar"
+      );
       return false;
     }
 
@@ -221,14 +240,54 @@ export default function CreateSaleView() {
       setDiscountTotal(0);
       setSearchTerm("");
       setShowPaymentModal(false);
+      setShowCreditConfirmModal(false);
       
-      toast.success("Venta procesada exitosamente");
+      toast.success(
+        "Venta procesada",
+        "La venta se registró correctamente"
+      );
+      
       navigate("/");
     },
     onError: (error: Error) => {
-      showPaymentErrorToast(error.message);
+      toast.error(
+        "Error al procesar la venta",
+        error.message || "No se pudo completar la operación. Intenta nuevamente"
+      );
     },
   });
+
+  // ✅ Handler para abrir modal de confirmación de crédito
+  const handleCreditClick = () => {
+    if (!validateSale()) return;
+    setShowCreditConfirmModal(true);
+  };
+
+  // ✅ Handler para confirmar guardar a crédito
+  const handleConfirmCredit = useCallback(() => {
+    const formData: SaleFormData = {
+      items: cart.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        isFullUnit: item.isFullUnit,
+        discount: item.discount,
+      })),
+      discountTotal,
+      amountPaidUSD: 0,      // ← Sin pago
+      amountPaidBs: 0,       // ← Sin pago
+      creditUsed: 0,         // ← Sin crédito usado
+      exchangeRate: 1,
+      ownerId: selectedOwner!.id,
+      // Sin paymentMethodId ni paymentReference
+    };
+
+    toast.info(
+      "Guardando venta a crédito",
+      "La factura quedará pendiente de pago para el cliente"
+    );
+
+    createSaleMutation(formData);
+  }, [cart, discountTotal, selectedOwner, createSaleMutation]);
 
   const handlePaymentConfirm = useCallback((paymentData: {
     paymentMethodId?: string;
@@ -260,18 +319,10 @@ export default function CreateSaleView() {
     const amount = isPayingInBs ? paymentData.addAmountPaidBs : paymentData.addAmountPaidUSD;
     const currency: "USD" | "Bs" = isPayingInBs ? "Bs" : "USD";
 
-    const itemCount = cart.length;
-    const itemDescription = itemCount === 1 
-      ? cart[0].productName 
-      : `${itemCount} producto${itemCount > 1 ? "s" : ""}`;
-
-    showPaymentToast({
-      amountPaid: amount,
-      currency,
-      isPartial: paymentData.isPartial,
-      creditUsed: paymentData.creditAmountUsed,
-      invoiceDescription: itemDescription,
-    });
+    toast.success(
+      "Pago procesado",
+      `Se registró el pago de ${currency} ${amount.toFixed(2)}`
+    );
 
     createSaleMutation(formData);
   }, [cart, discountTotal, selectedOwner, createSaleMutation]);
@@ -682,15 +733,39 @@ export default function CreateSaleView() {
               )}
             </div>
 
-            {/* Footer del Carrito */}
-            <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-vet-light)]/30">
-              <div className="flex justify-between items-center mb-4">
+            {/* ✅ FOOTER CON 2 BOTONES */}
+            <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-vet-light)]/30 space-y-3">
+              <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-[var(--color-vet-muted)]">Total:</span>
                 <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                   ${cartTotals.total.toFixed(2)}
                 </span>
               </div>
 
+              {/* ✅ BOTÓN: GUARDAR A CRÉDITO */}
+              <button
+                onClick={handleCreditClick}
+                disabled={!selectedOwner || cart.length === 0 || isProcessing}
+                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 border-2 ${
+                  !selectedOwner || cart.length === 0 || isProcessing
+                    ? "bg-[var(--color-border)] border-[var(--color-border)] text-[var(--color-vet-muted)] cursor-not-allowed"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/50 hover:shadow-md active:scale-[0.98]"
+                }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-5 h-5" />
+                    Guardar a Crédito
+                  </>
+                )}
+              </button>
+
+              {/* ✅ BOTÓN: PROCESAR PAGO */}
               <button
                 onClick={handleCheckout}
                 disabled={!selectedOwner || cart.length === 0 || isProcessing}
@@ -708,13 +783,13 @@ export default function CreateSaleView() {
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5" />
-                    Procesar Venta
+                    Procesar Pago
                   </>
                 )}
               </button>
 
               {!selectedOwner && cart.length > 0 && (
-                <p className="mt-3 text-xs text-center text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                <p className="text-xs text-center text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
                   <User className="w-3.5 h-3.5" />
                   Selecciona un cliente para continuar
                 </p>
@@ -723,6 +798,38 @@ export default function CreateSaleView() {
           </div>
         </div>
       </div>
+
+      {/* ✅ MODAL DE CONFIRMACIÓN PARA CRÉDITO */}
+      <ConfirmationModal
+        isOpen={showCreditConfirmModal}
+        onClose={() => setShowCreditConfirmModal(false)}
+        onConfirm={handleConfirmCredit}
+        title="¿Guardar venta a crédito?"
+        message={
+          <div className="space-y-2">
+            <p className="text-vet-text">
+              Esta venta se registrará <strong>sin pago</strong> y quedará como deuda pendiente para el cliente.
+            </p>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mt-3">
+              <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>
+                  <strong>{selectedOwner?.name}</strong> deberá <strong>${cartTotals.total.toFixed(2)}</strong>
+                </span>
+              </p>
+            </div>
+            <p className="text-xs text-vet-muted mt-2">
+              Podrás registrar el pago más adelante desde el historial de facturas del cliente.
+            </p>
+          </div>
+        }
+        confirmText="Sí, guardar a crédito"
+        cancelText="Cancelar"
+        confirmIcon={FileText}
+        variant="warning"
+        isLoading={isProcessing}
+        loadingText="Guardando..."
+      />
 
       {/* Modal de pago */}
       <PaymentModal
