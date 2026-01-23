@@ -30,7 +30,7 @@ export function DashboardHeader({ userName, authData }: DashboardHeaderProps) {
 
   const getPatientInfo = () => {
     if (!authData || authData.isLegacyUser) return null;
-    const limit = authData.planType === 'trial' ? 20 :
+    const limit = authData.planType === 'trial' ? 50 :
                   authData.planType === 'basic' ? 100 : 500;
     return `${authData.patientCount || 0}/${limit} pacientes`;
   };
@@ -46,7 +46,7 @@ export function DashboardHeader({ userName, authData }: DashboardHeaderProps) {
         </h1>
         <p className="text-vet-muted mt-1">Panel de control de tu clínica veterinaria</p>
         
-        {/* 👇 Mostrar estado del plan */}
+       
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {authData?.isLegacyUser ? (
             <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-500 rounded-full border border-purple-500/20 font-medium">
