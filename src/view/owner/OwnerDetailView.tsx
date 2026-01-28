@@ -106,6 +106,7 @@ export default function OwnerDetailView() {
   const { mutateAsync: createPaymentMutation } = useMutation({
     mutationFn: createPayment,
     onSuccess: () => {
+      // Invalidar queries para refrescar la UI automáticamente
       queryClient.invalidateQueries({ queryKey: ["invoices", { ownerId }] });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["payments"] });
@@ -208,6 +209,7 @@ export default function OwnerDetailView() {
     } catch (e) {}
   };
 
+  // --- CORRECCIÓN PRINCIPAL AQUÍ ---
   const handlePayAll = async (invoiceIds: string[], paymentData: PaymentData) => {
     try {
       let successCount = 0;
@@ -216,16 +218,50 @@ export default function OwnerDetailView() {
       const exchangeRate = paymentData.exchangeRate || 1;
       const isPayingInBs = paymentData.addAmountPaidBs > 0;
 
+      // Iteramos sobre las facturas seleccionadas
       for (const id of invoiceIds) {
         const invoice = invoices.find((inv) => inv._id === id);
         if (!invoice) continue;
+
+        // 1. Calcular cuánto se debe de esta factura específica
+        const pendingUSD = invoice.total - (invoice.amountPaid || 0);
+        
+        // Si ya está pagada o el saldo es insignificante, saltamos
+        if (pendingUSD <= 0.001) continue;
+
+        // 2. Definir el monto a enviar según moneda seleccionada
+        let amountToSend = 0;
+        if(isPayingInBs) {
+            amountToSend = pendingUSD * exchangeRate;
+        } else {
+            amountToSend = pendingUSD;
+        }
+
+        // 3. Crear el payload con TODOS los datos necesarios
         const payload: any = {
           invoiceId: id,
           currency: isPayingInBs ? "Bs" : "USD",
           exchangeRate,
+          amount: amountToSend, // <--- Fundamental: enviar el monto al backend
         };
-        // Lógica simplificada para el ejemplo, asumiendo que el backend maneja saldos
+
+        // Agregar método de pago y referencia
+        if (paymentData.paymentMethodId) {
+            payload.paymentMethod = paymentData.paymentMethodId;
+        }
+        if (paymentData.reference) {
+            payload.reference = paymentData.reference;
+        }
+        
+        // No enviamos creditAmountUsed en el bucle para no descontar el mismo crédito múltiples veces
+        // (La lógica de crédito masivo requeriría un manejo más complejo en el backend)
+
         await createPaymentMutation(payload);
+        
+        // Sumamos para el toast
+        if (isPayingInBs) totalPaidBs += amountToSend;
+        else totalPaidUSD += amountToSend;
+        
         successCount++;
       }
 
@@ -239,7 +275,9 @@ export default function OwnerDetailView() {
         });
       }
       setShowPayAllModal(false);
-    } catch (e) {}
+    } catch (e) {
+        console.error("Error en pago masivo", e);
+    }
   };
 
   const handlePayAllFromModal = (paymentData: PaymentData) => {

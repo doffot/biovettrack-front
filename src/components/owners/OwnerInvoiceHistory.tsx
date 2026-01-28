@@ -504,7 +504,7 @@ export function OwnerInvoiceHistory({
         </div>
       </div>
 
-      {/* ✅ Modal de pago ACTUALIZADO con nuevos props */}
+      {/*  Modal de pago ACTUALIZADO con nuevos props */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={handleClosePaymentModal}
